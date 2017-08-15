@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Fan.Web.Services;
+using Fan.Services;
 
-namespace Fan.Web.Services
+namespace Fan.Services
 {
     public static class EmailSenderExtensions
     {

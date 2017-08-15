@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Fan.Web.Models;
+using Fan.Models;
 
-namespace Fan.Web.Data
+namespace Fan.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class FanDbContext : IdentityDbContext<User>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public FanDbContext(DbContextOptions<FanDbContext> options)
             : base(options)
         {
         }
