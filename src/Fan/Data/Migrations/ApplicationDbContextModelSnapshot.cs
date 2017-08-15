@@ -125,7 +125,7 @@ namespace Fan.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Fan.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Fan.Models.User", b =>
                 {
                     b.Property<string>("Id");
 
@@ -184,7 +184,7 @@ namespace Fan.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Fan.Models.ApplicationUser")
+                    b.HasOne("Fan.Models.User")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -192,7 +192,7 @@ namespace Fan.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Fan.Models.ApplicationUser")
+                    b.HasOne("Fan.Models.User")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -205,7 +205,7 @@ namespace Fan.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Models.ApplicationUser")
+                    b.HasOne("Fan.Models.User")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
