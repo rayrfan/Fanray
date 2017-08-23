@@ -12,9 +12,10 @@ using System;
 namespace Fan.Data.Migrations
 {
     [DbContext(typeof(FanDbContext))]
-    partial class FanDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170823202655_CreateFanSchema")]
+    partial class CreateFanSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
