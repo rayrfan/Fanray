@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fan.Enums;
 using Fan.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fan.Data
 {
@@ -14,6 +15,9 @@ namespace Fan.Data
             _db = db;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Category"/>, the returned object is tracked.
+        /// </summary>
         public async Task<Category> CreateAsync(Category category)
         {
             await _db.AddAsync(category);
@@ -21,19 +25,53 @@ namespace Fan.Data
             return category;
         }
 
-        public Task DeleteAsync(int id, int defaultCategoryId)
+        /// <summary>
+        /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the given 
+        /// default category id.
+        /// </summary>
+        public async Task DeleteAsync(int id, int defaultCategoryId)
         {
-            throw new NotImplementedException();
+            if (id == defaultCategoryId) return;
+
+            // remove it
+            var category = await _db.Categories.SingleAsync(c => c.Id == id);
+            _db.Remove(category);
+
+            // update its posts to default category
+            var posts = _db.Posts.Where(p => p.CategoryId == id);
+            foreach (var post in posts)
+            {
+                post.CategoryId = defaultCategoryId;
+            }
+
+            await _db.SaveChangesAsync();
         }
 
-        public Task<List<Category>> GetListAsync()
+        /// <summary>
+        /// Returns a list of <see cref="Category"/>, the returned objects are not tracked.
+        /// </summary>
+        public async Task<List<Category>> GetListAsync()
         {
-            throw new NotImplementedException();
+            // when you do select and return new objects like below, the returned objects are un-tracked.
+            // or you can do _db.Categories.AsNoTracking()
+            return await (from c in _db.Categories
+                          select new Category
+                          {
+                              Id = c.Id,
+                              Title = c.Title,
+                              Slug = c.Slug,
+                              Count = _db.Posts.Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
+                          }).ToListAsync();
         }
 
-        public Task<Category> UpdateAsync(Category category)
+        /// <summary>
+        /// Updates a <see cref="Category"/>.
+        /// </summary>
+        /// <param name="category">this parm is not used just being returned.</param>
+        public async Task<Category> UpdateAsync(Category category)
         {
-            throw new NotImplementedException();
+            await _db.SaveChangesAsync();
+            return category;
         }
     }
 }

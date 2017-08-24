@@ -14,7 +14,8 @@ namespace Fan.Data
         /// </summary>
         Task<Category> CreateAsync(Category category);
         /// <summary>
-        /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the default category.
+        /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the given 
+        /// default category id.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="defaultCategoryId"></param>
