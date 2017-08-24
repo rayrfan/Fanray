@@ -7,6 +7,9 @@ using Xunit;
 
 namespace Fan.Tests.Data
 {
+    /// <summary>
+    /// Tests for <see cref="SqlCategoryRepository"/> class.
+    /// </summary>
     public class SqlCategoryRepositoryTest : IDisposable
     {
         FanDbContext _db;
@@ -41,7 +44,8 @@ namespace Fan.Tests.Data
         }
 
         /// <summary>
-        /// Test for <see cref="SqlCategoryRepository.DeleteAsync(int, int)"/> method.
+        /// Test for <see cref="SqlCategoryRepository.DeleteAsync(int, int)"/> when a category is 
+        /// deleted all posts belong to it will be assigned to a default category id.
         /// </summary>
         [Fact]
         public async void DeleteCategory_Will_Recategorize_Its_Posts_To_Default_Category()
@@ -60,7 +64,8 @@ namespace Fan.Tests.Data
         }
 
         /// <summary>
-        /// Test for <see cref="SqlCategoryRepository.GetListAsync"/> method.
+        /// Test for <see cref="SqlCategoryRepository.GetListAsync"/> returns all the categories 
+        /// in db.
         /// </summary>
         [Fact]
         public async void GetCategoryList_Returns_All_Categories()
@@ -91,6 +96,7 @@ namespace Fan.Tests.Data
             // Act: when we update its title
             var cat = _db.Categories.Single(c => c.Slug == "cat1");
             cat.Title = "Dog";
+            cat.Slug = "dog";
             await _catRepo.UpdateAsync(cat);
 
             /**
@@ -104,9 +110,10 @@ namespace Fan.Tests.Data
             //_db.Update(catAgain);
             //_db.SaveChanges();
 
-            // Assert: then the category's title is updated
-            var catAgain = _db.Categories.Single(c => c.Slug == "cat1");
+            // Assert: then the category's title and slug are updated
+            var catAgain = _db.Categories.Single(c => c.Slug == "dog");
             Assert.Equal("Dog", catAgain.Title);
+            Assert.Equal("dog", catAgain.Slug);
             Assert.Equal(1, catAgain.Id);
         }
     }
