@@ -14,20 +14,31 @@ namespace Fan.Models
         }
 
         public int Id { get; set; }
+
+        /// <summary>
+        /// Post body.
+        /// </summary>
         public string Body { get; set; }
+
         /// <summary>
         /// Category for a blog post, null for page.
         /// </summary>
         public Category Category { get; set; }
+
         /// <summary>
         /// Category id for blog post, null for a page.
         /// </summary>
         /// <remarks>
         /// Nullable FK to Category. NOTE: Sql Server will not create cascade delete for a nullable FK.
+        /// Therefore deleting a category by user won't delete its associated posts, 
+        /// <see cref="Fan.Data.SqlCategoryRepository.DeleteAsync(int, int)"/> for more details.
         /// </remarks>
         public int? CategoryId { get; set; }
+
         public int CommentCount { get; set; }
+
         public ECommentStatus CommentStatus { get; set; }
+
         /// <summary>
         /// Post date. 
         /// </summary>
@@ -38,11 +49,13 @@ namespace Fan.Models
         /// - When post is display to a user, we show the humanized version <see cref="CreatedOnDisplay"/>.
         /// </remarks>
         public DateTime CreatedOn { get; set; }
+
         /// <summary>
         /// User friendly time display, such as "yesterday".
         /// </summary>
         [NotMapped]
         public string CreatedOnDisplay { get; set; }
+
         /// <summary>
         /// The post excerpt.
         /// </summary>
@@ -52,19 +65,23 @@ namespace Fan.Models
         /// will be calculated on the fly.
         /// </remarks>
         public string Excerpt { get; set; }
+
         /// <summary>
         /// Available only when Type is Media, null otherwise.
         /// </summary>
         [StringLength(maximumLength: 128)]
         public string MimeType { get; set; }
+
         /// <summary>
         /// Parent page id for child page, 0 for root page, null for blog post.
         /// </summary>
         public int? ParentId { get; set; }
+
         /// <summary>
         /// Root page id for child page, 0 for root page, null for blog post.
         /// </summary>
         public int? RootId { get; set; }
+
         /// <summary>
         /// The post slug.
         /// </summary>
@@ -75,14 +92,17 @@ namespace Fan.Models
         [Required]
         [StringLength(maximumLength: 256)]
         public string Slug { get; set; }
+
         /// <summary>
         /// Page order, null for blog post.
         /// </summary>
         public int? SortOrder { get; set; }
+
         /// <summary>
         /// Published or Draft.
         /// </summary>
         public EPostStatus Status { get; set; }
+
         /// <summary>
         /// Post title.
         /// </summary>
@@ -91,20 +111,24 @@ namespace Fan.Models
         /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Title { get; set; }
+
         /// <summary>
         /// Blog post or Page.
         /// </summary>
         public EPostType Type { get; set; }
+
         /// <summary>
         /// For blog post and page, the datetime user last updated a draft, when post is published this value is null.
         /// </summary>
         public DateTime? UpdatedOn { get; set; }
+
         /// <summary>
         /// The username of the author.
         /// </summary>
         [Required]
         [StringLength(maximumLength: 256)]
         public string UserName { get; set; }
+
         public int ViewCount { get; set; }
 
         public virtual ICollection<PostTag> PostTags { get; set; }
