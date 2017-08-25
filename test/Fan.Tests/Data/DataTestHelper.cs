@@ -60,7 +60,7 @@ namespace Fan.Tests.Data
         public const string TAG2_SLUG = "cs";
 
         /// <summary>
-        /// Seeds 1 post associated with 1 category and 2 tags.
+        /// Seeds 1 blog post associated with 1 category and 2 tags.
         /// </summary>
         /// <param name="db"></param>
         public static void SeedTestPost(this FanDbContext db)
@@ -97,7 +97,7 @@ namespace Fan.Tests.Data
                 Body = "A post body.",
                 Category = cat,
                 UserName = "ray",
-                CreatedOn = new DateTime(2017, 01, 01), // be aware this is UTC time
+                CreatedOn = (new DateTime(2017, 01, 01)).ToUniversalTime(), 
                 RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,

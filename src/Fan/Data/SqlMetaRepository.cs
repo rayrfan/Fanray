@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fan.Data
 {
+    /// <summary>
+    /// Sql implementation of the <see cref="IMetaRepository"/> contract.
+    /// </summary>
     public class SqlMetaRepository : IMetaRepository
     {
         private readonly FanDbContext _db;

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Fan.Data
 {
+    /// <summary>
+    /// Sql implementation of the <see cref="ICategoryRepository"/> contract.
+    /// </summary>
     public class SqlCategoryRepository : ICategoryRepository
     {
         private readonly FanDbContext _db;
@@ -29,6 +32,15 @@ namespace Fan.Data
         /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the given 
         /// default category id.
         /// </summary>
+        /// <remarks>
+        /// Since <see cref="Post.CategoryId"/> is nullable, there is no Cascade Delete between 
+        /// Post and Category, which happens to be what we want.  User can choose to delete a
+        /// category and we should delete all posts associated with that category, instead we
+        /// apply the default category on these posts. 
+        /// 
+        /// The defaultCategoryId is BlogSettings DefaultCategoryId, I choose to have it pass in
+        /// from BLL for convenience instead of querying Meta for it.
+        /// </remarks>
         public async Task DeleteAsync(int id, int defaultCategoryId)
         {
             if (id == defaultCategoryId) return;
