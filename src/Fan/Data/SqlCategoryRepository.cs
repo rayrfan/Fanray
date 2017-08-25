@@ -64,16 +64,14 @@ namespace Fan.Data
         /// </summary>
         public async Task<List<Category>> GetListAsync()
         {
-            // when you do select and return new objects like below, the returned objects are un-tracked.
-            // or you can do _db.Categories.AsNoTracking()
-            return await (from c in _db.Categories
-                          select new Category
-                          {
-                              Id = c.Id,
-                              Title = c.Title,
-                              Slug = c.Slug,
-                              Count = _db.Posts.Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
-                          }).ToListAsync();
+            return await _db.Categories.Select(
+                    c => new Category
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Slug = c.Slug,
+                        Count = _db.Posts.Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
+                    }).ToListAsync();
         }
 
         /// <summary>

@@ -84,34 +84,53 @@ namespace Fan.Tests.Data
         }
 
         /// <summary>
+        /// Test for <see cref="SqlCategoryRepository.GetListAsync"/> and the returned categories 
+        /// are not tracked by EF.
+        /// </summary>
+        [Fact]
+        public async void GetCategoryList_Returns_NonTracked_Categories()
+        {
+            // Arrange: create 2 categories
+            var cat1 = new Category { Slug = "cat1", Title = "Category1" };
+            var cat2 = new Category { Slug = "cat2", Title = "Category2" };
+            await _catRepo.CreateAsync(cat1);
+            await _catRepo.CreateAsync(cat2);
+
+            // Act: when we call GetList
+            var list = await _catRepo.GetListAsync();
+            // get cat1 out from list and give it a new title
+            var cat = list.FirstOrDefault(c => c.Slug == "cat1");
+            cat.Title = "New Cat";
+            // save
+            await _catRepo.UpdateAsync(cat);
+
+            // get cat1 out from db again
+            var catAgain = _db.Categories.FirstOrDefault(c => c.Slug == "cat1");
+            Assert.NotEqual("New Cat", catAgain.Title);
+        }
+
+        /// <summary>
         /// Test for <see cref="SqlCategoryRepository.UpdateAsync(Category)"/> method.
         /// </summary>
         [Fact]
         public async void UpdateCategory_Updates_It_In_Db()
         {
             // Arrange: given a cat
-            var cat1 = new Category { Slug = "cat1", Title = "Category1" };
-            await _catRepo.CreateAsync(cat1);
+            var cat = new Category { Slug = "cat1", Title = "Category1" };
+            await _catRepo.CreateAsync(cat);
 
             // Act: when we update its title
-            var cat = _db.Categories.Single(c => c.Slug == "cat1");
-            cat.Title = "Dog";
-            cat.Slug = "dog";
-            await _catRepo.UpdateAsync(cat);
+            var catAgain = _db.Categories.Single(c => c.Slug == "cat1");
+            catAgain.Title = "Dog";
+            catAgain.Slug = "dog";
+            await _catRepo.UpdateAsync(catAgain);
 
-            /**
-             * This won't work!
-             * To update an entity it must be tracked first, if you just create it and update it, you'll get
-             * System.InvalidOperationException: 'The instance of entity type 'Category' cannot be tracked because 
-             * another instance of this type with the same key is already being tracked.
-             * This means you must do a select before update!
-             */
-            //Category catAgain = new Category { Id = 1, Slug = "dog", Title = "Dog" };
-            //_db.Update(catAgain);
-            //_db.SaveChanges();
+            // This won't work! To update an entity it needs to be tracked first.
+            //var catAgain = new Category { Id = 1, Slug = "dog", Title = "Dog" };
+            //await _catRepo.UpdateAsync(catAgain);
 
             // Assert: then the category's title and slug are updated
-            var catAgain = _db.Categories.Single(c => c.Slug == "dog");
+            catAgain = _db.Categories.Single(c => c.Slug == "dog");
             Assert.Equal("Dog", catAgain.Title);
             Assert.Equal("dog", catAgain.Slug);
             Assert.Equal(1, catAgain.Id);
