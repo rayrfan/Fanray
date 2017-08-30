@@ -43,6 +43,7 @@ namespace Microsoft.Extensions.Caching.Distributed
                     bytes = await Serializer.ObjectToBytesAsync(task.Result);
                     await cache.SetAsync(key, bytes, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = cacheTime });
                 }
+
                 return await task;
             }
         }
