@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Xunit;
-using Fan.Helpers;
+﻿using Fan.Helpers;
 using Fan.Models;
+using System.Collections.Generic;
+using Xunit;
 
 namespace Fan.Tests.Helpers
 {
