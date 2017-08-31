@@ -22,6 +22,7 @@ namespace Fan.Tests.Services
         protected Mock<ITagRepository> _tagRepoMock;
         protected BlogService _blogSvc;
         protected IMapper _mapper;
+        protected IDistributedCache _cache;
 
         /// <summary>
         /// Base constructor which will be called first for each test in derived test classes, thus
@@ -38,13 +39,13 @@ namespace Fan.Tests.Services
             // cache, loggerFactory, mapper
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
-            var cache = new MemoryDistributedCache(memCacheOptions);
+            _cache = new MemoryDistributedCache(memCacheOptions);
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             _mapper = Config.Mapper;
 
             // svc
             _blogSvc = new BlogService(_catRepoMock.Object, _metaRepoMock.Object, _postRepoMock.Object, _tagRepoMock.Object,
-                cache, loggerFactory, _mapper);
+                _cache, loggerFactory, _mapper);
         }
     }
 }

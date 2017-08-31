@@ -24,9 +24,10 @@ namespace Fan.Tests.Services
                 .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
 
             _catRepoMock.Setup(r => r.GetListAsync()).Returns(Task.FromResult(
-                   new List<Category> {
-                       new Category { Title = "Technology", Slug = "tech" } 
-                   }
+                new List<Category>
+                {
+                    new Category { Title = "Technology", Slug = "tech" } 
+                }
             ));
         }
 
@@ -65,8 +66,7 @@ namespace Fan.Tests.Services
         {
             // Arrange: a category and a repo to return it
             var category = new Category { Title = title, Slug = slug };
-            _catRepoMock.Setup(repo => repo.CreateAsync(It.IsAny<Category>()))
-                .Returns(Task.FromResult(category));
+            _catRepoMock.Setup(repo => repo.CreateAsync(It.IsAny<Category>())).Returns(Task.FromResult(category));
 
             // Act: when we create it
             category = await _blogSvc.CreateCategoryAsync(category);
@@ -86,6 +86,18 @@ namespace Fan.Tests.Services
 
             // Act and Assert: when we create it, we get exception
             await Assert.ThrowsAsync<FanException>(() => _blogSvc.CreateCategoryAsync(category));
+
+            // Act and Assert: error message
+            try
+            {
+                await _blogSvc.CreateCategoryAsync(category);
+            }
+            catch (FanException ex)
+            {
+                Assert.Equal("Failed to create Category.", ex.Message);
+                Assert.Equal(1, ex.ValidationFailures.Count);
+                Assert.Equal("Category 'Technology' is not available, please choose a different one.", ex.ValidationFailures[0].ErrorMessage);
+            }
         }
 
         /// <summary>
@@ -109,12 +121,43 @@ namespace Fan.Tests.Services
         }
 
         /// <summary>
+        /// Test <see cref="BlogService.CreateCategoryAsync(Category)"/> would call TagRepository's CreateAsync and invalidates cache for all categories.
+        /// </summary>
+        [Fact]
+        public async void CreateCategory_Calls_TagRepository_CreateAsync_And_Invalidates_Cache_For_AllCategories()
+        {
+            // Arrange 
+            var cat = new Category { Title = "Cat1" };
+
+            // Act
+            await _blogSvc.CreateCategoryAsync(cat);
+
+            // Assert
+            _catRepoMock.Verify(repo => repo.CreateAsync(It.IsAny<Category>()), Times.Exactly(1));
+            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_CATS));
+        }
+
+        /// <summary>
         /// Test <see cref="BlogService.DeleteCategoryAsync(int)"/> cannot delete the default category.
         /// </summary>
         [Fact]
         public async void DeleteCategory_Cannot_Delete_Default_Category()
         {
             await Assert.ThrowsAsync<FanException>(() => _blogSvc.DeleteCategoryAsync(1));
+        }
+
+        /// <summary>
+        /// Test <see cref="BlogService.DeleteCategoryAsync(int)"/> calls TagRepository's DeleteAsync and invalidates cache for all categories.
+        /// </summary>
+        [Fact]
+        public async void DeleteCategory_Calls_TagRepository_DeleteAsync_And_Invalidates_Cache_For_AllCategories()
+        {
+            // Act
+            await _blogSvc.DeleteCategoryAsync(2);
+
+            // Assert
+            _catRepoMock.Verify(repo => repo.DeleteAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
+            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_CATS));
         }
 
         /// <summary>
@@ -149,6 +192,48 @@ namespace Fan.Tests.Services
             // Assert
             Assert.Equal(expectedTitle, category.Title);
             Assert.Equal(expectedSlug, category.Slug);
+        }
+
+        /// <summary>
+        /// Test <see cref="BlogService.UpdateCategoryAsync(Category)"/> throws excpetion if title exists already.
+        /// </summary>
+        [Fact]
+        public async void UpdateCategory_Throws_FanException_If_Title_Already_Exist()
+        {
+            // Arrange: a category with a title that exists
+            var category = new Category { Title = "Technology" };
+
+            // Act and Assert: when we create it, we get exception
+            await Assert.ThrowsAsync<FanException>(() => _blogSvc.UpdateCategoryAsync(category));
+
+            // Act and Assert: error message
+            try
+            {
+                await _blogSvc.UpdateCategoryAsync(category);
+            }
+            catch (FanException ex)
+            {
+                Assert.Equal("Failed to update Category.", ex.Message);
+                Assert.Equal(1, ex.ValidationFailures.Count);
+                Assert.Equal("Category 'Technology' is not available, please choose a different one.", ex.ValidationFailures[0].ErrorMessage);
+            }
+        }
+
+        /// <summary>
+        /// Test <see cref="BlogService.UpdateCategoryAsync(Category)"/> would call CategoryRepository's UpdateAync and invalidates cache for all categories.
+        /// </summary>
+        [Fact]
+        public async void UpdateCategory_Calls_CategoryRepository_And_Invalidates_Cache_For_All_Categories()
+        {
+            // Arrange
+            var cat = new Category { Title = "Cat1" };
+
+            // Act
+            await _blogSvc.UpdateCategoryAsync(cat);
+
+            // Assert
+            _catRepoMock.Verify(repo => repo.UpdateAsync(It.IsAny<Category>()), Times.Exactly(1));
+            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_CATS));
         }
     }
 }

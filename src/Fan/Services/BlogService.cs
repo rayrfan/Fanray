@@ -110,20 +110,23 @@ namespace Fan.Services
         // -------------------------------------------------------------------- Categories
 
         /// <summary>
-        /// Creates a <see cref="Category"/>.
+        /// Creates a <see cref="Category"/> and invalidates cache for all categories.
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
         public async Task<Category> CreateCategoryAsync(Category category)
         {
-            category = await this.PrepCategoryAsync(category, ECreateOrUpdate.Create);
+            category = await this.PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); // TODO what about posts
+
             return category;
         }
 
         /// <summary>
-        /// Deletes a <see cref="Category"/>.
+        /// Deletes a <see cref="Category"/> and reassigns posts to a default category, and 
+        /// invalidates caceh for all categories.  Throws <see cref="FanException"/> if the
+        /// category being deleted is the default category.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -139,30 +142,52 @@ namespace Fan.Services
             // on the UI there is no delete button on the default cat
             // therefore when there is only one category left, it'll be the default.
             if (id == blogSettings.DefaultCategoryId)
+            {
                 throw new FanException("Default category cannot be deleted.");
+            }
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
         }
 
+        /// <summary>
+        /// Returns category by id, throws <see cref="FanException"/> if category with id is not found.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<Category> GetCategoryAsync(int id)
         {
             var cats = await this.GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
+            {
                 throw new FanException("Category is not found.");
+            }
+
             return cat;
         }
 
+        /// <summary>
+        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is not found.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
         public async Task<Category> GetCategoryAsync(string slug)
         {
             var cats = await this.GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
+            {
                 throw new FanException("Category is not found.");
+            }
+
             return cat;
         }
 
+        /// <summary>
+        /// Returns all categories, cached after calls to DAL.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<Category>> GetCategoriesAsync()
         {
             return await _cache.GetAsync<List<Category>>(CACHE_KEY_ALL_CATS, new TimeSpan(0, 10, 0), async () => {
@@ -170,45 +195,151 @@ namespace Fan.Services
             });
         }
 
+        /// <summary>
+        /// Updates a <see cref="Category"/> and invalidates cache for all categories.
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            category = await this.PrepCategoryAsync(category, ECreateOrUpdate.Update);
+            category = await this.PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
             category = await _catRepo.UpdateAsync(category);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+
             return category;
+        }
+
+        // -------------------------------------------------------------------- Tags
+
+        /// <summary>
+        /// Creates a <see cref="Tag"/> and invalidates cache for all tags.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public async Task<Tag> CreateTagAsync(Tag tag)
+        {
+            tag = await this.PrepTaxonomyAsync(tag, ECreateOrUpdate.Create) as Tag;
+            tag = await _tagRepo.CreateAsync(tag);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+
+            return tag;
+        }
+
+        /// <summary>
+        /// Deletes a <see cref="Tag"/> by id and invalidates cache for all tags.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task DeleteTagAsync(int id)
+        {
+            await _tagRepo.DeleteAsync(id);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+        }
+
+        /// <summary>
+        /// Returns tag by id, throws <see cref="FanException"/> if tag with id is not found.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Tag> GetTagAsync(int id)
+        {
+            var tags = await this.GetTagsAsync();
+            var tag = tags.SingleOrDefault(c => c.Id == id);
+            if (tag == null)
+            {
+                throw new FanException("Tag is not found.");
+            }
+
+            return tag;
+        }
+
+        /// <summary>
+        /// Returns tag by slug, throws <see cref="FanException"/> if tag with slug is not found.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public async Task<Tag> GetTagAsync(string slug)
+        {
+            var tags = await this.GetTagsAsync();
+            var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
+            if (tag == null)
+            {
+                throw new FanException("Tag is not found.");
+            }
+
+            return tag;
+        }
+
+        /// <summary>
+        /// Returns all tags, cached after calls to DAL.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<Tag>> GetTagsAsync()
+        {
+            return await _cache.GetAsync<List<Tag>>(CACHE_KEY_ALL_TAGS, new TimeSpan(0, 10, 0), async () => {
+                return await _tagRepo.GetListAsync();
+            });
+        }
+
+        /// <summary>
+        /// Updates a <see cref="Tag"/> and invalidates cache for all tags.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public async Task<Tag> UpdateTagAsync(Tag tag)
+        {
+            tag = await this.PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
+            tag = await _tagRepo.UpdateAsync(tag);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+
+            return tag;
         }
 
         // -------------------------------------------------------------------- Private
 
         /// <summary>
-        /// Prepares a category for Create or Update, making sure its title and slug are valid.
+        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
         /// </summary>
-        private async Task<Category> PrepCategoryAsync(Category category, ECreateOrUpdate createOrUpdate)
+        /// <param name="tax">A category or tag.</param>
+        /// <param name="createOrUpdate"></param>
+        /// <returns></returns>
+        private async Task<Taxonomy> PrepTaxonomyAsync(Taxonomy tax, ECreateOrUpdate createOrUpdate)
         {
-            // get all categories
-            var allCats = await this.GetCategoriesAsync();
+            // get existing titles and slugs
+            IEnumerable<string> existingTitles = null;
+            IEnumerable<string> existingSlugs = null;
+            ETaxonomyType type = ETaxonomyType.Category;
+            if (tax is Category)
+            {
+                var allCats = await this.GetCategoriesAsync();
+                existingTitles = allCats.Select(c => c.Title);
+                existingSlugs = allCats.Select(c => c.Slug);
+            }
+            else
+            {
+                var allTags = await this.GetTagsAsync();
+                existingTitles = allTags.Select(c => c.Title);
+                existingSlugs = allTags.Select(c => c.Slug);
+                type = ETaxonomyType.Tag;
+            }
 
-            // Title: validator makes sure it cannot be empty, or exceed max length or already exist
-            var existingTitles = allCats.Select(c => c.Title);
-            var validator = new TaxonomyValidator(existingTitles, ETaxonomyType.Category);
-            ValidationResult result = await validator.ValidateAsync(category);
+            // validator
+            var validator = new TaxonomyValidator(existingTitles, type);
+            ValidationResult result = await validator.ValidateAsync(tax);
             if (!result.IsValid)
             {
                 var cou = createOrUpdate.ToString().ToLower();
-                throw new FanException($"Failed to {cou} category.", result.Errors);
+                throw new FanException($"Failed to {cou} {type}.", result.Errors);
             }
 
             // Slug: user can create / update slug, we format the slug if it's available else we 
             // use title to get the slug.
-            var existingSlugs = allCats.Select(c => c.Slug);
-            category.Slug = BlogServiceHelper.FormatTaxonomySlug(category.Slug.IsNullOrEmpty() ? category.Title : category.Slug, existingSlugs);
+            tax.Slug = BlogServiceHelper.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
 
             // html encode title
-            category.Title = WebUtility.HtmlEncode(category.Title);
+            tax.Title = WebUtility.HtmlEncode(tax.Title);
 
-            return category;
+            return tax;
         }
-
-      
     }
 }
