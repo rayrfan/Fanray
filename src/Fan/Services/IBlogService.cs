@@ -78,5 +78,19 @@ namespace Fan.Services
         /// <returns></returns>
         /// <exception cref="FanException"></exception>
         Task<Category> UpdateCategoryAsync(Category category);
+
+        // -------------------------------------------------------------------- Tags
+
+        Task<Tag> CreateTagAsync(Tag tag);
+        Task DeleteTagAsync(int id);
+        Task<Tag> GetTagAsync(int id);
+        Task<Tag> GetTagAsync(string slug);
+        Task<List<Tag>> GetTagsAsync();
+        Task<Tag> UpdateTagAsync(Tag tag);
+
+        // -------------------------------------------------------------------- Media
+
+        Task<Media> UpsertMediaAsync(Media media);
+        Task<Media> GetMediaAsync(string fileName);
     }
 }

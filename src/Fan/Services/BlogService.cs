@@ -295,6 +295,51 @@ namespace Fan.Services
             return tag;
         }
 
+        // -------------------------------------------------------------------- Media
+
+        /// <summary>
+        /// Creates or updates a media post.
+        /// </summary>
+        /// <param name="media"></param>
+        /// <returns></returns>
+        public async Task<Media> UpsertMediaAsync(Media media)
+        {
+            if (media == null) return media;
+
+            var theMedia = await this.GetMediaAsync(media.Slug);
+
+            if (theMedia != null)
+            {
+                theMedia.UserName = media.UserName;
+                theMedia.Slug = media.Slug;
+                theMedia.Title = media.Title;
+                theMedia.MimeType = media.MimeType;
+                theMedia.UpdatedOn = DateTime.UtcNow;
+
+                var post = _mapper.Map<Media, Post>(theMedia);
+                await _postRepo.UpdateAsync(post);
+            }
+            else
+            {
+                media.CreatedOn = DateTime.UtcNow;
+                var post = _mapper.Map<Media, Post>(media);
+                await _postRepo.CreateAsync(post);
+            }
+
+            return media;
+        }
+
+        /// <summary>
+        /// Returns a media post by slug, returns null if not found.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public async Task<Media> GetMediaAsync(string slug)
+        {
+            var post = await _postRepo.GetAsync(slug, EPostType.Media);
+            return _mapper.Map<Post, Media>(post);
+        }
+
         // -------------------------------------------------------------------- Private
 
         /// <summary>
