@@ -1,5 +1,8 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using Humanizer;
+using System;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace Fan.Helpers
@@ -150,6 +153,39 @@ namespace Fan.Helpers
             var chars = Enumerable.Repeat(0, length) // Range would give the same end result
                                    .Select(x => input[random.Next(0, input.Length)]);
             return new string(chars.ToArray());
+        }
+
+        /// <summary>
+        /// Returns excerpt give body of a post. Returns empty string if body is null or operation
+        /// fails. The returned string 
+        /// </summary>
+        /// <param name="body"></param>
+        /// <param name="wordsLimit"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// - I noticed flipboard on the web uses cleaned up exerpts
+        /// - Stripping all html tags with Html Agility Pack http://stackoverflow.com/a/3140991/32240
+        /// </remarks>
+        public static string GetExcerpt(string body, int wordsLimit)
+        {
+            if (string.IsNullOrEmpty(body) || wordsLimit <= 0) return "";
+
+            try
+            {
+                HtmlDocument document = new HtmlDocument();
+                document.LoadHtml(body);
+                body = document.DocumentNode.InnerText?.Trim(); // should be clean text by now
+                if (body.IsNullOrEmpty()) return "";
+
+                // html entities https://stackoverflow.com/a/10971380/32240
+                body = WebUtility.HtmlDecode(body); 
+
+                return body.Truncate(wordsLimit, Truncator.FixedNumberOfWords);
+            }
+            catch (Exception e)
+            {
+                return body;
+            }
         }
     }
 }
