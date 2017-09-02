@@ -1,8 +1,8 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
 using Fan.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -11,21 +11,13 @@ namespace Fan.Tests.Data
     /// <summary>
     /// Tests for <see cref="SqlMetaRepository"/> class.
     /// </summary>
-    public class SqlMetaRepositoryTest : IDisposable
+    public class SqlMetaRepositoryTest : DataTestBase
     {
-        FanDbContext _db;
-        SqlMetaRepository _metaRepo;
+        private SqlMetaRepository _metaRepo;
 
         public SqlMetaRepositoryTest()
         {
-            _db = DataTestHelper.GetContextWithSqlite();
-            _metaRepo = new SqlMetaRepository(_db);
-        }
-
-        public void Dispose()
-        {
-            _db.Database.EnsureDeleted();
-            _db.Dispose();
+            _metaRepo = new SqlMetaRepository(_db, _loggerFactory.CreateLogger<SqlMetaRepository>());
         }
 
         /// <summary>
@@ -86,7 +78,7 @@ namespace Fan.Tests.Data
         public async void GetMeta_Returns_The_Meta_With_Specified_Key()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
 
             // Act
             var meta = await _metaRepo.GetAsync("BlogSettings");
@@ -112,6 +104,23 @@ namespace Fan.Tests.Data
             // Assert
             var metaAgain = await _metaRepo.GetAsync("key");
             Assert.Equal("new value", meta.Value);
+        }
+
+        /// <summary>
+        /// Test for <see cref="SqlMetaRepository.UpdateAsync(Meta)"/> method.
+        /// </summary>
+        [Fact]
+        public async void UpdateMeta_Updates_A_Record_With_Key_NotFound_Does_Nothing()
+        {
+            // Arrange
+            var meta = new Meta { Key = "key-not-found", Value = "value" };
+
+            // Act
+            await _metaRepo.UpdateAsync(meta);
+
+            // Assert
+            var metaAgain = await _metaRepo.GetAsync("key-not-found");
+            Assert.Null(metaAgain);
         }
     }
 }

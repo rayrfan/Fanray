@@ -12,7 +12,7 @@ namespace Fan.Tests.Services
     /// <summary>
     /// Tests for <see cref="BlogService"/> category operations.
     /// </summary>
-    public class CategoryTest : BlogServiceTest
+    public class CategoryTest : BlogServiceTestBase
     {
         /// <summary>
         /// Setting up existing categories.

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Fan.Tests.Services
 {
-    public class MediaTest : BlogServiceTest
+    public class MediaTest : BlogServiceTestBase
     {
         /// <summary>
         /// Test <see cref="BlogService.CreateMediaAsync(Media)"/> would call PostRepository's CreateAsync.

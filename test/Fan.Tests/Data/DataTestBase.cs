@@ -3,6 +3,8 @@ using Fan.Enums;
 using Fan.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,9 +12,8 @@ using System.Collections.Generic;
 namespace Fan.Tests.Data
 {
     /// <summary>
-    /// Helps with the creation of <see cref="FanDbContext"/> with SQLite in memory database and
-    /// EF Core InMemory Provider, as well as seeding initial blog data that some of the tests 
-    /// depend on. 
+    /// Base class for all integration tests.  It helps initialization of a in-memory based 
+    /// FanDbContext as well as seeding initial blog data that some of the tests depend on.
     /// </summary>
     /// <remarks>
     /// When it comes to test with an in-memory database, there are two choices, the 
@@ -23,33 +24,31 @@ namespace Fan.Tests.Data
     /// 
     /// For more info https://docs.microsoft.com/en-us/ef/core/miscellaneous/testing/index
     /// </remarks>
-    public static class DataTestHelper
+    public class DataTestBase : IDisposable
     {
         /// <summary>
-        /// Returns <see cref="FanDbContext"/> with SQLite Database Provider in-memory mode.
+        /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
-        public static FanDbContext GetContextWithSqlite()
-        {
-            var connection = new SqliteConnection() { ConnectionString = "Data Source=:memory:" };
-            connection.Open(); 
-
-            var builder = new DbContextOptionsBuilder<FanDbContext>();
-            builder.UseSqlite(connection);
-
-            var context = new FanDbContext(builder.Options);
-            context.Database.EnsureCreated();
-
-            return context;
-        }
-
+        protected FanDbContext _db;
         /// <summary>
-        /// Returns <see cref="FanDbContext"/> with Entity Framework Core In-Memory Database.
+        /// A logger factory for sub class to create their type dependent logger.
         /// </summary>
-        public static FanDbContext GetContextWithEFCore()
+        protected ILoggerFactory _loggerFactory;
+
+        public DataTestBase()
         {
-            var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
-            return new FanDbContext(_options);
+            _db = this.GetContextWithSqlite(); // I can either do sqlite in-mem mode or ef core in-mem db
+            var serviceProvider = new ServiceCollection().AddLogging().BuildServiceProvider();
+            _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
         }
+
+        public void Dispose()
+        {
+            _db.Database.EnsureDeleted(); // important, otherwise SeedTestData is not erased
+            _db.Dispose();
+        }
+
+        // -------------------------------------------------------------------- Seed data
 
         public const string POST_SLUG = "test-post";
         public const string CAT_TITLE = "Technology";
@@ -63,11 +62,11 @@ namespace Fan.Tests.Data
         /// Seeds 1 blog post associated with 1 category and 2 tags.
         /// </summary>
         /// <param name="db"></param>
-        public static void SeedTestPost(this FanDbContext db)
+        protected void SeedTestPost()
         {
-            db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
-            db.Posts.Add(GetPost());
-            db.SaveChanges();
+            _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
+            _db.Posts.Add(this.GetPost());
+            _db.SaveChanges();
         }
 
         /// <summary>
@@ -76,17 +75,17 @@ namespace Fan.Tests.Data
         /// </summary>
         /// <param name="db"></param>
         /// <param name="numOfPosts"></param>
-        public static void SeedTestPosts(this FanDbContext db, int numOfPosts)
+        protected void SeedTestPosts(int numOfPosts)
         {
-            db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
-            db.Posts.AddRange(GetPosts(numOfPosts));
-            db.SaveChanges();
+            _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
+            _db.Posts.AddRange(this.GetPosts(numOfPosts));
+            _db.SaveChanges();
         }
 
         /// <summary>
         /// Returns a post associated with 1 category and 2 tags.
         /// </summary>
-        private static Post GetPost()
+        private Post GetPost()
         {
             var cat = new Category { Slug = CAT_SLUG, Title = CAT_TITLE };
             var tag1 = new Tag { Slug = TAG1_SLUG, Title = TAG1_TITLE };
@@ -97,7 +96,7 @@ namespace Fan.Tests.Data
                 Body = "A post body.",
                 Category = cat,
                 UserName = "ray",
-                CreatedOn = (new DateTime(2017, 01, 01)).ToUniversalTime(), 
+                CreatedOn = (new DateTime(2017, 01, 01)).ToUniversalTime(),
                 RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,
@@ -118,7 +117,7 @@ namespace Fan.Tests.Data
         /// while odd number posts are published and tagged with tag1.
         /// </summary>
         /// <returns></returns>
-        private static List<Post> GetPosts(int numOfPosts)
+        private List<Post> GetPosts(int numOfPosts)
         {
             if (numOfPosts < 1) throw new ArgumentException("Param numOfPosts must be > 1");
 
@@ -137,7 +136,7 @@ namespace Fan.Tests.Data
                     CreatedOn = new DateTime(2017, 01, i), // be aware this is UTC time
                     RootId = null,
                     Title = $"Test Post #{i}",
-                    Slug = $"{POST_SLUG}-{i}", 
+                    Slug = $"{POST_SLUG}-{i}",
                     Type = EPostType.BlogPost,
                     Status = (i % 2 == 0) ? EPostStatus.Draft : EPostStatus.Published, // drafts / published
                 };
@@ -159,6 +158,34 @@ namespace Fan.Tests.Data
             }
 
             return list;
+        }
+
+        // -------------------------------------------------------------------- DbContext
+
+        /// <summary>
+        /// Returns <see cref="FanDbContext"/> with SQLite Database Provider in-memory mode.
+        /// </summary>
+        private FanDbContext GetContextWithSqlite()
+        {
+            var connection = new SqliteConnection() { ConnectionString = "Data Source=:memory:" };
+            connection.Open();
+
+            var builder = new DbContextOptionsBuilder<FanDbContext>();
+            builder.UseSqlite(connection);
+
+            var context = new FanDbContext(builder.Options);
+            context.Database.EnsureCreated();
+
+            return context;
+        }
+
+        /// <summary>
+        /// Returns <see cref="FanDbContext"/> with Entity Framework Core In-Memory Database.
+        /// </summary>
+        private FanDbContext GetContextWithEFCore()
+        {
+            var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
+            return new FanDbContext(_options);
         }
     }
 }

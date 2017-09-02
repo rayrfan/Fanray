@@ -11,30 +11,35 @@ namespace Fan.Tests.Services
     /// <summary>
     /// Tests for <see cref="BlogService"/> settings operations.
     /// </summary>
-    public class BlogSettingsTest : BlogServiceTest
+    public class BlogSettingsTest : BlogServiceTestBase
     {
         /// <summary>
-        /// Tests <see cref="BlogService.CreateSettingsAsync(BlogSettings)"/> when BlogSettings exists or not in DB.
+        /// Tests <see cref="BlogService.CreateSettingsAsync(BlogSettings)"/> when there isn't a BlogSettings exists already.
         /// </summary>
-        /// <param name="existingSettings"></param>
-        /// <param name="numCallsToRepoCreate"></param>
-        [Theory]
-        [InlineData(false, 1)]
-        [InlineData(true, 0)]
-        public async void Createsettings_Creates_Settings_If_Its_Not_Already_Existed(bool existingSettings, int numCallsToRepoCreate)
+        [Fact]
+        public async void CreateSettings_Creates_Settings_If_Its_Not_Already_Existed()
         {
-            // Arrange: existing BlogSettings
-            if (existingSettings)
-            {
-                _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
-                    .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
-            }
+            // Arrange: no settings setup here
 
-            // Act: create
+            // Act
             await _blogSvc.CreateSettingsAsync(new BlogSettings());
 
-            // Assert: it didn't touch repo's create since settings exist
-            _metaRepoMock.Verify(repo => repo.CreateAsync(It.IsAny<Meta>()), Times.Exactly(numCallsToRepoCreate));
+            // Assert
+            _metaRepoMock.Verify(repo => repo.CreateAsync(It.IsAny<Meta>()), Times.Exactly(1));
+        }
+
+        /// <summary>
+        /// Tests <see cref="BlogService.CreateSettingsAsync(BlogSettings)"/> when there isn't a BlogSettings exists already.
+        /// </summary>
+        [Fact]
+        public async void CreateSettings_Throws_FanException_If_Settings_Already_Existed()
+        {
+            // Arrange 
+            _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
+                .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
+
+            // Assert
+            var ex = await Assert.ThrowsAsync<FanException>(() => _blogSvc.CreateSettingsAsync(new BlogSettings()));
         }
 
         /// <summary>

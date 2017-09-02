@@ -19,34 +19,27 @@ namespace Fan.Tests.Services
     /// <summary>
     /// Integration tests for <see cref="BlogService"/> the different scenarios an author posts.
     /// </summary>
-    public class BlogPostIntegrationTest : IDisposable
+    public class BlogPostIntegrationTest : DataTestBase
     {
-        FanDbContext _db;
         BlogService _blogSvc;
 
         public BlogPostIntegrationTest()
         {
-            _db = DataTestHelper.GetContextWithSqlite();
-            var catRepo = new SqlCategoryRepository(_db);
-            var tagRepo = new SqlTagRepository(_db);
-            var metaRepo = new SqlMetaRepository(_db);
-            var postRepo = new SqlPostRepository(_db);
-
             // cache, loggerFactory, mapper
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             var cache = new MemoryDistributedCache(memCacheOptions);
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var logger = _loggerFactory.CreateLogger<BlogService>();
             var mapper = Config.Mapper;
 
-            // svc
-            _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, loggerFactory, mapper);
-        }
+            // repos
+            var catRepo = new SqlCategoryRepository(_db);
+            var tagRepo = new SqlTagRepository(_db);
+            var metaRepo = new SqlMetaRepository(_db, _loggerFactory.CreateLogger<SqlMetaRepository>());
+            var postRepo = new SqlPostRepository(_db);
 
-        public void Dispose()
-        {
-            _db.Database.EnsureDeleted(); 
-            _db.Dispose();
+            // svc
+            _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, mapper);
         }
 
         /// <summary>
@@ -56,7 +49,7 @@ namespace Fan.Tests.Services
         public async void Author_Can_Publish_BlogPost_From_OLW()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             DateTime createdOn = DateTime.Now;
             var blogPost = new BlogPost // A user posts this from OLW
             {
@@ -90,7 +83,7 @@ namespace Fan.Tests.Services
         public async void Author_Can_Publish_BlogPost_From_Browser()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             DateTime createdOn = DateTime.Now;
             var blogPost = new BlogPost // A user posts this from browser
             {
@@ -124,7 +117,7 @@ namespace Fan.Tests.Services
         public async void Author_Publish_BlogPost_With_New_Category_And_Tags_From_OLW()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             var blogPost = new BlogPost // A user posts this from OLW
             {
                 UserName = Actor.AUTHOR,
@@ -133,7 +126,7 @@ namespace Fan.Tests.Services
                 Body = "This is my first post",
                 Excerpt = null,
                 CategoryTitle = "Travel",
-                TagTitles = new List<string> { "Windows 10", DataTestHelper.TAG2_TITLE },
+                TagTitles = new List<string> { "Windows 10", DataTestBase.TAG2_TITLE },
                 CreatedOn = new DateTime(),
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
@@ -159,7 +152,7 @@ namespace Fan.Tests.Services
 
             // Tags
             Assert.Equal(3, tags.Count); // there are now 3 tags
-            Assert.Equal(2, tags.Find(t => t.Title == DataTestHelper.TAG2_TITLE).Count); // C# has 2 posts
+            Assert.Equal(2, tags.Find(t => t.Title == DataTestBase.TAG2_TITLE).Count); // C# has 2 posts
         }
 
         /// <summary>
@@ -169,13 +162,13 @@ namespace Fan.Tests.Services
         public async void Author_Can_Update_BlogPost_From_OLW()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             var blogPost = await _blogSvc.GetPostAsync(1);
             var wasCreatedOn = blogPost.CreatedOn;
 
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
-            blogPost.TagTitles = new List<string> { "Windows 10", DataTestHelper.TAG2_TITLE }; // 1 new tag, 1 existing
+            blogPost.TagTitles = new List<string> { "Windows 10", DataTestBase.TAG2_TITLE }; // 1 new tag, 1 existing
             blogPost.CreatedOn = DateTime.Now; // update the post time to now
 
             var result = await _blogSvc.UpdatePostAsync(blogPost);
@@ -188,7 +181,7 @@ namespace Fan.Tests.Services
             Assert.Equal(2, result.Category.Id);
             Assert.Equal("travel", result.Category.Slug);
             Assert.Equal(2, result.Tags.Count);
-            Assert.NotNull(result.Tags.SingleOrDefault(t => t.Title == DataTestHelper.TAG2_TITLE));
+            Assert.NotNull(result.Tags.SingleOrDefault(t => t.Title == DataTestBase.TAG2_TITLE));
             Assert.NotNull(result.Tags.SingleOrDefault(t => t.Slug == "windows-10"));
 
             // Category
@@ -198,7 +191,7 @@ namespace Fan.Tests.Services
 
             // Tags
             Assert.Equal(3, tags.Count); // there are now 3 tags
-            Assert.Equal(1, tags.Find(t => t.Title == DataTestHelper.TAG2_TITLE).Count); // C# has 1 post
+            Assert.Equal(1, tags.Find(t => t.Title == DataTestBase.TAG2_TITLE).Count); // C# has 1 post
 
             // CreatedOn & UpdatedOn
             Assert.True(result.CreatedOn > wasCreatedOn);
@@ -212,13 +205,13 @@ namespace Fan.Tests.Services
         public async void Author_Can_Update_BlogPost_To_Draft_From_Browser()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             var blogPost = await _blogSvc.GetPostAsync(1);
             var wasCreatedOn = blogPost.CreatedOn;
 
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
-            blogPost.TagTitles = new List<string> { "Windows 10", DataTestHelper.TAG2_TITLE }; // 1 new tag, 1 existing
+            blogPost.TagTitles = new List<string> { "Windows 10", DataTestBase.TAG2_TITLE }; // 1 new tag, 1 existing
             blogPost.CreatedOn = DateTime.Now; // update the post time to now
             blogPost.Status = EPostStatus.Draft;
 
@@ -232,7 +225,7 @@ namespace Fan.Tests.Services
             Assert.Equal(2, result.Category.Id);
             Assert.Equal("travel", result.Category.Slug);
             Assert.Equal(2, result.Tags.Count);
-            Assert.NotNull(result.Tags.SingleOrDefault(t => t.Title == DataTestHelper.TAG2_TITLE));
+            Assert.NotNull(result.Tags.SingleOrDefault(t => t.Title == DataTestBase.TAG2_TITLE));
             Assert.NotNull(result.Tags.SingleOrDefault(t => t.Slug == "windows-10"));
 
             // Category
@@ -242,7 +235,7 @@ namespace Fan.Tests.Services
 
             // Tags
             Assert.Equal(3, tags.Count); // there are now 3 tags
-            Assert.Equal(0, tags.Find(t => t.Title == DataTestHelper.TAG2_TITLE).Count); // draft is not counted
+            Assert.Equal(0, tags.Find(t => t.Title == DataTestBase.TAG2_TITLE).Count); // draft is not counted
 
             // CreatedOn & UpdatedOn
             Assert.True(result.CreatedOn > wasCreatedOn);
@@ -256,7 +249,7 @@ namespace Fan.Tests.Services
         public async void Visitor_Views_BlogPost_Date_In_Humanized_String()
         {
             // Arrange
-            _db.SeedTestPost();
+            SeedTestPost();
             var blogPost = new BlogPost // A user posts this from browser
             {
                 UserName = Actor.AUTHOR,

@@ -1,7 +1,6 @@
 using Fan.Data;
 using Fan.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -10,21 +9,13 @@ namespace Fan.Tests.Data
     /// <summary>
     /// Tests for <see cref="SqlCategoryRepository"/> class.
     /// </summary>
-    public class SqlCategoryRepositoryTest : IDisposable
+    public class SqlCategoryRepositoryTest : DataTestBase
     {
-        FanDbContext _db;
         SqlCategoryRepository _catRepo;
 
         public SqlCategoryRepositoryTest()
         {
-            _db = DataTestHelper.GetContextWithSqlite();
             _catRepo = new SqlCategoryRepository(_db);
-        }
-
-        public void Dispose()
-        {
-            _db.Database.EnsureDeleted();
-            _db.Dispose();
         }
 
         /// <summary>
@@ -51,14 +42,14 @@ namespace Fan.Tests.Data
         public async void DeleteCategory_Will_Recategorize_Its_Posts_To_Default_Category()
         {
             // Arrange: given a post with a category
-            _db.SeedTestPost();
-            var existCat = _db.Categories.Single(c => c.Slug == DataTestHelper.CAT_SLUG);
+            SeedTestPost();
+            var existCat = _db.Categories.Single(c => c.Slug == DataTestBase.CAT_SLUG);
 
             // Act: when we delete the existing category
             await _catRepo.DeleteAsync(existCat.Id, 1);
 
             // Assert: then post will have the default category
-            var post = _db.Posts.Include(p => p.Category).Single(p => p.Slug == DataTestHelper.POST_SLUG);
+            var post = _db.Posts.Include(p => p.Category).Single(p => p.Slug == DataTestBase.POST_SLUG);
             Assert.True(_db.Categories.Count() == 1);
             Assert.True(post.Category.Id == 1);
         }

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Fan.Tests.Services
 {
-    public class TagTest : BlogServiceTest
+    public class TagTest : BlogServiceTestBase
     {
         /// <summary>
         /// Setting up existing tags.
