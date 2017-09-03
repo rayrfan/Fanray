@@ -25,18 +25,18 @@ namespace Fan.Tests.Services
 
         public BlogPostIntegrationTest()
         {
+            // repos
+            var catRepo = new SqlCategoryRepository(_db);
+            var tagRepo = new SqlTagRepository(_db);
+            var metaRepo = new SqlMetaRepository(_db);
+            var postRepo = new SqlPostRepository(_db);
+
             // cache, loggerFactory, mapper
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             var cache = new MemoryDistributedCache(memCacheOptions);
             var logger = _loggerFactory.CreateLogger<BlogService>();
             var mapper = Config.Mapper;
-
-            // repos
-            var catRepo = new SqlCategoryRepository(_db);
-            var tagRepo = new SqlTagRepository(_db);
-            var metaRepo = new SqlMetaRepository(_db, _loggerFactory.CreateLogger<SqlMetaRepository>());
-            var postRepo = new SqlPostRepository(_db);
 
             // svc
             _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, mapper);

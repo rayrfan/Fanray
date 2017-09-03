@@ -1,8 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Fan.Models;
-using Fan.Exceptions;
+﻿using Fan.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace Fan.Data
 {
@@ -19,15 +18,12 @@ namespace Fan.Data
         }
 
         /// <summary>
-        /// Creates a <see cref="Meta"/>.
+        /// Creates a <see cref="Meta"/> record, throws <see cref="DbUpdateException"/> if there is 
+        /// already a record with the same key.  <see cref="Meta.Key"/> has a unique constraint.
         /// </summary>
         /// <param name="meta"></param>
-        /// <exception cref="FanException">If key already exists.</exception>
         public async Task<Meta> CreateAsync(Meta meta)
         {
-            if (await this.GetAsync(meta.Key) != null)
-                throw new FanException("Meta record already exists in database.");
-
             await _db.AddAsync(meta);
             await _db.SaveChangesAsync();
             return meta;

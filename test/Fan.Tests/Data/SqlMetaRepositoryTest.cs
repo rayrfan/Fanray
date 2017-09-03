@@ -1,6 +1,7 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
 using Fan.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Linq;
@@ -17,26 +18,23 @@ namespace Fan.Tests.Data
 
         public SqlMetaRepositoryTest()
         {
-            _metaRepo = new SqlMetaRepository(_db, _loggerFactory.CreateLogger<SqlMetaRepository>());
+            _metaRepo = new SqlMetaRepository(_db);
         }
 
         /// <summary>
         /// Test for <see cref="SqlMetaRepository.CreateAsync(Meta)"/> method when key already exists,
-        /// <see cref="FanException"/> will be thrown.
+        /// <see cref="DbUpdateException"/> will be thrown.
         /// </summary>
         [Fact]
-        public async void CreateMeta_Throws_FanException_If_Key_Already_Exists()
+        public async void CreateMeta_Throws_DbUpdateException_If_Key_Already_Exists()
         {
             // Arrange
             var meta = new Meta { Key = "key", Value = "value" };
             var meta2 = new Meta { Key = "key", Value = "value" };
 
-            // Act
+            // Act & Assert
             await _metaRepo.CreateAsync(meta);
-            var ex = await Assert.ThrowsAsync<FanException>(() => _metaRepo.CreateAsync(meta2));
-
-            // Assert
-            Assert.IsType<FanException>(ex);
+            var ex = await Assert.ThrowsAsync<DbUpdateException>(() => _metaRepo.CreateAsync(meta2));
         }
 
         /// <summary>
