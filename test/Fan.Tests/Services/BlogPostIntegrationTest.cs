@@ -261,22 +261,15 @@ namespace Fan.Tests.Services
                 TagTitles = null,                   // user didn't input
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
+
+                CreatedOn = DateTime.Now
             };
 
             // Act
-            blogPost.CreatedOn = DateTime.Now;
             var postNow = await _blogSvc.CreatePostAsync(blogPost);
-
-            blogPost.CreatedOn = DateTime.Now.AddHours(-1);
-            var postHourAgo = await _blogSvc.CreatePostAsync(blogPost);
-
-            blogPost.CreatedOn = DateTime.Now.AddHours(-30);
-            var postYesterday = await _blogSvc.CreatePostAsync(blogPost);
 
             // Assert
             Assert.Equal("now", postNow.CreatedOnDisplay);
-            Assert.Equal("an hour ago", postHourAgo.CreatedOnDisplay);
-            Assert.Equal("yesterday", postYesterday.CreatedOnDisplay);
         }
     }
 }

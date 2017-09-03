@@ -4,6 +4,12 @@ using System.Collections.Generic;
 
 namespace Fan.Exceptions
 {
+    /// <summary>
+    /// The exception for the system.
+    /// </summary>
+    /// <remarks>
+    /// Caller should log before throw an exception.  I choose not to pass in ILogger here for max flexibility.
+    /// </remarks>
     public class FanException : Exception
     {
         /// <summary>

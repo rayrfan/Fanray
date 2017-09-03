@@ -1,5 +1,6 @@
 ﻿using Fan.Enums;
 using Fan.Exceptions;
+using System;
 
 namespace Fan.Models
 {
@@ -25,11 +26,11 @@ namespace Fan.Models
 
             if ((id == null || id <= 0) && queryType == EPostListQueryType.ChildPagesForRoot)
             {
-                throw new FanException("A query for child pages must have a valid root id.");
+                throw new ArgumentException($"Invalid id '{id}'. A query for child pages must have a valid root id.");
             }
             else if ((id == null || id <= 0) && queryType == EPostListQueryType.ChildPagesForParent)
             {
-                throw new FanException("A query for child pages must have a valid parent id.");
+                throw new ArgumentException($"Invalid id '{id}'. A query for child pages must have a valid parent id.");
             }
         }
 

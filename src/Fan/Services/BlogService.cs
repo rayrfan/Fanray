@@ -25,7 +25,7 @@ namespace Fan.Services
         private readonly IPostRepository _postRepo;
         private readonly ITagRepository _tagRepo;
         private readonly IDistributedCache _cache;
-        private readonly ILogger _logger;
+        private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
 
         public BlogService(ICategoryRepository catRepo,
@@ -33,7 +33,7 @@ namespace Fan.Services
             IPostRepository postRepo,
             ITagRepository tagRepo,
             IDistributedCache cache,
-            ILoggerFactory loggerFactory,
+            ILogger<BlogService> logger,
             IMapper mapper)
         {
             _catRepo = catRepo;
@@ -42,7 +42,7 @@ namespace Fan.Services
             _tagRepo = tagRepo;
             _cache = cache;
             _mapper = mapper;
-            _logger = loggerFactory.CreateLogger<BlogService>();
+            _logger = logger;
         }
 
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
@@ -53,20 +53,25 @@ namespace Fan.Services
         // -------------------------------------------------------------------- Settings
 
         /// <summary>
-        /// Creates <see cref="BlogSettings"/>, if a BlogSettings already exists return it.
+        /// Creates <see cref="BlogSettings"/>, throws <see cref="FanException"/> if a BlogSettings already exists.
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
         public async Task<BlogSettings> CreateSettingsAsync(BlogSettings settings)
         {
-            var meta = await _metaRepo.GetAsync("BlogSettings");
-            if (meta != null) return settings;
+            if (await this.GetSettingsAsync() != null)
+            {
+                string msg = "BlogSettings already exists in system.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
+            }
 
-            meta = new Meta
+            var meta = new Meta
             {
                 Key = "BlogSettings",
                 Value = JsonConvert.SerializeObject(settings),
             };
+
             await _metaRepo.CreateAsync(meta);
 
             return settings;
@@ -98,7 +103,9 @@ namespace Fan.Services
             var meta = await _metaRepo.GetAsync("BlogSettings");
             if (meta == null)
             {
-                throw new FanException("BlogSettings cannot be updated because it does not exist in the system.");
+                var msg = "BlogSettings cannot be updated because it does not exist in the system.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
             }
 
             meta.Value = JsonConvert.SerializeObject(settings);
@@ -145,7 +152,9 @@ namespace Fan.Services
             // therefore when there is only one category left, it'll be the default.
             if (id == blogSettings.DefaultCategoryId)
             {
-                throw new FanException("Default category cannot be deleted.");
+                var msg = "Default category cannot be deleted.";
+                _logger.LogWarning(msg);
+                throw new FanException(msg);
             }
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
@@ -163,7 +172,9 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                throw new FanException("Category is not found.");
+                var msg = "Category is not found.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
             }
 
             return cat;
@@ -180,7 +191,9 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                throw new FanException("Category is not found.");
+                var msg = "Category is not found.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
             }
 
             return cat;
@@ -220,7 +233,7 @@ namespace Fan.Services
         /// <returns></returns>
         public async Task<Tag> CreateTagAsync(Tag tag)
         {
-            tag = await this.PrepTaxonomyAsync(tag, ECreateOrUpdate.Create) as Tag;
+            tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Create) as Tag;
             tag = await _tagRepo.CreateAsync(tag);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
 
@@ -249,7 +262,9 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                throw new FanException("Tag is not found.");
+                var msg = "Tag is not found.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
             }
 
             return tag;
@@ -266,7 +281,9 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException("Tag is not found.");
+                var msg = "Tag is not found.";
+                _logger.LogError(msg);
+                throw new FanException(msg);
             }
 
             return tag;
@@ -290,7 +307,7 @@ namespace Fan.Services
         /// <returns></returns>
         public async Task<Tag> UpdateTagAsync(Tag tag)
         {
-            tag = await this.PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
+            tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
             tag = await _tagRepo.UpdateAsync(tag);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
 
@@ -355,7 +372,7 @@ namespace Fan.Services
             if (blogPost == null) return blogPost;
 
             // preps BlogPost for saving and gets Post back
-            var post = await this.PrepPostAsync(blogPost, ECreateOrUpdate.Create);
+            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // save post
             await _postRepo.CreateAsync(post);
@@ -416,7 +433,7 @@ namespace Fan.Services
         public async Task<BlogPost> GetPostAsync(int id)
         {
             var post = await this.GetPostAsync(id, EPostType.BlogPost);
-            return await this.PrepBlogPostForShowingAsync(post);
+            return await this.PrepBlogPostForDisplayAsync(post);
         }
 
         /// <summary>
@@ -436,7 +453,7 @@ namespace Fan.Services
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
 
-            return await this.PrepBlogPostForShowingAsync(post);
+            return await this.PrepBlogPostForDisplayAsync(post);
         }
 
         /// <summary>
@@ -540,8 +557,9 @@ namespace Fan.Services
             var post = await _postRepo.GetAsync(id, type);
             if (post == null)
             {
-                _logger.LogWarning($"{type} with id {id} is not found!");
-                throw new FanException($"{type} with id {id} is not found.");
+                var msg = $"{type} with id {id} is not found.";
+                _logger.LogWarning(msg);
+                throw new FanException(msg);
             }
 
             return post;
@@ -555,6 +573,8 @@ namespace Fan.Services
         /// <returns></returns>
         private async Task<Taxonomy> PrepTaxonomyAsync(Taxonomy tax, ECreateOrUpdate createOrUpdate)
         {
+            _logger.LogDebug($"Prep {tax} to Taxonomy for {createOrUpdate} starts.");
+
             // get existing titles and slugs
             IEnumerable<string> existingTitles = null;
             IEnumerable<string> existingSlugs = null;
@@ -579,7 +599,9 @@ namespace Fan.Services
             if (!result.IsValid)
             {
                 var cou = createOrUpdate.ToString().ToLower();
-                throw new FanException($"Failed to {cou} {type}.", result.Errors);
+                var msg = $"Failed to {cou} {type}.";
+                _logger.LogWarning(msg + " " + string.Join(" ", result.Errors));
+                throw new FanException(msg, result.Errors);
             }
 
             // Slug: user can create / update slug, we format the slug if it's available else we 
@@ -589,29 +611,35 @@ namespace Fan.Services
             // html encode title
             tax.Title = WebUtility.HtmlEncode(tax.Title);
 
+            _logger.LogDebug($"Prep {tax} to Taxonomy for {createOrUpdate} ends.");
             return tax;
         }
 
         /// <summary>
-        /// Preps a <see cref="BlogPost"/> for create or update.
+        /// Preps a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
         /// <param name="blogPost"></param>
         /// <param name="createOrUpdate"></param>
         /// <returns></returns>
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
+            _logger.LogDebug($"Prep BlogPost to Post for {createOrUpdate} starts.");
+
             // Validation
             var validator = new PostValidator();
             ValidationResult result = await validator.ValidateAsync(blogPost);
             if (!result.IsValid)
             {
-                throw new FanException($"Failed to {createOrUpdate} blog post.", result.Errors);
+                var cou = createOrUpdate.ToString().ToLower();
+                var msg = $"Failed to {cou} blog post.";
+                _logger.LogWarning(msg + " " + string.Join(" ", result.Errors));
+                throw new FanException(msg, result.Errors);
             }
 
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
-            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await this.GetPostAsync(blogPost.Id, EPostType.BlogPost);
-            var blogSettings = await this.GetSettingsAsync();
+            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await GetPostAsync(blogPost.Id, EPostType.BlogPost);
+            var blogSettings = await GetSettingsAsync();
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create) // create: if user didn't set a time, server will give it UtcNow which is correct 
@@ -710,19 +738,22 @@ namespace Fan.Services
                 }
             }
 
+            _logger.LogDebug($"Prep BlogPost to Post for {createOrUpdate} ends.");
             return post;
         }
 
         /// <summary>
-        /// Preps a <see cref="BlogPost"/> for showing.
+        /// Preps a <see cref="BlogPost"/> for display to client.
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
         /// <remarks>
         /// It readies the excerpt and the list of tags.
         /// </remarks>
-        private async Task<BlogPost> PrepBlogPostForShowingAsync(Post post)
+        private async Task<BlogPost> PrepBlogPostForDisplayAsync(Post post)
         {
+            _logger.LogDebug($"Prep Post to BlogPost for display starts.");
+
             var blogPost = _mapper.Map<Post, BlogPost>(post);
             var blogSettings = await this.GetSettingsAsync();
 
@@ -749,6 +780,7 @@ namespace Fan.Services
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
 
+            _logger.LogDebug($"Prep Post to BlogPost for display ends.");
             return blogPost;
         }
 
@@ -810,8 +842,9 @@ namespace Fan.Services
             var blogPostList = new BlogPostList(results.totalCount, query.PageSize);
             foreach (var post in results.posts)
             {
-                blogPostList.Add(await this.PrepBlogPostForShowingAsync(post));
+                blogPostList.Add(await PrepBlogPostForDisplayAsync(post));
             }
+
             return blogPostList;
         }
     }
