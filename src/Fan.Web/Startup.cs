@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Fan.Data;
+using Fan.Helpers;
+using Fan.Models;
+using Fan.Services;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Fan.Data;
-using Fan.Services;
-using Fan.Models;
 
 namespace Fan.Web
 {
@@ -57,12 +55,29 @@ namespace Fan.Web
 
             app.UseAuthentication();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseMvc(routes => RegisterRoutes(routes, app));
+        }
+
+        private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
+        {
+            routes.MapRoute("Home", "", new { controller = "Home", action = "Index" });
+            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
+            routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
+            routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
+
+            routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
+
+            routes.MapRoute("BlogPost", string.Format(Const.POST_URL_TEMPLATE, "year", "month", "day", "slug"),
+                new { controller = "Blog", action = "ViewPost", year = 0, month = 0, day = 0, slug = "" },
+                new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
+
+            routes.MapRoute("BlogCategory", string.Format(Const.CATEGORY_URL_TEMPLATE, "slug"), 
+                new { controller = "Blog", action = "ViewCategory", slug = "" });
+
+            routes.MapRoute("BlogTag", string.Format(Const.TAG_URL_TEMPLATE, "slug"), 
+                new { controller = "Blog", action = "ViewTag", slug = "" });
+
+            routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
     }
 }
