@@ -606,7 +606,7 @@ namespace Fan.Services
 
             // Slug: user can create / update slug, we format the slug if it's available else we 
             // use title to get the slug.
-            tax.Slug = BlogServiceHelper.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
+            tax.Slug = Util.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
 
             // html encode title
             tax.Title = WebUtility.HtmlEncode(tax.Title);
