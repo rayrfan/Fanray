@@ -1,10 +1,15 @@
-﻿using Fan.Data;
+﻿using AutoMapper;
+using Fan.Data;
 using Fan.Enums;
+using Fan.Helpers;
 using Fan.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -34,12 +39,23 @@ namespace Fan.Tests.Data
         /// A logger factory for sub class to create their type dependent logger.
         /// </summary>
         protected ILoggerFactory _loggerFactory;
+        /// <summary>
+        /// A <see cref="IDistributedCache"/> for tests for BLL, DAL tests don't use this.
+        /// </summary>
+        protected IDistributedCache _cache;
+        /// <summary>
+        /// A <see cref="IMapper"/> for tests for BLL, DAL tests don't use this.
+        /// </summary>
+        protected IMapper _mapper;
 
         public DataTestBase()
         {
-            _db = this.GetContextWithSqlite(); // I can either do sqlite in-mem mode or ef core in-mem db
-            var serviceProvider = new ServiceCollection().AddLogging().BuildServiceProvider();
+            _db = GetContextWithSqlite(); // I can either do sqlite in-mem mode or ef core in-mem db
+            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
+            var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
+            _cache = new MemoryDistributedCache(memCacheOptions);
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            _mapper = Config.Mapper;
         }
 
         public void Dispose()

@@ -1,14 +1,9 @@
 ﻿using Fan.Data;
 using Fan.Enums;
-using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
 using Fan.Tests.Data;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,21 +20,12 @@ namespace Fan.Tests.Services
 
         public BlogPostIntegrationTest()
         {
-            // repos
             var catRepo = new SqlCategoryRepository(_db);
             var tagRepo = new SqlTagRepository(_db);
             var metaRepo = new SqlMetaRepository(_db);
             var postRepo = new SqlPostRepository(_db);
-
-            // cache, loggerFactory, mapper
-            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
-            var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
-            var cache = new MemoryDistributedCache(memCacheOptions);
             var logger = _loggerFactory.CreateLogger<BlogService>();
-            var mapper = Config.Mapper;
-
-            // svc
-            _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, mapper);
+            _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, _cache, logger, _mapper);
         }
 
         /// <summary>
