@@ -40,6 +40,9 @@ namespace Fan.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // OLW
+            app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
