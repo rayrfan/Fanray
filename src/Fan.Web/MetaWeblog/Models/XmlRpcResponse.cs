@@ -21,7 +21,7 @@ namespace Fan.Web.MetaWeblog.Models
 
         public MetaPost Post { get; set; }
 
-        public string PostID { get; set; }
+        public string PostId { get; set; }
 
         public int CategoryId { get; set; }
 
