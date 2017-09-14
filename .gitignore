@@ -287,5 +287,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-# Logs
+# My ignored folders
 Logs/
+uploads/
