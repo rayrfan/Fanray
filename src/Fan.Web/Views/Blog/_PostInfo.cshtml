@@ -1,0 +1,17 @@
+﻿@model BlogPost
+
+<div class="post-info clearfix">
+    <i class="fa fa-user" aria-hidden="true"></i><span class="post-author">@Model.UserName</span>
+    <i class="fa fa-calendar" aria-hidden="true"></i><span class="post-date">@Model.CreatedOnDisplay</span>
+    <i class="fa fa-folder" aria-hidden="true"></i><span class="post-category"><a href="@Model.Category.RelativeLink">@Model.CategoryTitle</a></span>
+    @if (Model.Tags.Count > 0)
+    {
+        <i class="fa fa-tags" aria-hidden="true"></i>
+        <span class="post-tags">
+            @foreach (var tag in Model.Tags)
+            {
+                <a href="@tag.RelativeLink">@tag.Title</a>
+            }
+        </span>
+    }
+</div>

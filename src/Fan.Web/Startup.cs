@@ -1,7 +1,9 @@
-﻿using Fan.Data;
+﻿using AutoMapper;
+using Fan.Data;
 using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
+using Fan.Web.MetaWeblog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -14,30 +16,54 @@ namespace Fan.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+            HostingEnvironment = env;
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
+        public IHostingEnvironment HostingEnvironment { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Db
             services.AddDbContext<FanDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<FanDbContext>()
-                .AddDefaultTokenProviders();
+            // Identity
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+            })
+            .AddEntityFrameworkStores<FanDbContext>()
+            .AddDefaultTokenProviders();
 
-            // Add application services.
-            services.AddTransient<IEmailSender, EmailSender>();
+            // Caching
+            services.AddDistributedMemoryCache();
 
+            // Mapper
+            services.AddAutoMapper();
+            services.AddSingleton(Config.Mapper);
+
+            // Repos / Services
+            services.AddScoped<IPostRepository, SqlPostRepository>();
+            services.AddScoped<IMetaRepository, SqlMetaRepository>();
+            services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
+            services.AddScoped<ITagRepository, SqlTagRepository>();
+            services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
+            services.AddScoped<IMetaWeblogService, MetaWeblogService>();
+
+            // Mvc
             services.AddMvc();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             // OLW
@@ -59,25 +85,27 @@ namespace Fan.Web
             app.UseAuthentication();
 
             app.UseMvc(routes => RegisterRoutes(routes, app));
+
+            SeedData.InitializeAsync(app.ApplicationServices).Wait();
         }
 
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
-            routes.MapRoute("Home", "", new { controller = "Home", action = "Index" });
+            routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
             routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
-            routes.MapRoute("BlogPost", string.Format(Const.POST_URL_TEMPLATE, "year", "month", "day", "slug"),
+            routes.MapRoute("BlogPost", string.Format(Const.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "ViewPost", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
-            routes.MapRoute("BlogCategory", string.Format(Const.CATEGORY_URL_TEMPLATE, "slug"), 
+            routes.MapRoute("BlogCategory", string.Format(Const.CATEGORY_URL_TEMPLATE, "{slug}"), 
                 new { controller = "Blog", action = "ViewCategory", slug = "" });
 
-            routes.MapRoute("BlogTag", string.Format(Const.TAG_URL_TEMPLATE, "slug"), 
+            routes.MapRoute("BlogTag", string.Format(Const.TAG_URL_TEMPLATE, "{slug}"), 
                 new { controller = "Blog", action = "ViewTag", slug = "" });
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");

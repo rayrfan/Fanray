@@ -60,7 +60,6 @@ namespace Fan.Data
         /// </summary>
         /// <param name="id"></param>
         /// <param name="type">If it's BlogPost it'll return category and tags with it.</param>
-        /// <exception cref="FanException">if post is not found.</exception>
         public async Task<Post> GetAsync(int id, EPostType type)
         {
             return (type == EPostType.BlogPost) ?

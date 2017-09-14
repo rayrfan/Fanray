@@ -1,0 +1,18 @@
+@model BlogPost
+
+@{
+    ViewData["Title"] = "Home";
+    var post = Model;
+}
+
+<article class="post">
+    <header class="post-header">
+        <h2 class="post-title">
+            @post.Title
+        </h2>
+        @await Html.PartialAsync("_PostInfo", Model)
+    </header>
+    <section class="post-body text">
+        @Html.Raw(post.Body)
+    </section>
+</article>

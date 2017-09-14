@@ -61,9 +61,7 @@ namespace Fan.Services
         {
             if (await this.GetSettingsAsync() != null)
             {
-                string msg = "BlogSettings already exists in system.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("BlogSettings already exists in system.");
             }
 
             var meta = new Meta
@@ -103,9 +101,7 @@ namespace Fan.Services
             var meta = await _metaRepo.GetAsync("BlogSettings");
             if (meta == null)
             {
-                var msg = "BlogSettings cannot be updated because it does not exist in the system.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("BlogSettings cannot be updated because it does not exist in the system.");
             }
 
             meta.Value = JsonConvert.SerializeObject(settings);
@@ -152,9 +148,7 @@ namespace Fan.Services
             // therefore when there is only one category left, it'll be the default.
             if (id == blogSettings.DefaultCategoryId)
             {
-                var msg = "Default category cannot be deleted.";
-                _logger.LogWarning(msg);
-                throw new FanException(msg);
+                throw new FanException("Default category cannot be deleted.");
             }
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
@@ -172,9 +166,7 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                var msg = "Category is not found.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("Category is not found.");
             }
 
             return cat;
@@ -191,9 +183,7 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                var msg = "Category is not found.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("Category is not found.");
             }
 
             return cat;
@@ -217,7 +207,7 @@ namespace Fan.Services
         /// <returns></returns>
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
-            category = await this.PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
+            category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
             category = await _catRepo.UpdateAsync(category);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
 
@@ -262,9 +252,7 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                var msg = "Tag is not found.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("Tag is not found.");
             }
 
             return tag;
@@ -281,9 +269,7 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                var msg = "Tag is not found.";
-                _logger.LogError(msg);
-                throw new FanException(msg);
+                throw new FanException("Tag is not found.");
             }
 
             return tag;
@@ -384,7 +370,7 @@ namespace Fan.Services
             }
 
             // get BlogPost again
-            return await this.GetPostAsync(post.Id);
+            return await GetPostAsync(post.Id);
         }
 
         /// <summary>
@@ -397,7 +383,7 @@ namespace Fan.Services
             // blogPost is just used as a container of data
             if (blogPost == null) return blogPost;
 
-            var post = await this.PrepPostAsync(blogPost, ECreateOrUpdate.Update);
+            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // update
             await _postRepo.UpdateAsync(post);
@@ -432,8 +418,8 @@ namespace Fan.Services
         /// </remarks>
         public async Task<BlogPost> GetPostAsync(int id)
         {
-            var post = await this.GetPostAsync(id, EPostType.BlogPost);
-            return await this.PrepBlogPostForDisplayAsync(post);
+            var post = await QueryPostAsync(id, EPostType.BlogPost);
+            return await GetBlogPostAsync(post);
         }
 
         /// <summary>
@@ -453,7 +439,7 @@ namespace Fan.Services
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
 
-            return await this.PrepBlogPostForDisplayAsync(post);
+            return await GetBlogPostAsync(post);
         }
 
         /// <summary>
@@ -474,11 +460,11 @@ namespace Fan.Services
             {
                 return await _cache.GetAsync<BlogPostList>(CACHE_KEY_POSTS_INDEX, new TimeSpan(0, 10, 0), async () =>
                 {
-                    return await this.QueryPostsAsync(query);
+                    return await QueryPostsAsync(query);
                 });
             }
 
-            return await this.QueryPostsAsync(query);
+            return await QueryPostsAsync(query);
         }
 
         /// <summary>
@@ -497,7 +483,7 @@ namespace Fan.Services
                 PageSize = (await GetSettingsAsync()).PageSize,
             };
 
-            return await this.QueryPostsAsync(query);
+            return await QueryPostsAsync(query);
         }
 
         /// <summary>
@@ -516,7 +502,7 @@ namespace Fan.Services
                 PageSize = (await GetSettingsAsync()).PageSize,
             };
 
-            return await this.QueryPostsAsync(query);
+            return await QueryPostsAsync(query);
         }
 
         /// <summary>
@@ -527,7 +513,7 @@ namespace Fan.Services
         {
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogDrafts);
 
-            return await this.QueryPostsAsync(query);
+            return await QueryPostsAsync(query);
         }
 
         /// <summary>
@@ -538,13 +524,13 @@ namespace Fan.Services
         {
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = numberOfPosts };
 
-            return await this.QueryPostsAsync(query);
+            return await QueryPostsAsync(query);
         }
 
         // -------------------------------------------------------------------- Private
 
         /// <summary>
-        /// Returns a <see cref="Post"/>, throws <see cref="FanException"/> if not found.
+        /// Returns a <see cref="Post"/> from data source, throws <see cref="FanException"/> if not found.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="type"></param>
@@ -552,17 +538,34 @@ namespace Fan.Services
         /// <remarks>
         /// This returns Post not a BlogPost, which would maintain tracking for <see cref="PrepPostAsync(BlogPost, string)"/>.
         /// </remarks>
-        private async Task<Post> GetPostAsync(int id, EPostType type)
+        private async Task<Post> QueryPostAsync(int id, EPostType type)
         {
             var post = await _postRepo.GetAsync(id, type);
+
             if (post == null)
             {
-                var msg = $"{type} with id {id} is not found.";
-                _logger.LogWarning(msg);
-                throw new FanException(msg);
+                throw new FanException($"{type} with id {id} is not found.");
             }
 
             return post;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="BlogPostList"/> based on query from data source.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        private async Task<BlogPostList> QueryPostsAsync(PostListQuery query)
+        {
+            var results = await _postRepo.GetListAsync(query);
+
+            var blogPostList = new BlogPostList(results.totalCount, query.PageSize);
+            foreach (var post in results.posts)
+            {
+                blogPostList.Add(await GetBlogPostAsync(post));
+            }
+
+            return blogPostList;
         }
 
         /// <summary>
@@ -573,8 +576,6 @@ namespace Fan.Services
         /// <returns></returns>
         private async Task<Taxonomy> PrepTaxonomyAsync(Taxonomy tax, ECreateOrUpdate createOrUpdate)
         {
-            _logger.LogDebug($"Prep {tax} to Taxonomy for {createOrUpdate} starts.");
-
             // get existing titles and slugs
             IEnumerable<string> existingTitles = null;
             IEnumerable<string> existingSlugs = null;
@@ -598,10 +599,7 @@ namespace Fan.Services
             ValidationResult result = await validator.ValidateAsync(tax);
             if (!result.IsValid)
             {
-                var cou = createOrUpdate.ToString().ToLower();
-                var msg = $"Failed to {cou} {type}.";
-                _logger.LogWarning(msg + " " + string.Join(" ", result.Errors));
-                throw new FanException(msg, result.Errors);
+                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
             }
 
             // Slug: user can create / update slug, we format the slug if it's available else we 
@@ -611,34 +609,29 @@ namespace Fan.Services
             // html encode title
             tax.Title = WebUtility.HtmlEncode(tax.Title);
 
-            _logger.LogDebug($"Prep {tax} to Taxonomy for {createOrUpdate} ends.");
+            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
             return tax;
         }
 
         /// <summary>
-        /// Preps a <see cref="BlogPost"/> into Post for create or update.
+        /// Prepares a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
         /// <param name="blogPost"></param>
         /// <param name="createOrUpdate"></param>
         /// <returns></returns>
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
-            _logger.LogDebug($"Prep BlogPost to Post for {createOrUpdate} starts.");
-
             // Validation
             var validator = new PostValidator();
             ValidationResult result = await validator.ValidateAsync(blogPost);
             if (!result.IsValid)
             {
-                var cou = createOrUpdate.ToString().ToLower();
-                var msg = $"Failed to {cou} blog post.";
-                _logger.LogWarning(msg + " " + string.Join(" ", result.Errors));
-                throw new FanException(msg, result.Errors);
+                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} blog post.", result.Errors);
             }
 
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
-            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await GetPostAsync(blogPost.Id, EPostType.BlogPost);
+            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
             var blogSettings = await GetSettingsAsync();
 
             // CreatedOn
@@ -656,7 +649,8 @@ namespace Fan.Services
             else post.UpdatedOn = null;
 
             // Slug before Title
-            post.Slug = await this.GetBlogPostSlugAsync(blogPost);
+            post.Slug = await GetBlogPostSlugAsync(blogPost.Slug.IsNullOrEmpty() ? blogPost.Title : blogPost.Slug,
+                post.CreatedOn, createOrUpdate, blogPost.Id);
             post.Title = blogPost.Title; // looks like OLW html encodes post title
 
             // Body & Excerpt, UserName
@@ -738,24 +732,22 @@ namespace Fan.Services
                 }
             }
 
-            _logger.LogDebug($"Prep BlogPost to Post for {createOrUpdate} ends.");
+            _logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
 
         /// <summary>
-        /// Preps a <see cref="BlogPost"/> for display to client.
+        /// Gets a <see cref="BlogPost"/> for display to client from a <see cref="Post"/>.
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
         /// <remarks>
         /// It readies the excerpt and the list of tags.
         /// </remarks>
-        private async Task<BlogPost> PrepBlogPostForDisplayAsync(Post post)
+        private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
-            _logger.LogDebug($"Prep Post to BlogPost for display starts.");
-
             var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var blogSettings = await this.GetSettingsAsync();
+            var blogSettings = await GetSettingsAsync();
 
              // Note: browser needs Utc (WP works the same way), so don't convert back to local
              // for example: "post/2017/6/2/slug" is actually posted on the night of 6/1/2017, 
@@ -780,17 +772,15 @@ namespace Fan.Services
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
 
-            _logger.LogDebug($"Prep Post to BlogPost for display ends.");
+            _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
         }
 
         /// <summary>
-        /// Returns the slug for a <see cref="BlogPost"/>. The returned slug is unique and valid.
+        /// Gets a unique and valid slug for a blog post.
         /// </summary>
-        private async Task<string> GetBlogPostSlugAsync(BlogPost blogPost)
+        private async Task<string> GetBlogPostSlugAsync(string input, DateTime createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
-            string input = string.IsNullOrEmpty(blogPost.Slug) ? blogPost.Title : blogPost.Slug;
-
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > Const.POST_TITLE_SLUG_MAXLEN)
             {
@@ -809,9 +799,9 @@ namespace Fan.Services
 
             // make sure slug is unique
             int i = 2;
-            if (blogPost.Id <= 0) // create
+            if (createOrUpdate == ECreateOrUpdate.Create) // create
             {
-                while (await _postRepo.GetAsync(slug, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day) != null)
+                while (await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
                 {
                     slug = $"{slug}-{i}";
                     i++;
@@ -819,33 +809,16 @@ namespace Fan.Services
             }
             else // update
             {
-                var p = await _postRepo.GetAsync(slug, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day);
-                while (p != null && p.Id != blogPost.Id)
+                var p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
+                while (p != null && p.Id != blogPostId)
                 {
                     slug = $"{slug}-{i}";
                     i++;
-                    p = await _postRepo.GetAsync(slug, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day);
+                    p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 }
             }
 
             return slug;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="BlogPostList"/> based on query.
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        private async Task<BlogPostList> QueryPostsAsync(PostListQuery query)
-        {
-            var results = await _postRepo.GetListAsync(query);
-            var blogPostList = new BlogPostList(results.totalCount, query.PageSize);
-            foreach (var post in results.posts)
-            {
-                blogPostList.Add(await PrepBlogPostForDisplayAsync(post));
-            }
-
-            return blogPostList;
         }
     }
 }
