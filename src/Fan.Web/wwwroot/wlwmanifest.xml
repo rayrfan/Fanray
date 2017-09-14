@@ -4,6 +4,7 @@
   <options>
     <clientType>Metaweblog</clientType>
     <supportsNewCategories>Yes</supportsNewCategories>
+    <supportsNewCategoriesInline>Yes</supportsNewCategoriesInline>
     <supportsMultipleCategories>No</supportsMultipleCategories>
     <supportsKeywords>Yes</supportsKeywords>
     <supportsGetTags>Yes</supportsGetTags>
