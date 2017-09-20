@@ -5,14 +5,14 @@
     var post = Model;
 }
 
-<article class="post">
+<article class="post single">
     <header class="post-header">
         <h2 class="post-title">
             @post.Title
         </h2>
         @await Html.PartialAsync("_PostInfo", Model)
     </header>
-    <section class="post-body text">
+    <section class="post-body">
         @Html.Raw(post.Body)
     </section>
 </article>

@@ -21,7 +21,7 @@
                 </h1>
                 @await Html.PartialAsync("_PostInfo", post)
             </header>
-            <div class="post-body text">
+            <div class="post-body">
                 @Html.Raw(post.Excerpt) <span style="padding-left:5px"><a href="@post.RelativeLink">Read More</a></span>
             </div>
         </article>
