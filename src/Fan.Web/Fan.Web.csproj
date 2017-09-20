@@ -5,6 +5,19 @@
     <UserSecretsId>aspnet-Fan.Web-14918957-EFB6-4589-8F34-F118990673D3</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="client\favicon.ico">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.1.1" />
@@ -26,11 +39,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\wlwmanifest.xml" />
+    <ProjectReference Include="..\Fan\Fan.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fan\Fan.csproj" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>
