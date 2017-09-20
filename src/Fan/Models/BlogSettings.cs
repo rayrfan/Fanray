@@ -9,10 +9,6 @@ namespace Fan.Models
         /// </summary>
         public string Title { get; set; } = "Fanray";
         /// <summary>
-        /// Sub title of the blog. Default "A fanray blog".
-        /// </summary>
-        public string Tagline { get; set; } = "A fanray blog";
-        /// <summary>
         /// The Id of <see cref="TimeZoneInfo"/> class.
         /// </summary>
         /// <remarks>

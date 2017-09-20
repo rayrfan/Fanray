@@ -86,13 +86,19 @@ namespace Fan.Web
 
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
-            SeedData.InitializeAsync(app.ApplicationServices).Wait();
+            //SeedData.InitializeAsync(app.ApplicationServices).Wait();
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
+                // you can create db here or you can click apply migrations when site launches
+                db.Database.EnsureCreated();
+            }
         }
 
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
+            routes.MapRoute("Setup", "setup", new { controller = "Blog", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });

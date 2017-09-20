@@ -27,6 +27,47 @@ p {
 img {
   max-width: 100%; }
 
+.form-control {
+  height: 2.5rem;
+  background: none;
+  border-radius: 0;
+  box-shadow: none; }
+  .form-control:focus {
+    box-shadow: none;
+    border-color: #0064c4; }
+
+::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: .75rem;
+  text-transform: uppercase; }
+
+label {
+  font-weight: 800;
+  font-size: 1rem; }
+
+.required-field {
+  color: #e81c4f;
+  font-size: 1rem;
+  text-transform: uppercase;
+  margin-right: .25rem;
+  margin-left: .25rem; }
+  .required-field[style="visibility:hidden;"] {
+    display: none; }
+
+.alert {
+  padding: 2rem;
+  border-radius: 0;
+  border: none;
+  margin-bottom: 2rem; }
+  .alert.support-theme {
+    font-family: segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 1.25rem; }
+    .alert.support-theme p a {
+      border-bottom: 2px solid #0064c4; }
+      .alert.support-theme p a:hover {
+        color: #000;
+        border-color: #000; }
+
 .container {
   width: 80rem;
   max-width: 100%;

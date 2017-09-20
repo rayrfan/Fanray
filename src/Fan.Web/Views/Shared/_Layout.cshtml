@@ -1,13 +1,14 @@
 ﻿@{
     var tags = await blogService.GetTagsAsync();
     var cats = await blogService.GetCategoriesAsync();
+    var settings = await blogService.GetSettingsAsync();
 }
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Fanray</title>
+    <title>@settings.Title - @ViewData["Title"]</title>
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 
     <environment include="Development">
@@ -31,7 +32,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">Fanray</a>
+                <a class="navbar-brand" href="/">@settings.Title</a>
             </div>
 
             <div class="collapse navbar-collapse">
@@ -42,8 +43,10 @@
                     <li>
                         <a href="/about">About</a>
                     </li>
+                    @*<li>
+                        @await Html.PartialAsync("_LoginPartial")
+                    </li>*@
                 </ul>
-                @*@await Html.PartialAsync("_LoginPartial")*@
             </div>
         </div>
     </nav>
