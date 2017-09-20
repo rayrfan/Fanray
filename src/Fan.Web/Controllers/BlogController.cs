@@ -41,13 +41,13 @@ namespace Fan.Web.Controllers
         /// <param name="day"></param>
         /// <param name="slug"></param>
         /// <returns></returns>
-        public async Task<IActionResult> ViewPost(int year, int month, int day, string slug)
+        public async Task<IActionResult> Post(int year, int month, int day, string slug)
         {
             var post = await _blogSvc.GetPostAsync(slug, year, month, day);
             return View(post);
         }
 
-        public async Task<IActionResult> ViewCategory(string slug)
+        public async Task<IActionResult> Category(string slug)
         {
             var cat = await _blogSvc.GetCategoryAsync(slug);
             var posts = await _blogSvc.GetPostsForCategoryAsync(slug, 1);
@@ -55,7 +55,7 @@ namespace Fan.Web.Controllers
             return View(new Tuple<Category, BlogPostList>(cat, posts));
         }
 
-        public async Task<IActionResult> ViewTag(string slug)
+        public async Task<IActionResult> Tag(string slug)
         {
             var tag = await _blogSvc.GetTagAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
