@@ -1,51 +1,93 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var tags = await blogService.GetTagsAsync();
+    var cats = await blogService.GetCategoriesAsync();
+}
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Fan.Web</title>
+    <title>@ViewData["Title"] - Fanray</title>
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
         <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
+    <nav class="navbar navbar-default navbar-custom">
+        <div class="container-fluid">
+            <div class="navbar-header page-scroll">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
+                    Menu <i class="fa fa-bars"></i>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Fan.Web</a>
+                <a class="navbar-brand" href="/">Fanray</a>
             </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    <li>
+                        <a href="/about">About</a>
+                    </li>
                 </ul>
-                @await Html.PartialAsync("_LoginPartial")
+                @*@await Html.PartialAsync("_LoginPartial")*@
             </div>
         </div>
     </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2017 - Fan.Web</p>
-        </footer>
+    <div class="container">
+        <div class="blog-wrapper">
+            <div class="blog-content">
+                @RenderBody()
+            </div>
+            <aside class="blog-sidebar">
+                <div class="widgets">
+                    <div class="widget">
+                        <h4 class="widget-header">Categories</h4>
+                        <div class="widget-content">
+                            <ul class="widget-categories">
+                                @foreach (var t in cats)
+                                {
+                                    <li>
+                                        <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Tags</h4>
+                        <div class="widget-content">
+                            <ul class="widget-tags">
+                                @foreach (var t in tags)
+                                {
+                                    <li>
+                                        <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
+                                        <span class="tag-multiplier">× @t.Count</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
     </div>
+    <footer class="site-footer">
+        <p class="text-muted">Copyright &copy; Fanray @DateTime.Now.Year</p>
+    </footer>      
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -67,7 +109,7 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-
+    <script src="~/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
