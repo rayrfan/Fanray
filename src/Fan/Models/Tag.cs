@@ -17,7 +17,7 @@ namespace Fan.Models
         public string Color { get; set; }
 
         [NotMapped]
-        public string RelativeLink => string.Format(Const.TAG_URL_TEMPLATE, Slug);
+        public string RelativeLink => string.Format("/" + Const.TAG_URL_TEMPLATE, Slug);
 
         public virtual ICollection<PostTag> PostTags { get; set; }
     }
