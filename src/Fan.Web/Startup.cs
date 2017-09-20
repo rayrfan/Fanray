@@ -94,19 +94,20 @@ namespace Fan.Web
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
             routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
+            routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
             routes.MapRoute("BlogPost", string.Format(Const.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
-                new { controller = "Blog", action = "ViewPost", year = 0, month = 0, day = 0, slug = "" },
+                new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
             routes.MapRoute("BlogCategory", string.Format(Const.CATEGORY_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "ViewCategory", slug = "" });
+                new { controller = "Blog", action = "Category", slug = "" });
 
             routes.MapRoute("BlogTag", string.Format(Const.TAG_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "ViewTag", slug = "" });
+                new { controller = "Blog", action = "Tag", slug = "" });
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
