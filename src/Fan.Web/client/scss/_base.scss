@@ -1,0 +1,37 @@
+﻿html {
+    font-size: 1em
+}
+
+body,
+html {
+    height: 100%;
+}
+
+body {
+    font-family: $font-family-base;
+    font-size: $font-size-base;
+    font-weight: $font-weight-normal;
+    cursor: default;
+    overflow-y: scroll;
+
+    @media screen and (max-width: 64rem) {
+        padding-top: 2rem
+    }
+}
+
+a {
+    color: $color-theme;
+    text-decoration: none !important;
+
+    &:hover {
+        color: darken($color-theme, 8%);
+    }
+}
+
+p {
+    margin-bottom: 1rem
+}
+
+img {
+    max-width: 100%
+}
