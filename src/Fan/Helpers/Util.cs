@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using AutoMapper;
+using Fan.Models;
+using HtmlAgilityPack;
 using Humanizer;
 using System;
 using System.Collections.Generic;
@@ -230,6 +232,28 @@ namespace Fan.Helpers
             }
 
             return slug;
+        }
+
+        /// <summary>
+        /// Returns automapper mapping.
+        /// </summary>
+        /// <remarks>
+        /// https://github.com/AutoMapper/AutoMapper/issues/1441
+        /// </remarks>
+        public static IMapper Mapper
+        {
+            get
+            {
+                return new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Post, BlogPost>();
+                    cfg.CreateMap<BlogPost, Post>();
+                    cfg.CreateMap<Post, Page>();
+                    cfg.CreateMap<Page, Post>();
+                    cfg.CreateMap<Post, Media>();
+                    cfg.CreateMap<Media, Post>();
+                }).CreateMapper();
+            }
         }
     }
 }

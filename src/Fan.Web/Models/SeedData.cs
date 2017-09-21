@@ -42,7 +42,7 @@ namespace Fan.Web
             var cache = new MemoryDistributedCache(memCacheOptions);
             var loggerFactory = provider.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<BlogService>();
-            var blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, Config.Mapper);
+            var blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, Util.Mapper);
             var data = provider.GetService<IOptions<SeedData>>().Value;
 
             // data

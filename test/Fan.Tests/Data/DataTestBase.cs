@@ -55,7 +55,7 @@ namespace Fan.Tests.Data
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             _cache = new MemoryDistributedCache(memCacheOptions);
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            _mapper = Config.Mapper;
+            _mapper = Util.Mapper;
         }
 
         public void Dispose()

@@ -48,7 +48,7 @@ namespace Fan.Web
 
             // Mapper
             services.AddAutoMapper();
-            services.AddSingleton(Config.Mapper);
+            services.AddSingleton(Util.Mapper);
 
             // Repos / Services
             services.AddScoped<IPostRepository, SqlPostRepository>();

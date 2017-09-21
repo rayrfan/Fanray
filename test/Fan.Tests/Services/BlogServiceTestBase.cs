@@ -47,7 +47,7 @@ namespace Fan.Tests.Services
             _logger = loggerFactory.CreateLogger<BlogService>();
 
             // mapper
-            _mapper = Config.Mapper;
+            _mapper = Util.Mapper;
 
             // svc
             _blogSvc = new BlogService(_catRepoMock.Object, _metaRepoMock.Object, _postRepoMock.Object, _tagRepoMock.Object,
