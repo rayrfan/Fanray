@@ -31,5 +31,10 @@
 
         public const string MEDIA_UPLOADS_FOLDER = "uploads";
 
+        // -------------------------------------------------------------------- Initial data
+
+        public const string DEFAULT_CATEGORY = "Uncategorized";
+        public const string WELCOME_POST_TITLE = "Welcome to Fanray";
+        public const string WELCOME_POST_BODY = @"<p>To start posting</p><ul><li>Install <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a></li><li>Open OLW &gt; Add blog account... &gt; Other services, type in</li><ul><li>Web address of your blog</li><li>User name</li><li>Password</li></ul></ul>";
     }
 }

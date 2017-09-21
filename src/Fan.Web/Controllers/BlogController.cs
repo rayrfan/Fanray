@@ -1,4 +1,5 @@
 ﻿using Fan.Enums;
+using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
 using Fan.Web.Models.BlogViewModels;
@@ -85,10 +86,10 @@ namespace Fan.Web.Controllers
                     // create welcome post and default category
                     await _blogSvc.CreatePostAsync(new BlogPost
                     {
-                        CategoryTitle = "Uncategorized",
+                        CategoryTitle = Const.DEFAULT_CATEGORY,
                         TagTitles = null,
-                        Title = "Welcome to Fanray",
-                        Body = @"<p>To start posting</p><ul><li>Install <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a></li><li>Open OLW &gt; Add blog account... &gt; Other services, type in</li><ul><li>Web address of your blog</li><li>User name</li><li>Password</li></ul></ul>",
+                        Title = Const.WELCOME_POST_TITLE,
+                        Body = Const.WELCOME_POST_BODY,
                         UserName = model.UserName,
                         Status = EPostStatus.Published,
                         CommentStatus = ECommentStatus.AllowComments,
