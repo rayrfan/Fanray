@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 
 namespace Fan.Web
 {
@@ -28,8 +29,20 @@ namespace Fan.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Db
-            services.AddDbContext<FanDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<FanDbContext>(builder =>
+            {
+                bool.TryParse(Configuration["Database:UseSqLite"], out bool useSqLite);
+                if (useSqLite)
+                {
+                    // use sqlite in development
+                    builder.UseSqlite("Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite"));
+                }
+                else
+                {
+                    // use sqlserver in production
+                    builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                }
+            });
 
             // Identity
             services.AddIdentity<User, IdentityRole>(options =>
