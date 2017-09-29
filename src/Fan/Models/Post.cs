@@ -60,6 +60,9 @@ namespace Fan.Models
         /// The post excerpt.
         /// </summary>
         /// <remarks>
+        /// This is intended to be used in search results, html meta description or when blog is set 
+        /// to show excerpt.
+        /// 
         /// This is manually inputted by user, if user didn't put an excerpt this field will be null.  
         /// When this field is not available and blog setting ShowExcerpt is set to true, the excerpt 
         /// will be calculated on the fly.

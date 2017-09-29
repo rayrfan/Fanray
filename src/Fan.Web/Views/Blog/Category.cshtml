@@ -1,15 +1,14 @@
 @model Tuple<Category, BlogPostList>
 
 @{
-    ViewData["Title"] = Model.Item1.Title;
     var category = Model.Item1;
     var postList = Model.Item2;
-    var settings = await blogService.GetSettingsAsync();
+    ViewData["Title"] = string.Format(Const.TAX_META_TITLE, category.Title);
 }
 
 <div class="posts">
     <h1 class="category-title">
-        Categeory: @Model.Item1.Title
+        Categeory: @category.Title
     </h1>
 
     @foreach (var post in postList)

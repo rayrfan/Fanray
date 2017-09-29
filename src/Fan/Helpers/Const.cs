@@ -2,6 +2,8 @@
 {
     public class Const
     {
+        public const string TAX_META_TITLE = "Latest '{0}' Posts";
+
         // -------------------------------------------------------------------- Url templates
 
         public const string CATEGORY_URL_TEMPLATE = "category/{0}";

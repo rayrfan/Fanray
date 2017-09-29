@@ -1,7 +1,8 @@
 @model BlogPost
 
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = Model.Excerpt;
     var post = Model;
 }
 

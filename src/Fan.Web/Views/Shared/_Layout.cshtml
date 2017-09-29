@@ -1,14 +1,26 @@
 ﻿@{
-    var tags = await blogService.GetTagsAsync();
     var cats = await blogService.GetCategoriesAsync();
+    var tags = await blogService.GetTagsAsync();
     var settings = await blogService.GetSettingsAsync();
+    var title = ViewData["Title"] == null ? settings.Title : $"{ViewData["Title"]} - {settings.Title}";
+    var description = ViewData["Description"] ?? settings.Tagline;
+    var domain = Context.Request.Host;
+    var url = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
 }
 <!DOCTYPE html>
 <html>
 <head>
+    <title>@title</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@settings.Title - @ViewData["Title"]</title>
+    <meta name="description" content="@description" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:domain" content="@domain" />
+    <meta name="twitter:title" property="og:title" itemprop="title name" content="@title" />
+    <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
+    <meta property="og:url" content="@url" />
+    <link rel="canonical" href="@url" />
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 
     <environment include="Development">
@@ -42,6 +54,9 @@
                     </li>
                     <li>
                         <a href="/about">About</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/FanrayMedia/Fanray">GitHub</a>
                     </li>
                     @*<li>
                         @await Html.PartialAsync("_LoginPartial")
@@ -89,7 +104,7 @@
         </div>
     </div>
     <footer class="site-footer">
-        <p class="text-muted">Copyright &copy; Fanray @DateTime.Now.Year</p>
+        <p class="text-muted">Copyright &copy; @settings.Title @DateTime.Now.Year - Powered by <a href="https://github.com/FanrayMedia/Fanray">Fanray</a></p>
     </footer>      
 
     <environment include="Development">
