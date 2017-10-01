@@ -19,8 +19,8 @@ namespace Fan.Web
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-                .AddCommandLine(args)
                 .AddEnvironmentVariables()
+                .AddCommandLine(args)
                 .Build();
 
             // create logger with configuration and sinks

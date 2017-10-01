@@ -166,7 +166,7 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                throw new FanException("Category is not found.");
+                throw new FanException($"Category with id '{id}' is not found.");
             }
 
             return cat;
@@ -183,7 +183,7 @@ namespace Fan.Services
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                throw new FanException("Category is not found.");
+                throw new FanException($"Category with slug '{slug}' is not found.");
             }
 
             return cat;
@@ -252,7 +252,7 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                throw new FanException("Tag is not found.");
+                throw new FanException($"Tag with id '{id}' is not found.");
             }
 
             return tag;
@@ -269,7 +269,7 @@ namespace Fan.Services
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException("Tag is not found.");
+                throw new FanException($"Tag with slug '{slug}' is not found.");
             }
 
             return tag;

@@ -6,16 +6,12 @@ using Fan.Services;
 using Fan.Web.MetaWeblog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Fan.Web
 {
@@ -38,12 +34,10 @@ namespace Fan.Web
                 bool.TryParse(Configuration["Database:UseSqLite"], out bool useSqLite);
                 if (useSqLite)
                 {
-                    // use sqlite in development
                     builder.UseSqlite("Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite"));
                 }
                 else
                 {
-                    // use sqlserver in production
                     builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
                 }
             });
@@ -83,29 +77,6 @@ namespace Fan.Web
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // Preferred domain rewrite
-            app.Use((context, next) =>
-            {
-                var request = context.Request;
-                var host = request.Host;
-
-                // do nothing if it's localhost or already starts with www
-                if (host.Host.StartsWith("localhost", StringComparison.OrdinalIgnoreCase) ||
-                    host.Host.StartsWith("www", StringComparison.OrdinalIgnoreCase))
-                {
-                    return next();
-                }
-
-                HostString newHost = host.Port.HasValue ?
-                        new HostString($"www.{host.Host}", host.Port.Value) :
-                        new HostString($"www.{host.Host}");
-
-                var url = $"{request.Scheme}://{newHost}{request.Path}{request.QueryString}";
-
-                context.Response.Redirect(url);
-                return Task.FromResult(0);
-            });
-
             // OLW
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
 
