@@ -1,0 +1,30 @@
+﻿@model Fan.Models.BlogPostList
+@{
+    var settings = await blogService.GetSettingsAsync();
+}
+
+<div class="posts">
+    @foreach (var post in Model)
+    {
+        <article class="post">
+            <header class="post-header">
+                <h1 class="post-title">
+                    
+                    <a href="@post.RelativeLink">@post.Title</a><br />
+   
+                </h1>
+                @await Html.PartialAsync("_PostInfo", post)
+            </header>
+            <section class="post-body">
+                @if (settings.ShowExcerpt)
+                {
+                    @Html.Raw(post.Excerpt) <span style="padding-left:5px"><a href="@post.RelativeLink">Read More</a></span>
+                }
+                else
+                {
+                    @Html.Raw(post.Body)
+                }
+            </section>
+        </article>
+    }
+</div>

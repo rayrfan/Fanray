@@ -1,5 +1,6 @@
 ﻿@using Fan.Web.Views.Manage
-@inject SignInManager<ApplicationUser> SignInManager
+@using Fan.Models
+@inject SignInManager<User> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

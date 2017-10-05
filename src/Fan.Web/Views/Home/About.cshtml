@@ -1,7 +1,14 @@
 ﻿@{
     ViewData["Title"] = "About";
 }
-<h2>@ViewData["Title"]</h2>
-<h3>@ViewData["Message"]</h3>
 
-<p>Use this area to provide additional information.</p>
+<article class="page">
+    <header class="page-header">
+        <h1 class="page-title">
+            @ViewData["Title"]
+        </h1>
+    </header>
+    <section class="page-body">
+        <p><a href="https://github.com/FanrayMedia/Fanray">Fanray</a> is a blog application built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a> and supports <a href="http://openlivewriter.org/">Open Live Writer</a>.</p>
+    </section>
+</article>

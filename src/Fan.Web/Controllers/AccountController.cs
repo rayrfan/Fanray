@@ -12,7 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Fan.Web.Models;
 using Fan.Web.Models.AccountViewModels;
-using Fan.Web.Services;
+using Fan.Services;
+using Fan.Models;
 
 namespace Fan.Web.Controllers
 {
@@ -20,14 +21,14 @@ namespace Fan.Web.Controllers
     [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger)
         {
@@ -204,42 +205,42 @@ namespace Fan.Web.Controllers
             return View();
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
-        }
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public IActionResult Register(string returnUrl = null)
+        //{
+        //    ViewData["ReturnUrl"] = returnUrl;
+        //    return View();
+        //}
 
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
-            {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created a new account with password.");
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        //{
+        //    ViewData["ReturnUrl"] = returnUrl;
+        //    if (ModelState.IsValid)
+        //    {
+        //        var user = new User { UserName = model.Email, Email = model.Email };
+        //        var result = await _userManager.CreateAsync(user, model.Password);
+        //        if (result.Succeeded)
+        //        {
+        //            _logger.LogInformation("User created a new account with password.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                    await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
+        //            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //            var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+        //            await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
-                }
-                AddErrors(result);
-            }
+        //            await _signInManager.SignInAsync(user, isPersistent: false);
+        //            _logger.LogInformation("User created a new account with password.");
+        //            return RedirectToLocal(returnUrl);
+        //        }
+        //        AddErrors(result);
+        //    }
 
-            // If we got this far, something failed, redisplay form
-            return View(model);
-        }
+        //    // If we got this far, something failed, redisplay form
+        //    return View(model);
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -310,7 +311,7 @@ namespace Fan.Web.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new User { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

@@ -1,0 +1,121 @@
+﻿.posts {
+    margin-top: 2rem;
+
+    .category-title, .tag-title {
+        padding: 2rem 3rem 0 3rem;
+    }
+}
+
+.post {
+    background: #fff;
+    padding: 2rem 3rem 1rem 3rem;
+    width: 100%;
+
+    &.single {
+        margin-top: 2rem;
+    }
+
+    .post-header {
+        margin-bottom: 2rem;
+
+        .post-title {
+            line-height: 1;
+            font-size: 2.25rem;
+            margin: 0 0 0.5rem;
+            font-weight: $font-weight-bold;
+
+            a {
+                text-decoration: none;
+                color: $color-primary;
+
+                &:hover {
+                    color: #111
+                }
+            }
+        }
+    }
+
+    .post-info {
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        padding: 10px 0 8px 0;
+
+        span {
+            margin-right: 0.5rem
+        }
+
+        a {
+            color: #666
+        }
+
+        .post-author,
+        .post-date,
+        .post-category,
+        .post-tags {
+            padding: 0 5px;
+        }
+    }
+
+    .post-body {
+        line-height: 1.6;
+        padding-bottom: 1rem;
+        border-bottom: 1px dashed #ccc;
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 0 0 1rem;
+            font-family: $font-family-heading;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-top: 32px;
+        }
+
+        h2 {
+            font-size: 1.4375rem;
+            margin-top: 32px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 30px;
+            margin-bottom: 18px;
+        }
+
+        h4 {
+            font-size: 1.188rem;
+            margin-top: 36px;
+            margin-bottom: 6px;
+        }
+
+        h5 {
+            font-size: 1rem;
+            letter-spacing: 1px;
+            margin-top: 36px;
+            margin-bottom: 6px;
+        }
+
+        h6 {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-top: 36px;
+            margin-bottom: 6px;
+        }
+    }
+
+    @media screen and (max-width: 64rem) {
+        margin-bottom: 1rem;
+        padding: 0.8rem
+    }
+
+    @media screen and (max-width: 40rem) {
+        .post-footer {
+            display: none
+        }
+    }
+}
