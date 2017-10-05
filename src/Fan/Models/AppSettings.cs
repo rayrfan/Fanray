@@ -40,6 +40,8 @@ namespace Fan.Models
         /// 
         /// Note if user sets this value to false but is already using https, I don't downgrade 
         /// you to http as this is good for SEO, Google strongly recommend all website to use https.
+        /// Also if you are running locally with console, set this value to false as console may 
+        /// not support https.
         /// </remarks>
         public bool UseHttps { get; set; }
     }

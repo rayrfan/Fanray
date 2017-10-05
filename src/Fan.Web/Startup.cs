@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Fan.Data;
+using Fan.Enums;
 using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
 using Fan.Web.MetaWeblog;
+using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 
 namespace Fan.Web
@@ -20,11 +23,11 @@ namespace Fan.Web
     {
         private ILogger<Startup> _logger;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public Startup(IConfiguration configuration, IHostingEnvironment env, ILogger<Startup> logger)
         {
             HostingEnvironment = env;
             Configuration = configuration;
-            _logger = loggerFactory.CreateLogger<Startup>();
+            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
@@ -35,8 +38,8 @@ namespace Fan.Web
             // Db
             services.AddDbContext<FanDbContext>(builder =>
             {
-                bool.TryParse(Configuration["Database:UseSqLite"], out bool useSqLite);
-                if (useSqLite)
+                Enum.TryParse(Configuration["AppSettings:Database"], ignoreCase: true, result: out ESupportedDatabase db);
+                if (db == ESupportedDatabase.Sqlite)
                 {
                     builder.UseSqlite("Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite"));
                     _logger.LogInformation("Using SQLite database.");
@@ -76,6 +79,7 @@ namespace Fan.Web
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
+            services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Mvc
@@ -84,6 +88,9 @@ namespace Fan.Web
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // https and www rewrite
+            app.UseHttpWwwRewrite();
+
             // OLW
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
 
