@@ -11,16 +11,20 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.IO;
 
 namespace Fan.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        private ILogger<Startup> _logger;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             HostingEnvironment = env;
             Configuration = configuration;
+            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
         public IConfiguration Configuration { get; }
@@ -35,10 +39,12 @@ namespace Fan.Web
                 if (useSqLite)
                 {
                     builder.UseSqlite("Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite"));
+                    _logger.LogInformation("Using SQLite database.");
                 }
                 else
                 {
                     builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                    _logger.LogInformation("Using SQL Server database.");
                 }
             });
 
@@ -70,6 +76,7 @@ namespace Fan.Web
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Mvc
             services.AddMvc();
