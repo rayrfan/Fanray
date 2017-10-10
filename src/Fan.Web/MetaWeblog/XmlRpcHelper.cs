@@ -157,7 +157,7 @@ namespace Fan.Web.MetaWeblog
 
             // author
             var authorId = memberList.SingleOrDefault(m => m.Element("name").Value == "wp_author_id");
-            post.Author = authorId?.Element("value").Value;
+            post.AuthorId = authorId?.Element("value").Value;
 
             // categories
             var categories = memberList.SingleOrDefault(m => m.Element("name").Value == "categories");

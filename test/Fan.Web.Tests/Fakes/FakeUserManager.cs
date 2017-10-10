@@ -1,4 +1,5 @@
 ﻿using Fan.Models;
+using Fan.Tests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -31,6 +32,11 @@ namespace Fan.Web.Tests.Fakes
         public override Task<IdentityResult> CreateAsync(User user, string password)
         {
             return Task.FromResult(IdentityResult.Success);
+        }
+
+        public override Task<User> FindByNameAsync(string userName)
+        {
+            return Task.FromResult(Actor.User);
         }
     }
 }

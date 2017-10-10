@@ -250,6 +250,7 @@ namespace Fan.Tests.Data
         public async void CreatePost_Will_Create_Its_Category_And_Tags_Automatically()
         {
             // Arrange: given brand new 1 post, 1 cat and 2 tags
+            SeedUser();
             var cat = new Category { Slug = "tech", Title = "Technology" };
             var tag1 = new Tag { Slug = "aspnet", Title = "ASP.NET" };
             var tag2 = new Tag { Slug = "cs", Title = "C#" };
@@ -257,7 +258,7 @@ namespace Fan.Tests.Data
             {
                 Category = cat,
                 Body = "A post body.",
-                UserName = "ray",
+                UserId = Actor.AUTHOR_ID,
                 UpdatedOn = new DateTime(2016, 12, 1),
                 RootId = null,
                 Title = "Hello World",
@@ -293,7 +294,7 @@ namespace Fan.Tests.Data
             var post = new Post
             {
                 Body = "A post body.",
-                UserName = "ray",
+                UserId = Actor.AUTHOR_ID,
                 UpdatedOn = new DateTime(2016, 12, 1),
                 RootId = null,
                 Title = "Hello World",

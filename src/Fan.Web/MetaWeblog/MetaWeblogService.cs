@@ -15,16 +15,20 @@ namespace Fan.Web.MetaWeblog
 {
     public class MetaWeblogService : IMetaWeblogService
     {
+        private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
         private readonly ILogger<MetaWeblogService> _logger;
         private readonly IHostingEnvironment _hostingEnvironment;
 
-        public MetaWeblogService(SignInManager<User> signInManager,
+        public MetaWeblogService(
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
             IBlogService blogSvc,
             ILogger<MetaWeblogService> logger,
             IHostingEnvironment env)
         {
+            _userManager = userManager;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
             _logger = logger;
@@ -41,7 +45,7 @@ namespace Fan.Web.MetaWeblog
             {
                 var blogPost = new BlogPost
                 {
-                    UserName = String.IsNullOrEmpty(post.Author) ? userName : post.Author,
+                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -73,7 +77,7 @@ namespace Fan.Web.MetaWeblog
                 var blogPost = new BlogPost
                 {
                     Id = Convert.ToInt32(postId),
-                    UserName = String.IsNullOrEmpty(post.Author) ? userName : post.Author,
+                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -246,6 +250,9 @@ namespace Fan.Web.MetaWeblog
 
             try
             {
+                // userId
+                int userId = (await _userManager.FindByNameAsync(userName)).Id;
+
                 // filename
                 string mediaObjectName = mediaObject.Name.Replace(" ", "_").Replace(":", "-");
                 var fileName = mediaObjectName.Substring(mediaObjectName.LastIndexOf('/') + 1);
@@ -281,7 +288,7 @@ namespace Fan.Web.MetaWeblog
                 // create media to db
                 await _blogSvc.UpsertMediaAsync(new Media
                 {
-                    UserName = userName,
+                    UserId = userId,
                     Title = fileName,
                     Slug = fileName,
                     MimeType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName)), // mediaObject.type
@@ -303,6 +310,12 @@ namespace Fan.Web.MetaWeblog
 
         // -------------------------------------------------------------------- Private helpers
 
+        /// <summary>
+        /// Ensures user is valid by sign in, throws <see cref="MetaWeblogException"/> if sign in fails.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         private async Task EnsureValidUserAsync(string userName, string password)
         {
             if (!await _signInManager.CanSignInAsync(new User { UserName = userName, PasswordHash = password }))
@@ -315,7 +328,7 @@ namespace Fan.Web.MetaWeblog
         {
             return new MetaPost
             {
-                Author = blogPost.UserName,
+                AuthorId = blogPost.UserId.ToString(),
                 Categories = new List<string> { blogPost.CategoryTitle },
                 CommentPolicy = (blogPost.CommentStatus == ECommentStatus.AllowComments ||
                                  blogPost.CommentStatus == ECommentStatus.AllowCommentsWithApproval) ? "1" : "0",

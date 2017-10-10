@@ -126,11 +126,14 @@ namespace Fan.Models
         public DateTime? UpdatedOn { get; set; }
 
         /// <summary>
-        /// The username of the author.
+        /// The author.
         /// </summary>
-        [Required]
-        [StringLength(maximumLength: 256)]
-        public string UserName { get; set; }
+        public User User { get; set; }
+
+        /// <summary>
+        /// The author id.
+        /// </summary>
+        public int UserId { get; set; }
 
         public int ViewCount { get; set; }
 

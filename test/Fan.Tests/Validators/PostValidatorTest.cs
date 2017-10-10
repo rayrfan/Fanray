@@ -25,7 +25,7 @@ namespace Fan.Tests.Validators
         public async void Post_Title_Cannot_Be_Null_Or_Empty(string title, int numberOfErrors, string[] expectedMessages)
         {
             // Arrange: a blog post with an invalid title
-            var blogPost = new BlogPost { Title = title, UserName = Actor.AUTHOR };
+            var blogPost = new BlogPost { Title = title, UserId = Actor.AUTHOR_ID };
 
             // Act: validate
             var result = await _validator.ValidateAsync(blogPost);
@@ -45,7 +45,7 @@ namespace Fan.Tests.Validators
         {
             // Arrange: a blog post with a title of 257 chars
             var title = string.Join("", Enumerable.Repeat<char>('a', 257));
-            var blogPost = new BlogPost { Title = title, UserName = Actor.AUTHOR };
+            var blogPost = new BlogPost { Title = title, UserId = Actor.AUTHOR_ID };
 
             // Act: validate
             var result = await _validator.ValidateAsync(blogPost);
@@ -53,23 +53,6 @@ namespace Fan.Tests.Validators
             // Assert: 1 error
             Assert.Equal(1, result.Errors.Count);
             Assert.Equal("'Title' must be between 1 and 256 characters. You entered 257 characters.", result.Errors[0].ErrorMessage);
-        }
-
-        /// <summary>
-        /// Test PostValidator for when a post didn't have author username.
-        /// </summary>
-        [Fact]
-        public async void Post_UserName_Is_Required()
-        {
-            // Arrange: a blog post with no author
-            var blogPost = new BlogPost { Title = "A post with no author", UserName = null };
-
-            // Act: validate
-            var result = await _validator.ValidateAsync(blogPost);
-
-            // Assert: 1 error, notice UserName is broken into "User Name"
-            Assert.Equal(1, result.Errors.Count);
-            Assert.Equal("'User Name' should not be empty.", result.Errors[0].ErrorMessage);
         }
     }
 }

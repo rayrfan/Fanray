@@ -15,7 +15,6 @@ namespace Fan.Validators
         public PostValidator()
         {
             RuleFor(x => x.Title).NotEmpty().Length(1, Const.POST_TITLE_SLUG_MAXLEN);
-            RuleFor(x => x.UserName).NotEmpty();
         }
     }
 }

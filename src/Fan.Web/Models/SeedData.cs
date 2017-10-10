@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Fan.Web
 {
+    /// <summary>
+    /// Seed initial data. Not currently used instead a setup page is used.
+    /// </summary>
     public class SeedData
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
@@ -46,7 +49,8 @@ namespace Fan.Web
             var data = provider.GetService<IOptions<SeedData>>().Value;
 
             // data
-            string userName = "admin";
+            int userId = 1;
+            string displayName = "John Smith";
             string password = "admin";
             string email = "admin@notset.com";
             string categoryTitle = "Uncategorized";
@@ -61,8 +65,8 @@ namespace Fan.Web
             logger.LogInformation("BlogSettings created.");
 
             // User
-            await userManager.CreateAsync(user: new User { UserName = userName, Email = email }, password: password); // AccountController Login and LoginViewModel
-            logger.LogInformation($"User '{userName}' created.");
+            await userManager.CreateAsync(user: new User { DisplayName = displayName, UserName = email, Email = email }, password: password); // AccountController Login and LoginViewModel
+            logger.LogInformation($"User '{userId}' created.");
 
             // Post / Category 
             if (seedWelcomePost)
@@ -73,7 +77,7 @@ namespace Fan.Web
                     TagTitles = null,
                     Title = postTitle,
                     Body = postBody,
-                    UserName = userName,
+                    UserId = userId,
                     Status = EPostStatus.Published,
                     CommentStatus = ECommentStatus.AllowComments,
                     CreatedOn = DateTime.Now,

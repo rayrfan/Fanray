@@ -315,7 +315,7 @@ namespace Fan.Services
 
             if (theMedia != null)
             {
-                theMedia.UserName = media.UserName;
+                theMedia.UserId = media.UserId;
                 theMedia.Slug = media.Slug;
                 theMedia.Title = media.Title;
                 theMedia.MimeType = media.MimeType;
@@ -653,10 +653,10 @@ namespace Fan.Services
                 post.CreatedOn, createOrUpdate, blogPost.Id);
             post.Title = blogPost.Title; // looks like OLW html encodes post title
 
-            // Body & Excerpt, UserName
+            // Body & Excerpt, UserId
             post.Body = blogPost.Body.IsNullOrWhiteSpace() ? null : blogPost.Body;
             post.Excerpt = blogPost.Excerpt.IsNullOrWhiteSpace() ? null : blogPost.Excerpt;
-            post.UserName = blogPost.UserName;
+            post.UserId = blogPost.UserId;
 
             // Status & CommentStatus
             post.Status = blogPost.Status;

@@ -1,17 +1,14 @@
-﻿namespace Fan.Tests
+﻿using Fan.Models;
+
+namespace Fan.Tests
 {
     /// <summary>
     /// Different users that interact with the system.
     /// </summary>
     public class Actor
     {
-        /// <summary>
-        /// The author of a blog.
-        /// </summary>
-        public const string AUTHOR = "ray";
-        /// <summary>
-        /// The anonymous visitor.
-        /// </summary>
-        public const string VISITOR = "anonymous";
+        public const int AUTHOR_ID = 1;
+        public const string AUTHOR_USERNAME = "user";
+        public static User User = new User { Id = 1, UserName = "user", DisplayName = "My Name", Email = "user@email.com" };
     }
 }

@@ -63,8 +63,8 @@ namespace Fan.Data
         public async Task<Post> GetAsync(int id, EPostType type)
         {
             return (type == EPostType.BlogPost) ?
-                await _db.Posts.Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag).SingleOrDefaultAsync(p => p.Id == id) :
-                await _db.Posts.SingleOrDefaultAsync(p => p.Id == id);
+                await _db.Posts.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag).SingleOrDefaultAsync(p => p.Id == id) :
+                await _db.Posts.Include(p => p.User).SingleOrDefaultAsync(p => p.Id == id);
         }
 
         /// <summary>
@@ -77,12 +77,13 @@ namespace Fan.Data
         public async Task<Post> GetAsync(string slug, EPostType type)
         {
             return (type == EPostType.BlogPost) ?
-                await _db.Posts.Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
+                await _db.Posts.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
                                   .SingleOrDefaultAsync(p =>
                                     p.Type == EPostType.BlogPost &&
                                     p.Status == EPostStatus.Published &&
                                     p.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase)) :
-                await _db.Posts.SingleOrDefaultAsync(p =>
+                await _db.Posts.Include(p => p.User)
+                                  .SingleOrDefaultAsync(p =>
                                     p.Type == type &&
                                     p.Status == EPostStatus.Published &&
                                     p.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
@@ -93,7 +94,7 @@ namespace Fan.Data
         /// </summary>
         public async Task<Post> GetAsync(string slug, int year, int month, int day)
         {
-            return await _db.Posts.Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
+            return await _db.Posts.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
                                   .SingleOrDefaultAsync(p =>
                                     p.Type == EPostType.BlogPost &&
                                     p.Status == EPostStatus.Published &&
@@ -113,7 +114,7 @@ namespace Fan.Data
             List<Post> posts = null;
             int skip = (query.PageIndex - 1) * query.PageSize;
             int take = query.PageSize;
-            IQueryable<Post> q = _db.Posts.Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag);
+            IQueryable<Post> q = _db.Posts.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag);
 
             switch (query.QueryType)
             {

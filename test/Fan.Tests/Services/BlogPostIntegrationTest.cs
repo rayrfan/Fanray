@@ -39,7 +39,7 @@ namespace Fan.Tests.Services
             DateTime createdOn = DateTime.Now;
             var blogPost = new BlogPost // A user posts this from OLW
             {
-                UserName = Actor.AUTHOR,
+                UserId = Actor.AUTHOR_ID,
                 Title = "Hello World!",
                 Slug = null,                        // user didn't input
                 Body = "This is my first post",
@@ -73,7 +73,7 @@ namespace Fan.Tests.Services
             DateTime createdOn = DateTime.Now;
             var blogPost = new BlogPost // A user posts this from browser
             {
-                UserName = Actor.AUTHOR,
+                UserId = Actor.AUTHOR_ID,
                 Title = "Hello World!",
                 Slug = null,                        // user didn't input
                 Body = "This is my first post",
@@ -106,7 +106,7 @@ namespace Fan.Tests.Services
             SeedTestPost();
             var blogPost = new BlogPost // A user posts this from OLW
             {
-                UserName = Actor.AUTHOR,
+                UserId = Actor.AUTHOR_ID,
                 Title = "Hello World!",
                 Slug = null,
                 Body = "This is my first post",
@@ -238,7 +238,7 @@ namespace Fan.Tests.Services
             SeedTestPost();
             var blogPost = new BlogPost // A user posts this from browser
             {
-                UserName = Actor.AUTHOR,
+                UserId = Actor.AUTHOR_ID,
                 Title = "Hello World!",
                 Slug = null,                        // user didn't input
                 Body = "This is my first post",

@@ -15,8 +15,8 @@ namespace Fan.Tests.Helpers
         {
             // Arrange: a list of two blog post
             var list = new List<BlogPost> {
-                new BlogPost { Title = "Post 1", UserName = "Ray" },
-                new BlogPost { Title = "Post 2", UserName = "Ray" },
+                new BlogPost { Title = "Post 1", UserId = Actor.AUTHOR_ID },
+                new BlogPost { Title = "Post 2", UserId = Actor.AUTHOR_ID },
             };
 
             // Act: serialize it to bytes and back

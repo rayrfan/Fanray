@@ -75,11 +75,21 @@ namespace Fan.Tests.Data
         public const string TAG2_SLUG = "cs";
 
         /// <summary>
+        /// Seeds 1 user.
+        /// </summary>
+        protected void SeedUser()
+        {
+            _db.Users.Add(Actor.User);
+            _db.SaveChanges();
+        }
+
+        /// <summary>
         /// Seeds 1 blog post associated with 1 category and 2 tags.
         /// </summary>
         /// <param name="db"></param>
         protected void SeedTestPost()
         {
+            SeedUser();
             _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
             _db.Posts.Add(this.GetPost());
             _db.SaveChanges();
@@ -93,6 +103,7 @@ namespace Fan.Tests.Data
         /// <param name="numOfPosts"></param>
         protected void SeedTestPosts(int numOfPosts)
         {
+            SeedUser();
             _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
             _db.Posts.AddRange(this.GetPosts(numOfPosts));
             _db.SaveChanges();
@@ -111,7 +122,7 @@ namespace Fan.Tests.Data
             {
                 Body = "A post body.",
                 Category = cat,
-                UserName = "ray",
+                UserId = Actor.AUTHOR_ID,
                 CreatedOn = (new DateTime(2017, 01, 01)).ToUniversalTime(),
                 RootId = null,
                 Title = "A published post",
@@ -148,7 +159,7 @@ namespace Fan.Tests.Data
                 {
                     Body = $"A post body #{i}.",
                     Category = cat,
-                    UserName = "ray",
+                    UserId = Actor.AUTHOR_ID,
                     CreatedOn = new DateTime(2017, 01, i), // be aware this is UTC time
                     RootId = null,
                     Title = $"Test Post #{i}",

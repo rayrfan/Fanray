@@ -1,6 +1,6 @@
 ﻿using Fan.Data;
-using Fan.Exceptions;
 using Fan.Services;
+using Fan.Tests;
 using Fan.Tests.Data;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Tests.Fakes;
@@ -40,12 +40,12 @@ namespace Fan.Web.Tests.MetaWeblog
             var context = new Mock<HttpContext>();
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
-            _svc = new MetaWeblogService(new FakeSignInManager(contextAccessor.Object), blogSvc, loggerMetaSvc, envMock.Object);
+            _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), blogSvc, loggerMetaSvc, envMock.Object);
         }
 
         string appKey = "appKey";
         string blogId = "blogId";
-        string userName = "ray";
+        string userName = Actor.AUTHOR_USERNAME;
         string password = "password";
         string rootUrl = "http://localhost";
 
@@ -58,7 +58,7 @@ namespace Fan.Web.Tests.MetaWeblog
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                Author = userName,
+                AuthorId = Actor.AUTHOR_ID.ToString(),
                 Categories = null,
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",
@@ -86,7 +86,7 @@ namespace Fan.Web.Tests.MetaWeblog
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                Author = userName,
+                AuthorId = Actor.AUTHOR_ID.ToString(),
                 Categories = new List<string>(), // try empty
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",
@@ -117,7 +117,7 @@ namespace Fan.Web.Tests.MetaWeblog
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                Author = userName,
+                AuthorId = Actor.AUTHOR_ID.ToString(),
                 Categories = new List<string> { "Windows 10" },
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",

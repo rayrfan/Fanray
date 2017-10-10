@@ -15,16 +15,19 @@ namespace Fan.Web.Controllers
     {
         private readonly IBlogService _blogSvc;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly ILogger<BlogService> _logger;
+        private readonly ILogger<BlogController> _logger;
 
         public BlogController(IBlogService blogService,
              UserManager<User> userManager,
+             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
-            ILogger<BlogService> logger)
+            ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _logger = logger;
         }
@@ -53,7 +56,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Setting up the blog, create user, create blogsettings and default category.
+        /// Sets up the blog, creates user, role, blogsettings and default category.
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -63,14 +66,33 @@ namespace Fan.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Fanray Setup Begins");
+
+                // user with email as username
+                var user = new User { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
+                var adminRole = "Admin";
+                var role = new Role { Name = adminRole, IsSystemRole = true };
+
                 // create user
-                var user = new User { UserName = model.UserName, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
+                // create Admin role
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("{@User} account created with password.", user);
+                    result = await _roleManager.CreateAsync(role);
+                }
+
+                // assign Admin role to user
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("{@Role} created.", role);
+                    result = await _userManager.AddToRoleAsync(user, adminRole);
+                }
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Blog Setup begins.");
-                    _logger.LogInformation("User account created with password.");
+                    _logger.LogInformation("{@Role} assigned to {@User}.", role, user);
 
                     //// sign-in user
                     //await _signInManager.SignInAsync(user, isPersistent: false);
@@ -79,6 +101,7 @@ namespace Fan.Web.Controllers
                     // create blog settings
                     await _blogSvc.CreateSettingsAsync(new BlogSettings {
                         Title = model.Title,
+                        Tagline = model.Tagline,
                         TimeZoneId = model.TimeZoneId
                     });
                     _logger.LogInformation("BlogSettings created.");
@@ -90,7 +113,7 @@ namespace Fan.Web.Controllers
                         TagTitles = null,
                         Title = Const.WELCOME_POST_TITLE,
                         Body = Const.WELCOME_POST_BODY,
-                        UserName = model.UserName,
+                        UserId = 1,
                         Status = EPostStatus.Published,
                         CommentStatus = ECommentStatus.AllowComments,
                         CreatedOn = DateTime.Now,

@@ -7,7 +7,7 @@
     "copy:bootstrap": "cpx node_modules/bootstrap/dist/** wwwroot/lib/bootstrap/dist",
     "copy:jquery": "cpx node_modules/jquery/dist/* wwwroot/lib/jquery/dist",
     "copy:jquery-val": "cpx node_modules/jquery-validation/dist/* wwwroot/lib/jquery-validation/dist",
-    "copy:jquery-val-unob": "cpx node_modules/jquery-validation-unobtrusive/dist/* wwwroot/lib/jquery-validation-unobtrusive/dist",
+    "copy:jquery-val-unob": "cpx node_modules/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js wwwroot/lib/jquery-validation-unobtrusive",
     "copy:js": "cpx client/js/*.js wwwroot/js",
     "copy:images": "cpx client/images wwwroot/images",
     "copy:fontcss": "cpx node_modules/font-awesome/css/** wwwroot/lib/font-awesome/css",

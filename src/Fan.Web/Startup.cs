@@ -52,7 +52,7 @@ namespace Fan.Web
             });
 
             // Identity
-            services.AddIdentity<User, IdentityRole>(options =>
+            services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 4;
@@ -115,7 +115,7 @@ namespace Fan.Web
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                // you can create db here or you can click apply migrations when site launches
+                // when develop with migration, comment below out, if you decide to keep migration, consider use Migrate().
                 db.Database.EnsureCreated();
             }
         }
