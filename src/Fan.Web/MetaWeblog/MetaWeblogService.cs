@@ -18,6 +18,7 @@ namespace Fan.Web.MetaWeblog
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
+        private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
         private readonly IHostingEnvironment _hostingEnvironment;
 
@@ -25,12 +26,14 @@ namespace Fan.Web.MetaWeblog
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IBlogService blogSvc,
+            ISettingService settingService,
             ILogger<MetaWeblogService> logger,
             IHostingEnvironment env)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
+            _settingSvc = settingService;
             _logger = logger;
             _hostingEnvironment = env;
         }
@@ -231,7 +234,7 @@ namespace Fan.Web.MetaWeblog
 
             try
             {
-                var settings = await _blogSvc.GetSettingsAsync();
+                var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
                 var blogs = new List<MetaBlogInfo>();
                 var blog = new MetaBlogInfo { Url = rootUrl, BlogName = settings.Title };
                 blogs.Add(blog);

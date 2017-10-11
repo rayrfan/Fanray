@@ -1,5 +1,4 @@
-﻿using Fan.Exceptions;
-using Fan.Models;
+﻿using Fan.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,28 +9,6 @@ namespace Fan.Services
     /// </summary>
     public interface IBlogService
     {
-        // -------------------------------------------------------------------- Settings
-
-        /// <summary>
-        /// Creates a <see cref="BlogSettings"/>.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        Task<BlogSettings> CreateSettingsAsync(BlogSettings settings);
-        /// <summary>
-        /// Returns the <see cref="BlogSettings"/>, returns null if it does not exist.
-        /// </summary>
-        /// <remarks>
-        /// A <see cref="BlogSettings"/> is created when the application runs for the first time.
-        /// </remarks>
-        Task<BlogSettings> GetSettingsAsync();
-        /// <summary>
-        /// Updates the <see cref="BlogSettings"/>, if BlogSettings does not exist, it will throw <see cref="FanException"/>.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        Task<BlogSettings> UpdateSettingsAsync(BlogSettings settings);
-
         // -------------------------------------------------------------------- Categories
 
         /// <summary>

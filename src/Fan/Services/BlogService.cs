@@ -20,6 +20,7 @@ namespace Fan.Services
 {
     public class BlogService : IBlogService
     {
+        private readonly ISettingService _settingSvc;
         private readonly ICategoryRepository _catRepo;
         private readonly IMetaRepository _metaRepo;
         private readonly IPostRepository _postRepo;
@@ -28,7 +29,9 @@ namespace Fan.Services
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
 
-        public BlogService(ICategoryRepository catRepo,
+        public BlogService(
+            ISettingService settingService,
+            ICategoryRepository catRepo,
             IMetaRepository metaRepo,
             IPostRepository postRepo,
             ITagRepository tagRepo,
@@ -36,6 +39,7 @@ namespace Fan.Services
             ILogger<BlogService> logger,
             IMapper mapper)
         {
+            _settingSvc = settingService;
             _catRepo = catRepo;
             _metaRepo = metaRepo;
             _postRepo = postRepo;
@@ -47,70 +51,7 @@ namespace Fan.Services
 
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
         public const string CACHE_KEY_ALL_TAGS = "BlogTags";
-        public const string CACHE_KEY_BLOG_SETTINGS = "BlogSettings";
         public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
-
-        // -------------------------------------------------------------------- Settings
-
-        /// <summary>
-        /// Creates <see cref="BlogSettings"/>, throws <see cref="FanException"/> if a BlogSettings already exists.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public async Task<BlogSettings> CreateSettingsAsync(BlogSettings settings)
-        {
-            if (await this.GetSettingsAsync() != null)
-            {
-                throw new FanException("BlogSettings already exists in system.");
-            }
-
-            var meta = new Meta
-            {
-                Key = "BlogSettings",
-                Value = JsonConvert.SerializeObject(settings),
-            };
-
-            await _metaRepo.CreateAsync(meta);
-
-            return settings;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="BlogSettings"/>, returns null if it does not exist.
-        /// </summary>
-        /// <remarks>
-        /// A <see cref="BlogSettings"/> is created when the application runs for the first time.
-        /// </remarks>
-        public async Task<BlogSettings> GetSettingsAsync()
-        {
-            return await _cache.GetAsync<BlogSettings>(CACHE_KEY_BLOG_SETTINGS, new TimeSpan(0, 10, 0), async () =>
-            {
-                var meta = await _metaRepo.GetAsync("BlogSettings");
-
-                return (meta == null) ? null : JsonConvert.DeserializeObject<BlogSettings>(meta.Value);
-            });
-        }
-
-        /// <summary>
-        /// Updates the <see cref="BlogSettings"/>, if BlogSettings does not exist, it will throw <see cref="FanException"/>.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public async Task<BlogSettings> UpdateSettingsAsync(BlogSettings settings)
-        {
-            var meta = await _metaRepo.GetAsync("BlogSettings");
-            if (meta == null)
-            {
-                throw new FanException("BlogSettings cannot be updated because it does not exist in the system.");
-            }
-
-            meta.Value = JsonConvert.SerializeObject(settings);
-
-            await _metaRepo.UpdateAsync(meta);
-            await _cache.RemoveAsync(CACHE_KEY_BLOG_SETTINGS);
-
-            return settings;
-        }
 
         // -------------------------------------------------------------------- Categories
 
@@ -142,7 +83,7 @@ namespace Fan.Services
         /// </remarks>
         public async Task DeleteCategoryAsync(int id)
         {
-            var blogSettings = await this.GetSettingsAsync();
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();// this.GetSettingsAsync();
 
             // on the UI there is no delete button on the default cat
             // therefore when there is only one category left, it'll be the default.
@@ -162,7 +103,7 @@ namespace Fan.Services
         /// <returns></returns>
         public async Task<Category> GetCategoryAsync(int id)
         {
-            var cats = await this.GetCategoriesAsync();
+            var cats = await GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
@@ -179,7 +120,7 @@ namespace Fan.Services
         /// <returns></returns>
         public async Task<Category> GetCategoryAsync(string slug)
         {
-            var cats = await this.GetCategoriesAsync();
+            var cats = await GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
@@ -452,13 +393,13 @@ namespace Fan.Services
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPosts)
             {
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await GetSettingsAsync()).PageSize,
+                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
             };
 
             // cache only first page
             if (query.PageIndex == 1)
             {
-                return await _cache.GetAsync<BlogPostList>(CACHE_KEY_POSTS_INDEX, new TimeSpan(0, 10, 0), async () =>
+                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, new TimeSpan(0, 10, 0), async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -480,7 +421,7 @@ namespace Fan.Services
             {
                 CategorySlug = categorySlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await GetSettingsAsync()).PageSize,
+                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
             };
 
             return await QueryPostsAsync(query);
@@ -499,7 +440,7 @@ namespace Fan.Services
             {
                 TagSlug = tagSlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await GetSettingsAsync()).PageSize,
+                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
             };
 
             return await QueryPostsAsync(query);
@@ -632,16 +573,16 @@ namespace Fan.Services
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            var blogSettings = await GetSettingsAsync();
+            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create) // create: if user didn't set a time, server will give it UtcNow which is correct 
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? DateTime.UtcNow : blogSettings.ToUtc(blogPost.CreatedOn);
+                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? DateTime.UtcNow : siteSettings.ToUtc(blogPost.CreatedOn);
             }
-            else if (blogPost.CreatedOn != blogSettings.FromUtc(post.CreatedOn)) // update: a change in post time
+            else if (blogPost.CreatedOn != siteSettings.FromUtc(post.CreatedOn)) // update: a change in post time
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? post.CreatedOn : blogSettings.ToUtc(blogPost.CreatedOn);
+                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? post.CreatedOn : siteSettings.ToUtc(blogPost.CreatedOn);
             }
 
             // UpdatedOn
@@ -682,6 +623,7 @@ namespace Fan.Services
             }
             else
             {
+                var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
                 post.CategoryId = blogSettings.DefaultCategoryId; // TODO test
             }
 
@@ -747,14 +689,15 @@ namespace Fan.Services
         private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var blogSettings = await GetSettingsAsync();
+            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
              // Note: browser needs Utc (WP works the same way), so don't convert back to local
              // for example: "post/2017/6/2/slug" is actually posted on the night of 6/1/2017, 
              // but since DB stores UTC, here we must stay that way
 
             // humanize datetime
-            blogPost.CreatedOnDisplay = DateTime.Now.Add(blogSettings.FromUtc(blogPost.CreatedOn) - DateTime.Now).Humanize(utcDate: false);
+            blogPost.CreatedOnDisplay = DateTime.Now.Add(siteSettings.FromUtc(blogPost.CreatedOn) - DateTime.Now).Humanize(utcDate: false);
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here

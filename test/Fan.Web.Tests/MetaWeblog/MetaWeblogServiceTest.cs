@@ -30,17 +30,19 @@ namespace Fan.Web.Tests.MetaWeblog
 
             // loggers
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+            var loggerSettingSvc = _loggerFactory.CreateLogger<SettingService>();
             var loggerMetaSvc = _loggerFactory.CreateLogger<MetaWeblogService>();
 
             // blog svc
-            var blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, _cache, loggerBlogSvc, _mapper);
+            var settingSvc = new SettingService(metaRepo, _cache, loggerSettingSvc);
+            var blogSvc = new BlogService(settingSvc, catRepo, metaRepo, postRepo, tagRepo, _cache, loggerBlogSvc, _mapper);
 
             // metaweblog svc
             var envMock = new Mock<IHostingEnvironment>();
             var context = new Mock<HttpContext>();
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
-            _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), blogSvc, loggerMetaSvc, envMock.Object);
+            _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), blogSvc, settingSvc, loggerMetaSvc, envMock.Object);
         }
 
         string appKey = "appKey";

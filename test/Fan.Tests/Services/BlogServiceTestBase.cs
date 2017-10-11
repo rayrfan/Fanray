@@ -21,9 +21,11 @@ namespace Fan.Tests.Services
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
         protected BlogService _blogSvc;
+        protected SettingService _settingSvc;
         protected IMapper _mapper;
         protected IDistributedCache _cache;
-        protected ILogger<BlogService> _logger;
+        protected ILogger<BlogService> _loggerBlogSvc;
+        protected ILogger<SettingService> _loggerSettingSvc;
 
         /// <summary>
         /// Base constructor which will be called first for each test in derived test classes, thus
@@ -44,14 +46,16 @@ namespace Fan.Tests.Services
 
             // logger
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            _logger = loggerFactory.CreateLogger<BlogService>();
+            _loggerBlogSvc = loggerFactory.CreateLogger<BlogService>();
+            _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
             // mapper
             _mapper = Util.Mapper;
 
             // svc
-            _blogSvc = new BlogService(_catRepoMock.Object, _metaRepoMock.Object, _postRepoMock.Object, _tagRepoMock.Object,
-                _cache, _logger, _mapper);
+            _settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
+            _blogSvc = new BlogService(_settingSvc, _catRepoMock.Object, _metaRepoMock.Object, _postRepoMock.Object, _tagRepoMock.Object,
+                _cache, _loggerBlogSvc, _mapper);
         }
     }
 }

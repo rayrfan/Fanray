@@ -77,6 +77,7 @@ namespace Fan.Web
             services.AddScoped<ITagRepository, SqlTagRepository>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();

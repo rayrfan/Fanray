@@ -89,9 +89,10 @@ namespace Fan.Tests.Data
         /// <param name="db"></param>
         protected void SeedTestPost()
         {
-            SeedUser();
+            _db.Users.Add(Actor.User);
+            _db.Metas.Add(new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) });
             _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
-            _db.Posts.Add(this.GetPost());
+            _db.Posts.Add(GetPost());
             _db.SaveChanges();
         }
 
@@ -103,9 +104,10 @@ namespace Fan.Tests.Data
         /// <param name="numOfPosts"></param>
         protected void SeedTestPosts(int numOfPosts)
         {
-            SeedUser();
+            _db.Users.Add(Actor.User);
+            _db.Metas.Add(new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) });
             _db.Metas.Add(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) });
-            _db.Posts.AddRange(this.GetPosts(numOfPosts));
+            _db.Posts.AddRange(GetPosts(numOfPosts));
             _db.SaveChanges();
         }
 

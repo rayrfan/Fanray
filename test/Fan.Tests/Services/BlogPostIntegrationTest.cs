@@ -17,6 +17,7 @@ namespace Fan.Tests.Services
     public class BlogPostIntegrationTest : DataTestBase
     {
         BlogService _blogSvc;
+        SettingService _settingSvc;
 
         public BlogPostIntegrationTest()
         {
@@ -24,8 +25,10 @@ namespace Fan.Tests.Services
             var tagRepo = new SqlTagRepository(_db);
             var metaRepo = new SqlMetaRepository(_db);
             var postRepo = new SqlPostRepository(_db);
-            var logger = _loggerFactory.CreateLogger<BlogService>();
-            _blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, _cache, logger, _mapper);
+            var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+            var loggerSettingSvc = _loggerFactory.CreateLogger<SettingService>();
+            _settingSvc = new SettingService(metaRepo, _cache, loggerSettingSvc);
+            _blogSvc = new BlogService(_settingSvc, catRepo, metaRepo, postRepo, tagRepo, _cache, loggerBlogSvc, _mapper);
         }
 
         /// <summary>

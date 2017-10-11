@@ -35,27 +35,27 @@ namespace Fan.Tests.Helpers
         [Fact]
         public async void GetAsync_ExtensionMethod_IsAbleTo_Cache_Object()
         {
-            // Arrange: Given a service that returns BlogSettings
-            var _svc = new Mock<IBlogService>();
-            _svc.Setup(t => t.GetSettingsAsync()).Returns(Task.FromResult(new BlogSettings()));
+            // Arrange: Given a service that returns SiteSettings
+            var _svc = new Mock<ISettingService>();
+            _svc.Setup(t => t.GetSettingsAsync<SiteSettings>(false)).Returns(Task.FromResult(new SiteSettings()));
 
             // Act: When we call the cache for it for the first time, 
             // it calls the method, gets the object and caches it.
-            var res1 = await _cache.GetAsync<BlogSettings>("cache-key", new TimeSpan(0, 10, 0), async () =>
+            var res1 = await _cache.GetAsync("cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return await _svc.Object.GetSettingsAsync();
+                return await _svc.Object.GetSettingsAsync<SiteSettings>();
             });
 
             // When we call the cache for it for the second time, 
             // it returns the object from cache and won't call the method.
-            var res2 = await _cache.GetAsync<BlogSettings>("cache-key", new TimeSpan(0, 10, 0), async () =>
+            var res2 = await _cache.GetAsync("cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return await _svc.Object.GetSettingsAsync();
+                return await _svc.Object.GetSettingsAsync<SiteSettings>();
             });
 
             // Assert: Then the method has only been called exactly once
             // And the objects returned each time should match in their values
-            _svc.Verify(service => service.GetSettingsAsync(), Times.Exactly(1));
+            _svc.Verify(service => service.GetSettingsAsync<SiteSettings>(false), Times.Exactly(1));
             Assert.Equal(res1.Title, res2.Title);
         }
     }

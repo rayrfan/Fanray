@@ -44,9 +44,11 @@ namespace Fan.Web
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             var cache = new MemoryDistributedCache(memCacheOptions);
             var loggerFactory = provider.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger<BlogService>();
-            var blogSvc = new BlogService(catRepo, metaRepo, postRepo, tagRepo, cache, logger, Util.Mapper);
+            var settingSvc = new SettingService(metaRepo, cache, loggerFactory.CreateLogger<SettingService>());
+            var blogSvc = new BlogService(settingSvc, catRepo, metaRepo, postRepo, tagRepo, cache,
+                loggerFactory.CreateLogger<BlogService>(), Util.Mapper);
             var data = provider.GetService<IOptions<SeedData>>().Value;
+            var logger = loggerFactory.CreateLogger<SeedData>();
 
             // data
             int userId = 1;
@@ -61,8 +63,9 @@ namespace Fan.Web
             logger.LogInformation("Seeding initial data begins ...");
 
             // BlogSettings
-            await blogSvc.CreateSettingsAsync(new BlogSettings());
-            logger.LogInformation("BlogSettings created.");
+            await settingSvc.CreateSettingsAsync(new SiteSettings());
+            await settingSvc.CreateSettingsAsync(new BlogSettings());
+            logger.LogInformation("Site and Blog Settings are created.");
 
             // User
             await userManager.CreateAsync(user: new User { DisplayName = displayName, UserName = email, Email = email }, password: password); // AccountController Login and LoginViewModel

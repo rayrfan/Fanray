@@ -14,18 +14,21 @@ namespace Fan.Web.Controllers
     public class BlogController : Controller
     {
         private readonly IBlogService _blogSvc;
+        private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<BlogController> _logger;
 
         public BlogController(IBlogService blogService,
+            ISettingService settingService,
              UserManager<User> userManager,
              RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _settingSvc = settingService;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
@@ -34,7 +37,7 @@ namespace Fan.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var settings = await _blogSvc.GetSettingsAsync();
+            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             if (settings == null)
                 return RedirectToAction("Setup");
 
@@ -48,7 +51,7 @@ namespace Fan.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Setup()
         {
-            var settings = await _blogSvc.GetSettingsAsync();
+            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             if (settings != null)
                 return RedirectToAction("Index");
 
@@ -80,7 +83,8 @@ namespace Fan.Web.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("{@User} account created with password.", user);
-                    result = await _roleManager.CreateAsync(role);
+                    if (!await _roleManager.RoleExistsAsync(adminRole))
+                        result = await _roleManager.CreateAsync(role);
                 }
 
                 // assign Admin role to user
@@ -94,17 +98,19 @@ namespace Fan.Web.Controllers
                 {
                     _logger.LogInformation("{@Role} assigned to {@User}.", role, user);
 
-                    //// sign-in user
-                    //await _signInManager.SignInAsync(user, isPersistent: false);
-                    //_logger.LogInformation("User has been signed in.");
+                    // sign-in user
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation("User has been signed in.");
 
-                    // create blog settings
-                    await _blogSvc.CreateSettingsAsync(new BlogSettings {
+                    // create site and blog settings
+                    await _settingSvc.CreateSettingsAsync(new SiteSettings
+                    {
                         Title = model.Title,
                         Tagline = model.Tagline,
                         TimeZoneId = model.TimeZoneId
                     });
-                    _logger.LogInformation("BlogSettings created.");
+                    await _settingSvc.CreateSettingsAsync(new BlogSettings());
+                    _logger.LogInformation("Site and Blog Settings created.");
 
                     // create welcome post and default category
                     await _blogSvc.CreatePostAsync(new BlogPost
