@@ -1,4 +1,7 @@
-﻿using Fan.Enums;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Helpers;
+using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
@@ -263,7 +266,7 @@ namespace Fan.Web.MetaWeblog
                 // save path 
                 // because I'm unable to find a way to get the post date of the post into here, I'm not using the year/month folders
                 //var uploads = $"uploads\\{DateTime.UtcNow.Year}\\{DateTime.UtcNow.Month.ToString("d2")}\\";
-                var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{Const.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
+                var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{BlogConst.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
 
                 // make sure save path is there
                 if (!Directory.Exists(savePath))
@@ -300,7 +303,7 @@ namespace Fan.Web.MetaWeblog
 
                 var mediaInfo = new MetaMediaInfo()
                 {
-                    Url = $"{Const.MEDIA_UPLOADS_FOLDER}/{fileName}"
+                    Url = $"{BlogConst.MEDIA_UPLOADS_FOLDER}/{fileName}"
                 };
 
                 return mediaInfo;

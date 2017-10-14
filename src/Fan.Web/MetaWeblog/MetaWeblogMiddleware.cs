@@ -46,7 +46,7 @@ namespace Fan.Web.MetaWeblog
                 {
                     case "blogger.getUsersBlogs":
                     case "metaWeblog.getUsersBlogs":
-                        response.Blogs = await service.GetUsersBlogsAsync(request.AppKey, request.UserName, request.Password, rootUrl);
+                        response.BlogInfos = await service.GetUsersBlogsAsync(request.AppKey, request.UserName, request.Password, rootUrl);
                         break;
 
                     case "metaWeblog.newPost":

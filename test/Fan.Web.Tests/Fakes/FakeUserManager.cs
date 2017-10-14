@@ -1,5 +1,4 @@
 ﻿using Fan.Models;
-using Fan.Tests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

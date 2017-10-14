@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\CoreDbContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="client\favicon.ico">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -39,10 +43,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Fan.Blogs\Fan.Blogs.csproj" />
     <ProjectReference Include="..\Fan\Fan.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

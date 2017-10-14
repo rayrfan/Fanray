@@ -13,9 +13,9 @@ namespace Fan.Data
     /// </summary>
     public class SqlMetaRepository : IMetaRepository
     {
-        private readonly FanDbContext _db;
+        private readonly CoreDbContext _db;
 
-        public SqlMetaRepository(FanDbContext db)
+        public SqlMetaRepository(CoreDbContext db)
         {
             _db = db;
         }

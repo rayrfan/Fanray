@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Fan.Blogs.Data;
+using Fan.Blogs.Helpers;
+using Fan.Blogs.Services;
 using Fan.Data;
 using Fan.Enums;
-using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
+using Fan.Web.Data;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
@@ -35,21 +38,26 @@ namespace Fan.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Db
-            services.AddDbContext<FanDbContext>(builder =>
+            // Db 
+            // AddDbContextPool causes multi-context to fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
+            // otherwise it's a perf enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
+            Enum.TryParse(Configuration["AppSettings:Database"], ignoreCase: true, result: out ESupportedDatabase db);
+            if (db == ESupportedDatabase.Sqlite)
             {
-                Enum.TryParse(Configuration["AppSettings:Database"], ignoreCase: true, result: out ESupportedDatabase db);
-                if (db == ESupportedDatabase.Sqlite)
-                {
-                    builder.UseSqlite("Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite"));
-                    _logger.LogInformation("Using SQLite database.");
-                }
-                else
-                {
-                    builder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-                    _logger.LogInformation("Using SQL Server database.");
-                }
-            });
+                var sqlitePath = "Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite");
+                services.AddDbContext<CoreDbContext>(options => options.UseSqlite(sqlitePath))
+                        .AddDbContext<BlogDbContext>(options => options.UseSqlite(sqlitePath))
+                        .AddDbContext<FanDbContext>(options => options.UseSqlite(sqlitePath));
+                _logger.LogInformation("Using SQLite database.");
+            }
+            else
+            {
+                var connStr = Configuration.GetConnectionString("DefaultConnection");
+                services.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connStr))
+                        .AddDbContext<BlogDbContext>(options => options.UseSqlServer(connStr))
+                        .AddDbContext<FanDbContext>(options => options.UseSqlServer(connStr));
+                _logger.LogInformation("Using SQL Server database.");
+            }
 
             // Identity
             services.AddIdentity<User, Role>(options =>
@@ -68,7 +76,7 @@ namespace Fan.Web
 
             // Mapper
             services.AddAutoMapper();
-            services.AddSingleton(Util.Mapper);
+            services.AddSingleton(BlogUtil.Mapper);
 
             // Repos / Services
             services.AddScoped<IPostRepository, SqlPostRepository>();
@@ -112,11 +120,10 @@ namespace Fan.Web
 
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
-            //SeedData.InitializeAsync(app.ApplicationServices).Wait();
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                // when develop with migration, comment below out, if you decide to keep migration, consider use Migrate().
+                // when develop with migration, comment below out; if you decide to keep migration, consider use Migrate().
                 db.Database.EnsureCreated();
             }
         }
@@ -131,14 +138,14 @@ namespace Fan.Web
 
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
-            routes.MapRoute("BlogPost", string.Format(Const.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
+            routes.MapRoute("BlogPost", string.Format(BlogConst.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
-            routes.MapRoute("BlogCategory", string.Format(Const.CATEGORY_URL_TEMPLATE, "{slug}"), 
+            routes.MapRoute("BlogCategory", string.Format(BlogConst.CATEGORY_URL_TEMPLATE, "{slug}"), 
                 new { controller = "Blog", action = "Category", slug = "" });
 
-            routes.MapRoute("BlogTag", string.Format(Const.TAG_URL_TEMPLATE, "{slug}"), 
+            routes.MapRoute("BlogTag", string.Format(BlogConst.TAG_URL_TEMPLATE, "{slug}"), 
                 new { controller = "Blog", action = "Tag", slug = "" });
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");

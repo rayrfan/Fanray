@@ -357,9 +357,9 @@ namespace Fan.Web.MetaWeblog
         {
             XElement data = new XElement("data");
 
-            if (response.Blogs != null)
+            if (response.BlogInfos != null)
             {
-                foreach (var blog in response.Blogs)
+                foreach (var blog in response.BlogInfos)
                 {
                     data.Add(new XElement("value",
                         new XElement("struct",

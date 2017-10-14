@@ -1,7 +1,5 @@
-﻿using Fan.Data;
-using Fan.Services;
-using Fan.Tests;
-using Fan.Tests.Data;
+﻿using Fan.Blogs.Tests.Services.IntegrationTests;
+using Fan.Models;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Tests.Fakes;
 using Microsoft.AspNetCore.Hosting;
@@ -17,32 +15,21 @@ namespace Fan.Web.Tests.MetaWeblog
     /// <summary>
     /// Integration tests for <see cref="MetaWeblogService"/> class.
     /// </summary>
-    public class MetaWeblogServiceTest : DataTestBase
+    public class MetaWeblogServiceTest : BlogIntegrationTestBase
     {
         MetaWeblogService _svc;
         public MetaWeblogServiceTest()
         {
-            // repos
-            var catRepo = new SqlCategoryRepository(_db);
-            var tagRepo = new SqlTagRepository(_db);
-            var metaRepo = new SqlMetaRepository(_db);
-            var postRepo = new SqlPostRepository(_db);
-
             // loggers
-            var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
-            var loggerSettingSvc = _loggerFactory.CreateLogger<SettingService>();
             var loggerMetaSvc = _loggerFactory.CreateLogger<MetaWeblogService>();
-
-            // blog svc
-            var settingSvc = new SettingService(metaRepo, _cache, loggerSettingSvc);
-            var blogSvc = new BlogService(settingSvc, catRepo, metaRepo, postRepo, tagRepo, _cache, loggerBlogSvc, _mapper);
 
             // metaweblog svc
             var envMock = new Mock<IHostingEnvironment>();
             var context = new Mock<HttpContext>();
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
-            _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), blogSvc, settingSvc, loggerMetaSvc, envMock.Object);
+            _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), 
+                _blogSvc, _settingSvcMock.Object, loggerMetaSvc, envMock.Object);
         }
 
         string appKey = "appKey";
@@ -98,7 +85,7 @@ namespace Fan.Web.Tests.MetaWeblog
                 PostId = null, // ??
                 Publish = true,
                 Slug = null,
-                Tags = new List<string> { DataTestBase.TAG1_TITLE },
+                Tags = new List<string> { TAG1_TITLE },
                 Title = "A post from OLW",
             };
 
@@ -180,7 +167,7 @@ namespace Fan.Web.Tests.MetaWeblog
 
             // Assert
             Assert.Equal(1, result.Count);
-            Assert.Equal($"{rootUrl}/category/{DataTestBase.CAT_SLUG}", result[0].HtmlUrl);
+            Assert.Equal($"{rootUrl}/category/{CAT_SLUG}", result[0].HtmlUrl);
         }
 
         [Fact]
@@ -194,8 +181,8 @@ namespace Fan.Web.Tests.MetaWeblog
 
             // Assert
             Assert.Equal(2, result.Count);
-            Assert.True(result.Contains(DataTestBase.TAG1_TITLE));
-            Assert.True(result.Contains(DataTestBase.TAG2_TITLE));
+            Assert.True(result.Contains(TAG1_TITLE));
+            Assert.True(result.Contains(TAG2_TITLE));
         }
 
         // -------------------------------------------------------------------- Other

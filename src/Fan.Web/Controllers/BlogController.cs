@@ -1,5 +1,7 @@
-﻿using Fan.Enums;
-using Fan.Helpers;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Helpers;
+using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Fan.Models;
 using Fan.Services;
 using Fan.Web.Models.BlogViewModels;
@@ -115,10 +117,10 @@ namespace Fan.Web.Controllers
                     // create welcome post and default category
                     await _blogSvc.CreatePostAsync(new BlogPost
                     {
-                        CategoryTitle = Const.DEFAULT_CATEGORY,
+                        CategoryTitle = BlogConst.DEFAULT_CATEGORY,
                         TagTitles = null,
-                        Title = Const.WELCOME_POST_TITLE,
-                        Body = Const.WELCOME_POST_BODY,
+                        Title = BlogConst.WELCOME_POST_TITLE,
+                        Body = BlogConst.WELCOME_POST_BODY,
                         UserId = 1,
                         Status = EPostStatus.Published,
                         CommentStatus = ECommentStatus.AllowComments,
