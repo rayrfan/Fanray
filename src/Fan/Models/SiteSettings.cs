@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fan.Models
+﻿namespace Fan.Models
 {
     /// <summary>
     /// Settings for the over all site.
@@ -16,37 +14,11 @@ namespace Fan.Models
         /// </summary>
         public string Tagline { get; set; } = "A fanray blog";
         /// <summary>
-        /// The Id of <see cref="TimeZoneInfo"/> class.
+        /// Gets or sets the timezone id for the site. Default "UTC".
         /// </summary>
         /// <remarks>
-        /// http://stackoverflow.com/a/7908482/32240
+        /// To learn more about timezone id <see cref="System.TimeZoneInfo.Id"/> and <see cref="http://stackoverflow.com/a/7908482/32240"/>
         /// </remarks>
-        public string TimeZoneId { get; set; } = "Pacific Standard Time";
-
-        /// <summary>
-        /// Converts client local time to UTC time.
-        /// </summary>
-        public DateTime ToUtc(DateTime? localTime = null)
-        {
-            if (localTime == null || localTime == new DateTime())
-                return DateTime.UtcNow;
-
-            var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(string.IsNullOrEmpty(TimeZoneId) ? "UTC" : TimeZoneId);
-            localTime = DateTime.SpecifyKind(localTime.Value, DateTimeKind.Unspecified);
-            return TimeZoneInfo.ConvertTime(localTime.Value, userTimeZone, TimeZoneInfo.Utc);
-        }
-
-        /// <summary>
-        /// Converts UTC from server into local client local time offset by timezone.
-        /// </summary>
-        public DateTime FromUtc(DateTime? serverTime = null)
-        {
-            if (serverTime == null || serverTime == new DateTime())
-                serverTime = DateTime.UtcNow;
-
-            var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(string.IsNullOrEmpty(TimeZoneId) ? "UTC" : TimeZoneId);
-            serverTime = DateTime.SpecifyKind(serverTime.Value, DateTimeKind.Unspecified);
-            return TimeZoneInfo.ConvertTime(serverTime.Value, TimeZoneInfo.Utc, userTimeZone);
-        }
+        public string TimeZoneId { get; set; } = "UTC";
     }
 }

@@ -75,8 +75,13 @@ namespace Fan.Web.Controllers
 
                 // user with email as username
                 var user = new User { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
-                var adminRole = "Admin";
-                var role = new Role { Name = adminRole, IsSystemRole = true };
+                var adminRole = "Administrator";
+                var role = new Role
+                {
+                    Name = adminRole,
+                    IsSystemRole = true,
+                    Description = "An Administrator has full power over the site and can do everything."
+                };
 
                 // create user
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -124,7 +129,7 @@ namespace Fan.Web.Controllers
                         UserId = 1,
                         Status = EPostStatus.Published,
                         CommentStatus = ECommentStatus.AllowComments,
-                        CreatedOn = DateTime.Now,
+                        CreatedOn = DateTimeOffset.Now,
                     });
                     _logger.LogInformation("Welcome post and default category created.");
                     _logger.LogInformation("Blog Setup completes.");

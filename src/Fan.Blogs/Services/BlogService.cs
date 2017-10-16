@@ -83,7 +83,7 @@ namespace Fan.Blogs.Services
         /// </remarks>
         public async Task DeleteCategoryAsync(int id)
         {
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();// this.GetSettingsAsync();
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
             // on the UI there is no delete button on the default cat
             // therefore when there is only one category left, it'll be the default.
@@ -260,14 +260,14 @@ namespace Fan.Blogs.Services
                 theMedia.Slug = media.Slug;
                 theMedia.Title = media.Title;
                 theMedia.MimeType = media.MimeType;
-                theMedia.UpdatedOn = DateTime.UtcNow;
+                theMedia.UpdatedOn = DateTimeOffset.UtcNow;
 
                 var post = _mapper.Map<Media, Post>(theMedia);
                 await _postRepo.UpdateAsync(post);
             }
             else
             {
-                media.CreatedOn = DateTime.UtcNow;
+                media.CreatedOn = DateTimeOffset.UtcNow;
                 var post = _mapper.Map<Media, Post>(media);
                 await _postRepo.CreateAsync(post);
             }
@@ -557,8 +557,8 @@ namespace Fan.Blogs.Services
         /// <summary>
         /// Prepares a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
-        /// <param name="blogPost"></param>
-        /// <param name="createOrUpdate"></param>
+        /// <param name="blogPost">The incoming post with user data.</param>
+        /// <param name="createOrUpdate">User is doing either a create or update post.</param>
         /// <returns></returns>
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
@@ -576,13 +576,14 @@ namespace Fan.Blogs.Services
             var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
 
             // CreatedOn
-            if (createOrUpdate == ECreateOrUpdate.Create) // create: if user didn't set a time, server will give it UtcNow which is correct 
+            if (createOrUpdate == ECreateOrUpdate.Create) 
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? DateTime.UtcNow : siteSettings.ToUtc(blogPost.CreatedOn);
+                // post time will be min value if user didn't set a time
+                post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
             }
-            else if (blogPost.CreatedOn != siteSettings.FromUtc(post.CreatedOn)) // update: a change in post time
+            else if (post.CreatedOn != blogPost.CreatedOn) // user changed in post time
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTime.MinValue) ? post.CreatedOn : siteSettings.ToUtc(blogPost.CreatedOn);
+                post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
             }
 
             // UpdatedOn
@@ -692,12 +693,11 @@ namespace Fan.Blogs.Services
             var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
-             // Note: browser needs Utc (WP works the same way), so don't convert back to local
-             // for example: "post/2017/6/2/slug" is actually posted on the night of 6/1/2017, 
-             // but since DB stores UTC, here we must stay that way
-
-            // humanize datetime
-            blogPost.CreatedOnDisplay = DateTime.Now.Add(siteSettings.FromUtc(blogPost.CreatedOn) - DateTime.Now).Humanize(utcDate: false);
+            // Friendly post time if the post was published within 2 days
+            // else show the actual date time in setting's timezone
+            blogPost.CreatedOnFriendly = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ? 
+                Util.ConvertTime(blogPost.CreatedOn, siteSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
+                blogPost.CreatedOn.Humanize();
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
@@ -722,7 +722,7 @@ namespace Fan.Blogs.Services
         /// <summary>
         /// Gets a unique and valid slug for a blog post.
         /// </summary>
-        private async Task<string> GetBlogPostSlugAsync(string input, DateTime createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
+        private async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > BlogConst.POST_TITLE_SLUG_MAXLEN)

@@ -265,7 +265,6 @@ namespace Fan.Web.MetaWeblog
 
                 // save path 
                 // because I'm unable to find a way to get the post date of the post into here, I'm not using the year/month folders
-                //var uploads = $"uploads\\{DateTime.UtcNow.Year}\\{DateTime.UtcNow.Month.ToString("d2")}\\";
                 var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{BlogConst.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
 
                 // make sure save path is there

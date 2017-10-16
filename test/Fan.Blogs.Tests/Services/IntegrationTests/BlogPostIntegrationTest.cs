@@ -21,7 +21,6 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
         {
             // Arrange
             SeedTestPost();
-            DateTime createdOn = DateTime.Now;
             var blogPost = new BlogPost // A user posts this from OLW
             {
                 UserId = Actor.AUTHOR_ID,
@@ -31,7 +30,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
                 Excerpt = null,                     // user didn't input
                 CategoryTitle = null,               // user didn't input
                 TagTitles = null,                   // user didn't input
-                CreatedOn = new DateTime(),         // user didn't input, it's MinValue
+                CreatedOn = new DateTimeOffset(),   // user didn't input, it's MinValue
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
             };
@@ -42,7 +41,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             // Assert
             Assert.Equal(2, result.Id);
             Assert.Equal("hello-world", result.Slug);
-            Assert.NotEqual(DateTime.MinValue, result.CreatedOn);
+            Assert.NotEqual(DateTimeOffset.MinValue, result.CreatedOn);
             Assert.Equal(1, result.Category.Id);
             Assert.Equal(0, result.Tags.Count);
         }
@@ -55,7 +54,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
         {
             // Arrange
             SeedTestPost();
-            DateTime createdOn = DateTime.Now;
+            var createdOn = DateTimeOffset.Now; // user local time
             var blogPost = new BlogPost // A user posts this from browser
             {
                 UserId = Actor.AUTHOR_ID,
@@ -98,7 +97,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
                 Excerpt = null,
                 CategoryTitle = "Travel",
                 TagTitles = new List<string> { "Windows 10", TAG2_TITLE },
-                CreatedOn = new DateTime(),
+                CreatedOn = new DateTimeOffset(),
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
             };
@@ -140,7 +139,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
             blogPost.TagTitles = new List<string> { "Windows 10", TAG2_TITLE }; // 1 new tag, 1 existing
-            blogPost.CreatedOn = DateTime.Now; // update the post time to now
+            blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
 
             var result = await _blogSvc.UpdatePostAsync(blogPost);
 
@@ -183,7 +182,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
             blogPost.TagTitles = new List<string> { "Windows 10", TAG2_TITLE }; // 1 new tag, 1 existing
-            blogPost.CreatedOn = DateTime.Now; // update the post time to now
+            blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
             blogPost.Status = EPostStatus.Draft;
 
             var result = await _blogSvc.UpdatePostAsync(blogPost);
@@ -232,15 +231,14 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
                 TagTitles = null,                   // user didn't input
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
-
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTimeOffset.Now      // user local time
             };
 
             // Act
             var postNow = await _blogSvc.CreatePostAsync(blogPost);
 
             // Assert
-            Assert.Equal("now", postNow.CreatedOnDisplay);
+            Assert.Equal("now", postNow.CreatedOnFriendly);
         }
     }
 }

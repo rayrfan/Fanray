@@ -262,7 +262,7 @@ namespace Fan.Blogs.Tests.Data
                 Category = cat,
                 Body = "A post body.",
                 UserId = Actor.AUTHOR_ID,
-                UpdatedOn = new DateTime(2016, 12, 1),
+                UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",
                 Slug = "hello-world",
@@ -298,7 +298,7 @@ namespace Fan.Blogs.Tests.Data
             {
                 Body = "A post body.",
                 UserId = Actor.AUTHOR_ID,
-                UpdatedOn = new DateTime(2016, 12, 1),
+                UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",
                 Slug = "hello-world",

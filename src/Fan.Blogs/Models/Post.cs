@@ -46,16 +46,17 @@ namespace Fan.Blogs.Models
         /// <remarks>
         /// - This time is saved in Utc time.
         /// - When a published post is saved as draft, this maintains the post's CreatedOn.
-        ///   When draft is published, unless user sets a new datetime, it maintains the original datetime.
-        /// - When post is display to a user, we show the humanized version <see cref="CreatedOnDisplay"/>.
+        ///   When draft is published, unless user sets a new datetime, it maintains the original value.
+        /// - When post is display to a user, we show the humanized version <see cref="CreatedOnFriendly"/>
+        ///   or a date time string converted to the <see cref="SiteSettings.TimeZoneId"/>.
         /// </remarks>
-        public DateTime CreatedOn { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
 
         /// <summary>
         /// User friendly time display, such as "yesterday".
         /// </summary>
         [NotMapped]
-        public string CreatedOnDisplay { get; set; }
+        public string CreatedOnFriendly { get; set; }
 
         /// <summary>
         /// The post excerpt.
@@ -122,9 +123,9 @@ namespace Fan.Blogs.Models
         public EPostType Type { get; set; }
 
         /// <summary>
-        /// For blog post and page, the datetime user last updated a draft, when post is published this value is null.
+        /// When user last updated a draft, when the post is published this value is null.
         /// </summary>
-        public DateTime? UpdatedOn { get; set; }
+        public DateTimeOffset? UpdatedOn { get; set; }
 
         /// <summary>
         /// The author.

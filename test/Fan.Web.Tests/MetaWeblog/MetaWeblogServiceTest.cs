@@ -53,7 +53,7 @@ namespace Fan.Web.Tests.MetaWeblog
                 Description = "<p>This is a post from OLW</p>",
                 Excerpt = null,
                 Link = null, // ??
-                PostDate = new DateTime(), // ??
+                PostDate = new DateTimeOffset(), // ??
                 PostId = null, // ??
                 Publish = true,
                 Slug = null,
@@ -81,7 +81,7 @@ namespace Fan.Web.Tests.MetaWeblog
                 Description = "<p>This is a post from OLW</p>",
                 Excerpt = null,
                 Link = null, // ??
-                PostDate = new DateTime(), // ??
+                PostDate = new DateTimeOffset(), // ??
                 PostId = null, // ??
                 Publish = true,
                 Slug = null,
@@ -112,7 +112,7 @@ namespace Fan.Web.Tests.MetaWeblog
                 Description = "<p>This is a post from OLW</p>",
                 Excerpt = null,
                 Link = null, // ??
-                PostDate = new DateTime(), // ??
+                PostDate = new DateTimeOffset(), // ??
                 PostId = null, // ??
                 Publish = true,
                 Slug = null,

@@ -187,5 +187,22 @@ namespace Fan.Helpers
                 return body;
             }
         }
+
+        /// <summary>
+        /// Converts a time from the server to a user's local time with his specified timezone.
+        /// </summary>
+        /// <param name="serverTime"></param>
+        /// <param name="timeZoneId">The timezone to convert server time to.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Server saves all posts with DateTimeOffset.UtcNow, when a post is shown in browser it's 
+        /// shows either a humanized string if the post was published within 2 days, or an actual
+        /// date time string converted in <see cref="Fan.Models.SiteSettings.TimeZoneId"/> timezone.
+        /// </remarks>
+        public static DateTimeOffset ConvertTime(DateTimeOffset serverTime, string timeZoneId)
+        {
+            var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            return TimeZoneInfo.ConvertTime(serverTime, userTimeZone);
+        }
     }
 }

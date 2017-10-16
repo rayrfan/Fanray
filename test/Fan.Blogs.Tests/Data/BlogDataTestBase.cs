@@ -97,7 +97,7 @@ namespace Fan.Blogs.Tests.Data
                 Body = "A post body.",
                 Category = cat,
                 UserId = Actor.AUTHOR_ID,
-                CreatedOn = (new DateTime(2017, 01, 01)).ToUniversalTime(),
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,
@@ -134,7 +134,7 @@ namespace Fan.Blogs.Tests.Data
                     Body = $"A post body #{i}.",
                     Category = cat,
                     UserId = Actor.AUTHOR_ID,
-                    CreatedOn = new DateTime(2017, 01, i), // be aware this is UTC time
+                    CreatedOn = new DateTimeOffset(new DateTime(2017, 01, i), new TimeSpan(-7, 0, 0)),
                     RootId = null,
                     Title = $"Test Post #{i}",
                     Slug = $"{POST_SLUG}-{i}",
