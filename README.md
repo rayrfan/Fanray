@@ -7,7 +7,7 @@
 Just clone and run, either from Visual Studio 2017 or command line.
 
 - From VS2017, open Fanray.sln, ctrl + F5
-- From command line, do the following, then go to http://localhost:5000
+- From command line, do the following, then go to http://localhost:5001
  ```
 cd <sln folder>
 dotnet restore
