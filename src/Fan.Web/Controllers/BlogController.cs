@@ -1,5 +1,7 @@
-﻿using Fan.Enums;
-using Fan.Helpers;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Helpers;
+using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Fan.Models;
 using Fan.Services;
 using Fan.Web.Models.BlogViewModels;
@@ -14,24 +16,30 @@ namespace Fan.Web.Controllers
     public class BlogController : Controller
     {
         private readonly IBlogService _blogSvc;
+        private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly ILogger<BlogService> _logger;
+        private readonly ILogger<BlogController> _logger;
 
         public BlogController(IBlogService blogService,
+            ISettingService settingService,
              UserManager<User> userManager,
+             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
-            ILogger<BlogService> logger)
+            ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _settingSvc = settingService;
             _userManager = userManager;
+            _roleManager = roleManager;
             _signInManager = signInManager;
             _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var settings = await _blogSvc.GetSettingsAsync();
+            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             if (settings == null)
                 return RedirectToAction("Setup");
 
@@ -45,7 +53,7 @@ namespace Fan.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Setup()
         {
-            var settings = await _blogSvc.GetSettingsAsync();
+            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             if (settings != null)
                 return RedirectToAction("Index");
 
@@ -53,7 +61,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Setting up the blog, create user, create blogsettings and default category.
+        /// Sets up the blog, creates user, role, blogsettings and default category.
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -63,37 +71,65 @@ namespace Fan.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Fanray Setup Begins");
+
+                // user with email as username
+                var user = new User { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
+                var adminRole = "Administrator";
+                var role = new Role
+                {
+                    Name = adminRole,
+                    IsSystemRole = true,
+                    Description = "An Administrator has full power over the site and can do everything."
+                };
+
                 // create user
-                var user = new User { UserName = model.UserName, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
+                // create Admin role
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("{@User} account created with password.", user);
+                    if (!await _roleManager.RoleExistsAsync(adminRole))
+                        result = await _roleManager.CreateAsync(role);
+                }
+
+                // assign Admin role to user
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("{@Role} created.", role);
+                    result = await _userManager.AddToRoleAsync(user, adminRole);
+                }
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Blog Setup begins.");
-                    _logger.LogInformation("User account created with password.");
+                    _logger.LogInformation("{@Role} assigned to {@User}.", role, user);
 
-                    //// sign-in user
-                    //await _signInManager.SignInAsync(user, isPersistent: false);
-                    //_logger.LogInformation("User has been signed in.");
+                    // sign-in user
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation("User has been signed in.");
 
-                    // create blog settings
-                    await _blogSvc.CreateSettingsAsync(new BlogSettings {
+                    // create site and blog settings
+                    await _settingSvc.CreateSettingsAsync(new SiteSettings
+                    {
                         Title = model.Title,
+                        Tagline = model.Tagline,
                         TimeZoneId = model.TimeZoneId
                     });
-                    _logger.LogInformation("BlogSettings created.");
+                    await _settingSvc.CreateSettingsAsync(new BlogSettings());
+                    _logger.LogInformation("Site and Blog Settings created.");
 
                     // create welcome post and default category
                     await _blogSvc.CreatePostAsync(new BlogPost
                     {
-                        CategoryTitle = Const.DEFAULT_CATEGORY,
+                        CategoryTitle = BlogConst.DEFAULT_CATEGORY,
                         TagTitles = null,
-                        Title = Const.WELCOME_POST_TITLE,
-                        Body = Const.WELCOME_POST_BODY,
-                        UserName = model.UserName,
+                        Title = BlogConst.WELCOME_POST_TITLE,
+                        Body = BlogConst.WELCOME_POST_BODY,
+                        UserId = 1,
                         Status = EPostStatus.Published,
                         CommentStatus = ECommentStatus.AllowComments,
-                        CreatedOn = DateTime.Now,
+                        CreatedOn = DateTimeOffset.Now,
                     });
                     _logger.LogInformation("Welcome post and default category created.");
                     _logger.LogInformation("Blog Setup completes.");

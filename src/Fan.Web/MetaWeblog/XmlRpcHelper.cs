@@ -157,7 +157,7 @@ namespace Fan.Web.MetaWeblog
 
             // author
             var authorId = memberList.SingleOrDefault(m => m.Element("name").Value == "wp_author_id");
-            post.Author = authorId?.Element("value").Value;
+            post.AuthorId = authorId?.Element("value").Value;
 
             // categories
             var categories = memberList.SingleOrDefault(m => m.Element("name").Value == "categories");
@@ -175,18 +175,18 @@ namespace Fan.Web.MetaWeblog
 
                 if (dateCreated != null)
                 {
-                    post.PostDate = DateTime.ParseExact(dateCreated.Element("value").Value,
+                    post.PostDate = DateTimeOffset.ParseExact(dateCreated.Element("value").Value,
                             "yyyyMMdd'T'HH':'mm':'ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                 }
                 else if (pubDate != null)
                 {
-                    post.PostDate = DateTime.ParseExact(pubDate.Element("value").Value,
+                    post.PostDate = DateTimeOffset.ParseExact(pubDate.Element("value").Value,
                             "yyyyMMdd'T'HH':'mm':'ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                 }
             }
             catch (Exception ex)
             {
-                post.PostDate = DateTime.MinValue;
+                post.PostDate = DateTimeOffset.MinValue;
                 _logger.LogError(ex.Message);
             }
 
@@ -357,9 +357,9 @@ namespace Fan.Web.MetaWeblog
         {
             XElement data = new XElement("data");
 
-            if (response.Blogs != null)
+            if (response.BlogInfos != null)
             {
-                foreach (var blog in response.Blogs)
+                foreach (var blog in response.BlogInfos)
                 {
                     data.Add(new XElement("value",
                         new XElement("struct",
@@ -491,7 +491,7 @@ namespace Fan.Web.MetaWeblog
         /// <summary>
         /// Convert date to ISO8601 format.
         /// </summary>
-        private string ConvertDatetoISO8601(DateTime date)
+        private string ConvertDatetoISO8601(DateTimeOffset date)
         {
             return string.Format("{0}{1}{2}T{3}:{4}:{5}",
                                 date.Year,

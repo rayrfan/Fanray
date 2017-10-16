@@ -3,7 +3,7 @@
 @{
     var category = Model.Item1;
     var postList = Model.Item2;
-    ViewData["Title"] = string.Format(Const.TAX_META_TITLE, category.Title);
+    ViewData["Title"] = $"Latest '{category.Title}' Posts";
 }
 
 <div class="posts">

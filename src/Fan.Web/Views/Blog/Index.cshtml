@@ -1,6 +1,6 @@
-﻿@model Fan.Models.BlogPostList
+﻿@model BlogPostList
 @{
-    var settings = await blogService.GetSettingsAsync();
+    var settings = await settingService.GetSettingsAsync<BlogSettings>();
 }
 
 <div class="posts">

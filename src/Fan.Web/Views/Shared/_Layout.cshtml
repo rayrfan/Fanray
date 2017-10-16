@@ -1,9 +1,9 @@
 ﻿@{
     var cats = await blogService.GetCategoriesAsync();
     var tags = await blogService.GetTagsAsync();
-    var settings = await blogService.GetSettingsAsync();
+    var settings = await settingService.GetSettingsAsync<SiteSettings>();
     var title = ViewData["Title"] == null ? settings.Title : $"{ViewData["Title"]} - {settings.Title}";
-    var description = ViewData["Description"] ?? settings.Tagline;
+    string description = ViewData["Description"] == null ? settings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
     var url = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
 }
@@ -13,13 +13,16 @@
     <title>@title</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="@description" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:domain" content="@domain" />
     <meta name="twitter:title" property="og:title" itemprop="title name" content="@title" />
-    <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
     <meta property="og:url" content="@url" />
+    @if (!string.IsNullOrEmpty(description))
+    {
+        <meta name="description" content="@description" />
+        <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
+    }
     <link rel="canonical" href="@url" />
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 

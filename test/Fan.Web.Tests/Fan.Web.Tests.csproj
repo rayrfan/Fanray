@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fan.Web\Fan.Web.csproj" />
-    <ProjectReference Include="..\Fan.Tests\Fan.Tests.csproj" />
+    <ProjectReference Include="..\Fan.Blogs.Tests\Fan.Blogs.Tests.csproj" />
   </ItemGroup>
 
 </Project>

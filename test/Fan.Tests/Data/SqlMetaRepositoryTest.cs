@@ -1,8 +1,6 @@
 ﻿using Fan.Data;
-using Fan.Exceptions;
 using Fan.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Linq;
 using Xunit;
@@ -45,13 +43,13 @@ namespace Fan.Tests.Data
         public async void CreateMeta_Creates_A_Meta_In_Db()
         {
             // Arrange
-            var meta = new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) };
+            var meta = new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) };
 
             // Act
             await _metaRepo.CreateAsync(meta);
 
             // Assert
-            Assert.NotNull(_db.Metas.SingleOrDefault(c => c.Key == "BlogSettings"));
+            Assert.NotNull(_db.Metas.SingleOrDefault(c => c.Key == "SiteSettings"));
         }
 
         /// <summary>
@@ -76,14 +74,14 @@ namespace Fan.Tests.Data
         public async void GetMeta_Returns_The_Meta_With_Specified_Key()
         {
             // Arrange
-            SeedTestPost();
+            await _metaRepo.CreateAsync(new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) });
 
             // Act
-            var meta = await _metaRepo.GetAsync("BlogSettings");
+            var meta = await _metaRepo.GetAsync("SiteSettings");
 
             // Assert
             Assert.NotNull(meta);
-            Assert.Equal("BlogSettings", meta.Key);
+            Assert.Equal("SiteSettings", meta.Key);
         }
 
         /// <summary>

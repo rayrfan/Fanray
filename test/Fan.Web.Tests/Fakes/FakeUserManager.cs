@@ -32,5 +32,10 @@ namespace Fan.Web.Tests.Fakes
         {
             return Task.FromResult(IdentityResult.Success);
         }
+
+        public override Task<User> FindByNameAsync(string userName)
+        {
+            return Task.FromResult(Actor.User);
+        }
     }
 }
