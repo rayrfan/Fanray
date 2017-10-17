@@ -1,4 +1,7 @@
-﻿using Fan.Enums;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Helpers;
+using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
@@ -15,18 +18,25 @@ namespace Fan.Web.MetaWeblog
 {
     public class MetaWeblogService : IMetaWeblogService
     {
+        private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
+        private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
         private readonly IHostingEnvironment _hostingEnvironment;
 
-        public MetaWeblogService(SignInManager<User> signInManager,
+        public MetaWeblogService(
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
             IBlogService blogSvc,
+            ISettingService settingService,
             ILogger<MetaWeblogService> logger,
             IHostingEnvironment env)
         {
+            _userManager = userManager;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
+            _settingSvc = settingService;
             _logger = logger;
             _hostingEnvironment = env;
         }
@@ -41,7 +51,7 @@ namespace Fan.Web.MetaWeblog
             {
                 var blogPost = new BlogPost
                 {
-                    UserName = String.IsNullOrEmpty(post.Author) ? userName : post.Author,
+                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -73,7 +83,7 @@ namespace Fan.Web.MetaWeblog
                 var blogPost = new BlogPost
                 {
                     Id = Convert.ToInt32(postId),
-                    UserName = String.IsNullOrEmpty(post.Author) ? userName : post.Author,
+                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -227,7 +237,7 @@ namespace Fan.Web.MetaWeblog
 
             try
             {
-                var settings = await _blogSvc.GetSettingsAsync();
+                var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
                 var blogs = new List<MetaBlogInfo>();
                 var blog = new MetaBlogInfo { Url = rootUrl, BlogName = settings.Title };
                 blogs.Add(blog);
@@ -246,14 +256,16 @@ namespace Fan.Web.MetaWeblog
 
             try
             {
+                // userId
+                int userId = (await _userManager.FindByNameAsync(userName)).Id;
+
                 // filename
                 string mediaObjectName = mediaObject.Name.Replace(" ", "_").Replace(":", "-");
                 var fileName = mediaObjectName.Substring(mediaObjectName.LastIndexOf('/') + 1);
 
                 // save path 
                 // because I'm unable to find a way to get the post date of the post into here, I'm not using the year/month folders
-                //var uploads = $"uploads\\{DateTime.UtcNow.Year}\\{DateTime.UtcNow.Month.ToString("d2")}\\";
-                var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{Const.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
+                var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{BlogConst.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
 
                 // make sure save path is there
                 if (!Directory.Exists(savePath))
@@ -281,7 +293,7 @@ namespace Fan.Web.MetaWeblog
                 // create media to db
                 await _blogSvc.UpsertMediaAsync(new Media
                 {
-                    UserName = userName,
+                    UserId = userId,
                     Title = fileName,
                     Slug = fileName,
                     MimeType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName)), // mediaObject.type
@@ -290,7 +302,7 @@ namespace Fan.Web.MetaWeblog
 
                 var mediaInfo = new MetaMediaInfo()
                 {
-                    Url = $"{Const.MEDIA_UPLOADS_FOLDER}/{fileName}"
+                    Url = $"{BlogConst.MEDIA_UPLOADS_FOLDER}/{fileName}"
                 };
 
                 return mediaInfo;
@@ -303,6 +315,12 @@ namespace Fan.Web.MetaWeblog
 
         // -------------------------------------------------------------------- Private helpers
 
+        /// <summary>
+        /// Ensures user is valid by sign in, throws <see cref="MetaWeblogException"/> if sign in fails.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         private async Task EnsureValidUserAsync(string userName, string password)
         {
             if (!await _signInManager.CanSignInAsync(new User { UserName = userName, PasswordHash = password }))
@@ -315,7 +333,7 @@ namespace Fan.Web.MetaWeblog
         {
             return new MetaPost
             {
-                Author = blogPost.UserName,
+                AuthorId = blogPost.UserId.ToString(),
                 Categories = new List<string> { blogPost.CategoryTitle },
                 CommentPolicy = (blogPost.CommentStatus == ECommentStatus.AllowComments ||
                                  blogPost.CommentStatus == ECommentStatus.AllowCommentsWithApproval) ? "1" : "0",

@@ -1,4 +1,6 @@
-﻿using Fan.Models;
+﻿using Fan.Enums;
+using Fan.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Data
@@ -21,6 +23,14 @@ namespace Fan.Data
         /// <param name="key"></param>
         /// <returns></returns>
         Task<Meta> GetAsync(string key);
+
+        /// <summary>
+        /// Returns a list of <see cref="Meta"/> based on keySegment and how it's compared
+        /// </summary>
+        /// <param name="keySegment"></param>
+        /// <param name="compareBy"></param>
+        /// <returns></returns>
+        Task<List<Meta>> GetListAsync(string keySegment, EMetaKeyCompareBy compareBy);
 
         /// <summary>
         /// Updates a <see cref="Meta"/>.

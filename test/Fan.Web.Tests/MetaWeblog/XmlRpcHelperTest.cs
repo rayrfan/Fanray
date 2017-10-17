@@ -502,7 +502,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("Technology", request.Post.Categories[0]);
             Assert.Equal("blogging", request.Post.Tags[0]);
             Assert.Equal("testing", request.Post.Tags[1]);
-            Assert.Equal(new DateTime(2017, 9, 7, 8, 8, 0), request.Post.PostDate); // 20170907T15:08:00
+            Assert.Equal(new DateTimeOffset(2017, 9, 7, 8, 8, 0, new TimeSpan(-7, 0, 0)), request.Post.PostDate); // 20170907T15:08:00
 
             Assert.Equal(true, request.Publish);
         }
@@ -526,7 +526,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("Technology", request.Post.Categories[0]);
             Assert.Equal("blogging", request.Post.Tags[0]);
             Assert.Equal("testing", request.Post.Tags[1]);
-            Assert.Equal(new DateTime(2017, 9, 7, 8, 8, 0), request.Post.PostDate); // 20170907T15:08:00
+            Assert.Equal(new DateTimeOffset(2017, 9, 7, 8, 8, 0, new TimeSpan(-7, 0, 0)), request.Post.PostDate); // 20170907T15:08:00
 
             Assert.Equal(true, request.Publish);
         }
@@ -927,7 +927,7 @@ namespace Fan.Web.Tests.MetaWeblog
                     Slug = "test-post",
                     Description = "Body of post.",
                     Publish = true,
-                    PostDate = new DateTime(2017, 9, 8, 13, 34, 05)
+                    PostDate = new DateTimeOffset(2017, 9, 8, 13, 34, 05, TimeSpan.Zero)
                 },
             };
 

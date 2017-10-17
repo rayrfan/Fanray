@@ -1,5 +1,7 @@
 ﻿using Fan.Helpers;
-using System.Collections.Generic;
+using Fan.Models;
+using Humanizer;
+using System;
 using Xunit;
 
 namespace Fan.Tests.Helpers
@@ -37,19 +39,42 @@ namespace Fan.Tests.Helpers
         }
 
         /// <summary>
-        /// Test <see cref="Util.FormatTaxonomySlug(string, IEnumerable{string})"/> for
-        /// long, duplicate user inputs.
+        /// 
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="expected"></param>
-        /// <param name="existingSlugs"></param>
-        [Theory]
-        [InlineData("c#", "cs")]
-        [InlineData("this is a really long category title", "this-is-a-really-long-ca")]
-        [InlineData("cat1", "cat1-2", new string[] { "cat1" })]
-        public void FormatTaxonomySlug_Test(string input, string expected, IEnumerable<string> existingSlugs = null)
+        [Fact]
+        public void ConvertTime_Converts_UtcTime_To_A_Specified_Timezone()
         {
-            Assert.Equal(expected, Util.FormatTaxonomySlug(input, existingSlugs));
+            // suppose a site owner lives in US west coast
+            // so he sets the site with the following timezone
+            var siteSettings = new SiteSettings
+            {
+                TimeZoneId = "Pacific Standard Time"
+            };
+
+            // he published a post at his local time 2017/10/14 16:22:00,
+            // since server saves all posts with DateTimeOffset.UtcNow, so it
+            // records this time for the post CreatedOn
+            var createdOn = new DateTimeOffset(2017, 10, 14, 23, 22, 0, TimeSpan.Zero);
+
+            // the user wants to see the actual post time in his own timezone
+            // Util.ConvertTime returns him that
+            var displayToUser = Util.ConvertTime(createdOn, siteSettings.TimeZoneId);
+            Assert.Equal("-07:00:00", displayToUser.Offset.ToString());
+        }
+
+        /// <summary>
+        /// DateTimeOffset is used throughout the system as recommended 
+        /// <see cref="https://docs.microsoft.com/en-us/dotnet/standard/datetime/choosing-between-datetime"/>
+        /// DateTime is ambiguous wheras DateTimeOffset has an offset relating to UTC making it 
+        /// very clear spot in time.
+        /// </summary>
+        [Fact]
+        public void TimeOffset_Humanize_Test()
+        {
+            Assert.Equal("now", DateTimeOffset.UtcNow.Humanize()); // now
+            Assert.Equal("now", DateTimeOffset.Now.Humanize()); // now
+            Assert.Equal("now", DateTime.UtcNow.Humanize()); // now
+            Assert.NotEqual("now", DateTime.Now.Humanize()); // 7 hours ago or wherever you are running
         }
     }
 }

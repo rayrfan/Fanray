@@ -6,7 +6,7 @@ namespace Fan.Web.MetaWeblog.Models
     {
         public XmlRpcResponse()
         {
-            Blogs = new List<MetaBlogInfo>();
+            BlogInfos = new List<MetaBlogInfo>();
             Categories = new List<MetaCategory>();
             Keywords = new List<string>();
             Posts = new List<MetaPost>();
@@ -29,7 +29,7 @@ namespace Fan.Web.MetaWeblog.Models
 
         public List<MetaAuthor> Authors { get; set; }
 
-        public List<MetaBlogInfo> Blogs { get; set; }
+        public List<MetaBlogInfo> BlogInfos { get; set; }
 
         public List<MetaCategory> Categories { get; set; }
 

@@ -18,10 +18,14 @@ namespace Fan.Web.Models.BlogViewModels
             TimeZoneId = "Pacific Standard Time";
         }
 
-
         [Required]
-        [Display(Name = "Blog Name")]
+        [Display(Name = "Site Title")]
+        [StringLength(64, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
         public string Title { get; set; }
+
+        [Display(Name = "Site Tagline")]
+        [StringLength(128, ErrorMessage = "The {0} must be no more than {1} characters long.", MinimumLength = 0)]
+        public string Tagline { get; set; }
 
         public string TimeZoneId { get; set; }
 
@@ -29,8 +33,9 @@ namespace Fan.Web.Models.BlogViewModels
         public List<SelectListItem> TimeZones { get; set; }
 
         [Required]
-        [Display(Name = "Username")]
-        public string UserName { get; set; }
+        [Display(Name = "Display Name")]
+        [StringLength(64, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
+        public string DisplayName { get; set; }
 
         [Required]
         [EmailAddress]
@@ -38,7 +43,7 @@ namespace Fan.Web.Models.BlogViewModels
         public string Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 4)]
+        [StringLength(16, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 4)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
