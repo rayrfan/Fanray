@@ -24,12 +24,11 @@ namespace Fan.Web.Tests.MetaWeblog
             var loggerMetaSvc = _loggerFactory.CreateLogger<MetaWeblogService>();
 
             // metaweblog svc
-            var envMock = new Mock<IHostingEnvironment>();
             var context = new Mock<HttpContext>();
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
             _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), 
-                _blogSvc, _settingSvcMock.Object, loggerMetaSvc, envMock.Object);
+                _blogSvc, _settingSvcMock.Object, loggerMetaSvc, _envMock.Object);
         }
 
         string appKey = "appKey";
@@ -166,7 +165,7 @@ namespace Fan.Web.Tests.MetaWeblog
             var result = await _svc.GetCategoriesAsync(blogId, userName, password, rootUrl);
 
             // Assert
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.Equal($"{rootUrl}/category/{CAT_SLUG}", result[0].HtmlUrl);
         }
 
@@ -181,8 +180,8 @@ namespace Fan.Web.Tests.MetaWeblog
 
             // Assert
             Assert.Equal(2, result.Count);
-            Assert.True(result.Contains(TAG1_TITLE));
-            Assert.True(result.Contains(TAG2_TITLE));
+            Assert.Contains(TAG1_TITLE, result);
+            Assert.Contains(TAG2_TITLE, result);
         }
 
         // -------------------------------------------------------------------- Other

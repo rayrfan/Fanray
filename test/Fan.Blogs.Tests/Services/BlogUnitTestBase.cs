@@ -4,6 +4,7 @@ using Fan.Blogs.Helpers;
 using Fan.Blogs.Services;
 using Fan.Data;
 using Fan.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ namespace Fan.Blogs.Tests.Services
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
+        protected Mock<IMediaRepository> _mediaRepoMock;
         protected BlogService _blogSvc;
         protected SettingService _settingSvc;
         protected IMapper _mapper;
@@ -40,6 +42,10 @@ namespace Fan.Blogs.Tests.Services
             _metaRepoMock = new Mock<IMetaRepository>();
             _catRepoMock = new Mock<ICategoryRepository>();
             _tagRepoMock = new Mock<ITagRepository>();
+            _mediaRepoMock = new Mock<IMediaRepository>();
+
+            // env 
+            var envMock = new Mock<IHostingEnvironment>();
 
             // cache
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
@@ -56,7 +62,12 @@ namespace Fan.Blogs.Tests.Services
 
             // svc
             _settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
-            _blogSvc = new BlogService(_settingSvc, _catRepoMock.Object, _postRepoMock.Object, _tagRepoMock.Object,
+            _blogSvc = new BlogService(_settingSvc, 
+                _catRepoMock.Object, 
+                _postRepoMock.Object, 
+                _tagRepoMock.Object,
+                _mediaRepoMock.Object,
+                envMock.Object,
                 _cache, _loggerBlogSvc, _mapper);
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
-using Fan.Enums;
-using Fan.Models;
+using Fan.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,25 +9,13 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Contract for a post repository.
     /// </summary>
-    public interface IPostRepository
+    public interface IPostRepository : IRepository<Post>
     {
-        /// <summary>
-        /// Creates a new <see cref="Post"/>
-        /// </summary>
-        Task<Post> CreateAsync(Post post);
-
         /// <summary>
         /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
         /// it will also delete all child pages.
         /// </summary>
         Task DeleteAsync(int id);
-
-        /// <summary>
-        /// Updates a <see cref="Post"/>.
-        /// </summary>
-        /// <param name="post">Not all implementations use this parameter, such as the Sql ones.</param>
-        /// <returns></returns>
-        Task<Post> UpdateAsync(Post post);
 
         /// <summary>
         /// Returns a <see cref="Post"/> by id. If it is a BlogPost it'll return together with its 

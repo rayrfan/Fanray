@@ -29,7 +29,23 @@
         /// </remarks>
         public const int POST_TITLE_SLUG_MAXLEN = 256;
 
+        /// <summary>
+        /// Max len for a media filename is 128.
+        /// </summary>
+        public const int MEDIA_FILENAME_MAXLEN = 128;
+
+        /// <summary>
+        /// Folder to save uploaded media is called "uploads".
+        /// </summary>
         public const string MEDIA_UPLOADS_FOLDER = "uploads";
+
+        /// <summary>
+        /// Accepted image types: .jpg .jpeg .png .gif
+        /// </summary>
+        /// <remarks>
+        /// Getting this idea from WP https://en.support.wordpress.com/images/
+        /// </remarks>
+        public static readonly string[] Accepted_Image_Types = { ".jpg", ".jpeg", ".gif", ".png" };
 
         // -------------------------------------------------------------------- Initial data
 

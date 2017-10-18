@@ -1,9 +1,8 @@
 ﻿namespace Fan.Blogs.Enums
 {
-    public enum EPostType
+    public enum EPostType : byte
     {
         BlogPost = 0,
         Page,
-        Media,
     }
 }

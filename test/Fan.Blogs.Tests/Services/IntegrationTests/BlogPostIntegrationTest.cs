@@ -43,7 +43,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             Assert.Equal("hello-world", result.Slug);
             Assert.NotEqual(DateTimeOffset.MinValue, result.CreatedOn);
             Assert.Equal(1, result.Category.Id);
-            Assert.Equal(0, result.Tags.Count);
+            Assert.Empty(result.Tags);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             Assert.Equal("hello-world", result.Slug);
             Assert.Equal(createdOn.ToUniversalTime(), result.CreatedOn);
             Assert.Equal(1, result.Category.Id);
-            Assert.Equal(0, result.Tags.Count);
+            Assert.Empty(result.Tags);
         }
 
         /// <summary>

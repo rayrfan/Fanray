@@ -2,10 +2,8 @@
 
 namespace Fan.Models
 {
-    public class Meta
+    public class Meta : BaseEntity
     {
-        public int Id { get; set; }
-
         /// <summary>
         /// Must be unique.
         /// </summary>

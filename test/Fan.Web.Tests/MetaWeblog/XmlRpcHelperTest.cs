@@ -496,7 +496,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("admin", request.UserName);
             Assert.Equal("admin", request.Password);
 
-            Assert.Equal(null, request.Post.PostId);
+            Assert.Null(request.Post.PostId);
             Assert.Equal("Welcome to Fanray", request.Post.Title);
             Assert.Equal("welcome-to-fanray", request.Post.Slug);
             Assert.Equal("Technology", request.Post.Categories[0]);
@@ -504,7 +504,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("testing", request.Post.Tags[1]);
             Assert.Equal(new DateTimeOffset(2017, 9, 7, 8, 8, 0, new TimeSpan(-7, 0, 0)), request.Post.PostDate); // 20170907T15:08:00
 
-            Assert.Equal(true, request.Publish);
+            Assert.True(request.Publish);
         }
 
         /// <summary>
@@ -520,7 +520,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("admin", request.UserName);
             Assert.Equal("admin", request.Password);
 
-            Assert.Equal(null, request.Post.PostId); // postId is set outside of post
+            Assert.Null(request.Post.PostId); // postId is set outside of post
             Assert.Equal("Welcome to Fanray", request.Post.Title);
             Assert.Equal("welcome-to-fanray", request.Post.Slug);
             Assert.Equal("Technology", request.Post.Categories[0]);
@@ -528,7 +528,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("testing", request.Post.Tags[1]);
             Assert.Equal(new DateTimeOffset(2017, 9, 7, 8, 8, 0, new TimeSpan(-7, 0, 0)), request.Post.PostDate); // 20170907T15:08:00
 
-            Assert.Equal(true, request.Publish);
+            Assert.True(request.Publish);
         }
 
         /// <summary>
@@ -616,7 +616,7 @@ namespace Fan.Web.Tests.MetaWeblog
             Assert.Equal("2", request.PostId);
             Assert.Equal("admin", request.UserName);    
             Assert.Equal("admin", request.Password);
-            Assert.Equal(true, request.Publish);
+            Assert.True(request.Publish);
         }
 
         /// <summary>
