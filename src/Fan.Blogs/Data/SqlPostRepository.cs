@@ -1,5 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,24 +12,12 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Sql implementation of the <see cref="IPostRepository"/> contract.
     /// </summary>
-    public class SqlPostRepository : IPostRepository
+    public class SqlPostRepository : EFRepository<Post>, IPostRepository
     {
         private readonly BlogDbContext _db;
-        public SqlPostRepository(BlogDbContext db)
+        public SqlPostRepository(BlogDbContext db) : base(db)
         {
             _db = db;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Post"/>.
-        /// </summary>
-        /// <param name="post"></param>
-        /// <returns></returns>
-        public async Task<Post> CreateAsync(Post post)
-        {
-            await _db.Posts.AddAsync(post);
-            await _db.SaveChangesAsync();
-            return post;
         }
 
         /// <summary>
@@ -165,17 +154,6 @@ namespace Fan.Blogs.Data
             int postCount = await q.CountAsync();
 
             return (posts: posts, totalCount: postCount);
-        }
-
-        /// <summary>
-        /// Updates a post.
-        /// </summary>
-        /// <param name="post">Not used just being returned.</param>
-        /// <returns></returns>
-        public async Task<Post> UpdateAsync(Post post)
-        {
-            await _db.SaveChangesAsync();
-            return post;
         }
     }
 }

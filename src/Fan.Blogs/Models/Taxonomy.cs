@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Fan.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blogs.Models
 {
-    public class Taxonomy
+    public class Taxonomy : BaseEntity
     {
-        public int Id { get; set; }
-
         /// <summary>
         /// Text of the term.
         /// </summary>

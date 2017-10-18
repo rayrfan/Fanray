@@ -7,14 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blogs.Models
 {
-    public class Post
+    public class Post : BaseEntity
     {
         public Post()
         {
             PostTags = new HashSet<PostTag>();
         }
-
-        public int Id { get; set; }
 
         /// <summary>
         /// Post body.

@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Models;
+using Fan.Data;
 using Fan.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,13 +9,8 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Contract for a category repository.
     /// </summary>
-    public interface ICategoryRepository 
+    public interface ICategoryRepository : IRepository<Category>
     {
-        /// <summary>
-        /// Creates a new <see cref="Category"/>.
-        /// </summary>
-        Task<Category> CreateAsync(Category category);
-
         /// <summary>
         /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the given 
         /// default category id.
@@ -30,11 +26,5 @@ namespace Fan.Blogs.Data
         /// Returns all categories or empty list if no categories found.
         /// </summary>
         Task<List<Category>> GetListAsync();
-
-        /// <summary>
-        /// Updates a <see cref="Category"/>.
-        /// </summary>
-        /// <param name="category">Not all implementations use this parameter, such as the Sql ones.</param>
-        Task<Category> UpdateAsync(Category category);
     }
 }

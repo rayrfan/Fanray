@@ -144,7 +144,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _cache.GetAsync<List<Category>>(CACHE_KEY_ALL_CATS, new TimeSpan(0, 10, 0), async () => {
+            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, new TimeSpan(0, 10, 0), async () => {
                 return await _catRepo.GetListAsync();
             });
         }

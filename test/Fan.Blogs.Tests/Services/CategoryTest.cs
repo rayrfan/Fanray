@@ -20,14 +20,15 @@ namespace Fan.Blogs.Tests.Services
         /// </summary>
         public CategoryTest()
         {
-            // blog settings
+            // setup blog settings
             _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
                 .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
 
+            // setup all categories in db
             _catRepoMock.Setup(r => r.GetListAsync()).Returns(Task.FromResult(
                 new List<Category>
                 {
-                    new Category { Title = "Technology", Slug = "tech" } 
+                    new Category { Title = "Technology", Slug = "tech" }
                 }
             ));
         }
