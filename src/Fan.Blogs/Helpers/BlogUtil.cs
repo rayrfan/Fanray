@@ -51,6 +51,7 @@ namespace Fan.Blogs.Helpers
 
             return slug;
         }
+
         /// <summary>
         /// Returns automapper mapping.
         /// </summary>
@@ -67,8 +68,6 @@ namespace Fan.Blogs.Helpers
                     cfg.CreateMap<BlogPost, Post>();
                     cfg.CreateMap<Post, Page>();
                     cfg.CreateMap<Page, Post>();
-                    cfg.CreateMap<Post, Media>();
-                    cfg.CreateMap<Media, Post>();
                 }).CreateMapper();
             }
         }

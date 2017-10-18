@@ -72,12 +72,6 @@ namespace Fan.Blogs.Models
         public string Excerpt { get; set; }
 
         /// <summary>
-        /// Available only when Type is Media, null otherwise.
-        /// </summary>
-        [StringLength(maximumLength: 128)]
-        public string MimeType { get; set; }
-
-        /// <summary>
         /// Parent page id for child page, 0 for root page, null for blog post.
         /// </summary>
         public int? ParentId { get; set; }
