@@ -20,7 +20,7 @@ Either way you will see the blog setup page on app initial launch.
 ## Database
 
 Database is created for you on app initial launch. Out of box it uses SQLite, and SQL Server is also supported.
-To switch to SQL Server, go to `appsettings.json` you will see the following.
+To switch to SQL Server, go to `appsettings.json` and change the Database value on line 3 from `sqlite` to `sqlserver` and update your connection string accordingly.
 
 ```
   "AppSettings": {
@@ -32,10 +32,7 @@ To switch to SQL Server, go to `appsettings.json` you will see the following.
   "ConnectionStrings": {
     "DefaultConnection": "Server=.\\SQLEXPRESS;Database=Fanray;Trusted_Connection=True;MultipleActiveResultSets=true"
   },
-
 ```
-
-Change `sqlite` to `sqlserver` and update your connection string accordingly.
 
 ## Open Live Writer
 
