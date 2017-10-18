@@ -1,5 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +11,15 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Sql implementation of the <see cref="ICategoryRepository"/> contract.
     /// </summary>
-    public class SqlCategoryRepository : ICategoryRepository
+    /// <remarks>
+    /// Category specific data access methods.
+    /// </remarks>
+    public class SqlCategoryRepository : EFRepository<Category>, ICategoryRepository
     {
         private readonly BlogDbContext _db;
-        public SqlCategoryRepository(BlogDbContext db)
+        public SqlCategoryRepository(BlogDbContext db) : base(db)
         {
             _db = db;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Category"/>, the returned object is tracked.
-        /// </summary>
-        public async Task<Category> CreateAsync(Category category)
-        {
-            await _db.AddAsync(category);
-            await _db.SaveChangesAsync();
-            return category;
         }
 
         /// <summary>
@@ -72,16 +66,6 @@ namespace Fan.Blogs.Data
                         Slug = c.Slug,
                         Count = _db.Posts.Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
                     }).ToListAsync();
-        }
-
-        /// <summary>
-        /// Updates a <see cref="Category"/>.
-        /// </summary>
-        /// <param name="category">this parm is not used just being returned.</param>
-        public async Task<Category> UpdateAsync(Category category)
-        {
-            await _db.SaveChangesAsync();
-            return category;
         }
     }
 }

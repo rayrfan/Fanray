@@ -100,17 +100,17 @@ namespace Fan.Blogs.Services
         // -------------------------------------------------------------------- Media
 
         /// <summary>
-        /// Creates or updates a media post.
+        /// Uploads media and inserts a record in datasource.
         /// </summary>
-        /// <param name="media"></param>
+        /// <param name="userId"></param>
+        /// <param name="name"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
-        Task<Media> UpsertMediaAsync(Media media);
+        Task<string> UploadMediaAsync(int userId, string name, byte[] content);
         /// <summary>
-        /// Returns a media post by slug, returns null if not found.
+        /// Updates media title and description.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        Task<Media> GetMediaAsync(string fileName);
+        Task<Media> UpdateMediaAsync(int id, string title, string description);
 
         // -------------------------------------------------------------------- BlogPosts
 

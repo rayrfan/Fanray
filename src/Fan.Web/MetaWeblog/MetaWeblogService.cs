@@ -1,8 +1,6 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
-using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -11,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Web.MetaWeblog
@@ -256,56 +253,12 @@ namespace Fan.Web.MetaWeblog
 
             try
             {
-                // userId
                 int userId = (await _userManager.FindByNameAsync(userName)).Id;
-
-                // filename
-                string mediaObjectName = mediaObject.Name.Replace(" ", "_").Replace(":", "-");
-                var fileName = mediaObjectName.Substring(mediaObjectName.LastIndexOf('/') + 1);
-
-                // save path 
-                // because I'm unable to find a way to get the post date of the post into here, I'm not using the year/month folders
-                var savePath = $"{Path.Combine(_hostingEnvironment.WebRootPath)}\\{BlogConst.MEDIA_UPLOADS_FOLDER}\\"; // "wwwroot\uploads\"
-
-                // make sure save path is there
-                if (!Directory.Exists(savePath))
-                    Directory.CreateDirectory(savePath);
-
-                // file path
-                var filePath = Path.Combine(savePath, fileName);
-
-                // make sure filename is unique
-                // the problem with this is if user updates the post resizing the image, we'll end up with new files
-                int i = 2;
-                while (File.Exists(filePath))
+                var url = await _blogSvc.UploadMediaAsync(userId, mediaObject.Name, mediaObject.Bits);
+                return new MetaMediaInfo()
                 {
-                    fileName = fileName.Insert(fileName.LastIndexOf('.'), $"_{i}");
-                    filePath = Path.Combine(savePath, fileName);
-                }
-
-                // save file
-                using (var targetStream = File.Create(filePath))
-                using (MemoryStream stream = new MemoryStream(mediaObject.Bits))
-                {
-                    await stream.CopyToAsync(targetStream);
-                }
-
-                // create media to db
-                await _blogSvc.UpsertMediaAsync(new Media
-                {
-                    UserId = userId,
-                    Title = fileName,
-                    Slug = fileName,
-                    MimeType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName)), // mediaObject.type
-                    Status = EPostStatus.Published,
-                });
-
-                var mediaInfo = new MetaMediaInfo()
-                {
-                    Url = $"{BlogConst.MEDIA_UPLOADS_FOLDER}/{fileName}"
+                    Url = url
                 };
-
-                return mediaInfo;
             }
             catch (Exception ex)
             {

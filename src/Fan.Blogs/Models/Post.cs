@@ -7,14 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blogs.Models
 {
-    public class Post
+    public class Post : BaseEntity
     {
         public Post()
         {
             PostTags = new HashSet<PostTag>();
         }
-
-        public int Id { get; set; }
 
         /// <summary>
         /// Post body.
@@ -70,12 +68,6 @@ namespace Fan.Blogs.Models
         /// will be calculated on the fly.
         /// </remarks>
         public string Excerpt { get; set; }
-
-        /// <summary>
-        /// Available only when Type is Media, null otherwise.
-        /// </summary>
-        [StringLength(maximumLength: 128)]
-        public string MimeType { get; set; }
 
         /// <summary>
         /// Parent page id for child page, 0 for root page, null for blog post.

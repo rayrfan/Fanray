@@ -11,25 +11,13 @@ namespace Fan.Data
     /// <summary>
     /// Sql implementation of the <see cref="IMetaRepository"/> contract.
     /// </summary>
-    public class SqlMetaRepository : IMetaRepository
+    public class SqlMetaRepository : EFRepository<Meta>, IMetaRepository
     {
         private readonly CoreDbContext _db;
 
-        public SqlMetaRepository(CoreDbContext db)
+        public SqlMetaRepository(CoreDbContext db) : base(db)
         {
             _db = db;
-        }
-
-        /// <summary>
-        /// Creates a <see cref="Meta"/> record, throws <see cref="DbUpdateException"/> if there is 
-        /// already a record with the same key.  <see cref="Meta.Key"/> has a unique constraint.
-        /// </summary>
-        /// <param name="meta"></param>
-        public async Task<Meta> CreateAsync(Meta meta)
-        {
-            await _db.AddAsync(meta);
-            await _db.SaveChangesAsync();
-            return meta;
         }
 
         /// <summary>
@@ -59,17 +47,6 @@ namespace Fan.Data
                 default:
                     return await _db.Metas.Where(m => m.Key.Contains(keySegment)).ToListAsync();
             }
-        }
-
-        /// <summary>
-        /// Updates a <see cref="Meta"/>.
-        /// </summary>
-        /// <param name="meta">Not used just being returned.</param>
-        /// <returns></returns>
-        public async Task<Meta> UpdateAsync(Meta meta)
-        {
-            await _db.SaveChangesAsync();
-            return meta;
         }
     }
 }

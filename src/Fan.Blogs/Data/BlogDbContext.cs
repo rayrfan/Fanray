@@ -5,12 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fan.Blogs.Data
 {
+    /// <summary>
+    /// The DbContext for blog application.
+    /// </summary>
+    /// <remarks>
+    /// It's deriving from IdentityDbContext instead of DbContext because when testing it's still
+    /// required to access User table to seed data.
+    /// </remarks>
     public class BlogDbContext : IdentityDbContext<User, Role, int>
     {
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
         public virtual DbSet<PostTag> PostTags { get; set; }
+        public virtual DbSet<Media> Medias { get; set; }
 
         public BlogDbContext(DbContextOptions<BlogDbContext> options) 
             : base(options)
@@ -57,6 +65,12 @@ namespace Fan.Blogs.Data
             {
                 entity.ToTable("Blog_PostTag");
                 entity.HasKey(e => new { e.PostId, e.TagId });
+            });
+
+            builder.Entity<Media>(entity =>
+            {
+                entity.ToTable("Blog_Media");
+                entity.HasIndex(e => new { e.Type, e.UploadedOn });
             });
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,12 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Sql implementation of the <see cref="ITagRepository"/> contract.
     /// </summary>
-    public class SqlTagRepository : ITagRepository
+    public class SqlTagRepository : EFRepository<Tag>, ITagRepository
     {
         private readonly BlogDbContext _db;
-        public SqlTagRepository(BlogDbContext db)
+        public SqlTagRepository(BlogDbContext db) : base(db)
         {
             _db = db;
-        }
-
-        public async Task<Tag> CreateAsync(Tag tag)
-        {
-            await _db.Tags.AddAsync(tag);
-            await _db.SaveChangesAsync();
-            return tag;
         }
 
         /// <summary>
@@ -55,12 +49,6 @@ namespace Fan.Blogs.Data
                                        where pt.TagId == t.Id && p.Status == EPostStatus.Published
                                        select pt).Count(),
                           }).ToListAsync();
-        }
-
-        public async Task<Tag> UpdateAsync(Tag tag)
-        {
-            await _db.SaveChangesAsync();
-            return tag;
         }
     }
 }
