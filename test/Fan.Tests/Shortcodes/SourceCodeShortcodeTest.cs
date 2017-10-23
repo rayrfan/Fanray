@@ -22,6 +22,8 @@ namespace Fan.Tests.Shortcodes
         [InlineData("c#", "csharp")]
         [InlineData("cs", "csharp")]
         [InlineData("htm", "xml")]
+        [InlineData("html", "xml")]
+        [InlineData("xml", "xml")]
         [InlineData("not exist", "text")]
         public void GetBrush_Returns_Correct_Brush_Given_Language_Alias(string alias, string expected)
         {

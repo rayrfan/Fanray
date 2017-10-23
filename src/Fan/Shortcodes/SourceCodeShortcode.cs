@@ -120,7 +120,7 @@ namespace Fan.Shortcodes
 			string lang = Language ?? Lang;
 
 			// lookup
-			for (int i = 0; i < lang_alias_lookup.GetLength(0) - 1; i++)
+			for (int i = 0; i < lang_alias_lookup.GetLength(0); i++)
 			{
 				if (lang_alias_lookup[i, 0].Equals(lang, StringComparison.InvariantCultureIgnoreCase))
 				{
