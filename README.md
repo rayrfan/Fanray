@@ -107,6 +107,6 @@ To specify the width only
 ```
 
 To start at a certain point in the video, convert the time of that point from minutes and seconds to all seconds, then add that number as shown (using an example start point of 1 minute 15 seconds)
-```html
+```
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U&start=75]
 ```
