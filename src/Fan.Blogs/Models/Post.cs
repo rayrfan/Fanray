@@ -91,11 +91,6 @@ namespace Fan.Blogs.Models
         public string Slug { get; set; }
 
         /// <summary>
-        /// Page order, null for blog post.
-        /// </summary>
-        public int? SortOrder { get; set; }
-
-        /// <summary>
         /// Published or Draft.
         /// </summary>
         public EPostStatus Status { get; set; }
