@@ -9,6 +9,7 @@ using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Models;
 using Fan.Services;
+using Fan.Shortcodes;
 using FluentValidation.Results;
 using Humanizer;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,7 @@ namespace Fan.Blogs.Services
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
+        private readonly IShortcodeService _shortcodeSvc;
 
         public BlogService(
             ISettingService settingService,
@@ -44,7 +46,9 @@ namespace Fan.Blogs.Services
             IHostingEnvironment env,
             IDistributedCache cache,
             ILogger<BlogService> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IShortcodeService shortcodeService
+            )
         {
             _settingSvc = settingService;
             _catRepo = catRepo;
@@ -55,6 +59,7 @@ namespace Fan.Blogs.Services
             _cache = cache;
             _mapper = mapper;
             _logger = logger;
+            _shortcodeSvc = shortcodeService;
         }
 
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
@@ -742,7 +747,7 @@ namespace Fan.Blogs.Services
         /// <param name="post"></param>
         /// <returns></returns>
         /// <remarks>
-        /// It readies the excerpt and the list of tags.
+        /// It readies CreatedOnFriendly, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
         private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
@@ -771,6 +776,9 @@ namespace Fan.Blogs.Services
                 blogPost.Tags.Add(postTag.Tag);
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
+
+            // Shortcodes
+            blogPost.Body = _shortcodeSvc.Parse(post.Body);
 
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;

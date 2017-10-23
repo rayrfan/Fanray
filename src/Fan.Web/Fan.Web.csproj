@@ -35,9 +35,4 @@
     <ProjectReference Include="..\Fan\Fan.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
 </Project>

@@ -6,6 +6,7 @@ using Fan.Data;
 using Fan.Enums;
 using Fan.Models;
 using Fan.Services;
+using Fan.Shortcodes;
 using Fan.Web.Data;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Middlewares;
@@ -91,6 +92,10 @@ namespace Fan.Web
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            var shortcodeService = new ShortcodeService();
+            shortcodeService.Add<SourceCodeShortcode>(tag: "code");
+            shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
+            services.AddSingleton<IShortcodeService>(shortcodeService);
 
             // Mvc
             services.AddMvc();

@@ -5,6 +5,7 @@ using Fan.Blogs.Services;
 using Fan.Blogs.Tests.Data;
 using Fan.Models;
 using Fan.Services;
+using Fan.Shortcodes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -53,8 +54,11 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             // Mapper
             var mapper = BlogUtil.Mapper;
 
+            // Shortcode
+            var shortcodeSvc = new Mock<IShortcodeService>();
+
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
-            _blogSvc = new BlogService(_settingSvcMock.Object, catRepo, postRepo, tagRepo, mediaRepo, _envMock.Object, cache, loggerBlogSvc, mapper);
+            _blogSvc = new BlogService(_settingSvcMock.Object, catRepo, postRepo, tagRepo, mediaRepo, _envMock.Object, cache, loggerBlogSvc, mapper, shortcodeSvc.Object);
         }
     }
 }
