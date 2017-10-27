@@ -577,7 +577,7 @@ namespace Fan.Blogs.Services
         /// <param name="tax">A category or tag.</param>
         /// <param name="createOrUpdate"></param>
         /// <returns></returns>
-        private async Task<Taxonomy> PrepTaxonomyAsync(Taxonomy tax, ECreateOrUpdate createOrUpdate)
+        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
         {
             // get existing titles and slugs
             IEnumerable<string> existingTitles = null;

@@ -49,7 +49,7 @@ namespace Fan.Tests.Data
             await _metaRepo.CreateAsync(meta);
 
             // Assert
-            Assert.NotNull(_db.Metas.SingleOrDefault(c => c.Key == "SiteSettings"));
+            Assert.NotNull(_db.Set<Meta>().SingleOrDefault(c => c.Key == "SiteSettings"));
         }
 
         /// <summary>

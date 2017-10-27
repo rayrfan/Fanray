@@ -2,7 +2,6 @@
 using Fan.Models;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Tests.Fakes;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;

@@ -11,10 +11,10 @@ namespace Fan.Blogs.Data
     /// <summary>
     /// Sql implementation of the <see cref="ITagRepository"/> contract.
     /// </summary>
-    public class SqlTagRepository : EFRepository<Tag>, ITagRepository
+    public class SqlTagRepository : EntityRepository<Tag>, ITagRepository
     {
-        private readonly BlogDbContext _db;
-        public SqlTagRepository(BlogDbContext db) : base(db)
+        private readonly FanDbContext _db;
+        public SqlTagRepository(FanDbContext db) : base(db)
         {
             _db = db;
         }
@@ -29,14 +29,14 @@ namespace Fan.Blogs.Data
         /// </remarks>
         public async Task DeleteAsync(int id)
         {
-            var tag = await _db.Tags.SingleAsync(t => t.Id == id);
+            var tag = await _entities.SingleAsync(t => t.Id == id);
             _db.Remove(tag); // cascade delete will take care of PostTag assoc
             await _db.SaveChangesAsync();
         }
 
         public async Task<List<Tag>> GetListAsync()
         {
-            return await (from t in _db.Tags
+            return await (from t in _entities
                           select new Tag
                           {
                               Id = t.Id,
@@ -44,7 +44,7 @@ namespace Fan.Blogs.Data
                               Slug = t.Slug,
                               Color = t.Color,
                               Description = t.Description,
-                              Count = (from p in _db.Posts
+                              Count = (from p in _db.Set<Post>()
                                        from pt in p.PostTags
                                        where pt.TagId == t.Id && p.Status == EPostStatus.Published
                                        select pt).Count(),

@@ -13,11 +13,6 @@ namespace Fan.Models
         public string Version { get; set; }
 
         /// <summary>
-        /// The database to use: "sqlite" (default) or "sqlserver".
-        /// </summary>
-        public ESupportedDatabase Database { get; set; } = ESupportedDatabase.Sqlite;
-
-        /// <summary>
         /// The preferred domain to use: "auto" (default), "www", "nonwww".
         /// </summary>
         /// <remarks>

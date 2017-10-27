@@ -3,7 +3,7 @@ using Fan.Web.Middlewares;
 
 namespace Microsoft.AspNetCore.Builder
 {
-    public static class IApplicationBuilderExtensions
+    public static class ApplicationBuilderExtensions
     {
         /// <summary>
         /// Adds <see cref="MetaWeblogMiddleware"/> to the application's request pipeline.

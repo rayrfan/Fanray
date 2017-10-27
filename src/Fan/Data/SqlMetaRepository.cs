@@ -11,11 +11,11 @@ namespace Fan.Data
     /// <summary>
     /// Sql implementation of the <see cref="IMetaRepository"/> contract.
     /// </summary>
-    public class SqlMetaRepository : EFRepository<Meta>, IMetaRepository
+    public class SqlMetaRepository : EntityRepository<Meta>, IMetaRepository
     {
-        private readonly CoreDbContext _db;
+        private readonly FanDbContext _db;
 
-        public SqlMetaRepository(CoreDbContext db) : base(db)
+        public SqlMetaRepository(FanDbContext db) : base(db)
         {
             _db = db;
         }
@@ -26,7 +26,7 @@ namespace Fan.Data
         /// <param name="key"></param>
         /// <returns></returns>
         public async Task<Meta> GetAsync(string key) =>
-             await _db.Metas.SingleOrDefaultAsync(m => m.Key.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+             await _entities.SingleOrDefaultAsync(m => m.Key.Equals(key, StringComparison.CurrentCultureIgnoreCase));
 
         /// <summary>
         /// Returns a list of <see cref="Meta"/> records.
@@ -39,13 +39,13 @@ namespace Fan.Data
             switch (compareBy)
             {
                 case EMetaKeyCompareBy.StartsWith:
-                    return await _db.Metas.Where(m => m.Key.StartsWith(keySegment)).ToListAsync();
+                    return await _entities.Where(m => m.Key.StartsWith(keySegment)).ToListAsync();
 
                 case EMetaKeyCompareBy.EndsWith:
-                    return await _db.Metas.Where(m => m.Key.EndsWith(keySegment)).ToListAsync();
+                    return await _entities.Where(m => m.Key.EndsWith(keySegment)).ToListAsync();
 
                 default:
-                    return await _db.Metas.Where(m => m.Key.Contains(keySegment)).ToListAsync();
+                    return await _entities.Where(m => m.Key.Contains(keySegment)).ToListAsync();
             }
         }
     }

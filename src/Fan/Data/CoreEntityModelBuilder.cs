@@ -1,30 +1,15 @@
 ﻿using Fan.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fan.Data
 {
-    public class CoreDbContext : IdentityDbContext<User, Role, int>
+    /// <summary>
+    /// The core entity model.
+    /// </summary>
+    public class CoreEntityModelBuilder : IEntityModelBuilder
     {
-        public virtual DbSet<Meta> Metas { get; set; }
-
-        public CoreDbContext(DbContextOptions<CoreDbContext> options)
-            : base(options)
-        {
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            CreateCoreModel(builder);
-        }
-
-        /// <summary>
-        /// Core models.
-        /// </summary>
-        /// <param name="builder"></param>
-        public static void CreateCoreModel(ModelBuilder builder)
+        public void CreateModel(ModelBuilder builder)
         {
             builder.Entity<User>().ToTable("Core_User");
             builder.Entity<Role>().ToTable("Core_Role");

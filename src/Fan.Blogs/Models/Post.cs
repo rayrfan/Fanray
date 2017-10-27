@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blogs.Models
 {
-    public class Post : BaseEntity
+    public class Post : Entity
     {
         public Post()
         {

@@ -15,7 +15,7 @@ namespace Fan.Blogs.Validators
     /// Both Category and Tag need validation on its title, the slug is derived from title and is made sure
     /// to be valid.
     /// </remarks>
-    public class TaxonomyValidator : AbstractValidator<Taxonomy>
+    public class TaxonomyValidator : AbstractValidator<ITaxonomy>
     {
         public TaxonomyValidator(IEnumerable<string> existingTitles, ETaxonomyType type)
         {

@@ -2,7 +2,7 @@
 
 namespace Fan.Models
 {
-    public class Meta : BaseEntity
+    public class Meta : Entity
     {
         /// <summary>
         /// Must be unique.

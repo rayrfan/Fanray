@@ -13,7 +13,7 @@ namespace Fan.Blogs.Models
     /// as in the case of an img.
     /// https://en.support.wordpress.com/images/image-settings/
     /// </remarks>
-    public class Media : BaseEntity
+    public class Media : Entity
     {
         /// <summary>
         /// Description of the media, alt text for image.

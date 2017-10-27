@@ -1,42 +1,15 @@
 ﻿using Fan.Blogs.Models;
-using Fan.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fan.Blogs.Data
 {
     /// <summary>
-    /// The DbContext for blog application.
+    /// The blog app entity model.
     /// </summary>
-    /// <remarks>
-    /// It's deriving from IdentityDbContext instead of DbContext because when testing it's still
-    /// required to access User table to seed data.
-    /// </remarks>
-    public class BlogDbContext : IdentityDbContext<User, Role, int>
+    public class BlogEntityModelBuilder : IEntityModelBuilder
     {
-        public virtual DbSet<Post> Posts { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
-        public virtual DbSet<Tag> Tags { get; set; }
-        public virtual DbSet<PostTag> PostTags { get; set; }
-        public virtual DbSet<Media> Medias { get; set; }
-
-        public BlogDbContext(DbContextOptions<BlogDbContext> options) 
-            : base(options)
-        {
-        }
-      
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.Entity<User>().ToTable("Core_User"); // post joins user
-            CreateBlogModel(builder);
-        }
-
-        /// <summary>
-        /// Blog specific models.
-        /// </summary>
-        /// <param name="builder"></param>
-        public static void CreateBlogModel(ModelBuilder builder)
+        public void CreateModel(ModelBuilder builder)
         {
             builder.Entity<Post>(entity =>
             {

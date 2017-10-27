@@ -7,12 +7,12 @@ namespace Fan.Data
     /// <summary>
     /// EF implementation of a base repository for commonly used data access methods.
     /// </summary>
-    /// <typeparam name="T">It is a sub type of <see cref="BaseEntity"/> which provides an int based PK.</typeparam>
+    /// <typeparam name="T">It is a sub type of <see cref="Entity"/> which provides an int based PK.</typeparam>
     /// <remarks>
     /// The sub class will have its specific methods, for example SqlCategoryRepository and SqlTagRepository
     /// has a GetListAsync() which does their specific join.
     /// </remarks>
-    public class EFRepository<T> : IRepository<T> where T : BaseEntity
+    public class EntityRepository<T> : IRepository<T> where T : Entity
     {
         /// <summary>
         /// The set initialized by sub class.
@@ -23,7 +23,7 @@ namespace Fan.Data
         /// </summary>
         private readonly DbContext _db;
 
-        public EFRepository(DbContext context) 
+        public EntityRepository(DbContext context) 
         {
             _entities = context.Set<T>();
             _db = context;

@@ -3,11 +3,9 @@ using Fan.Blogs.Data;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Services;
 using Fan.Data;
-using Fan.Enums;
 using Fan.Models;
 using Fan.Services;
 using Fan.Shortcodes;
-using Fan.Web.Data;
 using Fan.Web.MetaWeblog;
 using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
@@ -18,8 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
 
 namespace Fan.Web
 {
@@ -40,25 +36,10 @@ namespace Fan.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Db 
-            // AddDbContextPool causes multi-context to fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
-            // otherwise it's a perf enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
-            Enum.TryParse(Configuration["AppSettings:Database"], ignoreCase: true, result: out ESupportedDatabase db);
-            if (db == ESupportedDatabase.Sqlite)
-            {
-                var sqlitePath = "Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite");
-                services.AddDbContext<CoreDbContext>(options => options.UseSqlite(sqlitePath))
-                        .AddDbContext<BlogDbContext>(options => options.UseSqlite(sqlitePath))
-                        .AddDbContext<FanDbContext>(options => options.UseSqlite(sqlitePath));
-                _logger.LogInformation("Using SQLite database.");
-            }
-            else
-            {
-                var connStr = Configuration.GetConnectionString("DefaultConnection");
-                services.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connStr))
-                        .AddDbContext<BlogDbContext>(options => options.UseSqlServer(connStr))
-                        .AddDbContext<FanDbContext>(options => options.UseSqlServer(connStr));
-                _logger.LogInformation("Using SQL Server database.");
-            }
+            // AddDbContextPool is a perf enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
+            // however if you have multiple contexts it'll fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
+            // furthermore to use AddDbContextPool, FanDbContext can only have a single public constructor accepting a single parameter of type DbContextOptions
+            services.AddDbContextPool<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Identity
             services.AddIdentity<User, Role>(options =>
@@ -129,8 +110,7 @@ namespace Fan.Web
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                // when develop with migration, comment below out; if you decide to keep migration, consider use Migrate().
-                db.Database.EnsureCreated();
+                db.Database.Migrate();
             }
         }
 

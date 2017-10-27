@@ -14,10 +14,10 @@ namespace Fan.Blogs.Data
     /// <remarks>
     /// Category specific data access methods.
     /// </remarks>
-    public class SqlCategoryRepository : EFRepository<Category>, ICategoryRepository
+    public class SqlCategoryRepository : EntityRepository<Category>, ICategoryRepository
     {
-        private readonly BlogDbContext _db;
-        public SqlCategoryRepository(BlogDbContext db) : base(db)
+        private readonly FanDbContext _db;
+        public SqlCategoryRepository(FanDbContext db) : base(db)
         {
             _db = db;
         }
@@ -40,11 +40,11 @@ namespace Fan.Blogs.Data
             if (id == defaultCategoryId) return;
 
             // remove it
-            var category = await _db.Categories.SingleAsync(c => c.Id == id);
+            var category = await _entities.SingleAsync(c => c.Id == id);
             _db.Remove(category);
 
             // update its posts to default category
-            var posts = _db.Posts.Where(p => p.CategoryId == id);
+            var posts = _db.Set<Post>().Where(p => p.CategoryId == id);
             foreach (var post in posts)
             {
                 post.CategoryId = defaultCategoryId;
@@ -58,13 +58,13 @@ namespace Fan.Blogs.Data
         /// </summary>
         public async Task<List<Category>> GetListAsync()
         {
-            return await _db.Categories.Select(
+            return await _entities.Select(
                     c => new Category
                     {
                         Id = c.Id,
                         Title = c.Title,
                         Slug = c.Slug,
-                        Count = _db.Posts.Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
+                        Count = _db.Set<Post>().Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
                     }).ToListAsync();
         }
     }

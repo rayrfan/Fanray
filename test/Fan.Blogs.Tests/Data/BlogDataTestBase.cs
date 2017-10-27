@@ -1,6 +1,6 @@
-﻿using Fan.Blogs.Data;
-using Fan.Blogs.Enums;
+﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.Data;
 using Fan.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -25,9 +25,9 @@ namespace Fan.Blogs.Tests.Data
     public class BlogDataTestBase : IDisposable
     {
         /// <summary>
-        /// A <see cref="BlogDbContext"/> built with Sqlite in-memory mode.
+        /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
-        protected BlogDbContext _db;
+        protected FanDbContext _db;
 
         public BlogDataTestBase()
         {
@@ -66,7 +66,7 @@ namespace Fan.Blogs.Tests.Data
         protected void SeedTestPost()
         {
             _db.Users.Add(Actor.User);
-            _db.Posts.Add(GetPost());
+            _db.Set<Post>().Add(GetPost());
             _db.SaveChanges();
         }
 
@@ -79,7 +79,7 @@ namespace Fan.Blogs.Tests.Data
         protected void SeedTestPosts(int numOfPosts)
         {
             _db.Users.Add(Actor.User);
-            _db.Posts.AddRange(GetPosts(numOfPosts));
+            _db.Set<Post>().AddRange(GetPosts(numOfPosts));
             _db.SaveChanges();
         }
 
@@ -166,15 +166,15 @@ namespace Fan.Blogs.Tests.Data
         /// <summary>
         /// Returns <see cref="BlogDbContext"/> with SQLite Database Provider in-memory mode.
         /// </summary>
-        private BlogDbContext GetContextWithSqlite()
+        private FanDbContext GetContextWithSqlite()
         {
             var connection = new SqliteConnection() { ConnectionString = "Data Source=:memory:" };
             connection.Open();
 
-            var builder = new DbContextOptionsBuilder<BlogDbContext>();
+            var builder = new DbContextOptionsBuilder<FanDbContext>();
             builder.UseSqlite(connection);
 
-            var context = new BlogDbContext(builder.Options);
+            var context = new FanDbContext(builder.Options);
             context.Database.EnsureCreated();
 
             return context;
@@ -183,10 +183,10 @@ namespace Fan.Blogs.Tests.Data
         /// <summary>
         /// Returns <see cref="BlogDbContext"/> with Entity Framework Core In-Memory Database.
         /// </summary>
-        private BlogDbContext GetContextWithEFCore()
+        private FanDbContext GetContextWithEFCore()
         {
-            var _options = new DbContextOptionsBuilder<BlogDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
-            return new BlogDbContext(_options);
+            var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
+            return new FanDbContext(_options);
         }
     }
 }
