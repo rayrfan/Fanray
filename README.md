@@ -1,12 +1,12 @@
 # Fanray
 
-**A blog application built with [ASP.NET Core](https://github.com/aspnet/Home) and supports [Open Live Writer](http://openlivewriter.org/) and shortcodes.**
+A blog application built with [ASP.NET Core 2.0](https://github.com/aspnet/Home), supports MetaWeblog API which enables you to use [Open Live Writer](http://openlivewriter.org/), also supports shortcodes so posting things like source code is very easy.
 
 ## Get Started
 
-Clone repo then run either from Visual Studio 2017 or command line.
+Fanray requires [.NET Core 2.0](https://www.microsoft.com/net/core/) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads).  Clone the repo, then run from either [Visual Studio 2017](https://www.visualstudio.com/vs/community/) or command line.
 
-- VS2017: open Fanray.sln, ctrl + F5
+- VS2017: open Fanray.sln, make sure Fan.Web is the startup project, ctrl + F5
 - Command line: do the following, then go to http://localhost:5001
  ```
 cd <sln folder>
@@ -15,27 +15,19 @@ cd src/Fan.Web
 dotnet run
 ```
 
-You will see the blog setup page on app initial launch.
-
-## Database
-
-Database is created for you on app initial launch. Running locally Fanray uses SQLite by default, and SQL Server is also supported. To switch to SQL Server, go to `appsettings.json` and change the Database value on line 3 from `sqlite` to `sqlserver` and update your connection string accordingly.
+Database is created for you on app initial launch. Below is the default connection string, to adjust it go to `appsettings.json`
 
 ```
-  "AppSettings": {
-    "Version": "1.0.0",
-    "Database": "sqlite",
-    "PreferredDomain": "auto",
-    "UseHttps": false
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.\\SQLEXPRESS;Database=Fanray;Trusted_Connection=True;MultipleActiveResultSets=true"
-  },
+"ConnectionStrings": {
+  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=Fanray;Trusted_Connection=True;MultipleActiveResultSets=true"
+},
 ```
+
+You will see the blog setup page on your first launch.
 
 ## Open Live Writer
 
-Right now the only way to post is through [Open Live Writer](http://openlivewriter.org/). To get started,
+With Fanray v1.0 to start posting, a client like [Open Live Writer](http://openlivewriter.org/) is required. To get started,
 
 - Launch the web app
 - Install and open OLW > Add blog account... > Other services > type in
