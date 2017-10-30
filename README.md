@@ -1,6 +1,6 @@
 # Fanray
 
-A blog application built with [ASP.NET Core 2.0](https://github.com/aspnet/Home), supports MetaWeblog API which enables you to use [Open Live Writer](http://openlivewriter.org/), also supports shortcodes so posting things like source code is very easy.
+A blog application built with [ASP.NET Core](https://github.com/aspnet/Home) and [Entity Framework Core](https://github.com/aspnet/EntityFrameworkCore), supports MetaWeblog API so you can use [Open Live Writer](http://openlivewriter.org/), also supports shortcodes so you can post things like source code very easily.
 
 ## Get Started
 
@@ -23,7 +23,7 @@ Database is created for you on app initial launch. Below is the default connecti
 },
 ```
 
-You will see the blog setup page on your first launch.
+You will see the blog setup page on the first launch.
 
 ## Open Live Writer
 
@@ -34,6 +34,8 @@ With Fanray v1.0 to start posting, a client like [Open Live Writer](http://openl
   - Web address of your blog
   - User name
   - Password
+
+The user name and password are created on the blog setup page.
 
 ## Shortcodes
 
@@ -102,3 +104,7 @@ To start at a certain point in the video, convert the time of that point from mi
 ```
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U&start=75]
 ```
+
+## Road Map
+* **v1.0** _mvp_ - Minimal viable product. MetaWeblog API support, writing posts, categories, tags, slug etc. through OLW; shortcodes for source code and YouTube videos (Nov 2017)
+* **v1.1** _admin_ - Admin console.
