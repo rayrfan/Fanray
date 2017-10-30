@@ -1,9 +1,8 @@
-@model BlogPost
-
+@model BlogPostViewModel
 @{
-    ViewData["Title"] = Model.Title;
-    ViewData["Description"] = Model.Excerpt;
-    var post = Model;
+    var post = Model.BlogPost;
+    ViewData["Title"] = post.Title;
+    ViewData["Description"] = post.Excerpt;
 }
 
 <article class="post single">
@@ -17,3 +16,10 @@
         @Html.Raw(post.Body)
     </section>
 </article>
+
+@await Html.PartialAsync("_Comments", Model)
+
+@section Canonical {
+    <meta property="og:url" content="@Model.CanonicalUrl" />
+    <link rel="canonical" href="@Model.CanonicalUrl" />
+}

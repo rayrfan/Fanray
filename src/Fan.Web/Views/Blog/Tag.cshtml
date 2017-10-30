@@ -1,8 +1,8 @@
-@model Tuple<Tag, BlogPostList>
+@model Tuple<Tag, BlogPostViewModelList>
 
 @{
     var tag = Model.Item1;
-    var postList = Model.Item2;
+    var postVMs = Model.Item2.PostViewModels;
     ViewData["Title"] = $"Latest '{tag.Title}' Posts";
 }
 
@@ -11,14 +11,15 @@
         Tag: @tag.Title
     </h1>
 
-    @foreach (var post in postList)
+    @foreach (var postVM in postVMs)
     {
+        var post = postVM.BlogPost;
         <article class="post">
             <header class="post-header">
                 <h1 class="post-title">
                     <a href="@post.RelativeLink">@post.Title</a>
                 </h1>
-                @await Html.PartialAsync("_PostInfo", post)
+                @await Html.PartialAsync("_PostInfo", postVM)
             </header>
             <div class="post-body">
                 @Html.Raw(post.Excerpt) <span style="padding-left:5px"><a href="@post.RelativeLink">Read More</a></span>

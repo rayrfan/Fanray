@@ -10,6 +10,7 @@ using Fan.Web.MetaWeblog;
 using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +69,7 @@ namespace Fan.Web
             services.AddScoped<IMediaRepository, SqlMediaRepository>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<IBlogMapper, BlogMapper>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
@@ -77,6 +79,7 @@ namespace Fan.Web
             shortcodeService.Add<SourceCodeShortcode>(tag: "code");
             shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
             services.AddSingleton<IShortcodeService>(shortcodeService);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Mvc
             services.AddMvc();
@@ -123,6 +126,9 @@ namespace Fan.Web
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
+
+            routes.MapRoute("BlogPostPerma", string.Format(BlogConst.POST_PERMA_URL_TEMPLATE, "{id}"),
+               new { controller = "Blog", action = "PostPerma", id = 0 }, new { id = @"^\d+$" });
 
             routes.MapRoute("BlogPost", string.Format(BlogConst.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },

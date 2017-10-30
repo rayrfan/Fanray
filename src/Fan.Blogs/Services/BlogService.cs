@@ -47,8 +47,7 @@ namespace Fan.Blogs.Services
             IDistributedCache cache,
             ILogger<BlogService> logger,
             IMapper mapper,
-            IShortcodeService shortcodeService
-            )
+            IShortcodeService shortcodeService)
         {
             _settingSvc = settingService;
             _catRepo = catRepo;

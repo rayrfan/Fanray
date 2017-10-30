@@ -1,4 +1,6 @@
-﻿namespace Fan.Blogs.Models
+﻿using Fan.Blogs.Enums;
+
+namespace Fan.Blogs.Models
 {
     /// <summary>
     /// Settings for the blog application.
@@ -20,6 +22,17 @@
         /// <summary>
         /// Should blog show a list of excerpt instead of body. Default false.
         /// </summary>
-        public bool ShowExcerpt { get; set; } 
+        public bool ShowExcerpt { get; set; } = false;
+        /// <summary>
+        /// Which comment system to use. Default Disqus.
+        /// </summary>
+        public ECommentProvider CommentProvider { get; set; } = ECommentProvider.Disqus;
+        /// <summary>
+        /// Disqus shortname.
+        /// </summary>
+        /// <remarks>
+        /// https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
+        /// </remarks>
+        public string DisqusShortname { get; set; }
     }
 }

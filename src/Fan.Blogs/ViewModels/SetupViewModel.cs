@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Web.Models.BlogViewModels
+namespace Fan.Blogs.ViewModels
 {
     public class SetupViewModel
     {
@@ -32,6 +32,9 @@ namespace Fan.Web.Models.BlogViewModels
         [Display(Name = "Time Zone")]
         public List<SelectListItem> TimeZones { get; set; }
 
+        [Display(Name = "Disqus Shortname")]
+        public string DisqusShortname { get; set; }
+
         [Required]
         [Display(Name = "Display Name")]
         [StringLength(64, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
@@ -53,4 +56,5 @@ namespace Fan.Web.Models.BlogViewModels
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
     }
+
 }

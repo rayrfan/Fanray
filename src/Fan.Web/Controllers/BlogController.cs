@@ -2,9 +2,9 @@
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
+using Fan.Blogs.ViewModels;
 using Fan.Models;
 using Fan.Services;
-using Fan.Web.Models.BlogViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,20 +16,24 @@ namespace Fan.Web.Controllers
     public class BlogController : Controller
     {
         private readonly IBlogService _blogSvc;
+        private readonly IBlogMapper _mapper;
         private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<BlogController> _logger;
 
-        public BlogController(IBlogService blogService,
+        public BlogController(
+            IBlogService blogService,
+            IBlogMapper mapper,
             ISettingService settingService,
-             UserManager<User> userManager,
-             RoleManager<Role> roleManager,
+            UserManager<User> userManager,
+            RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _mapper = mapper;
             _settingSvc = settingService;
             _userManager = userManager;
             _roleManager = roleManager;
@@ -44,7 +48,8 @@ namespace Fan.Web.Controllers
                 return RedirectToAction("Setup");
 
             var posts = await _blogSvc.GetPostsAsync(1);
-            return View(posts);
+            var vm = await _mapper.GetBlogPostViewModelListAsync(posts);
+            return View(vm);
         }
 
         /// <summary>
@@ -116,7 +121,11 @@ namespace Fan.Web.Controllers
                         Tagline = model.Tagline,
                         TimeZoneId = model.TimeZoneId
                     });
-                    await _settingSvc.CreateSettingsAsync(new BlogSettings());
+                    await _settingSvc.CreateSettingsAsync(new BlogSettings
+                    {
+                        CommentProvider = model.DisqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
+                        DisqusShortname = model.DisqusShortname.IsNullOrWhiteSpace() ? null : model.DisqusShortname.Trim(),
+                    });
                     _logger.LogInformation("Site and Blog Settings created.");
 
                     // create welcome post and default category
@@ -171,7 +180,14 @@ namespace Fan.Web.Controllers
         public async Task<IActionResult> Post(int year, int month, int day, string slug)
         {
             var post = await _blogSvc.GetPostAsync(slug, year, month, day);
-            return View(post);
+            var postVM = await _mapper.GetBlogPostViewModelAsync(post);
+            return View(postVM);
+        }
+
+        public async Task<IActionResult> PostPerma(int id)
+        {
+            var post = await _blogSvc.GetPostAsync(id);
+            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug});
         }
 
         public async Task<IActionResult> Category(string slug)
@@ -179,7 +195,8 @@ namespace Fan.Web.Controllers
             var cat = await _blogSvc.GetCategoryAsync(slug);
             var posts = await _blogSvc.GetPostsForCategoryAsync(slug, 1);
 
-            return View(new Tuple<Category, BlogPostList>(cat, posts));
+            var postVMs = await _mapper.GetBlogPostViewModelListAsync(posts);
+            return View(new Tuple<Category, BlogPostViewModelList>(cat, postVMs));
         }
 
         public async Task<IActionResult> Tag(string slug)
@@ -187,7 +204,8 @@ namespace Fan.Web.Controllers
             var tag = await _blogSvc.GetTagAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
 
-            return View(new Tuple<Tag, BlogPostList>(tag, posts));
+            var postVMs = await _mapper.GetBlogPostViewModelListAsync(posts);
+            return View(new Tuple<Tag, BlogPostViewModelList>(tag, postVMs));
         }
     }
 }

@@ -23,6 +23,5 @@ namespace Fan.Blogs.Models
         public List<Tag> Tags { get; set; }
 
         public List<string> TagTitles { get; set; }
-
     }
 }

@@ -1,17 +1,25 @@
-﻿@model BlogPost
-
+﻿@model BlogPostViewModel
+@{ 
+    var blogSettings = Model.Settings;
+    var post = Model.BlogPost;
+    var disqusId = Model.DisqusPageIdentifier;
+}
 <div class="post-info clearfix">
-    <i class="fa fa-user" aria-hidden="true"></i><span class="post-author">@Model.User.DisplayName</span>
-    <i class="fa fa-calendar" aria-hidden="true"></i><span class="post-date">@Model.CreatedOnFriendly</span>
-    <i class="fa fa-folder" aria-hidden="true"></i><span class="post-category"><a href="@Model.Category.RelativeLink">@Model.CategoryTitle</a></span>
-    @if (Model.Tags.Count > 0)
+    <i class="fa fa-user" aria-hidden="true"></i><span class="post-author">@post.User.DisplayName</span>
+    <i class="fa fa-calendar" aria-hidden="true"></i><span class="post-date">@post.CreatedOnFriendly</span>
+    <i class="fa fa-folder" aria-hidden="true"></i><span class="post-category"><a href="@post.Category.RelativeLink">@post.CategoryTitle</a></span>
+    @if (post.Tags.Count > 0)
     {
         <i class="fa fa-tags" aria-hidden="true"></i>
         <span class="post-tags">
-            @foreach (var tag in Model.Tags)
+            @foreach (var tag in post.Tags)
             {
                 <a href="@tag.RelativeLink">@tag.Title</a>
             }
         </span>
     }
+@if (blogSettings.CommentProvider == Fan.Blogs.Enums.ECommentProvider.Disqus)
+{
+    <i class="fa fa-comment" aria-hidden="true"></i><span class="post-author"><a href="@post.RelativeLink#disqus_thread" data-disqus-identifier="@disqusId"></a></span>
+}
 </div>

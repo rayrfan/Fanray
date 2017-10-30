@@ -8,6 +8,7 @@
         public const string CATEGORY_RSS_URL_TEMPLATE = "category/rss/{0}";
         public const string TAG_URL_TEMPLATE = "tag/{0}";
         public const string POST_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
+        public const string POST_PERMA_URL_TEMPLATE = "post/{0}";
         public const string POST_EDIT_URL_TEMPLATE = "admin/post/edit/{0}";
         public const string MEDIA_URL_TEMPLATE = "uploads/{0}";
 

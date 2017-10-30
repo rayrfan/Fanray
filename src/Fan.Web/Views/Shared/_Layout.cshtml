@@ -1,11 +1,12 @@
 ﻿@{
     var cats = await blogService.GetCategoriesAsync();
     var tags = await blogService.GetTagsAsync();
-    var settings = await settingService.GetSettingsAsync<SiteSettings>();
-    var title = ViewData["Title"] == null ? settings.Title : $"{ViewData["Title"]} - {settings.Title}";
-    string description = ViewData["Description"] == null ? settings.Tagline : ViewData["Description"] as string;
+    var siteSettings = await settingService.GetSettingsAsync<SiteSettings>();
+    var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
+
+    var title = ViewData["Title"] == null ? siteSettings.Title : $"{ViewData["Title"]} - {siteSettings.Title}";
+    string description = ViewData["Description"] == null ? siteSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
-    var url = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
 }
 <!DOCTYPE html>
 <html>
@@ -17,13 +18,12 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:domain" content="@domain" />
     <meta name="twitter:title" property="og:title" itemprop="title name" content="@title" />
-    <meta property="og:url" content="@url" />
     @if (!string.IsNullOrEmpty(description))
     {
         <meta name="description" content="@description" />
         <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
     }
-    <link rel="canonical" href="@url" />
+    @RenderSection("Canonical", required: false)
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 
     <environment include="Development">
@@ -47,7 +47,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">@settings.Title</a>
+                <a class="navbar-brand" href="/">@siteSettings.Title</a>
             </div>
 
             <div class="collapse navbar-collapse">
@@ -107,7 +107,7 @@
         </div>
     </div>
     <footer class="site-footer">
-        <p class="text-muted">Copyright &copy; @settings.Title @DateTime.Now.Year - Powered by <a href="https://github.com/FanrayMedia/Fanray">Fanray</a></p>
+        <p class="text-muted">Copyright &copy; @siteSettings.Title @DateTime.Now.Year - Powered by <a href="https://github.com/FanrayMedia/Fanray">Fanray</a></p>
     </footer>      
 
     <environment include="Development">
@@ -131,5 +131,9 @@
     </environment>
     <script src="~/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
+    @if (blogSettings.CommentProvider == Fan.Blogs.Enums.ECommentProvider.Disqus)
+    {
+        <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
+    }
 </body>
 </html>
