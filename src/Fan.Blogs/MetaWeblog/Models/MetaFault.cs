@@ -1,4 +1,4 @@
-﻿namespace Fan.Web.MetaWeblog
+﻿namespace Fan.Blogs.MetaWeblog
 {
     public class MetaFault
     {

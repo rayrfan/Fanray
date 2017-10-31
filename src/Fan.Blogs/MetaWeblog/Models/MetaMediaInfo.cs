@@ -1,4 +1,4 @@
-﻿namespace Fan.Web.MetaWeblog
+﻿namespace Fan.Blogs.MetaWeblog
 {
     /// <summary>
     /// The media info returned by <see cref="IMetaWeblogService.NewMediaObjectAsync(string, string, string, MetaMediaObject, Microsoft.AspNetCore.Http.HttpContext)"/>

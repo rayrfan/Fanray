@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Controllers
+namespace Fan.Blogs.Controllers
 {
     public class BlogController : Controller
     {

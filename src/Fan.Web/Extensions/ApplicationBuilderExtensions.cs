@@ -1,4 +1,4 @@
-﻿using Fan.Web.MetaWeblog;
+﻿using Fan.Blogs.MetaWeblog;
 using Fan.Web.Middlewares;
 
 namespace Microsoft.AspNetCore.Builder

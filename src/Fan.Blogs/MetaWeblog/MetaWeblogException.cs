@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fan.Web.MetaWeblog
+namespace Fan.Blogs.MetaWeblog
 {
     public enum EMetaWeblogCode
     {

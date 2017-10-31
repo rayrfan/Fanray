@@ -1,4 +1,4 @@
-﻿using Fan.Web.MetaWeblog.Models;
+﻿using Fan.Blogs.MetaWeblog.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Globalization;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Fan.Web.MetaWeblog
+namespace Fan.Blogs.MetaWeblog
 {
     /// <summary>
     /// Helps parsing and composing of the xmlrpc request and response data.

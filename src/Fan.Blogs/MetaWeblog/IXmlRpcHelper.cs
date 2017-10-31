@@ -1,6 +1,6 @@
-﻿using Fan.Web.MetaWeblog.Models;
+﻿using Fan.Blogs.MetaWeblog.Models;
 
-namespace Fan.Web.MetaWeblog
+namespace Fan.Blogs.MetaWeblog
 {
     /// <summary>
     /// Helps parsing and composing of the xmlrpc request and response data.

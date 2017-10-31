@@ -1,12 +1,12 @@
-﻿using Fan.Web.MetaWeblog;
-using Fan.Web.MetaWeblog.Models;
+﻿using Fan.Blogs.MetaWeblog;
+using Fan.Blogs.MetaWeblog.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Fan.Web.Tests.MetaWeblog
+namespace Fan.Blogs.Tests.MetaWeblog
 {
     public class XmlRpcHelperTest
     {

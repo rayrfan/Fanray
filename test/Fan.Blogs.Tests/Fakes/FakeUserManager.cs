@@ -6,7 +6,7 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Tests.Fakes
+namespace Fan.Blogs.Tests.Fakes
 {
     /// <summary>
     /// Fake <see cref="UserManager{TUser}"/> to help create <see cref="FakeSignInManager"/>.

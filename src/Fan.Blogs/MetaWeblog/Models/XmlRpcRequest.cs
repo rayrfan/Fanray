@@ -1,4 +1,4 @@
-﻿namespace Fan.Web.MetaWeblog.Models
+﻿namespace Fan.Blogs.MetaWeblog.Models
 {
     public class XmlRpcRequest
     {

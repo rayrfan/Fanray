@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.Web.MetaWeblog
+namespace Fan.Blogs.MetaWeblog
 {
     public class MetaWeblogService : IMetaWeblogService
     {

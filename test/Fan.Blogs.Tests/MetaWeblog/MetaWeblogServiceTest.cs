@@ -1,7 +1,7 @@
-﻿using Fan.Blogs.Tests.Services.IntegrationTests;
+﻿using Fan.Blogs.MetaWeblog;
+using Fan.Blogs.Tests.Fakes;
+using Fan.Blogs.Tests.Services.IntegrationTests;
 using Fan.Models;
-using Fan.Web.MetaWeblog;
-using Fan.Web.Tests.Fakes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Fan.Web.Tests.MetaWeblog
+namespace Fan.Blogs.Tests.MetaWeblog
 {
     /// <summary>
     /// Integration tests for <see cref="MetaWeblogService"/> class.

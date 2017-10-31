@@ -1,4 +1,4 @@
-﻿using Fan.Web.MetaWeblog.Models;
+﻿using Fan.Blogs.MetaWeblog.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fan.Web.MetaWeblog
+namespace Fan.Blogs.MetaWeblog
 {
     /// <summary>
     /// The middleware for MetaWeblog.

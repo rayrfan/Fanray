@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Fan.Blogs.Data;
 using Fan.Blogs.Helpers;
+using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Services;
 using Fan.Data;
 using Fan.Models;
 using Fan.Services;
 using Fan.Shortcodes;
-using Fan.Web.MetaWeblog;
 using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
