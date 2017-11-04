@@ -119,6 +119,7 @@ namespace Fan.Web
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
+            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });

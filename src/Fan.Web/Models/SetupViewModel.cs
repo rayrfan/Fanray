@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Blogs.ViewModels
+namespace Fan.Web.Models
 {
     public class SetupViewModel
     {

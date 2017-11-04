@@ -7,8 +7,6 @@ namespace Fan.Blogs.Helpers
     {
         public static void RegisterRoutes(IRouteBuilder routes)
         {
-            routes.MapRoute("Setup", "setup", new { controller = "Blog", action = "Setup" });
-
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
             routes.MapRoute("BlogPostPerma", string.Format(BlogConst.POST_PERMA_URL_TEMPLATE, "{id}"),

@@ -1,11 +1,8 @@
-﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Models;
+﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Blogs.ViewModels;
 using Fan.Models;
 using Fan.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -22,143 +19,35 @@ namespace Fan.Blogs.Controllers
     {
         private readonly IBlogService _blogSvc;
         private readonly ISettingService _settingSvc;
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly SignInManager<User> _signInManager;
         private readonly ILogger<BlogController> _logger;
         private readonly IDistributedCache _cache;
 
         public BlogController(
             IBlogService blogService,
             ISettingService settingService,
-            UserManager<User> userManager,
-            RoleManager<Role> roleManager,
-            SignInManager<User> signInManager,
             IDistributedCache cache,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
             _settingSvc = settingService;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
             _cache = cache;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Blog index page, redirect to home setup on initial launch.
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> Index()
         {
             var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
             if (settings == null)
-                return RedirectToAction("Setup");
+                return RedirectToAction("Setup", "Home");
 
             var posts = await _blogSvc.GetPostsAsync(1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request);
             return View(vm);
-        }
-
-        /// <summary>
-        /// Setup blog page, if already setup redirect to blog index page.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IActionResult> Setup()
-        {
-            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
-            if (settings != null)
-                return RedirectToAction("Index");
-
-            return View(new SetupViewModel());
-        }
-
-        /// <summary>
-        /// Sets up the blog, creates user, role, blogsettings and default category.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Setup(SetupViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                _logger.LogInformation("Fanray Setup Begins");
-
-                // user with email as username
-                var user = new User { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
-                var adminRole = "Administrator";
-                var role = new Role
-                {
-                    Name = adminRole,
-                    IsSystemRole = true,
-                    Description = "An Administrator has full power over the site and can do everything."
-                };
-
-                // create user
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                // create Admin role
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@User} account created with password.", user);
-                    if (!await _roleManager.RoleExistsAsync(adminRole))
-                        result = await _roleManager.CreateAsync(role);
-                }
-
-                // assign Admin role to user
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@Role} created.", role);
-                    result = await _userManager.AddToRoleAsync(user, adminRole);
-                }
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@Role} assigned to {@User}.", role, user);
-
-                    // sign-in user
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User has been signed in.");
-
-                    // create site and blog settings
-                    await _settingSvc.CreateSettingsAsync(new SiteSettings
-                    {
-                        Title = model.Title,
-                        Tagline = model.Tagline,
-                        TimeZoneId = model.TimeZoneId
-                    });
-                    await _settingSvc.CreateSettingsAsync(new BlogSettings
-                    {
-                        CommentProvider = model.DisqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
-                        DisqusShortname = model.DisqusShortname.IsNullOrWhiteSpace() ? null : model.DisqusShortname.Trim(),
-                    });
-                    _logger.LogInformation("Site and Blog Settings created.");
-
-                    // create welcome post and default category
-                    await _blogSvc.CreatePostAsync(new BlogPost
-                    {
-                        CategoryTitle = BlogConst.DEFAULT_CATEGORY,
-                        TagTitles = null,
-                        Title = BlogConst.WELCOME_POST_TITLE,
-                        Body = BlogConst.WELCOME_POST_BODY,
-                        UserId = 1,
-                        Status = EPostStatus.Published,
-                        CommentStatus = ECommentStatus.AllowComments,
-                        CreatedOn = DateTimeOffset.Now,
-                    });
-                    _logger.LogInformation("Welcome post and default category created.");
-                    _logger.LogInformation("Blog Setup completes.");
-
-                    return RedirectToAction("Index", "Blog");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
-            return View(model);
         }
 
         /// <summary>
