@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.0" />
+    <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 

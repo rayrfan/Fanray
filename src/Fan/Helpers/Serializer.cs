@@ -37,7 +37,7 @@ namespace Fan.Helpers
         /// </summary>
         /// <typeparam name="T">The type to deserialize to.</typeparam>
         /// <param name="bytes"></param>
-        public async static Task<T> BytesToObjectAsync<T>(byte[] bytes) where T : class, new()
+        public async static Task<T> BytesToObjectAsync<T>(byte[] bytes) where T : class
         {
             T obj = null;
 

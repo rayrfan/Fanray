@@ -1,11 +1,9 @@
 ﻿@model BlogPostViewModel
 @{ 
-    var pageIdentifier = Model.DisqusPageIdentifier;
-    var permalink = Model.Permalink;
-    var blogSettings = Model.Settings;
+    var post = Model;
 }
 
-@if (blogSettings.CommentProvider == Fan.Blogs.Enums.ECommentProvider.Disqus)
+@if (post.ShowDisqus)
 {
     <div id="disqus_thread" style="padding:0 50px"></div>
     <script>
@@ -13,12 +11,12 @@
     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
     var disqus_config = function () {
-    this.page.url = '@permalink';  // Replace PAGE_URL with your page's canonical URL variable
-    this.page.identifier = '@pageIdentifier'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    this.page.url = '@post.Permalink';  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = '@post.DisqusPageIdentifier'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
     (function() { // DON'T EDIT BELOW THIS LINE
     var d = document, s = d.createElement('script');
-    s.src = '@string.Format("https://{0}.disqus.com/embed.js", blogSettings.DisqusShortname)';
+    s.src = '@string.Format("https://{0}.disqus.com/embed.js", post.DisqusShortname)';
     s.setAttribute('data-timestamp', +new Date());
     (d.head || d.body).appendChild(s);
     })();

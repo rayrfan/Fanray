@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.Caching.Distributed
         /// out of the cache.
         /// </remarks>
         public async static Task<T> GetAsync<T>(this IDistributedCache cache, string key,
-            TimeSpan cacheTime, Func<Task<T>> acquire) where T : class, new()
+            TimeSpan cacheTime, Func<Task<T>> acquire) where T : class
         {
             byte[] bytes = await cache.GetAsync(key);
 

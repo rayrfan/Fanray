@@ -69,7 +69,6 @@ namespace Fan.Web
             services.AddScoped<IMediaRepository, SqlMediaRepository>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<IBlogMapper, BlogMapper>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
@@ -120,25 +119,11 @@ namespace Fan.Web
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("Setup", "setup", new { controller = "Blog", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
-            routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
-
-            routes.MapRoute("BlogPostPerma", string.Format(BlogConst.POST_PERMA_URL_TEMPLATE, "{id}"),
-               new { controller = "Blog", action = "PostPerma", id = 0 }, new { id = @"^\d+$" });
-
-            routes.MapRoute("BlogPost", string.Format(BlogConst.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
-                new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
-                new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
-
-            routes.MapRoute("BlogCategory", string.Format(BlogConst.CATEGORY_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "Category", slug = "" });
-
-            routes.MapRoute("BlogTag", string.Format(BlogConst.TAG_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "Tag", slug = "" });
+            BlogRoute.RegisterRoutes(routes);
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }

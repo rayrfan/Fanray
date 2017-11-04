@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Models;
@@ -57,8 +58,7 @@ namespace Fan.Blogs.MetaWeblog
                     CategoryTitle = (post.Categories == null || post.Categories.Count <= 0) ? null : post.Categories[0],
                     TagTitles = post.Tags,
                     Status = publish ? EPostStatus.Published : EPostStatus.Draft,
-                    // Default / None / Close all will yield NoComments
-                    CommentStatus = (!post.CommentPolicy.IsNullOrEmpty() && post.CommentPolicy == "0") ? ECommentStatus.NoComments : ECommentStatus.AllowComments,
+                    CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
                 blogPost = await _blogSvc.CreatePostAsync(blogPost);
@@ -89,7 +89,7 @@ namespace Fan.Blogs.MetaWeblog
                     CategoryTitle = (post.Categories == null || post.Categories.Count <= 0) ? null : post.Categories[0],
                     TagTitles = post.Tags,
                     Status = publish ? EPostStatus.Published : EPostStatus.Draft,
-                    CommentStatus = (!post.CommentPolicy.IsNullOrEmpty() && post.CommentPolicy == "0") ? ECommentStatus.NoComments : ECommentStatus.AllowComments,
+                    CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
                 await _blogSvc.UpdatePostAsync(blogPost);
@@ -175,7 +175,7 @@ namespace Fan.Blogs.MetaWeblog
                         Description = cat.Title,
                         HtmlUrl = rootUrl + cat.RelativeLink,
                         Id = cat.Id.ToString(),
-                        RssUrl = "", // todo
+                        RssUrl = rootUrl + cat.RssRelativeLink,
                         Title = cat.Title,
                     });
                 }
@@ -292,14 +292,34 @@ namespace Fan.Blogs.MetaWeblog
                                  blogPost.CommentStatus == ECommentStatus.AllowCommentsWithApproval) ? "1" : "0",
                 Description = blogPost.Body,
                 Excerpt = blogPost.Excerpt,
-                Link = rootUrl + blogPost.RelativeLink,
                 PostDate = blogPost.CreatedOn,
                 PostId = blogPost.Id.ToString(),
                 Publish = blogPost.Status == EPostStatus.Published,
                 Slug = blogPost.Slug,
                 Tags = blogPost.TagTitles,
                 Title = blogPost.Title,
+                Link = rootUrl + string.Format("/" + BlogConst.POST_RELATIVE_URL_TEMPLATE, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day, blogPost.Slug),
             };
+        }
+
+        /// <summary>
+        /// Returns <see cref="ECommentStatus"/> by analyzing the 4 possible post comment policy values.
+        /// </summary>
+        /// <param name="commentPolicy"></param>
+        /// <returns></returns>
+        private async Task<ECommentStatus> GetPostCommentStatusAsync(string commentPolicy)
+        {
+            if (commentPolicy.IsNullOrEmpty())
+            {
+                var settings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+                return settings.AllowCommentsOnBlogPost ? ECommentStatus.AllowComments : ECommentStatus.NoComments;
+            }
+            else if (commentPolicy == "1")
+            {
+                return ECommentStatus.AllowComments;
+            }
+
+            return ECommentStatus.NoComments; // "0", "2"
         }
     }
 }

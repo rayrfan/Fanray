@@ -36,6 +36,9 @@ namespace Fan.Blogs.Models
 
         public int CommentCount { get; set; }
 
+        /// <summary>
+        /// Gets and sets if the post allows, needs approval of or no comments.
+        /// </summary>
         public ECommentStatus CommentStatus { get; set; }
 
         /// <summary>

@@ -126,12 +126,14 @@ namespace Fan.Blogs.Services
         }
 
         /// <summary>
-        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is not found.
+        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is null or not found.
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
         public async Task<Category> GetCategoryAsync(string slug)
         {
+            if (slug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
+
             var cats = await GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
@@ -218,6 +220,8 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Tag> GetTagAsync(string slug)
         {
+            if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+
             var tags = await this.GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
@@ -477,6 +481,8 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<BlogPostList> GetPostsForCategoryAsync(string categorySlug, int pageIndex)
         {
+            if (categorySlug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
+
             // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByCategory)
             {
@@ -496,6 +502,8 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<BlogPostList> GetPostsForTagAsync(string tagSlug, int pageIndex)
         {
+            if (tagSlug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+
             // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByTag)
             {

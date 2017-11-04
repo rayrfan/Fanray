@@ -37,5 +37,8 @@ namespace Fan.Blogs.Models
 
         [NotMapped]
         public string RelativeLink => string.Format("/" + BlogConst.CATEGORY_URL_TEMPLATE, Slug);
+
+        [NotMapped]
+        public string RssRelativeLink => string.Format("/" + BlogConst.CATEGORY_RSS_URL_TEMPLATE, Slug);
     }
 }
