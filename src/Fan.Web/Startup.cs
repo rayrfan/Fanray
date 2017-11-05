@@ -100,6 +100,7 @@ namespace Fan.Web
             app.UseHsts();
             app.UseHttpWwwRewrite();
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
+            app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseMvc(routes => RegisterRoutes(routes, app));

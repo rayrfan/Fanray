@@ -119,7 +119,7 @@ namespace Fan.Blogs.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                throw new FanException($"Category with id '{id}' is not found.");
+                throw new FanException($"Category with id {id} is not found.");
             }
 
             return cat;
@@ -138,7 +138,7 @@ namespace Fan.Blogs.Services
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                throw new FanException($"Category with slug '{slug}' is not found.");
+                throw new FanException($"Category '{slug}' does not exist.");
             }
 
             return cat;
@@ -207,7 +207,7 @@ namespace Fan.Blogs.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                throw new FanException($"Tag with id '{id}' is not found.");
+                throw new FanException($"Tag with id {id} is not found.");
             }
 
             return tag;
@@ -226,7 +226,7 @@ namespace Fan.Blogs.Services
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException($"Tag with slug '{slug}' is not found.");
+                throw new FanException($"Tag '{slug}' does not exist.");
             }
 
             return tag;
@@ -425,6 +425,7 @@ namespace Fan.Blogs.Services
         public async Task<BlogPost> GetPostAsync(int id)
         {
             var post = await QueryPostAsync(id, EPostType.BlogPost);
+            if (post == null) throw new FanException("Blog post not found.");
             return await GetBlogPostAsync(post);
         }
 
@@ -444,7 +445,7 @@ namespace Fan.Blogs.Services
         {
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
-
+            if (post == null) throw new FanException("Blog post not found.");
             return await GetBlogPostAsync(post);
         }
 
