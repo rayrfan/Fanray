@@ -86,12 +86,6 @@ namespace Fan.Web
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // https and www rewrite
-            app.UseHttpWwwRewrite();
-
-            // OLW
-            app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,10 +97,11 @@ namespace Fan.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseHsts();
+            app.UseHttpWwwRewrite();
+            app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
             app.UseStaticFiles();
-
             app.UseAuthentication();
-
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
