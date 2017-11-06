@@ -1,0 +1,5 @@
+@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+
+<environment names="Production">
+    @Html.Raw(JavaScriptSnippet.FullScript)
+</environment>

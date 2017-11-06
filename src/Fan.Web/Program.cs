@@ -61,6 +61,7 @@ namespace Fan.Web
         /// </remarks>
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseApplicationInsights()
                 .UseSerilog()
                 .UseStartup<Startup>()
                 .Build();

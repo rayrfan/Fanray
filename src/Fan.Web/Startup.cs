@@ -82,6 +82,9 @@ namespace Fan.Web
 
             // Mvc
             services.AddMvc();
+
+            // AppInsights
+            services.AddApplicationInsightsTelemetry(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
