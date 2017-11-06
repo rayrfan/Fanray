@@ -25,7 +25,11 @@ p {
   margin-bottom: 1rem; }
 
 img {
-  max-width: 100%; }
+  max-width: 100%;
+  height: auto; }
+
+ul {
+  list-style-type: square; }
 
 .form-control {
   height: 2.5rem;
@@ -122,7 +126,7 @@ label {
         width: 100%; } }
 
 .site-footer {
-  padding: 2.625em 0 1.75em;
+  padding: 2rem 3rem 1rem 3rem;
   word-wrap: break-word;
   text-align: center;
   bottom: 0; }

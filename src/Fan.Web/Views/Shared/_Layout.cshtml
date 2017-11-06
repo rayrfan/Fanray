@@ -72,6 +72,10 @@
         <div class="blog-wrapper">
             <div class="blog-content">
                 @RenderBody()
+                <footer class="site-footer">
+                    <p class="text-muted pull-left">&copy; @DateTime.Now.Year - @siteSettings.Title</p>
+                    <p class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></p>
+                </footer>
             </div>
             <aside class="blog-sidebar">
                 <div class="widgets">
@@ -106,9 +110,6 @@
             </aside>
         </div>
     </div>
-    <footer class="site-footer">
-        <p class="text-muted">Copyright &copy; @siteSettings.Title @DateTime.Now.Year - Powered by <a href="https://github.com/FanrayMedia/Fanray">Fanray</a></p>
-    </footer>      
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
