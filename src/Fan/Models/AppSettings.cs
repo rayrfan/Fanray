@@ -8,11 +8,6 @@ namespace Fan.Models
     public class AppSettings
     {
         /// <summary>
-        /// Current version of the application.
-        /// </summary>
-        public string Version { get; set; }
-
-        /// <summary>
         /// The preferred domain to use: "auto" (default), "www", "nonwww".
         /// </summary>
         /// <remarks>
@@ -38,6 +33,6 @@ namespace Fan.Models
         /// Also if you are running locally with console, set this value to false as console may 
         /// not support https.
         /// </remarks>
-        public bool UseHttps { get; set; }
+        public bool UseHttps { get; set; } = false;
     }
 }
