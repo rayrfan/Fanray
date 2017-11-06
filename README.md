@@ -1,6 +1,6 @@
 # Fanray
 
-A blog application built with [ASP.NET Core](https://github.com/aspnet/Home) and [Entity Framework Core](https://github.com/aspnet/EntityFrameworkCore), supports MetaWeblog API so you can use [Open Live Writer](http://openlivewriter.org/), also supports shortcodes so you can post things like source code very easily.
+A blog application built with [ASP.NET Core](https://github.com/aspnet/Home) and [Entity Framework Core](https://github.com/aspnet/EntityFrameworkCore), supports clients like [Open Live Writer](http://openlivewriter.org/) through MetaWeblog API, also supports shortcodes for posting source code and YouTube videos easily.
 
 ## Get Started
 
@@ -27,7 +27,7 @@ You will see the blog setup page on the first launch.
 
 ## Open Live Writer
 
-With Fanray v1.0 to start posting, a client like [Open Live Writer](http://openlivewriter.org/) is required. To get started,
+With Fanray v1.0 to start posting a client like [Open Live Writer](http://openlivewriter.org/) is required. To get started,
 
 - Launch the web app
 - Install and open OLW > Add blog account... > Other services > type in
@@ -35,7 +35,7 @@ With Fanray v1.0 to start posting, a client like [Open Live Writer](http://openl
   - User name
   - Password
 
-The user name and password are created on the blog setup page.
+The login credentials here are created on the blog setup page.
 
 ## Shortcodes
 
@@ -43,8 +43,7 @@ When writing a post, you may need to post things like source code or youtube vid
 
 ### Source code
 
-Fanray uses [SyntaxHighlighter](https://github.com/syntaxhighlighter/syntaxhighlighter) to render source code, here are the [supported languages](http://alexgorbatchev.com/SyntaxHighlighter/manual/brushes/).  
-For example, to post C# code
+Fanray uses [SyntaxHighlighter](https://github.com/syntaxhighlighter/syntaxhighlighter) to highlgith source code, here are the [supported languages](http://alexgorbatchev.com/SyntaxHighlighter/manual/brushes/). For example, to post C# code
 ```
 [code lang=cs]
 paste your code here...
@@ -79,7 +78,7 @@ The following attributes are supported
 
 ### YouTube videos
 
-To post a youtube video, copy a youtube url, any of the two formats will do.
+To post a youtube video, get the video's url, any of the two formats will do.
 ```
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U] or 
 [youtube https://youtu.be/MNor4dYXa6U]
@@ -105,6 +104,12 @@ To start at a certain point in the video, convert the time of that point from mi
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U&start=75]
 ```
 
-## Road Map
-* **v1.0** _mvp_ - Minimal viable product. MetaWeblog API support, writing posts, categories, tags, slug etc. through OLW; shortcodes for source code and YouTube videos (Nov 2017)
-* **v1.1** _admin_ - Admin console.
+## Roadmap
+* **v1.0** _mvp_ - Minimal Viable Product (Nov 2017)
+  - MetaWeblog API
+  - Shortcodes 
+  - RSS Feeds
+  - Disqus
+  - SEO
+  - Infrastructure
+* **v1.1** _admin_ - Admin Console
