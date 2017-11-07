@@ -7,6 +7,7 @@
     var title = ViewData["Title"] == null ? siteSettings.Title : $"{ViewData["Title"]} - {siteSettings.Title}";
     string description = ViewData["Description"] == null ? siteSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
+    var showDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
 }
 <!DOCTYPE html>
 <html>
@@ -38,7 +39,7 @@
         <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
-    <partial name="_Analytics" />
+    @await Html.PartialAsync("_Analytics")
 </head>
 <body>
     <nav class="navbar navbar-default navbar-custom">
@@ -132,7 +133,7 @@
     </environment>
     <script src="~/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
-    @if (blogSettings.CommentProvider == Fan.Blogs.Enums.ECommentProvider.Disqus)
+    @if (showDisqus)
     {
         <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
     }

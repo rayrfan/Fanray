@@ -15,7 +15,7 @@ namespace Fan.Web.Models
             {
                 TimeZones.Add(new SelectListItem() { Value = tz.Id, Text = tz.DisplayName });
             }
-            TimeZoneId = "Pacific Standard Time";
+            TimeZoneId = "UTC";
         }
 
         [Required]
@@ -31,9 +31,6 @@ namespace Fan.Web.Models
 
         [Display(Name = "Time Zone")]
         public List<SelectListItem> TimeZones { get; set; }
-
-        [Display(Name = "Disqus Shortname")]
-        public string DisqusShortname { get; set; }
 
         [Required]
         [Display(Name = "Display Name")]
@@ -55,6 +52,13 @@ namespace Fan.Web.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Display(Name = "Disqus Shortname")]
+        public string DisqusShortname { get; set; }
+
+        [Display(Name = "Google Analytics Tracking ID")]
+        public string GoogleAnalyticsTrackingID { get; set; }
+
     }
 
 }

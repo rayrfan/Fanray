@@ -105,19 +105,23 @@ namespace Fan.Web.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User has been signed in.");
 
-                    // create site and blog settings
+                    // create site settings
                     await _settingSvc.CreateSettingsAsync(new SiteSettings
                     {
                         Title = model.Title,
                         Tagline = model.Tagline,
-                        TimeZoneId = model.TimeZoneId
+                        TimeZoneId = model.TimeZoneId,
+                        GoogleAnalyticsTrackingID = model.GoogleAnalyticsTrackingID.IsNullOrWhiteSpace() ? null : model.GoogleAnalyticsTrackingID.Trim(),
                     });
+                    _logger.LogInformation("SiteSettings created.");
+
+                    // create blog settings
                     await _settingSvc.CreateSettingsAsync(new BlogSettings
                     {
                         CommentProvider = model.DisqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
                         DisqusShortname = model.DisqusShortname.IsNullOrWhiteSpace() ? null : model.DisqusShortname.Trim(),
                     });
-                    _logger.LogInformation("Site and Blog Settings created.");
+                    _logger.LogInformation("BlogSettings created.");
 
                     // create welcome post and default category
                     await _blogSvc.CreatePostAsync(new BlogPost

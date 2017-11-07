@@ -20,5 +20,12 @@
         /// To learn more about timezone id <see cref="System.TimeZoneInfo.Id"/> and <see cref="http://stackoverflow.com/a/7908482/32240"/>
         /// </remarks>
         public string TimeZoneId { get; set; } = "UTC";
+        /// <summary>
+        /// The Google Analytics Tracking ID.
+        /// </summary>
+        /// <remarks>
+        /// https://analytics.google.com
+        /// </remarks>
+        public string GoogleAnalyticsTrackingID { get; set; }
     }
 }
