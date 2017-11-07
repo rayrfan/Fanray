@@ -5,6 +5,7 @@ using Fan.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Fan.Blogs.ViewModels
 {
@@ -37,6 +38,25 @@ namespace Fan.Blogs.ViewModels
             DisqusPageIdentifier = $"{ECommentTargetType.BlogPost}_{blogPost.Id}";
             ShowDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
             DisqusShortname = blogSettings.DisqusShortname;
+
+            var hash = "";
+            if (blogPost.Tags.Count > 0)
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < blogPost.Tags.Count; i++)
+                {
+                    var tag = blogPost.Tags[i];
+                    sb.Append(tag.Slug.Replace("-", ""));
+                    if (i<blogPost.Tags.Count-1) sb.Append(",");
+                }
+                hash = sb.ToString();
+            }
+            TwitterShareLink = hash.IsNullOrEmpty() ?
+                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}" :
+                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}&hashtags={hash}";
+            FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={Permalink}";
+            GoogleShareLink = $"https://plus.google.com/share?url={Permalink}";
+            LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={Permalink}&title={Title}";
         }
 
         // -------------------------------------------------------------------- BlogPost
@@ -107,5 +127,12 @@ namespace Fan.Blogs.ViewModels
         /// in _PostInfo.cshtml.
         /// </summary>
         public string DisqusPageIdentifier { get; }
+
+        // -------------------------------------------------------------------- Social links
+
+        public string TwitterShareLink { get; }
+        public string FacebookShareLink { get; }
+        public string GoogleShareLink { get; }
+        public string LinkedInShareLink { get; }
     }
 }

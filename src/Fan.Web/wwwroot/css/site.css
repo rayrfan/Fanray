@@ -212,7 +212,7 @@ label {
   .post.single {
     margin-top: 2rem; }
   .post .post-header {
-    margin-bottom: 2rem; }
+    margin-bottom: 0.8rem; }
     .post .post-header .post-title {
       line-height: 1;
       font-size: 2.25rem;
@@ -235,8 +235,23 @@ label {
     .post .post-info .post-author,
     .post .post-info .post-date,
     .post .post-info .post-category,
-    .post .post-info .post-tags {
+    .post .post-info .post-tags,
+    .post .post-info #social-list {
       padding: 0 5px; }
+    .post .post-info #social-list a {
+      color: #666;
+      font-size: larger;
+      font-weight: bolder; }
+    .post .post-info #social-list > a {
+      padding: 0 3px; }
+    .post .post-info #social-list .twtr-share {
+      color: #00acee; }
+    .post .post-info #social-list .fb-share {
+      color: #3b5998; }
+    .post .post-info #social-list .goog-share {
+      color: #e93f2e; }
+    .post .post-info #social-list .lnkd-share {
+      color: #0e76a8; }
   .post .post-body {
     line-height: 1.6;
     padding-bottom: 1rem;
