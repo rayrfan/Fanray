@@ -1,7 +1,7 @@
 ﻿using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Tests.Fakes;
+using Fan.Blogs.Tests.Helpers;
 using Fan.Blogs.Tests.Services.IntegrationTests;
-using Fan.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;

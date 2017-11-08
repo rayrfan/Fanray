@@ -1,4 +1,6 @@
-﻿namespace Fan.Models
+﻿using Fan.Models;
+
+namespace Fan.Blogs.Tests.Helpers
 {
     /// <summary>
     /// Different users that interact with the system. Used for tests.

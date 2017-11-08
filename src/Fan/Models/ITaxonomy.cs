@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Fan.Blogs.Models
+namespace Fan.Models
 {
     public interface ITaxonomy
     {

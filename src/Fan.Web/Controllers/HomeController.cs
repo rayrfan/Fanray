@@ -5,7 +5,7 @@ using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Exceptions;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Fan.Web.Models;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
@@ -49,8 +49,7 @@ namespace Fan.Web.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Setup()
         {
-            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
-            if (settings != null)
+            if (await _settingSvc.SettingsExist())
                 return RedirectToAction(nameof(BlogController.Index), "Blog");
 
             return View(new SetupViewModel());
@@ -106,17 +105,17 @@ namespace Fan.Web.Controllers
                     _logger.LogInformation("User has been signed in.");
 
                     // create site settings
-                    await _settingSvc.CreateSettingsAsync(new SiteSettings
+                    await _settingSvc.UpsertSettingsAsync(new CoreSettings
                     {
                         Title = model.Title,
                         Tagline = model.Tagline,
                         TimeZoneId = model.TimeZoneId,
                         GoogleAnalyticsTrackingID = model.GoogleAnalyticsTrackingID.IsNullOrWhiteSpace() ? null : model.GoogleAnalyticsTrackingID.Trim(),
                     });
-                    _logger.LogInformation("SiteSettings created.");
+                    _logger.LogInformation("CoreSettings created.");
 
                     // create blog settings
-                    await _settingSvc.CreateSettingsAsync(new BlogSettings
+                    await _settingSvc.UpsertSettingsAsync(new BlogSettings
                     {
                         CommentProvider = model.DisqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
                         DisqusShortname = model.DisqusShortname.IsNullOrWhiteSpace() ? null : model.DisqusShortname.Trim(),

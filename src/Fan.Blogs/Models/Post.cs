@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Data;
 using Fan.Models;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace Fan.Blogs.Models
         /// - When a published post is saved as draft, this maintains the post's CreatedOn.
         ///   When draft is published, unless user sets a new datetime, it maintains the original value.
         /// - When post is display to a user, we show the humanized version <see cref="CreatedOnFriendly"/>
-        ///   or a date time string converted to the <see cref="SiteSettings.TimeZoneId"/>.
+        ///   or a date time string converted to the <see cref="CoreSettings.TimeZoneId"/>.
         /// </remarks>
         public DateTimeOffset CreatedOn { get; set; }
 

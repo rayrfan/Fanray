@@ -1,19 +1,19 @@
 @inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
 @{ 
-    var siteSettings = await settingService.GetSettingsAsync<SiteSettings>();
-    var showGA = !siteSettings.GoogleAnalyticsTrackingID.IsNullOrEmpty();
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+    var showGA = !coreSettings.GoogleAnalyticsTrackingID.IsNullOrEmpty();
 }
 <environment names="Production">
     @if (showGA)
     {
         <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="@string.Format("https://www.googletagmanager.com/gtag/js?id={0}", siteSettings.GoogleAnalyticsTrackingID)"></script>
+        <script async src="@string.Format("https://www.googletagmanager.com/gtag/js?id={0}", coreSettings.GoogleAnalyticsTrackingID)"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '@siteSettings.GoogleAnalyticsTrackingID');
+          gtag('config', '@coreSettings.GoogleAnalyticsTrackingID');
         </script>
     }
 

@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Data;
 using Fan.Models;
 using System;
 using System.ComponentModel.DataAnnotations;

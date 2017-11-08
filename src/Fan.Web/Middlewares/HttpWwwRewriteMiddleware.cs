@@ -1,4 +1,4 @@
-﻿using Fan.Models;
+﻿using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;

@@ -3,7 +3,7 @@ using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -234,7 +234,7 @@ namespace Fan.Blogs.MetaWeblog
 
             try
             {
-                var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+                var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                 var blogs = new List<MetaBlogInfo>();
                 var blog = new MetaBlogInfo { Url = rootUrl, BlogName = settings.Title };
                 blogs.Add(blog);

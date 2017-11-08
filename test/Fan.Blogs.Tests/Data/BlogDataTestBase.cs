@@ -1,7 +1,7 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.Blogs.Tests.Helpers;
 using Fan.Data;
-using Fan.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;

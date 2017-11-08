@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Fan.Services;
 
-namespace Fan.Services
+namespace Fan.Emails
 {
     public static class EmailSenderExtensions
     {

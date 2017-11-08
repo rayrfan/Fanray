@@ -1,6 +1,4 @@
-﻿using Fan.Enums;
-
-namespace Fan.Models
+﻿namespace Fan.Settings
 {
     /// <summary>
     /// AppSettings section in appsettings.json.

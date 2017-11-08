@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Helpers;
+using Fan.Data;
 using Fan.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

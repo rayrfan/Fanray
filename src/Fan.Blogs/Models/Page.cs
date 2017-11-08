@@ -1,9 +1,6 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Enums;
 using Fan.Models;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Fan.Blogs.Models
 {

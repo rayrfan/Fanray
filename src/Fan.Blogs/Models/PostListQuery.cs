@@ -1,6 +1,4 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Enums;
-using Fan.Exceptions;
 using System;
 
 namespace Fan.Blogs.Models

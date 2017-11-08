@@ -1,9 +1,9 @@
-﻿namespace Fan.Models
+﻿namespace Fan.Settings
 {
     /// <summary>
-    /// Settings for the over all site.
+    /// Core settings.
     /// </summary>
-    public class SiteSettings
+    public class CoreSettings : ISettings
     {
         /// <summary>
         /// Title of the blog. Default "Fanray".

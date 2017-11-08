@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Fan.Data;
+using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Models
+namespace Fan.Settings
 {
-    public class Meta : Entity
+    public class Setting : Entity
     {
         /// <summary>
         /// Must be unique.

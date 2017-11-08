@@ -1,9 +1,7 @@
 ﻿using Fan.Blogs.Data;
 using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
-using Fan.Data;
-using Fan.Enums;
-using Fan.Models;
+using Fan.Blogs.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

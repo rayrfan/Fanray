@@ -1,5 +1,5 @@
 ﻿using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,27 +35,27 @@ namespace Fan.Tests.Helpers
         [Fact]
         public async void GetAsync_ExtensionMethod_IsAbleTo_Cache_Object()
         {
-            // Arrange: Given a service that returns SiteSettings
+            // Arrange: Given a service that returns CoreSettings
             var _svc = new Mock<ISettingService>();
-            _svc.Setup(t => t.GetSettingsAsync<SiteSettings>(false)).Returns(Task.FromResult(new SiteSettings()));
+            _svc.Setup(t => t.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
 
             // Act: When we call the cache for it for the first time, 
             // it calls the method, gets the object and caches it.
             var res1 = await _cache.GetAsync("cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return await _svc.Object.GetSettingsAsync<SiteSettings>();
+                return await _svc.Object.GetSettingsAsync<CoreSettings>();
             });
 
             // When we call the cache for it for the second time, 
             // it returns the object from cache and won't call the method.
             var res2 = await _cache.GetAsync("cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return await _svc.Object.GetSettingsAsync<SiteSettings>();
+                return await _svc.Object.GetSettingsAsync<CoreSettings>();
             });
 
             // Assert: Then the method has only been called exactly once
             // And the objects returned each time should match in their values
-            _svc.Verify(service => service.GetSettingsAsync<SiteSettings>(false), Times.Exactly(1));
+            _svc.Verify(service => service.GetSettingsAsync<CoreSettings>(), Times.Exactly(1));
             Assert.Equal(res1.Title, res2.Title);
         }
     }

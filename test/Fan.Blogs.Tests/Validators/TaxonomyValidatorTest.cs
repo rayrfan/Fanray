@@ -1,10 +1,9 @@
-﻿using Xunit;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Models;
+using Fan.Blogs.Validators;
 using System.Collections.Generic;
 using System.Linq;
-using Fan.Enums;
-using Fan.Blogs.Validators;
-using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
+using Xunit;
 
 namespace Fan.Blogs.Tests.Validators
 {

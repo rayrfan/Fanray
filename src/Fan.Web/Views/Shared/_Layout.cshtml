@@ -1,11 +1,11 @@
 ﻿@{
     var cats = await blogService.GetCategoriesAsync();
     var tags = await blogService.GetTagsAsync();
-    var siteSettings = await settingService.GetSettingsAsync<SiteSettings>();
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
     var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
 
-    var title = ViewData["Title"] == null ? siteSettings.Title : $"{ViewData["Title"]} - {siteSettings.Title}";
-    string description = ViewData["Description"] == null ? siteSettings.Tagline : ViewData["Description"] as string;
+    var title = ViewData["Title"] == null ? coreSettings.Title : $"{ViewData["Title"]} - {coreSettings.Title}";
+    string description = ViewData["Description"] == null ? coreSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
     var showDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
 }
@@ -49,7 +49,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">@siteSettings.Title</a>
+                <a class="navbar-brand" href="/">@coreSettings.Title</a>
             </div>
 
             <div class="collapse navbar-collapse">
@@ -75,7 +75,7 @@
             <div class="blog-content">
                 @RenderBody()
                 <footer class="site-footer">
-                    <p class="text-muted pull-left">&copy; @DateTime.Now.Year - @siteSettings.Title</p>
+                    <p class="text-muted pull-left">&copy; @DateTime.Now.Year - @coreSettings.Title</p>
                     <p class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></p>
                 </footer>
             </div>

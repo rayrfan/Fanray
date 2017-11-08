@@ -1,7 +1,7 @@
 ﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Settings;
 using Moq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -20,10 +20,6 @@ namespace Fan.Blogs.Tests.Services
         /// </summary>
         public CategoryTest()
         {
-            // setup blog settings
-            _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
-                .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
-
             // setup all categories in db
             _catRepoMock.Setup(r => r.GetListAsync()).Returns(Task.FromResult(
                 new List<Category>
@@ -123,10 +119,10 @@ namespace Fan.Blogs.Tests.Services
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.CreateCategoryAsync(Category)"/> would call TagRepository's CreateAsync and invalidates cache for all categories.
+        /// Test <see cref="BlogService.CreateCategoryAsync(Category)"/> would call Repository's CreateAsync and invalidates cache for all categories.
         /// </summary>
         [Fact]
-        public async void CreateCategory_Calls_TagRepository_CreateAsync_And_Invalidates_Cache_For_AllCategories()
+        public async void CreateCategory_calls_repos_CreateAsync_and_invalidates_cache_for_all_categories()
         {
             // Arrange 
             var cat = new Category { Title = "Cat1" };
@@ -143,17 +139,29 @@ namespace Fan.Blogs.Tests.Services
         /// Test <see cref="BlogService.DeleteCategoryAsync(int)"/> cannot delete the default category.
         /// </summary>
         [Fact]
-        public async void DeleteCategory_Cannot_Delete_Default_Category()
+        public async void Default_category_cannot_be_deleted()
         {
+            // setup blog settings
+            _settingRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
+                .Returns(Task.FromResult(new Setting { Key = "blogsettings.defaultcategoryid", Value = "1" }));
+            _settingRepoMock.Setup(repo => repo.GetAllSettingsAsync())
+                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
+
             await Assert.ThrowsAsync<FanException>(() => _blogSvc.DeleteCategoryAsync(1));
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.DeleteCategoryAsync(int)"/> calls TagRepository's DeleteAsync and invalidates cache for all categories.
+        /// Test <see cref="BlogService.DeleteCategoryAsync(int)"/> calls repository's DeleteAsync and invalidates cache for all categories.
         /// </summary>
         [Fact]
-        public async void DeleteCategory_Calls_TagRepository_DeleteAsync_And_Invalidates_Cache_For_AllCategories()
+        public async void DeleteCategory_calls_repos_DeleteAsync_and_invalidates_cache_for_all_categories()
         {
+            // setup blog settings
+            _settingRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
+                .Returns(Task.FromResult(new Setting { Key = "blogsettings.defaultcategoryid", Value = "1" }));
+            _settingRepoMock.Setup(repo => repo.GetAllSettingsAsync())
+                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
+
             // Act
             await _blogSvc.DeleteCategoryAsync(2);
 

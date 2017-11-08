@@ -1,4 +1,4 @@
-﻿namespace Fan.Enums
+﻿namespace Fan.Settings
 {
     public enum EPreferredDomain
     {

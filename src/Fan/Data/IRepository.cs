@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fan.Data
 {
@@ -9,6 +10,8 @@ namespace Fan.Data
     public interface IRepository<T> where T : class 
     {
         Task<T> CreateAsync(T obj);
+        Task<IEnumerable<T>> CreateRangeAsync(IEnumerable<T> objs);
         Task<T> UpdateAsync(T obj);
+        Task UpdateAsync();
     }
 }

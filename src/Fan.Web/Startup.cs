@@ -4,8 +4,9 @@ using Fan.Blogs.Helpers;
 using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Services;
 using Fan.Data;
+using Fan.Emails;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Fan.Shortcodes;
 using Fan.Web.Middlewares;
 using Microsoft.AspNetCore.Builder;
@@ -63,7 +64,7 @@ namespace Fan.Web
 
             // Repos / Services
             services.AddScoped<IPostRepository, SqlPostRepository>();
-            services.AddScoped<IMetaRepository, SqlMetaRepository>();
+            services.AddScoped<ISettingRepository, SqlSettingRepository>();
             services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
             services.AddScoped<ITagRepository, SqlTagRepository>();
             services.AddScoped<IMediaRepository, SqlMediaRepository>();

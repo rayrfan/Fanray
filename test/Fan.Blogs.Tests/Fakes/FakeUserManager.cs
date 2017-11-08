@@ -1,4 +1,5 @@
-﻿using Fan.Models;
+﻿using Fan.Blogs.Tests.Helpers;
+using Fan.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

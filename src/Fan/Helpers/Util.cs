@@ -197,7 +197,7 @@ namespace Fan.Helpers
         /// <remarks>
         /// Server saves all posts with DateTimeOffset.UtcNow, when a post is shown in browser it's 
         /// shows either a humanized string if the post was published within 2 days, or an actual
-        /// date time string converted in <see cref="Fan.Models.SiteSettings.TimeZoneId"/> timezone.
+        /// date time string converted in <see cref="CoreSettings.TimeZoneId"/> timezone.
         /// </remarks>
         public static DateTimeOffset ConvertTime(DateTimeOffset serverTime, string timeZoneId)
         {

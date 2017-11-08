@@ -1,7 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
-using Fan.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;

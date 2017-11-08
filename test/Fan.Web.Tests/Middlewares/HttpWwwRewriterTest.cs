@@ -1,5 +1,4 @@
-﻿using Fan.Enums;
-using Fan.Models;
+﻿using Fan.Settings;
 using Fan.Web.Middlewares;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -1,8 +1,7 @@
 ﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Blogs.ViewModels;
-using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -40,8 +39,7 @@ namespace Fan.Blogs.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            var settings = await _settingSvc.GetSettingsAsync<SiteSettings>();
-            if (settings == null)
+            if (!await _settingSvc.SettingsExist())
                 return RedirectToAction("Setup", "Home");
 
             var posts = await _blogSvc.GetPostsAsync(1);
@@ -151,12 +149,12 @@ namespace Fan.Blogs.Controllers
                     var posts = cat == null ?
                                 await _blogSvc.GetPostsAsync(1) :
                                 await _blogSvc.GetPostsForCategoryAsync(cat.Slug, 1);
-                    var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+                    var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
                     var vm = new BlogPostListViewModel(posts, blogSettings, Request);
 
                     var channelTitle = cat == null ? "Fanray" : $"{cat.Title} - Fanray";
-                    var channelDescription = siteSettings.Tagline;
+                    var channelDescription = coreSettings.Tagline;
                     var channelLink = $"{Request.Scheme}://{Request.Host}";
                     var channelLastPubDate = posts.Count <= 0 ? DateTimeOffset.UtcNow : posts[0].CreatedOn;
 

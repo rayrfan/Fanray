@@ -1,6 +1,6 @@
-﻿using Fan.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Fan.Data
 {
@@ -45,6 +45,18 @@ namespace Fan.Data
         }
 
         /// <summary>
+        /// Creates a list of entities.
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        public virtual async Task<IEnumerable<T>> CreateRangeAsync(IEnumerable<T> entities)
+        {
+            _entities.AddRange(entities);
+            await _db.SaveChangesAsync();
+            return entities;
+        }
+
+        /// <summary>
         /// Updates an entity.
         /// </summary>
         /// <param name="entity">Not all implementations use this parameter, such as the Sql ones.</param>
@@ -53,6 +65,15 @@ namespace Fan.Data
         {
             await _db.SaveChangesAsync();
             return entity;
+        }
+
+        /// <summary>
+        /// Updates all the entities updated.
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task UpdateAsync()
+        {
+            await _db.SaveChangesAsync();
         }
     }
 }

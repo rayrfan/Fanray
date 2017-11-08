@@ -4,11 +4,10 @@ using Fan.Blogs.Enums;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Validators;
-using Fan.Enums;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Fan.Shortcodes;
 using FluentValidation.Results;
 using Humanizer;
@@ -643,7 +642,7 @@ namespace Fan.Blogs.Services
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create) 
@@ -760,13 +759,13 @@ namespace Fan.Blogs.Services
         private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
             // Friendly post time if the post was published within 2 days
             // else show the actual date time in setting's timezone
             blogPost.CreatedOnFriendly = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ? 
-                Util.ConvertTime(blogPost.CreatedOn, siteSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
+                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
                 blogPost.CreatedOn.Humanize();
 
             // Title

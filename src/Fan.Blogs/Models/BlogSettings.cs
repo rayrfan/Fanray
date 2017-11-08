@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Settings;
 
 namespace Fan.Blogs.Models
 {
@@ -8,7 +9,7 @@ namespace Fan.Blogs.Models
     /// <remarks>
     /// This is saved in the meta table, it's ok to add or remove properties here.
     /// </remarks>
-    public class BlogSettings
+    public class BlogSettings : ISettings
     {
         /// <summary>
         /// Number of blog posts to show. Default 10.

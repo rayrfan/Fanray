@@ -4,7 +4,7 @@ using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Blogs.Tests.Data;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
 using Fan.Shortcodes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -40,8 +40,8 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
 
             // SettingService mock
             _settingSvcMock = new Mock<ISettingService>();
-            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<SiteSettings>(false)).Returns(Task.FromResult(new SiteSettings()));
-            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<BlogSettings>(false)).Returns(Task.FromResult(new BlogSettings()));
+            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
+            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<BlogSettings>()).Returns(Task.FromResult(new BlogSettings()));
 
             // Cache
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();

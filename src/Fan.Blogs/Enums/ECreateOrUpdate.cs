@@ -1,4 +1,4 @@
-﻿namespace Fan.Enums
+﻿namespace Fan.Blogs.Enums
 {
     public enum ECreateOrUpdate
     {
