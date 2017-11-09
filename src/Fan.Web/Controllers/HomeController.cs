@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Web.Controllers
@@ -104,7 +105,7 @@ namespace Fan.Web.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User has been signed in.");
 
-                    // create site settings
+                    // create core settings
                     await _settingSvc.UpsertSettingsAsync(new CoreSettings
                     {
                         Title = model.Title,
@@ -126,7 +127,7 @@ namespace Fan.Web.Controllers
                     await _blogSvc.CreatePostAsync(new BlogPost
                     {
                         CategoryTitle = BlogConst.DEFAULT_CATEGORY,
-                        TagTitles = null,
+                        TagTitles = new List<string> { "announcement", "blogging" },
                         Title = BlogConst.WELCOME_POST_TITLE,
                         Body = BlogConst.WELCOME_POST_BODY,
                         UserId = 1,

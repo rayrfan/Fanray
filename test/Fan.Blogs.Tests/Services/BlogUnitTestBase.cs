@@ -2,6 +2,7 @@
 using Fan.Blogs.Data;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Services;
+using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;
 using Microsoft.AspNetCore.Hosting;
@@ -65,12 +66,11 @@ namespace Fan.Blogs.Tests.Services
 
             // svc
             _settingSvc = new SettingService(_settingRepoMock.Object, _cache, _loggerSettingSvc);
-            _blogSvc = new BlogService(_settingSvc, 
+            _blogSvc = new BlogService(
+                _settingSvc, 
                 _catRepoMock.Object, 
                 _postRepoMock.Object, 
                 _tagRepoMock.Object,
-                _mediaRepoMock.Object,
-                envMock.Object,
                 _cache, 
                 _loggerBlogSvc, 
                 _mapper,

@@ -1,4 +1,5 @@
-﻿using Fan.Models;
+﻿using Fan.Medias;
+using Fan.Models;
 using Fan.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,11 @@ namespace Fan.Data
                 entity.ToTable("Core_Setting");
                 entity.HasKey(e => e.Id).ForSqlServerIsClustered(clustered: false);
                 entity.HasIndex(e => e.Key).IsUnique().ForSqlServerIsClustered();
+            });
+            builder.Entity<Media>(entity =>
+            {
+                entity.ToTable("Core_Media");
+                entity.HasIndex(e => new { e.MediaType, e.UploadedOn });
             });
         }
     }

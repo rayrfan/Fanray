@@ -97,21 +97,6 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         Task<Tag> UpdateTagAsync(Tag tag);
 
-        // -------------------------------------------------------------------- Media
-
-        /// <summary>
-        /// Uploads media and inserts a record in datasource.
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="name"></param>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        Task<string> UploadMediaAsync(int userId, string name, byte[] content);
-        /// <summary>
-        /// Updates media title and description.
-        /// </summary>
-        Task<Media> UpdateMediaAsync(int id, string title, string description);
-
         // -------------------------------------------------------------------- BlogPosts
 
         /// <summary>

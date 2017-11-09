@@ -1,9 +1,8 @@
-﻿using Fan.Blogs.Models;
-using Fan.Data;
+﻿using Fan.Data;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Blogs.Data
+namespace Fan.Medias
 {
     public interface IMediaRepository : IRepository<Media>
     {

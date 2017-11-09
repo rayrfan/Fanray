@@ -27,7 +27,7 @@ namespace Fan.Blogs.Tests.MetaWeblog
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
             _svc = new MetaWeblogService(new FakeUserManager(), new FakeSignInManager(contextAccessor.Object), 
-                _blogSvc, _settingSvcMock.Object, loggerMetaSvc, _envMock.Object);
+                _blogSvc, _settingSvcMock.Object, _mediaSvcMock.Object, loggerMetaSvc);
         }
 
         string appKey = "appKey";

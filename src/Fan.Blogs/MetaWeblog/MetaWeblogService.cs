@@ -2,6 +2,7 @@
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
+using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Microsoft.AspNetCore.Hosting;
@@ -20,23 +21,23 @@ namespace Fan.Blogs.MetaWeblog
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
         private readonly ISettingService _settingSvc;
+        private readonly IMediaService _mediaSvc;
         private readonly ILogger<MetaWeblogService> _logger;
-        private readonly IHostingEnvironment _hostingEnvironment;
 
         public MetaWeblogService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IBlogService blogSvc,
             ISettingService settingService,
-            ILogger<MetaWeblogService> logger,
-            IHostingEnvironment env)
+            IMediaService mediaSvc,
+            ILogger<MetaWeblogService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
             _settingSvc = settingService;
+            _mediaSvc = mediaSvc;
             _logger = logger;
-            _hostingEnvironment = env;
         }
 
         // -------------------------------------------------------------------- Posts
@@ -253,8 +254,7 @@ namespace Fan.Blogs.MetaWeblog
 
             try
             {
-                int userId = (await _userManager.FindByNameAsync(userName)).Id;
-                var url = await _blogSvc.UploadMediaAsync(userId, mediaObject.Name, mediaObject.Bits);
+                var url = await _mediaSvc.UploadMediaAsync(userName, mediaObject.Name, mediaObject.Bits, EAppType.Blog);
                 return new MetaMediaInfo()
                 {
                     Url = url

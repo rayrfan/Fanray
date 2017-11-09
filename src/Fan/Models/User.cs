@@ -12,6 +12,11 @@ namespace Fan.Models
         }
 
         /// <summary>
+        /// When the user was created.
+        /// </summary>
+        public DateTimeOffset CreatedOn { get; set; }
+
+        /// <summary>
         /// The friendly name to display on posts.
         /// </summary>
         [Required]
@@ -19,8 +24,8 @@ namespace Fan.Models
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// When the user was created.
+        /// The length of user's total upload file in byte.
         /// </summary>
-        public DateTimeOffset CreatedOn { get; set; }
+        public long UploadLength { get; set; }
     }
 }

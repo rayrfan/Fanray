@@ -3,6 +3,7 @@ using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Fan.Blogs.Tests.Data;
+using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -24,7 +25,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
     {
         protected BlogService _blogSvc;
         protected Mock<ISettingService> _settingSvcMock;
-        protected Mock<IHostingEnvironment> _envMock;
+        protected Mock<IMediaService> _mediaSvcMock;
         protected ILoggerFactory _loggerFactory;
 
         public BlogIntegrationTestBase()
@@ -33,15 +34,14 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             var catRepo = new SqlCategoryRepository(_db);
             var tagRepo = new SqlTagRepository(_db);
             var postRepo = new SqlPostRepository(_db);
-            var mediaRepo = new SqlMediaRepository(_db);
-
-            // Env
-            _envMock = new Mock<IHostingEnvironment>();
 
             // SettingService mock
             _settingSvcMock = new Mock<ISettingService>();
             _settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
             _settingSvcMock.Setup(svc => svc.GetSettingsAsync<BlogSettings>()).Returns(Task.FromResult(new BlogSettings()));
+
+            // MediaService mock
+            _mediaSvcMock = new Mock<IMediaService>();
 
             // Cache
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
@@ -58,7 +58,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             var shortcodeSvc = new Mock<IShortcodeService>();
 
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
-            _blogSvc = new BlogService(_settingSvcMock.Object, catRepo, postRepo, tagRepo, mediaRepo, _envMock.Object, cache, loggerBlogSvc, mapper, shortcodeSvc.Object);
+            _blogSvc = new BlogService(_settingSvcMock.Object, catRepo, postRepo, tagRepo, cache, loggerBlogSvc, mapper, shortcodeSvc.Object);
         }
     }
 }

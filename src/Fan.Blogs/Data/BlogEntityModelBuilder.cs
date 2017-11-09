@@ -39,12 +39,6 @@ namespace Fan.Blogs.Data
                 entity.ToTable("Blog_PostTag");
                 entity.HasKey(e => new { e.PostId, e.TagId });
             });
-
-            builder.Entity<Media>(entity =>
-            {
-                entity.ToTable("Blog_Media");
-                entity.HasIndex(e => new { e.Type, e.UploadedOn });
-            });
         }
     }
 }

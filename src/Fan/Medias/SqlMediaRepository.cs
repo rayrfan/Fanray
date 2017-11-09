@@ -1,10 +1,9 @@
-﻿using Fan.Blogs.Models;
-using Fan.Data;
+﻿using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Blogs.Data
+namespace Fan.Medias
 {
     public class SqlMediaRepository : EntityRepository<Media>, IMediaRepository
     {

@@ -5,6 +5,7 @@ using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Services;
 using Fan.Data;
 using Fan.Emails;
+using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -62,15 +63,16 @@ namespace Fan.Web
             services.AddAutoMapper();
             services.AddSingleton(BlogUtil.Mapper);
 
-            // Repos / Services
-            services.AddScoped<IPostRepository, SqlPostRepository>();
+            // Repos & Services
             services.AddScoped<ISettingRepository, SqlSettingRepository>();
+            services.AddScoped<IMediaRepository, SqlMediaRepository>();
+            services.AddScoped<IPostRepository, SqlPostRepository>();
             services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
             services.AddScoped<ITagRepository, SqlTagRepository>();
-            services.AddScoped<IMediaRepository, SqlMediaRepository>();
+            services.AddScoped<ISettingService, SettingService>();
+            services.AddScoped<IMediaService, MediaService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
