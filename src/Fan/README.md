@@ -21,3 +21,7 @@ This will add a new folder "Fan/Migrations" with a migration named NameOfTheMigr
 `Add-Migration NewMigrationName`
 
 This will add a new migration, ctrl + f5, site is up running with Post table having the new column added automatically in db.
+
+## Azure Blob Storage
+
+Nuget: WindowsAzure.Storage
