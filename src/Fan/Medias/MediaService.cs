@@ -1,8 +1,5 @@
 ﻿using Fan.Exceptions;
 using Fan.Helpers;
-using Fan.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,22 +8,14 @@ using System.Threading.Tasks;
 namespace Fan.Medias
 {
     /// <summary>
-    /// 
+    /// The service manages media files.
     /// </summary>
-    /// <remarks>
-    /// todo: track upload limit (6GB) in user profile
-    /// </remarks>
     public class MediaService : IMediaService
     {
         /// <summary>
         /// Max len for a media filename is 128.
         /// </summary>
         public const int MEDIA_FILENAME_MAXLEN = 128;
-
-        /// <summary>
-        /// Folder to save uploaded media is called "uploads".
-        /// </summary>
-        public const string MEDIA_UPLOADS_FOLDER = "uploads";
 
         /// <summary>
         /// Accepted image types: .jpg .jpeg .png .gif
@@ -37,90 +26,62 @@ namespace Fan.Medias
         /// </remarks>
         public static readonly string[] Accepted_Image_Types = { ".jpg", ".jpeg", ".gif", ".png" };
 
-        private readonly UserManager<User> _userManager;
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IStorageProvider _storageProvider;
         private readonly IMediaRepository _mediaRepo;
-        public MediaService(
-            UserManager<User> userManager,
-            IMediaRepository mediaRepo, 
-            IHostingEnvironment env)
+        public MediaService(IStorageProvider storageProvider, IMediaRepository mediaRepo)
         {
-            _userManager = userManager;
-            _hostingEnvironment = env;
+            _storageProvider = storageProvider;
             _mediaRepo = mediaRepo;
         }
 
         /// <summary>
-        /// 
+        /// Returns media url after upload to storage.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="name">File name</param>
+        /// <param name="userId">Id of the user uploading the media.</param>
+        /// <param name="fileName">File name with ext.</param>
         /// <param name="content">File content</param>
+        /// <param name="appId">Which app it uploaded it.</param>
         /// <returns></returns>
-        public async Task<string> UploadMediaAsync(string userName, string name, byte[] content, EAppType appId)
+        /// <remarks>
+        /// Depending on the storage provider, the returned media url could be relative path 
+        /// (File Sys) or absolute path (Azure Blog).
+        /// </remarks>
+        public async Task<string> UploadMediaAsync(int userId, string fileName, byte[] content, EAppType appId)
         {
             // verify ext is supported
-            string ext = Path.GetExtension(name);
+            var ext = Path.GetExtension(fileName);
             if (ext.IsNullOrEmpty() || !Accepted_Image_Types.Contains(ext, StringComparer.InvariantCultureIgnoreCase))
-                throw new FanException("Upload image type is not supported.");
+                throw new FanException("Upload file type is not supported.");
 
             // time
             var uploadedOn = DateTimeOffset.UtcNow;
             var year = uploadedOn.Year.ToString();
             var month = uploadedOn.Month.ToString("d2");
 
-            // directory path to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}",
-                Path.Combine(_hostingEnvironment.WebRootPath),
-                MEDIA_UPLOADS_FOLDER,
-                year,
-                month);
-
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-
-            // file path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(name);
+            // make sure file name is not too long
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
             if (fileNameWithoutExt.Length > MEDIA_FILENAME_MAXLEN)
             {
                 fileNameWithoutExt = fileNameWithoutExt.Substring(0, MEDIA_FILENAME_MAXLEN);
             }
 
-            string slug = Util.FormatSlug(fileNameWithoutExt); // chinese fn ends up emtpy
+            // slug file name
+            var slug = Util.FormatSlug(fileNameWithoutExt); // chinese fn ends up emtpy
             if (slug.IsNullOrEmpty())
             {
                 slug = Util.RandomString(6);
             }
+            string fileNameSlugged = $"{slug}{ext}";
 
-            string fileName = $"{slug}{ext}";
-            var filePath = Path.Combine(dirPath, fileName); // C:\Fan.Web\wwwroot\uploads\2017\10\test-pic.jpg
-
-            // user uploads file with an existing name, get a unique name
-            // the problem is olw, if user resizes an image, be aware olw sends it as new file
-            // also olw each time sends two copies of the file, orig and thumb
-            int i = 2;
-            while (File.Exists(filePath))
-            {
-                fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
-                filePath = Path.Combine(dirPath, fileName);
-            }
-
-            // save file to file sys, always a new file
-            using (var targetStream = File.Create(filePath))
-            using (MemoryStream stream = new MemoryStream(content))
-            {
-                await stream.CopyToAsync(targetStream);
-            }
-
-            // find user
-            var user = await _userManager.FindByNameAsync(userName);
+            // save file to storage and get back file path
+            var filePath = await _storageProvider.SaveFileAsync(fileNameSlugged, year, month, content, EAppType.Blog);
 
             // save record to db
             var media = new Media
             {
-                UserId = user.Id,
+                UserId = userId,
                 AppId = appId,
-                FileName = fileName,
+                FileName = fileNameSlugged,
                 Title = fileNameWithoutExt,
                 Description = fileNameWithoutExt,
                 Length = content.LongLength,
@@ -129,15 +90,7 @@ namespace Fan.Medias
             };
             await _mediaRepo.CreateAsync(media);
 
-            // update user uploadLength
-            user.UploadLength += content.LongLength;
-            await _userManager.UpdateAsync(user);
-
-            // a challenge here is that this returned url will be hardcoded into post
-            // if user later switches to Blob Storage or CDN instead of file sys
-            // all these post will break. If that happens, the easy remedy is keep 
-            // existing copies of files where they were, not ideal.
-            return $"{MEDIA_UPLOADS_FOLDER}/{year}/{month}/{fileName}";
+            return filePath;
         }
 
         public async Task<Media> UpdateMediaAsync(int id, string title, string description)

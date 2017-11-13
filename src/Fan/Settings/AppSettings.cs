@@ -32,5 +32,15 @@
         /// not support https.
         /// </remarks>
         public bool UseHttps { get; set; } = false;
+
+        /// <summary>
+        /// Whether to use Azure Blob Storage: false (default) will use file system.
+        /// </summary>
+        public bool UseBlobStorage { get; set; } = false;
+
+        /// <summary>
+        /// Azure Blob Storage connection string, default to development storage in dev.
+        /// </summary>
+        public string BlobStorageConnectionString { get; set; } = "UseDevelopmentStorage=true";
     }
 }

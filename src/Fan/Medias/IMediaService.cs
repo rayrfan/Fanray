@@ -5,13 +5,14 @@ namespace Fan.Medias
     public interface IMediaService
     {
         /// <summary>
-        /// Uploads media and inserts a record in datasource.
+        /// Returns media url after upload to storage.
         /// </summary>
-        /// <param name="userName"></param>
-        /// <param name="name"></param>
-        /// <param name="content"></param>
+        /// <param name="userId">Id of the user uploading the media.</param>
+        /// <param name="fileName">File name with ext.</param>
+        /// <param name="content">File content</param>
+        /// <param name="appId">Which app it uploaded it.</param>
         /// <returns></returns>
-        Task<string> UploadMediaAsync(string userName, string name, byte[] content, EAppType appId);
+        Task<string> UploadMediaAsync(int userId, string name, byte[] content, EAppType appId);
         /// <summary>
         /// Updates media title and description.
         /// </summary>

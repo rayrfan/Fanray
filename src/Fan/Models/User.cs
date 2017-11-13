@@ -22,10 +22,5 @@ namespace Fan.Models
         [Required]
         [StringLength(maximumLength: 256)]
         public string DisplayName { get; set; }
-
-        /// <summary>
-        /// The length of user's total upload file in byte.
-        /// </summary>
-        public long UploadLength { get; set; }
     }
 }

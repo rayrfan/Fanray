@@ -288,6 +288,5 @@ __pycache__/
 *.xsd.cs
 
 # My ignores
-*.sqlite
-logs/
-uploads/
+src/fan.web/logs/
+src/fan.web/wwwroot/media/

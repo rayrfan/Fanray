@@ -254,7 +254,8 @@ namespace Fan.Blogs.MetaWeblog
 
             try
             {
-                var url = await _mediaSvc.UploadMediaAsync(userName, mediaObject.Name, mediaObject.Bits, EAppType.Blog);
+                var userId = (await _userManager.FindByNameAsync(userName)).Id;
+                var url = await _mediaSvc.UploadMediaAsync(userId, mediaObject.Name, mediaObject.Bits, EAppType.Blog);
                 return new MetaMediaInfo()
                 {
                     Url = url

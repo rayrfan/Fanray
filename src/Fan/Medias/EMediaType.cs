@@ -1,10 +1,10 @@
 ﻿namespace Fan.Medias
 {
     /// <summary>
-    /// The type of media uploaded, image, file etc.
+    /// The type of media uploaded, image, documents, vid and aud.
     /// </summary>
     /// <remarks>
-    /// https://en.support.wordpress.com/accepted-filetypes/
+    /// Inspired by https://en.support.wordpress.com/accepted-filetypes/
     /// </remarks>
     public enum EMediaType : byte
     {

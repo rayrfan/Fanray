@@ -76,7 +76,13 @@ namespace Fan.Web
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            var appSettingsConfigSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsConfigSection);
+            var appSettings = appSettingsConfigSection.Get<AppSettings>();
+            if (appSettings.UseBlobStorage)
+                services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();
+            else
+                services.AddScoped<IStorageProvider, FileSysStorageProvider>();
             var shortcodeService = new ShortcodeService();
             shortcodeService.Add<SourceCodeShortcode>(tag: "code");
             shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
