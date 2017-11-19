@@ -10,6 +10,7 @@ using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
 using Fan.Web.Middlewares;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,10 +40,14 @@ namespace Fan.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Db 
-            // AddDbContextPool is a perf enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
-            // however if you have multiple contexts it'll fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
-            // furthermore to use AddDbContextPool, FanDbContext can only have a single public constructor accepting a single parameter of type DbContextOptions
-            services.AddDbContextPool<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            /**
+             * AddDbContextPool is an EF Core 2.0 performance enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
+             * unfortunately it has limitations and cannot be used here.  
+             * 1. It interferes with dbcontext implicit transactions when events are raised and event handlers call SaveChangesAsync
+             * 2. Multiple dbcontexts will fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
+             * 3. To use AddDbContextPool, FanDbContext can only have a single public constructor accepting a single parameter of type DbContextOptions
+             */
+            services.AddDbContext<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Identity
             services.AddIdentity<User, Role>(options =>
@@ -63,8 +68,11 @@ namespace Fan.Web
             services.AddAutoMapper();
             services.AddSingleton(BlogUtil.Mapper);
 
+            // Mediatr
+            services.AddMediatR();
+
             // Repos & Services
-            services.AddScoped<ISettingRepository, SqlSettingRepository>();
+            services.AddScoped<IMetaRepository, SqlMetaRepository>();
             services.AddScoped<IMediaRepository, SqlMediaRepository>();
             services.AddScoped<IPostRepository, SqlPostRepository>();
             services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
@@ -132,7 +140,7 @@ namespace Fan.Web
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
-            BlogRoute.RegisterRoutes(routes);
+            BlogRoutes.RegisterRoutes(routes);
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
