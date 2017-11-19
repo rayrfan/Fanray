@@ -100,8 +100,9 @@ namespace Fan.Medias
             media.Title = title.Length > MEDIA_FILENAME_MAXLEN ?
              title.Substring(0, MEDIA_FILENAME_MAXLEN) : title;
             media.Description = description;
-            return await _mediaRepo.UpdateAsync(media);
-        }
 
+            await _mediaRepo.UpdateAsync(media);
+            return media;
+        }
     }
 }

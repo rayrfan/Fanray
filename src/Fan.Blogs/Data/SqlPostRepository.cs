@@ -3,6 +3,7 @@ using Fan.Blogs.Models;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -129,6 +130,12 @@ namespace Fan.Blogs.Data
                         select p;
                     posts = await q.OrderByDescending(p => p.CreatedOn).Skip(skip).Take(take).ToListAsync();
                     break;
+                case EPostListQueryType.BlogPostsArchive:
+                    q = (query.Month.HasValue && query.Month > 0) ?
+                        q.Where(p => p.CreatedOn.Year == query.Year && p.CreatedOn.Month == query.Month && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost) :
+                        q.Where(p => p.CreatedOn.Year == query.Year && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost);
+                    posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
+                    break;
                 case EPostListQueryType.BlogPostsByNumber:
                     q = q.Where(p => p.Type == EPostType.BlogPost);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Take(take).ToListAsync();
@@ -154,6 +161,18 @@ namespace Fan.Blogs.Data
             int postCount = await q.CountAsync();
 
             return (posts: posts, totalCount: postCount);
+        }
+
+        /// <summary>
+        /// Returns CreatedOn of all published blog posts, used for archives.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<DateTime>> GetPostDateTimesAsync()
+        {
+            return await _entities.Where(p => p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost)
+                .OrderByDescending(p => p.CreatedOn)
+                .Select(p => new DateTime(p.CreatedOn.Year, p.CreatedOn.Month, 1))
+                .ToListAsync();
         }
     }
 }

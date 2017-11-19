@@ -1,5 +1,4 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
 using Fan.Models;
 using FluentValidation;
 using System;
@@ -17,11 +16,19 @@ namespace Fan.Blogs.Validators
     /// </remarks>
     public class TaxonomyValidator : AbstractValidator<ITaxonomy>
     {
+        /// <summary>
+        /// Max length for a category and tag's title or slug is 24.
+        /// </summary>
+        /// <remarks>
+        /// I'm treating a taxonomy's title and slug with same length requirement.
+        /// </remarks>
+        public const int TAXONOMY_TITLE_SLUG_MAXLEN = 24;
+
         public TaxonomyValidator(IEnumerable<string> existingTitles, ETaxonomyType type)
         {
             RuleFor(c => c.Title)
                 .NotEmpty()
-                .Length(1, BlogConst.TAXONOMY_TITLE_SLUG_MAXLEN)
+                .Length(1, TAXONOMY_TITLE_SLUG_MAXLEN)
                 .Must(title => !existingTitles.Contains(title, StringComparer.CurrentCultureIgnoreCase)) 
                 .WithMessage(c => $"{type} '{c.Title}' is not available, please choose a different one.");
         }

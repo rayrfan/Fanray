@@ -115,28 +115,8 @@ namespace Fan.Web.Controllers
                     });
                     _logger.LogInformation("CoreSettings created.");
 
-                    // create blog settings
-                    await _settingSvc.UpsertSettingsAsync(new BlogSettings
-                    {
-                        CommentProvider = model.DisqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
-                        DisqusShortname = model.DisqusShortname.IsNullOrWhiteSpace() ? null : model.DisqusShortname.Trim(),
-                    });
-                    _logger.LogInformation("BlogSettings created.");
-
-                    // create welcome post and default category
-                    await _blogSvc.CreatePostAsync(new BlogPost
-                    {
-                        CategoryTitle = BlogConst.DEFAULT_CATEGORY,
-                        TagTitles = new List<string> { "announcement", "blogging" },
-                        Title = BlogConst.WELCOME_POST_TITLE,
-                        Body = BlogConst.WELCOME_POST_BODY,
-                        UserId = 1,
-                        Status = EPostStatus.Published,
-                        CommentStatus = ECommentStatus.AllowComments,
-                        CreatedOn = DateTimeOffset.Now,
-                    });
-                    _logger.LogInformation("Welcome post and default category created.");
-                    _logger.LogInformation("Blog Setup completes.");
+                    // setup blog
+                    await _blogSvc.SetupAsync(model.DisqusShortname);
 
                     return RedirectToAction("Index", "Blog");
                 }

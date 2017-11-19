@@ -1,9 +1,8 @@
 ﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
+using Fan.Data;
 using Fan.Exceptions;
-using Fan.Settings;
 using Moq;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -142,10 +141,10 @@ namespace Fan.Blogs.Tests.Services
         public async void Default_category_cannot_be_deleted()
         {
             // setup blog settings
-            _settingRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
-                .Returns(Task.FromResult(new Setting { Key = "blogsettings.defaultcategoryid", Value = "1" }));
-            _settingRepoMock.Setup(repo => repo.GetAllSettingsAsync())
-                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
+            _metaRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
+                .Returns(Task.FromResult(new Meta { Key = "blogsettings.defaultcategoryid", Value = "1" }));
+            _metaRepoMock.Setup(repo => repo.AllAsync())
+                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
 
             await Assert.ThrowsAsync<FanException>(() => _blogSvc.DeleteCategoryAsync(1));
         }
@@ -157,10 +156,10 @@ namespace Fan.Blogs.Tests.Services
         public async void DeleteCategory_calls_repos_DeleteAsync_and_invalidates_cache_for_all_categories()
         {
             // setup blog settings
-            _settingRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
-                .Returns(Task.FromResult(new Setting { Key = "blogsettings.defaultcategoryid", Value = "1" }));
-            _settingRepoMock.Setup(repo => repo.GetAllSettingsAsync())
-                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
+            _metaRepoMock.Setup(repo => repo.GetAsync("blogsettings.defaultcategoryid"))
+                .Returns(Task.FromResult(new Meta { Key = "blogsettings.defaultcategoryid", Value = "1" }));
+            _metaRepoMock.Setup(repo => repo.AllAsync())
+                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "blogsettings.defaultcategoryid", Value = "1" } }));
 
             // Act
             await _blogSvc.DeleteCategoryAsync(2);

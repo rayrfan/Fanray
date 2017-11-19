@@ -1,6 +1,8 @@
 ﻿@{
     var cats = await blogService.GetCategoriesAsync();
     var tags = await blogService.GetTagsAsync();
+    var years = await blogService.GetArchivesAsync();
+
     var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
     var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
 
@@ -108,6 +110,26 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Archives</h4>
+                        <div class="widget-content">
+                            <ul class="month-list">
+                                @foreach (var year in years)
+                                {
+                                    <li class="year">@year.Key
+                                        <ul class="months">
+                                            @foreach (var item in year.Value)
+                                            {
+                                                <li>
+                                                    <a href="@item.Url">@item.Title</a> (@item.Count)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </aside>
         </div>
@@ -133,6 +155,13 @@
     </environment>
     <script src="~/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.month-list .year').click(function () {
+                $(this).find('.months').slideToggle();
+            });
+        });
+    </script>
     @if (showDisqus)
     {
         <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>

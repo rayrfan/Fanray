@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fan.Blogs.Models;
+using Fan.Blogs.Validators;
 using Fan.Helpers;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,9 @@ namespace Fan.Blogs.Helpers
         public static string FormatTaxonomySlug(string input, IEnumerable<string> existingSlugs = null)
         {
             // if user input exceeds max len, we trim
-            if (input.Length > BlogConst.TAXONOMY_TITLE_SLUG_MAXLEN)
+            if (input.Length > TaxonomyValidator.TAXONOMY_TITLE_SLUG_MAXLEN)
             {
-                input = input.Substring(0, BlogConst.TAXONOMY_TITLE_SLUG_MAXLEN);
+                input = input.Substring(0, TaxonomyValidator.TAXONOMY_TITLE_SLUG_MAXLEN);
             }
 
             input = input.Replace('#', 's'); // preserve # as s before format to slug

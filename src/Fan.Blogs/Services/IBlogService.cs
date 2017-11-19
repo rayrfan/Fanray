@@ -97,6 +97,15 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         Task<Tag> UpdateTagAsync(Tag tag);
 
+        // -------------------------------------------------------------------- Archive 
+
+        /// <summary>
+        /// Returns a dictionary of year and months, the key is year and the value is a list of 
+        /// <see cref="MonthItem"/> objects.
+        /// </summary>
+        /// <returns></returns>
+        Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync();
+
         // -------------------------------------------------------------------- BlogPosts
 
         /// <summary>
@@ -144,6 +153,14 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         Task<BlogPostList> GetPostsForTagAsync(string tagSlug, int pageIndex);
         /// <summary>
+        /// Returns <see cref="BlogPostList"/> for archive.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        Task<BlogPostList> GetPostsForArchive(int? year, int? month, int page = 1);
+        /// <summary>
         /// Returns all blog post drafts.
         /// </summary>
         /// <returns></returns>
@@ -154,5 +171,13 @@ namespace Fan.Blogs.Services
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         /// <returns></returns>
         Task<List<BlogPost>> GetRecentPostsAsync(int numberOfPosts);
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        Task SetupAsync(string disqusShortname);        
     }
 }

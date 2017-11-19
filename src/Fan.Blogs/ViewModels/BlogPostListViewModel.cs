@@ -63,5 +63,9 @@ namespace Fan.Blogs.ViewModels
         /// Category title to show on Category.cshtml page.
         /// </summary>
         public string CategoryTitle { get; }
+        /// <summary>
+        /// Archive title to show on Archive.cshtml page.
+        /// </summary>
+        public string ArchiveTitle { get; set; }
     }
 }

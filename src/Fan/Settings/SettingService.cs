@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿using Fan.Data;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -9,18 +10,21 @@ using System.Threading.Tasks;
 
 namespace Fan.Settings
 {
+    /// <summary>
+    /// The service that manages settings.
+    /// </summary>
     public class SettingService : ISettingService
     {
-        private readonly ISettingRepository _repo;
+        private readonly IMetaRepository _repo;
         private readonly IDistributedCache _cache;
         private readonly ILogger<SettingService> _logger;
         private const string CACHE_KEY_ALL_SETTINGS = "All-Settings";
 
-        public SettingService(ISettingRepository settingRepo,
+        public SettingService(IMetaRepository metaRepo,
                               IDistributedCache cache,
                               ILogger<SettingService> logger)
         {
-            _repo = settingRepo;
+            _repo = metaRepo;
             _cache = cache;
             _logger = logger;
         }
@@ -29,11 +33,14 @@ namespace Fan.Settings
         /// Returns all settings, cached for 10 min, returns null if no setting found.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Setting>> GetAllSettingsAsync()
+        /// <remarks>
+        /// TODO needs to get only settings from meta.
+        /// </remarks>
+        private async Task<List<Meta>> GetAllSettingsAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_SETTINGS, new TimeSpan(0, 10, 0), async () =>
             {
-                return await _repo.GetAllSettingsAsync();
+                return await _repo.AllAsync();
             });
         }
 
@@ -80,8 +87,8 @@ namespace Fan.Settings
         /// <returns></returns>
         public async Task<T> UpsertSettingsAsync<T>(T settings) where T : class, ISettings, new()
         {
-            var settingsCreate = new List<Setting>();
-            var settingsUpdate = new List<Setting>();
+            var settingsCreate = new List<Meta>();
+            var settingsUpdate = new List<Meta>();
             var allSettings = await GetAllSettingsAsync();
 
             foreach (var property in typeof(T).GetProperties())
@@ -97,7 +104,7 @@ namespace Fan.Settings
                 var key = (typeof(T).Name + "." + property.Name).ToLowerInvariant();
                 if (allSettings == null || !allSettings.Any(s => s.Key == key))
                 {
-                    settingsCreate.Add(new Setting
+                    settingsCreate.Add(new Meta
                     {
                         Key = key,
                         Value = valueStr
@@ -115,7 +122,7 @@ namespace Fan.Settings
             }
 
             if (settingsCreate.Count > 0) await _repo.CreateRangeAsync(settingsCreate);
-            if (settingsUpdate.Count > 0) await _repo.UpdateAsync();
+            if (settingsUpdate.Count > 0) await _repo.UpdateAsync(settingsUpdate);
 
             string cacheKey = typeof(T).Name;
             await _cache.RemoveAsync(cacheKey);

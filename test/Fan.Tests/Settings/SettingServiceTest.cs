@@ -1,4 +1,5 @@
-﻿using Fan.Settings;
+﻿using Fan.Data;
+using Fan.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,14 +14,14 @@ namespace Fan.Tests.Settings
 {
     public class SettingServiceTest
     {
-        protected Mock<ISettingRepository> _repoMock;
+        protected Mock<IMetaRepository> _repoMock;
         protected IDistributedCache _cache;
         protected SettingService _settingSvc;
         protected ILogger<SettingService> _logger;
 
         public SettingServiceTest()
         {
-            _repoMock = new Mock<ISettingRepository>();
+            _repoMock = new Mock<IMetaRepository>();
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
 
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
@@ -33,21 +34,6 @@ namespace Fan.Tests.Settings
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>
-        /// Have to mock and return en empty list, otherwise it get null instead of empty list.
-        /// </remarks>
-        [Fact]
-        public async void GetAllSettings_returns_empty_list_if_no_setting_is_found()
-        {
-            _repoMock.Setup(repo => repo.GetAllSettingsAsync()).Returns(Task.FromResult(new List<Setting>()));
-            var settings = await _settingSvc.GetAllSettingsAsync();
-            Assert.NotNull(settings);
-            Assert.Empty(settings);
-        }
-
-        /// <summary>
         /// Tests <see cref="SettingService.UpsertSettingsAsync{T}(T)"/> when there isn't one exists already.
         /// </summary>
         [Fact]
@@ -57,42 +43,45 @@ namespace Fan.Tests.Settings
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
 
             // Assert:
-            _repoMock.Verify(repo => repo.CreateRangeAsync(It.IsAny<List<Setting>>()), Times.Once);
+            _repoMock.Verify(repo => repo.CreateRangeAsync(It.IsAny<List<Meta>>()), Times.Once);
         }
 
         /// <summary>
-        /// Tests <see cref="SettingService.UpsertSettingsAsync{T}(T)"/> 
+        /// Tests <see cref="SettingService.UpsertSettingsAsync{T}(T)"/>. 
         /// </summary>
+        /// <remarks>
+        /// When one or more properties of a settings class change, update range will update them in one shot.
+        /// </remarks>
         [Fact]
-        public async void UpsertSettings_updates_setting_if_setting_exists_and_a_new_value_comes_in()
+        public async void UpsertSettings_updates_meta_if_setting_exists_and_a_new_value_comes_in()
         {
             // Arrange
             _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
-                .Returns(Task.FromResult(new Setting() { Key = "coresettings.title", Value = "New value" }));
-            _repoMock.Setup(repo => repo.GetAllSettingsAsync())
-                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "coresettings.title", Value = "New value" } }));
+                .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "New value" }));
+            _repoMock.Setup(repo => repo.AllAsync())
+                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "New value" } }));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
 
-            // Assert: UpdateAsync() is called once
-            _repoMock.Verify(repo => repo.UpdateAsync(), Times.Once);
+            // Assert: UpdateAsync(IEnumerable<T>) is called once
+            _repoMock.Verify(repo => repo.UpdateAsync(It.IsAny<IEnumerable<Meta>>()), Times.Once);
         }
 
         [Fact]
-        public async void UpsertSettings_does_not_update_setting_if_setting_exists_but_value_not_new()
+        public async void UpsertSettings_does_not_update_meta_if_setting_exists_but_value_not_new()
         {
             // Arrange
             _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
-                .Returns(Task.FromResult(new Setting() { Key = "coresettings.title", Value = "Fanray" }));
-            _repoMock.Setup(repo => repo.GetAllSettingsAsync())
-                .Returns(Task.FromResult(new List<Setting>() { new Setting() { Key = "coresettings.title", Value = "Fanray" } }));
+                .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "Fanray" }));
+            _repoMock.Setup(repo => repo.AllAsync())
+                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "Fanray" } }));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
 
             // Assert
-            _repoMock.Verify(repo => repo.UpdateAsync(), Times.Never);
+            _repoMock.Verify(repo => repo.UpdateAsync(It.IsAny<Meta>()), Times.Never);
         }
     }
 }

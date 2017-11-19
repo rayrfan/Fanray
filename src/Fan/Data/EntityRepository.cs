@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Fan.Data
 {
@@ -35,7 +38,8 @@ namespace Fan.Data
         /// <param name="entity"></param>
         /// <returns></returns>
         /// <exception cref="DbUpdateException">
-        /// If there is a unique constraint and adding a new record with same key, such as <see cref="Fan.Models.Meta"/>.
+        /// If table has unique key constrain and the record being added violates it, 
+        /// this exception will throw, such as <see cref="Meta"/> table.
         /// </exception>
         public virtual async Task<T> CreateAsync(T entity)
         {
@@ -57,21 +61,37 @@ namespace Fan.Data
         }
 
         /// <summary>
+        /// Returns a list of objects of T based on search predicate.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Suitable when predicate is very simple and short.  If you take a look at 
+        /// SqlTagRepository GetListAsync() that is not suitable for this.
+        /// </remarks>
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) 
+            => await _entities.Where(predicate).ToListAsync();
+
+        /// <summary>
         /// Updates an entity.
         /// </summary>
-        /// <param name="entity">Not all implementations use this parameter, such as the Sql ones.</param>
+        /// <param name="entity">
+        /// The entity to be updated, the EF implementation does not use this parameter.
+        /// </param>
         /// <returns></returns>
-        public virtual async Task<T> UpdateAsync(T entity)
+        public virtual async Task UpdateAsync(T entity)
         {
             await _db.SaveChangesAsync();
-            return entity;
         }
 
         /// <summary>
-        /// Updates all the entities updated.
+        /// Updates a list of entities.
         /// </summary>
+        /// <param name="entities">
+        /// The entities to be updated, the EF implementation does not use this parameter.
+        /// </param>
         /// <returns></returns>
-        public virtual async Task UpdateAsync()
+        public virtual async Task UpdateAsync(IEnumerable<T> entities)
         {
             await _db.SaveChangesAsync();
         }

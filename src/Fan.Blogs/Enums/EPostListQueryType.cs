@@ -5,7 +5,7 @@
         /// <summary>
         /// A list of blog posts.
         /// </summary>
-        BlogPosts = 0,
+        BlogPosts,
         /// <summary>
         /// All blog drafts.
         /// </summary>
@@ -18,6 +18,10 @@
         /// Posts for a tag
         /// </summary>
         BlogPostsByTag,
+        /// <summary>
+        /// Posts for archive.
+        /// </summary>
+        BlogPostsArchive,
         /// <summary>
         /// A specified number of blog posts regardless status, int.MaxValue will return all.
         /// This is used by metaweblog.

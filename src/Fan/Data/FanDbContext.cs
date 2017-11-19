@@ -1,14 +1,10 @@
-﻿using Fan.Models;
+﻿using Fan.Helpers;
+using Fan.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 
 namespace Fan.Data
 {
@@ -37,23 +33,10 @@ namespace Fan.Data
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<FanDbContext>();
 
-            // bin dir
-            var bin = new DirectoryInfo(Directory.GetCurrentDirectory());
-            logger.LogInformation($"Bin: {bin}");
-
             // find entities and model builders from app assemblies
-            var entityTypes = new List<Type>();
-            var modelBuilderTypes = new List<Type>();
-            foreach (var dll in bin.GetFileSystemInfos("*.dll", SearchOption.AllDirectories))
-            {
-                // https://stackoverflow.com/a/44139005/32240
-                // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Runtime/Loader/AssemblyLoadContext.cs
-                Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
-                logger.LogInformation($"Assembly: {assembly.FullName} loaded");
-
-                entityTypes.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == typeof(Entity) && !t.GetTypeInfo().IsAbstract));
-                modelBuilderTypes.AddRange(assembly.DefinedTypes.Where(t => typeof(IEntityModelBuilder).IsAssignableFrom(t)));
-            }
+            var typeFinder = new TypeFinder();
+            var entityTypes = typeFinder.Find<Entity>();
+            var modelBuilderTypes = typeFinder.Find<IEntityModelBuilder>();
 
             // add entity types to the model
             foreach (var type in entityTypes)

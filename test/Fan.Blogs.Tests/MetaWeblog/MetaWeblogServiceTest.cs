@@ -1,4 +1,5 @@
-﻿using Fan.Blogs.MetaWeblog;
+﻿using Fan.Blogs.Helpers;
+using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Tests.Fakes;
 using Fan.Blogs.Tests.Helpers;
 using Fan.Blogs.Tests.Services.IntegrationTests;
@@ -161,11 +162,12 @@ namespace Fan.Blogs.Tests.MetaWeblog
             SeedTestPosts(11);
 
             // Act
-            var result = await _svc.GetCategoriesAsync(blogId, userName, password, rootUrl);
+            var metaCatList = await _svc.GetCategoriesAsync(blogId, userName, password, rootUrl);
+            var catUrl = string.Format(BlogRoutes.CATEGORY_URL_TEMPLATE, CAT_SLUG);
 
             // Assert
-            Assert.Single(result);
-            Assert.Equal($"{rootUrl}/category/{CAT_SLUG}", result[0].HtmlUrl);
+            Assert.Single(metaCatList);
+            Assert.Equal($"{rootUrl}/{catUrl}", metaCatList[0].HtmlUrl);
         }
 
         [Fact]

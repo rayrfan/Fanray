@@ -2,9 +2,11 @@
 using Fan.Blogs.Data;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Services;
+using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;
+using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -21,7 +23,7 @@ namespace Fan.Blogs.Tests.Services
     public class BlogUnitTestBase
     {
         protected Mock<IPostRepository> _postRepoMock;
-        protected Mock<ISettingRepository> _settingRepoMock;
+        protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
         protected Mock<IMediaRepository> _mediaRepoMock;
@@ -40,7 +42,7 @@ namespace Fan.Blogs.Tests.Services
         {
             // repos
             _postRepoMock = new Mock<IPostRepository>();
-            _settingRepoMock = new Mock<ISettingRepository>();
+            _metaRepoMock = new Mock<IMetaRepository>();
             _catRepoMock = new Mock<ICategoryRepository>();
             _tagRepoMock = new Mock<ITagRepository>();
             _mediaRepoMock = new Mock<IMediaRepository>();
@@ -65,7 +67,9 @@ namespace Fan.Blogs.Tests.Services
             var shortcodeSvc = new Mock<IShortcodeService>();
 
             // svc
-            _settingSvc = new SettingService(_settingRepoMock.Object, _cache, _loggerSettingSvc);
+            var mediatorMock = new Mock<IMediator>();
+
+            _settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
             _blogSvc = new BlogService(
                 _settingSvc, 
                 _catRepoMock.Object, 
@@ -74,7 +78,8 @@ namespace Fan.Blogs.Tests.Services
                 _cache, 
                 _loggerBlogSvc, 
                 _mapper,
-                shortcodeSvc.Object);
+                shortcodeSvc.Object,
+                mediatorMock.Object);
         }
     }
 }

@@ -28,11 +28,11 @@ namespace Fan.Blogs.ViewModels
             Tags = blogPost.Tags;
             Category = blogPost.Category;
 
-            RelativeLink = string.Format("/" + BlogConst.POST_RELATIVE_URL_TEMPLATE, CreatedOn.Year, CreatedOn.Month, CreatedOn.Day, blogPost.Slug);
-            var permalinkPart = string.Format(BlogConst.POST_PERMA_URL_TEMPLATE, blogPost.Id);
+            RelativeLink = string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, CreatedOn.Year, CreatedOn.Month, CreatedOn.Day, blogPost.Slug);
+            var permalinkPart = string.Format(BlogRoutes.POST_PERMA_URL_TEMPLATE, blogPost.Id);
             Permalink = $"{request.Scheme}://{request.Host}/{permalinkPart}";
             CanonicalUrl = $"{request.Scheme}://{request.Host}{RelativeLink}";
-            EditLink = string.Format("/" + BlogConst.POST_EDIT_URL_TEMPLATE, blogPost.Id);
+            EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, blogPost.Id);
 
             DisqusPageIdentifier = $"{ECommentTargetType.BlogPost}_{blogPost.Id}";
             ShowDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;

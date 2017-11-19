@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Fan.Blogs.Data;
 using Fan.Blogs.Enums;
+using Fan.Blogs.Events;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Validators;
@@ -11,6 +12,7 @@ using Fan.Settings;
 using Fan.Shortcodes;
 using FluentValidation.Results;
 using Humanizer;
+using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
@@ -31,6 +33,7 @@ namespace Fan.Blogs.Services
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
         private readonly IShortcodeService _shortcodeSvc;
+        private readonly IMediator _mediator;
 
         public BlogService(
             ISettingService settingService,
@@ -40,7 +43,8 @@ namespace Fan.Blogs.Services
             IDistributedCache cache,
             ILogger<BlogService> logger,
             IMapper mapper,
-            IShortcodeService shortcodeService)
+            IShortcodeService shortcodeService,
+            IMediator mediator) 
         {
             _settingSvc = settingService;
             _catRepo = catRepo;
@@ -50,11 +54,27 @@ namespace Fan.Blogs.Services
             _mapper = mapper;
             _logger = logger;
             _shortcodeSvc = shortcodeService;
+            _mediator = mediator;
         }
+
+        // -------------------------------------------------------------------- Cache
 
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
         public const string CACHE_KEY_ALL_TAGS = "BlogTags";
         public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
+        public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
+        public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
+
+        private async Task InvalidateAllBlogCache()
+        {
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
+        }
 
         // -------------------------------------------------------------------- Categories
 
@@ -65,9 +85,10 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Category> CreateCategoryAsync(Category category)
         {
-            category = await this.PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
+            category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); // TODO what about posts
+
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); 
 
             return category;
         }
@@ -97,6 +118,7 @@ namespace Fan.Blogs.Services
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
         }
 
         /// <summary>
@@ -141,7 +163,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, new TimeSpan(0, 10, 0), async () => {
+            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
                 return await _catRepo.GetListAsync();
             });
         }
@@ -154,8 +176,9 @@ namespace Fan.Blogs.Services
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
-            category = await _catRepo.UpdateAsync(category);
+            await _catRepo.UpdateAsync(category);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
 
             return category;
         }
@@ -185,6 +208,7 @@ namespace Fan.Blogs.Services
         {
             await _tagRepo.DeleteAsync(id);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
         }
 
         /// <summary>
@@ -229,7 +253,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<List<Tag>> GetTagsAsync()
         {
-            return await _cache.GetAsync<List<Tag>>(CACHE_KEY_ALL_TAGS, new TimeSpan(0, 10, 0), async () => {
+            return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
                 return await _tagRepo.GetListAsync();
             });
         }
@@ -242,10 +266,52 @@ namespace Fan.Blogs.Services
         public async Task<Tag> UpdateTagAsync(Tag tag)
         {
             tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
-            tag = await _tagRepo.UpdateAsync(tag);
+            await _tagRepo.UpdateAsync(tag);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
 
             return tag;
+        }
+
+        // -------------------------------------------------------------------- Archives
+
+        /// <summary>
+        /// Returns archive information.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync()
+        {
+            return await _cache.GetAsync(CACHE_KEY_ALL_ARCHIVES, CacheTime_Archives, async () =>
+            {
+                var months = new Dictionary<DateTime, int>();
+                var years = new Dictionary<int, List<MonthItem>>();
+
+                var dates = await _postRepo.GetPostDateTimesAsync();
+                foreach (var month in dates)
+                {
+                    months.TryGetValue(month, out int count);
+                    ++count;
+                    months[month] = count;
+                }
+
+                foreach (var month in months)
+                {
+                    int year = month.Key.Year;
+                    if (!years.Keys.Contains(year))
+                    {
+                        years.Add(year, new List<MonthItem>());
+                    }
+
+                    years[year].Add(new MonthItem
+                    {
+                        Title = month.Key.ToString("MMMM"),
+                        Url = string.Format("/" + BlogRoutes.ARCHIVE_URL_TEMPLATE, year, month.Key.Month.ToString("00")),
+                        Count = month.Value,
+                    });
+                }
+
+                return years;
+            });
         }
 
         // -------------------------------------------------------------------- BlogPosts 
@@ -260,7 +326,7 @@ namespace Fan.Blogs.Services
             // blogPost is just used as a container of data
             if (blogPost == null) return blogPost;
 
-            // preps BlogPost for saving and gets Post back
+            // preps a post from blog post for saving
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // save post
@@ -269,11 +335,16 @@ namespace Fan.Blogs.Services
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+                await InvalidateAllBlogCache();
             }
 
-            // get BlogPost again
-            return await GetPostAsync(post.Id);
+            // get BlogPost back
+            blogPost =  await GetPostAsync(post.Id);
+
+            // raise event
+            await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
+
+            return blogPost;
         }
 
         /// <summary>
@@ -292,10 +363,10 @@ namespace Fan.Blogs.Services
             await _postRepo.UpdateAsync(post);
 
             // invalidate cache 
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await InvalidateAllBlogCache();
 
             // return a new blogPost with latest data
-            return await this.GetPostAsync(post.Id);
+            return await GetPostAsync(post.Id);
         }
 
         /// <summary>
@@ -306,7 +377,7 @@ namespace Fan.Blogs.Services
         public async Task DeletePostAsync(int id)
         {
             await _postRepo.DeleteAsync(id);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await InvalidateAllBlogCache();
         }
 
         /// <summary>
@@ -362,7 +433,7 @@ namespace Fan.Blogs.Services
             // cache only first page
             if (query.PageIndex == 1)
             {
-                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, new TimeSpan(0, 10, 0), async () =>
+                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, CacheTime_PostsIndex, async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -414,6 +485,25 @@ namespace Fan.Blogs.Services
         }
 
         /// <summary>
+        /// Returns a list of blog posts for archive.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public async Task<BlogPostList> GetPostsForArchive(int? year, int? month, int page = 1)
+        {
+            if (!year.HasValue) throw new FanException("Year must be provided.");
+            var query = new PostListQuery(EPostListQueryType.BlogPostsArchive)
+            {
+                Year = year.Value,
+                Month = month
+            };
+
+            return await QueryPostsAsync(query);
+        }
+
+        /// <summary>
         /// Returns a list of blog drafts.
         /// </summary>
         /// <returns></returns>
@@ -433,6 +523,42 @@ namespace Fan.Blogs.Services
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = numberOfPosts };
 
             return await QueryPostsAsync(query);
+        }
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SetupAsync(string disqusShortname)
+        {
+            const string DEFAULT_CATEGORY = "Uncategorized";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray";
+            const string WELCOME_POST_BODY = @"<p>To start posting</p><ul><li>Install <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a></li><li>Open OLW &gt; Add blog account... &gt; Other services, type in</li><ul><li>Web address of your blog</li><li>User name</li><li>Password</li></ul></ul>";
+
+            // create blog settings
+            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            {
+                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
+                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
+            });
+            _logger.LogInformation("BlogSettings created.");
+
+            // create welcome post and default category
+            await CreatePostAsync(new BlogPost
+            {
+                CategoryTitle = DEFAULT_CATEGORY,
+                TagTitles = new List<string> { "announcement", "blogging" },
+                Title = WELCOME_POST_TITLE,
+                Body = WELCOME_POST_BODY,
+                UserId = 1,
+                Status = EPostStatus.Published,
+                CommentStatus = ECommentStatus.AllowComments,
+                CreatedOn = DateTimeOffset.Now,
+            });
+            _logger.LogInformation("Welcome post and default category created.");
+            _logger.LogInformation("Blog Setup completes.");
         }
 
         // -------------------------------------------------------------------- Private
@@ -490,13 +616,13 @@ namespace Fan.Blogs.Services
             ETaxonomyType type = ETaxonomyType.Category;
             if (tax is Category)
             {
-                var allCats = await this.GetCategoriesAsync();
+                var allCats = await GetCategoriesAsync();
                 existingTitles = allCats.Select(c => c.Title);
                 existingSlugs = allCats.Select(c => c.Slug);
             }
             else
             {
-                var allTags = await this.GetTagsAsync();
+                var allTags = await GetTagsAsync();
                 existingTitles = allTags.Select(c => c.Title);
                 existingSlugs = allTags.Select(c => c.Slug);
                 type = ETaxonomyType.Tag;
@@ -574,10 +700,10 @@ namespace Fan.Blogs.Services
             // Categories TODO check CategoryTitle first
             if (!string.IsNullOrEmpty(blogPost.CategoryTitle)) // CatTitle takes precedence if available
             {
-                var cat = (await this.GetCategoriesAsync())
+                var cat = (await GetCategoriesAsync())
                     .SingleOrDefault(c => c.Title.Equals(blogPost.CategoryTitle, StringComparison.CurrentCultureIgnoreCase));
                 if (cat == null)
-                    post.Category = await this.CreateCategoryAsync(new Category { Title = blogPost.CategoryTitle });
+                    post.Category = await CreateCategoryAsync(new Category { Title = blogPost.CategoryTitle });
                 else
                     //post.Category = cat; // todo see if id works
                     post.CategoryId = cat.Id;
@@ -695,9 +821,9 @@ namespace Fan.Blogs.Services
         private async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
-            if (input.Length > BlogConst.POST_TITLE_SLUG_MAXLEN)
+            if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)
             {
-                input = input.Substring(0, BlogConst.POST_TITLE_SLUG_MAXLEN);
+                input = input.Substring(0, PostValidator.POST_TITLE_SLUG_MAXLEN);
             }
 
             // remove/replace odd char, lower case etc

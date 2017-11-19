@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
@@ -98,6 +99,28 @@ namespace Fan.Blogs.Controllers
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);
+            return View(vm);
+        }
+
+        /// <summary>
+        /// Archive page.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Archive(int? year, int? month)
+        {
+            if (!year.HasValue) return RedirectToAction("Index");
+
+            var posts = await _blogSvc.GetPostsForArchive(year, month);
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            string monthName = (month.HasValue && month.Value > 0) ?
+                CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Value) : "";
+
+            var vm = new BlogPostListViewModel(posts, blogSettings, Request)
+            {
+                ArchiveTitle = $"{monthName} {year.Value}"
+            };
             return View(vm);
         }
 

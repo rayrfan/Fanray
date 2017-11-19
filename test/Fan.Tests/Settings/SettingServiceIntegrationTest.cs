@@ -1,4 +1,5 @@
-﻿using Fan.Models;
+﻿using Fan.Data;
+using Fan.Models;
 using Fan.Settings;
 using Fan.Tests.Data;
 using Microsoft.Extensions.Caching.Distributed;
@@ -18,7 +19,7 @@ namespace Fan.Tests.Settings
         private ISettingService _svc;
         public SettingServiceIntegrationTest()
         {
-            var repo = new SqlSettingRepository(_db);
+            var repo = new SqlMetaRepository(_db);
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             var cache = new MemoryDistributedCache(memCacheOptions);

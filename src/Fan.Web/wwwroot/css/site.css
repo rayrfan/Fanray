@@ -203,6 +203,7 @@ label {
 .posts {
   margin-top: 2rem; }
   .posts .category-title, .posts .tag-title {
+    font-weight: bold;
     padding: 2rem 3rem 0 3rem; }
 
 .post {
@@ -358,6 +359,27 @@ label {
   color: #666;
   margin-right: 4px;
   font-size: 12px; }
+
+.month-list li {
+  font-weight: normal; }
+
+.month-list .year {
+  cursor: pointer;
+  color: #555;
+  font-weight: bold; }
+  .month-list .year li {
+    margin: 0 1rem;
+    padding: 0;
+    font-weight: bold; }
+
+.month-list .year:not(:first-child) .months {
+  display: none; }
+
+.month-list ul ul {
+  display: none; }
+
+.month-list .open {
+  display: block; }
 
 .syntaxhighlighter a,
 .syntaxhighlighter div,

@@ -299,7 +299,7 @@ namespace Fan.Blogs.MetaWeblog
                 Slug = blogPost.Slug,
                 Tags = blogPost.TagTitles,
                 Title = blogPost.Title,
-                Link = rootUrl + string.Format("/" + BlogConst.POST_RELATIVE_URL_TEMPLATE, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day, blogPost.Slug),
+                Link = rootUrl + string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day, blogPost.Slug),
             };
         }
 

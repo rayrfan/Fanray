@@ -1,8 +1,7 @@
 ﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
+using Fan.Data;
 using Fan.Exceptions;
-using Fan.Models;
-using Fan.Settings;
 using Moq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -19,8 +18,8 @@ namespace Fan.Blogs.Tests.Services
         public TagTest()
         {
             // blog settings
-            _settingRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
-                .Returns(Task.FromResult(new Setting { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
+            _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
+                .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
 
             // 
             _tagRepoMock.Setup(r => r.GetListAsync()).Returns(Task.FromResult(
