@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.fanray.com/">
-    <img src="https://avatars0.githubusercontent.com/u/633119" alt="" width=72 height=72>
+    <img src="https://user-images.githubusercontent.com/633119/33040750-e444959e-cdf0-11e7-8e44-069a5417e5c9.png" alt="" width=72 height=72>
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
