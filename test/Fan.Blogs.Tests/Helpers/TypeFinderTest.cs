@@ -1,4 +1,5 @@
-﻿using Fan.Helpers;
+﻿using Fan.Data;
+using Fan.Helpers;
 using Xunit;
 
 namespace Fan.Blogs.Tests.Helpers
@@ -17,12 +18,11 @@ namespace Fan.Blogs.Tests.Helpers
             _typeFinder = new TypeFinder();
         }
 
-        //[Fact]
-        //public void FindTest()
-        //{
-        //    // must provide a specific BlogPost for it to work
-        //    //var consumers = _typeFinder.Find(typeof(IAsyncNotificationHandler<>)).ToList();
-        //    //Assert.NotEmpty(consumers);
-        //}
+        [Fact]
+        public void TypeFinder_is_able_to_find_IEntityModelBuilder_from_dlls()
+        {
+           var consumers = _typeFinder.Find(typeof(IEntityModelBuilder));
+            Assert.NotEmpty(consumers);
+        }
     }
 }

@@ -16,9 +16,14 @@ namespace Fan.Blogs.Models
         }
 
         /// <summary>
-        /// Post body.
+        /// Post body in html.
         /// </summary>
         public string Body { get; set; }
+
+        /// <summary>
+        /// Post body in markdown.
+        /// </summary>
+        public string BodyMark { get; set; }
 
         /// <summary>
         /// Category for a blog post, null for page.
