@@ -1,8 +1,42 @@
-# Fanray
+<p align="center">
+  <a href="https://www.fanray.com/">
+    <img src="https://avatars0.githubusercontent.com/u/633119" alt="" width=72 height=72>
+  </a>
+  <h3 align="center">Fanray</h3>
+  <p align="center">
+    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a> and <a href="https://github.com/aspnet/EntityFrameworkCore">Entity Framework Core</a>.
+  </p>
+</p>
 
-A blog application built with [ASP.NET Core](https://github.com/aspnet/Home) and [Entity Framework Core](https://github.com/aspnet/EntityFrameworkCore), supports clients like [Open Live Writer](http://openlivewriter.org/) through MetaWeblog API, also supports shortcodes for posting source code and YouTube videos easily.
+<br>
 
-## Get Started
+## Table of contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Open Live Writer](#open-live-writer)
+- [Shortcodes](#shortcodes)
+- [Roadmap](#roadmap)
+- [License](#license)
+
+## Features
+
+Fanray v1.0 highlights:
+
+- Supports [Open Live Writer](#open-live-writer) through MetaWeblog API
+- Easily posts source code and YouTube videos with [Shortcodes](#shortcodes)
+- Provides main and per category RSS feeds, e.g.
+  - Main feed: https://www.fanray.com/feed
+  - Category feed: https://www.fanray.com/posts/categorized/technology/feed
+- Easily configures URL forwarding to https and preferred domain (either www or non-www)
+- Infrastructure
+  - Logging with Serilog to Console, Files, Seq and Application Insights
+  - Caching
+  - File storages on File Sytem and Azure Blob Storage
+  - xUnit tests with SQLite in-memory database
+- Uses Disqus for comments
+
+## Quick Start
 
 Fanray requires [.NET Core 2.0](https://www.microsoft.com/net/core/) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads).  Clone the repo, then run from either [Visual Studio 2017](https://www.visualstudio.com/vs/community/) or command line.
 
@@ -105,11 +139,9 @@ To start at a certain point in the video, convert the time of that point from mi
 ```
 
 ## Roadmap
-* **v1.0** _mvp_ - Minimal Viable Product (Nov 2017)
-  - MetaWeblog API
-  - Shortcodes 
-  - RSS Feeds
-  - Disqus
-  - SEO
-  - Infrastructure
-* **v1.1** _admin_ - Admin Console
+* **v1.0** _mvp_ - Minimal viable product (Nov 2017)
+* **v1.1** _admin_ - Admin console
+
+## License
+
+This project is licensed under [BSD 3](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
