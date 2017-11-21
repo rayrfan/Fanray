@@ -139,8 +139,8 @@ To start at a certain point in the video, convert the time of that point from mi
 ```
 
 ## Roadmap
-* **v1.0** _mvp_ - Minimal viable product (Nov 2017)
-* **v1.1** _admin_ - Admin console
+* **v1.0** _mvp_ (Nov 2017)
+* **v1.1** _admin console_ 
 
 ## License
 
