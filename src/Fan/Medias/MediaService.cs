@@ -65,6 +65,12 @@ namespace Fan.Medias
                 fileNameWithoutExt = fileNameWithoutExt.Substring(0, MEDIA_FILENAME_MAXLEN);
             }
 
+            // there is a quirk file uploaded from olw had "_2" suffixed to the name
+            if (fileNameWithoutExt.EndsWith("_2"))
+            {
+                fileNameWithoutExt = fileNameWithoutExt.Remove(fileNameWithoutExt.Length - 2);
+            }
+
             // slug file name
             var slug = Util.FormatSlug(fileNameWithoutExt); // chinese fn ends up emtpy
             if (slug.IsNullOrEmpty())

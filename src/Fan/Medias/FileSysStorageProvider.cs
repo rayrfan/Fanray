@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Fan.Settings;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -12,16 +16,12 @@ namespace Fan.Medias
     /// also olw each time sends two copies of the file, orig and thumb
     public class FileSysStorageProvider : IStorageProvider
     {
-        /// <summary>
-        /// All files will be saved into a "media" folder right under wwwroot, such that a file 
-        /// will have this url https://yoursite.com/media/2017/11/file-name.jpg
-        /// </summary>
-        public const string MEDIA_UPLOADS_FOLDER = "media";
-
         private readonly IHostingEnvironment _hostingEnvironment;
-        public FileSysStorageProvider(IHostingEnvironment env)
+        private readonly AppSettings _appSettings;
+        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             _hostingEnvironment = env;
+            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Fan.Medias
             // dir to save this file in
             var dirPath = string.Format("{0}\\{1}\\{2}\\{3}",
                 Path.Combine(_hostingEnvironment.WebRootPath),
-                MEDIA_UPLOADS_FOLDER,
+                _appSettings.MediaContainerName,
                 year,
                 month);
 
@@ -50,7 +50,7 @@ namespace Fan.Medias
             var filePath = Path.Combine(dirPath, fileName); 
 
             // make sure file is unique
-            int i = 2;
+            int i = 1;
             while (File.Exists(filePath))
             {
                 fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
@@ -65,7 +65,7 @@ namespace Fan.Medias
             }
 
             // returns relative path
-            return $"{MEDIA_UPLOADS_FOLDER}/{year}/{month}/{fileName}";
+            return $"{_appSettings.MediaContainerName}/{year}/{month}/{fileName}";
         }
     }
 }

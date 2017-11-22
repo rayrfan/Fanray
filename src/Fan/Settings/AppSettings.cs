@@ -1,4 +1,6 @@
-﻿namespace Fan.Settings
+﻿using Fan.Medias;
+
+namespace Fan.Settings
 {
     /// <summary>
     /// AppSettings section in appsettings.json.
@@ -34,8 +36,23 @@
         public bool UseHttps { get; set; } = false;
 
         /// <summary>
-        /// Whether to use Azure Blob Storage: false (default) will use file system.
+        /// The storage type of uploaded media files: "FileSystem" (default) or "AzureBlob".
         /// </summary>
-        public bool UseBlobStorage { get; set; } = false;
+        /// <remarks>
+        /// "FileSystem": files will be stored on file system.
+        /// "AzureBlob": files will be stored in Azure Blob Storage.
+        /// </remarks>
+        public EMediaStorageType MediaStorageType { get; set; } = EMediaStorageType.FileSystem;
+
+        /// <summary>
+        /// The folder/container name of uploaded media files: "media" (default).
+        /// </summary>
+        /// <remarks>
+        /// For FileSystem, it's a folder created in wwwroot, a typical url from file sys
+        /// https://yoursite.com/media/2017/11/file-name.ext
+        /// For AzureBlob, it's a container created in your Azure storage account, a typical url from blob
+        /// https://your-blob-acct-name.blob.core.windows.net/media/2017/11/file-name.ext
+        /// </remarks>
+        public string MediaContainerName { get; set; } = "media";
     }
 }

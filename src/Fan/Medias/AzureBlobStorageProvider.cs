@@ -1,5 +1,8 @@
 ﻿using Fan.Helpers;
+using Fan.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -13,17 +16,13 @@ namespace Fan.Medias
     /// </summary>
     public class AzureBlobStorageProvider : IStorageProvider
     {
-        /// <summary>
-        /// All files will be saved into a "media" container, such that a file will have this url
-        /// https://your-blob-acct-name.blob.core.windows.net/media/2017/11/file-name.ext
-        /// </summary>
-        public const string MEDIA_UPLOADS_CONTAINER = "media";
-
         private static CloudBlobContainer _container;
         private readonly string _connString;
-        public AzureBlobStorageProvider(IConfiguration configuration)
+        private readonly AppSettings _appSettings;
+        public AzureBlobStorageProvider(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _connString = configuration.GetConnectionString("BlobStorageConnectionString");
+            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
             PrepBlobContainer();
         }
 
@@ -40,7 +39,7 @@ namespace Fan.Medias
             var blobClient = storageAccount.CreateCloudBlobClient();
 
             // get a ref to contain which does not call server
-            _container = blobClient.GetContainerReference(MEDIA_UPLOADS_CONTAINER);
+            _container = blobClient.GetContainerReference(_appSettings.MediaContainerName);
             await _container.CreateIfNotExistsAsync();
             await _container.SetPermissionsAsync(new BlobContainerPermissions
             {
@@ -69,7 +68,7 @@ namespace Fan.Medias
             var blob = _container.GetBlockBlobReference(blobName); 
 
             // make sure blob is unique
-            int i = 2;
+            int i = 1;
             while (await blob.ExistsAsync())
             {
                 blobName = blobName.Insert(blobName.LastIndexOf('.'), $"-{i}");

@@ -87,7 +87,7 @@ namespace Fan.Web
             var appSettingsConfigSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsConfigSection);
             var appSettings = appSettingsConfigSection.Get<AppSettings>();
-            if (appSettings.UseBlobStorage)
+            if (appSettings.MediaStorageType == EMediaStorageType.AzureBlob)
                 services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();
             else
                 services.AddScoped<IStorageProvider, FileSysStorageProvider>();
