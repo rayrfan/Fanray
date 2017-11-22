@@ -1,17 +1,17 @@
-@model Tuple<Tag, BlogPostList>
+@model BlogPostListViewModel
 
 @{
-    var tag = Model.Item1;
-    var postList = Model.Item2;
-    ViewData["Title"] = $"Latest '{tag.Title}' Posts";
+    var tagTitle = Model.TagTitle;
+    var posts = Model.BlogPostViewModels;
+    ViewData["Title"] = $"Latest '{tagTitle}' Posts";
 }
 
 <div class="posts">
     <h1 class="tag-title">
-        Tag: @tag.Title
+        Tag: @tagTitle
     </h1>
 
-    @foreach (var post in postList)
+    @foreach (var post in posts)
     {
         <article class="post">
             <header class="post-header">

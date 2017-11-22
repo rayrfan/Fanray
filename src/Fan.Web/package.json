@@ -12,8 +12,6 @@
     "copy:images": "cpx client/images wwwroot/images",
     "copy:fontcss": "cpx node_modules/font-awesome/css/** wwwroot/lib/font-awesome/css",
     "copy:fontfonts": "cpx node_modules/font-awesome/fonts/** wwwroot/lib/font-awesome/fonts",
-    "copy:ico": "cpx client/favicon.ico wwwroot",
-    "copy:wlw": "cpx wlwmanifest.xml wwwroot",
     "scss": "node-sass --include-path scss client/scss/site.scss wwwroot/css/site.css",
     "scss:watch": "node-sass -w --include-path scss client/scss/site.scss wwwroot/css/site.css",
     "postscss": "minify wwwroot/css/site.css"

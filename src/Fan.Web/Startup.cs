@@ -1,24 +1,25 @@
 ﻿using AutoMapper;
 using Fan.Blogs.Data;
 using Fan.Blogs.Helpers;
+using Fan.Blogs.MetaWeblog;
 using Fan.Blogs.Services;
 using Fan.Data;
-using Fan.Enums;
+using Fan.Emails;
+using Fan.Medias;
 using Fan.Models;
-using Fan.Services;
-using Fan.Web.Data;
-using Fan.Web.MetaWeblog;
+using Fan.Settings;
+using Fan.Shortcodes;
 using Fan.Web.Middlewares;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
 
 namespace Fan.Web
 {
@@ -39,25 +40,14 @@ namespace Fan.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Db 
-            // AddDbContextPool causes multi-context to fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
-            // otherwise it's a perf enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
-            Enum.TryParse(Configuration["AppSettings:Database"], ignoreCase: true, result: out ESupportedDatabase db);
-            if (db == ESupportedDatabase.Sqlite)
-            {
-                var sqlitePath = "Data Source=" + Path.Combine(HostingEnvironment.ContentRootPath, "Fanray.sqlite");
-                services.AddDbContext<CoreDbContext>(options => options.UseSqlite(sqlitePath))
-                        .AddDbContext<BlogDbContext>(options => options.UseSqlite(sqlitePath))
-                        .AddDbContext<FanDbContext>(options => options.UseSqlite(sqlitePath));
-                _logger.LogInformation("Using SQLite database.");
-            }
-            else
-            {
-                var connStr = Configuration.GetConnectionString("DefaultConnection");
-                services.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connStr))
-                        .AddDbContext<BlogDbContext>(options => options.UseSqlServer(connStr))
-                        .AddDbContext<FanDbContext>(options => options.UseSqlServer(connStr));
-                _logger.LogInformation("Using SQL Server database.");
-            }
+            /**
+             * AddDbContextPool is an EF Core 2.0 performance enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
+             * unfortunately it has limitations and cannot be used here.  
+             * 1. It interferes with dbcontext implicit transactions when events are raised and event handlers call SaveChangesAsync
+             * 2. Multiple dbcontexts will fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
+             * 3. To use AddDbContextPool, FanDbContext can only have a single public constructor accepting a single parameter of type DbContextOptions
+             */
+            services.AddDbContext<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Identity
             services.AddIdentity<User, Role>(options =>
@@ -78,32 +68,44 @@ namespace Fan.Web
             services.AddAutoMapper();
             services.AddSingleton(BlogUtil.Mapper);
 
-            // Repos / Services
-            services.AddScoped<IPostRepository, SqlPostRepository>();
+            // Mediatr
+            services.AddMediatR();
+
+            // Repos & Services
             services.AddScoped<IMetaRepository, SqlMetaRepository>();
+            services.AddScoped<IMediaRepository, SqlMediaRepository>();
+            services.AddScoped<IPostRepository, SqlPostRepository>();
             services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
             services.AddScoped<ITagRepository, SqlTagRepository>();
-            services.AddScoped<IMediaRepository, SqlMediaRepository>();
+            services.AddScoped<ISettingService, SettingService>();
+            services.AddScoped<IMediaService, MediaService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            var appSettingsConfigSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsConfigSection);
+            var appSettings = appSettingsConfigSection.Get<AppSettings>();
+            if (appSettings.MediaStorageType == EMediaStorageType.AzureBlob)
+                services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();
+            else
+                services.AddScoped<IStorageProvider, FileSysStorageProvider>();
+            var shortcodeService = new ShortcodeService();
+            shortcodeService.Add<SourceCodeShortcode>(tag: "code");
+            shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
+            services.AddSingleton<IShortcodeService>(shortcodeService);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Mvc
             services.AddMvc();
+
+            // AppInsights
+            services.AddApplicationInsightsTelemetry(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            // https and www rewrite
-            app.UseHttpWwwRewrite();
-
-            // OLW
-            app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -115,39 +117,30 @@ namespace Fan.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseHsts();
+            app.UseHttpWwwRewrite();
+            app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
+            app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();
-
             app.UseAuthentication();
-
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                // when develop with migration, comment below out; if you decide to keep migration, consider use Migrate().
-                db.Database.EnsureCreated();
+                db.Database.Migrate();
             }
         }
 
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("Setup", "setup", new { controller = "Blog", action = "Setup" });
+            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
-            routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
-
-            routes.MapRoute("BlogPost", string.Format(BlogConst.POST_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
-                new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
-                new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
-
-            routes.MapRoute("BlogCategory", string.Format(BlogConst.CATEGORY_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "Category", slug = "" });
-
-            routes.MapRoute("BlogTag", string.Format(BlogConst.TAG_URL_TEMPLATE, "{slug}"), 
-                new { controller = "Blog", action = "Tag", slug = "" });
+            BlogRoutes.RegisterRoutes(routes);
 
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }

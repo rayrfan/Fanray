@@ -31,7 +31,7 @@ namespace Fan.Blogs.Tests.Data
             await _tagRepo.CreateAsync(tag);
 
             // Assert
-            Assert.NotNull(_db.Tags.SingleOrDefault(c => c.Title == "Tag"));
+            Assert.NotNull(_db.Set<Tag>().SingleOrDefault(c => c.Title == "Tag"));
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Fan.Blogs.Tests.Data
             await _tagRepo.DeleteAsync(1);
 
             // Assert
-            Assert.True(_db.PostTags.Count() == 1);
+            Assert.True(_db.Set<PostTag>().Count() == 1);
         }
 
         /// <summary>
@@ -78,13 +78,13 @@ namespace Fan.Blogs.Tests.Data
             await _tagRepo.CreateAsync(tag);
 
             // Act: when we update its title
-            var tagAgain = _db.Tags.Single(t => t.Slug == "tag");
+            var tagAgain = _db.Set<Tag>().Single(t => t.Slug == "tag");
             tagAgain.Title = "Tag2";
             tagAgain.Slug = "tag2";
             await _tagRepo.UpdateAsync(tagAgain);
 
             // Assert: then the tag's title and slug are updated
-            var catAgain = _db.Tags.Single(c => c.Slug == "tag2");
+            var catAgain = _db.Set<Tag>().Single(c => c.Slug == "tag2");
             Assert.Equal("Tag2", catAgain.Title);
             Assert.Equal("tag2", catAgain.Slug);
             Assert.Equal(1, catAgain.Id);

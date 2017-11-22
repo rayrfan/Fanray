@@ -1,4 +1,4 @@
-﻿using Fan.Models;
+﻿using Fan.Settings;
 
 namespace Fan.Web.Middlewares
 {

@@ -24,6 +24,7 @@ namespace Fan.Web
             Log.Logger = new LoggerConfiguration()
                .ReadFrom.Configuration(configuration)
                .Enrich.FromLogContext()
+               .WriteTo.ApplicationInsightsTraces(configuration.GetValue<string>("ApplicationInsights:InstrumentationKey"))
                .CreateLogger();
 
             try
@@ -61,6 +62,7 @@ namespace Fan.Web
         /// </remarks>
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseApplicationInsights()
                 .UseSerilog()
                 .UseStartup<Startup>()
                 .Build();

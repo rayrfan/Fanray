@@ -2,6 +2,7 @@
     margin-top: 2rem;
 
     .category-title, .tag-title {
+        font-weight: bold;
         padding: 2rem 3rem 0 3rem;
     }
 }
@@ -16,7 +17,7 @@
     }
 
     .post-header {
-        margin-bottom: 2rem;
+        margin-bottom: 0.8rem;
 
         .post-title {
             line-height: 1;
@@ -52,8 +53,37 @@
         .post-author,
         .post-date,
         .post-category,
-        .post-tags {
+        .post-tags,
+        #social-list {
             padding: 0 5px;
+        }
+
+        #social-list {
+            a {
+                color: #666;
+                font-size: larger;
+                font-weight: bolder;
+            }
+
+            > a {
+                padding: 0 3px;
+            }
+
+            .twtr-share {
+                color: #00acee;
+            }
+
+            .fb-share {
+                color: #3b5998;
+            }
+
+            .goog-share {
+                color: #e93f2e;
+            }
+
+            .lnkd-share {
+                color: #0e76a8;
+            }
         }
     }
 

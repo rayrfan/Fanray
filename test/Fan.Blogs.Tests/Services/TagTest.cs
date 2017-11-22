@@ -1,7 +1,7 @@
 ﻿using Fan.Blogs.Models;
 using Fan.Blogs.Services;
+using Fan.Data;
 using Fan.Exceptions;
-using Fan.Models;
 using Moq;
 using Newtonsoft.Json;
 using System.Collections.Generic;

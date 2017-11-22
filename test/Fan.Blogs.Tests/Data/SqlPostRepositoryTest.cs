@@ -1,9 +1,7 @@
 ﻿using Fan.Blogs.Data;
 using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
-using Fan.Data;
-using Fan.Enums;
-using Fan.Models;
+using Fan.Blogs.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -278,7 +276,7 @@ namespace Fan.Blogs.Tests.Data
             await _postRepo.CreateAsync(post);
 
             // Assert: then the category and tags were created as well
-            var postAgain = _db.Posts.Include(p => p.PostTags).Single(p => p.Id == post.Id);
+            var postAgain = _db.Set<Post>().Include(p => p.PostTags).Single(p => p.Id == post.Id);
             Assert.Equal(cat.Id, postAgain.CategoryId);
             Assert.Equal(tag1.Id, postAgain.PostTags.ToList()[0].TagId);
             Assert.Equal(tag2.Id, postAgain.PostTags.ToList()[1].TagId);
@@ -306,8 +304,8 @@ namespace Fan.Blogs.Tests.Data
                 Status = EPostStatus.Published,
             };
             // the 2 existing tags
-            var tag1 = _db.Tags.Single(t => t.Slug == TAG1_SLUG);
-            var tag2 = _db.Tags.Single(t => t.Slug == TAG2_SLUG);
+            var tag1 = _db.Set<Tag>().Single(t => t.Slug == TAG1_SLUG);
+            var tag2 = _db.Set<Tag>().Single(t => t.Slug == TAG2_SLUG);
             // associate them together
             post.PostTags = new List<PostTag> {
                     new PostTag { Post = post, Tag = tag1 },
@@ -318,7 +316,7 @@ namespace Fan.Blogs.Tests.Data
             await _postRepo.CreateAsync(post);
 
             // Assert: tags are with the post
-            var postAgain = _db.Posts.Include(p => p.PostTags).Single(p => p.Id == post.Id);
+            var postAgain = _db.Set<Post>().Include(p => p.PostTags).Single(p => p.Id == post.Id);
             Assert.Equal(tag1.Id, postAgain.PostTags.ToList()[0].TagId);
             Assert.Equal(tag2.Id, postAgain.PostTags.ToList()[1].TagId);
         }
@@ -382,12 +380,12 @@ namespace Fan.Blogs.Tests.Data
             var tagNonTracked = (await tagRepo.GetListAsync()).Single(t => t.Title == "Java");
 
             // Act: when user updates post by adding the non-tracked tag
-            var post = _db.Posts.Include(p => p.PostTags).Single(p => p.Slug == POST_SLUG);
+            var post = _db.Set<Post>().Include(p => p.PostTags).Single(p => p.Slug == POST_SLUG);
             post.PostTags.Add(new PostTag { Post = post, Tag = tagNonTracked });
             await _postRepo.UpdateAsync(post);
 
             // Assert: now post has 3 tags
-            var postAgain = _db.Posts.Include(p => p.PostTags).Single(p => p.Id == post.Id);
+            var postAgain = _db.Set<Post>().Include(p => p.PostTags).Single(p => p.Id == post.Id);
             Assert.Equal(3, postAgain.PostTags.Count());
         }
 
@@ -401,7 +399,7 @@ namespace Fan.Blogs.Tests.Data
         {
             // Arrange a post with a category
             SeedTestPost();
-            var post = await _db.Posts.SingleAsync(p => p.Slug == POST_SLUG);
+            var post = await _db.Set<Post>().SingleAsync(p => p.Slug == POST_SLUG);
             Assert.Equal(1, post.Category.Id);
             Assert.Equal(1, post.CategoryId);
 
@@ -428,7 +426,7 @@ namespace Fan.Blogs.Tests.Data
             _db.SaveChanges();
 
             // Assert
-            var postAgain = _db.Posts.Include(p => p.PostTags).Single(p => p.Id == post.Id);
+            var postAgain = _db.Set<Post>().Include(p => p.PostTags).Single(p => p.Id == post.Id);
             Assert.Equal(newCat.Id, postAgain.CategoryId);
             Assert.Equal(2, postAgain.Category.Id);
             Assert.Equal("fashion", postAgain.Category.Slug);
@@ -449,7 +447,7 @@ namespace Fan.Blogs.Tests.Data
             await _postRepo.DeleteAsync(1);
 
             // Assert
-            Assert.Equal(0, _db.Posts.Count());
+            Assert.Equal(0, _db.Set<Post>().Count());
         }
 
         /// <summary>

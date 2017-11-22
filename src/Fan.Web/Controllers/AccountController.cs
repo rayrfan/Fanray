@@ -1,5 +1,5 @@
-﻿using Fan.Models;
-using Fan.Services;
+﻿using Fan.Emails;
+using Fan.Models;
 using Fan.Web.Models.AccountViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;

@@ -33,7 +33,7 @@ namespace Fan.Blogs.Tests.Data
             await _catRepo.CreateAsync(cat);
 
             // Assert
-            Assert.NotNull(_db.Categories.SingleOrDefault(c => c.Title == "CategoryCreate"));
+            Assert.NotNull(_db.Set<Category>().SingleOrDefault(c => c.Title == "CategoryCreate"));
         }
 
         /// <summary>
@@ -45,14 +45,14 @@ namespace Fan.Blogs.Tests.Data
         {
             // Arrange: given a post with a category
             SeedTestPost();
-            var existCat = _db.Categories.Single(c => c.Slug == CAT_SLUG);
+            var existCat = _db.Set<Category>().Single(c => c.Slug == CAT_SLUG);
 
             // Act: when we delete the existing category
             await _catRepo.DeleteAsync(existCat.Id, 1);
 
             // Assert: then post will have the default category
-            var post = _db.Posts.Include(p => p.Category).Single(p => p.Slug == POST_SLUG);
-            Assert.True(_db.Categories.Count() == 1);
+            var post = _db.Set<Post>().Include(p => p.Category).Single(p => p.Slug == POST_SLUG);
+            Assert.True(_db.Set<Category>().Count() == 1);
             Assert.True(post.Category.Id == 1);
         }
 
@@ -98,7 +98,7 @@ namespace Fan.Blogs.Tests.Data
             await _catRepo.UpdateAsync(cat);
 
             // get cat1 out from db again
-            var catAgain = _db.Categories.FirstOrDefault(c => c.Slug == "cat1");
+            var catAgain = _db.Set<Category>().FirstOrDefault(c => c.Slug == "cat1");
             Assert.NotEqual("New Cat", catAgain.Title);
         }
 
@@ -113,7 +113,7 @@ namespace Fan.Blogs.Tests.Data
             await _catRepo.CreateAsync(cat);
 
             // Act: when we update its title
-            var catAgain = _db.Categories.Single(c => c.Slug == "cat1");
+            var catAgain = _db.Set<Category>().Single(c => c.Slug == "cat1");
             catAgain.Title = "Dog";
             catAgain.Slug = "dog";
             await _catRepo.UpdateAsync(catAgain);
@@ -123,7 +123,7 @@ namespace Fan.Blogs.Tests.Data
             //await _catRepo.UpdateAsync(catAgain);
 
             // Assert: then the category's title and slug are updated
-            catAgain = _db.Categories.Single(c => c.Slug == "dog");
+            catAgain = _db.Set<Category>().Single(c => c.Slug == "dog");
             Assert.Equal("Dog", catAgain.Title);
             Assert.Equal("dog", catAgain.Slug);
             Assert.Equal(1, catAgain.Id);

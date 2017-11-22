@@ -1,0 +1,124 @@
+﻿@model SetupViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fanray Blog Setup</title>
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+    <style>
+        body {
+            background-color:#eee
+        }
+        .col-centered {
+            float: none;
+            margin: 0 auto;
+        }
+        .btn {
+            height: 2.5rem;
+            line-height: 2.5rem;
+            font-size: 1rem;
+            padding: 0 .5rem !important;
+            text-transform: uppercase;
+            border-radius: 0;
+            border: none;
+            background-color: #5091FF
+        }
+        .text-setup {
+            padding-left: 5px;
+            font-size: smaller;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-10 col-centered" style="margin-top:2rem">
+                <form method="post">
+                    <h2>Fanray Blog Setup</h2>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <hr />
+
+                    <div class="form-group">
+                        <label asp-for="Title"></label><span class="text-setup">(Site name to show up on header and copyright)</span>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Tagline"></label><span class="text-setup">(Optional, in a few words explain what this site is about)</span>
+                        <input asp-for="Tagline" class="form-control" />
+                        <span asp-validation-for="Tagline" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="TimeZones"></label>
+                        <select asp-for="TimeZoneId" asp-items="Model.TimeZones" class="form-control"></select> 
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DisplayName"></label><span class="text-setup">(Your name public will see when you post)</span>
+                        <input asp-for="DisplayName" class="form-control" />
+                        <span asp-validation-for="DisplayName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Email"></label><span class="text-setup">(Used for login)</span>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DisqusShortname"></label><span class="text-setup">(Optional, currently only Disqus is supported for comments, put your <a href="https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-" target="_blank">Disqus shortname</a> here)</span>
+                        <input asp-for="DisqusShortname" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="GoogleAnalyticsTrackingID"></label><span class="text-setup">(Optional, put your <a href="https://support.google.com/analytics/answer/1008080?hl=en" target="_blank">Google Analytics Tracking ID</a> here)</span>
+                        <input asp-for="GoogleAnalyticsTrackingID" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:2rem">Create My Blog</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+        </script>
+    </environment>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+</body>
+</html>
