@@ -24,6 +24,7 @@ namespace Fan.Web
             Log.Logger = new LoggerConfiguration()
                .ReadFrom.Configuration(configuration)
                .Enrich.FromLogContext()
+               .WriteTo.ApplicationInsightsTraces(configuration.GetValue<string>("ApplicationInsights:InstrumentationKey"))
                .CreateLogger();
 
             try

@@ -1,7 +1,5 @@
 ﻿using Fan.Helpers;
-using Fan.Settings;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -22,10 +20,10 @@ namespace Fan.Medias
         public const string MEDIA_UPLOADS_CONTAINER = "media";
 
         private static CloudBlobContainer _container;
-        private readonly AppSettings _appSettings;
-        public AzureBlobStorageProvider(IServiceProvider serviceProvider)
+        private readonly string _connString;
+        public AzureBlobStorageProvider(IConfiguration configuration)
         {
-            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+            _connString = configuration.GetConnectionString("BlobStorageConnectionString");
             PrepBlobContainer();
         }
 
@@ -34,7 +32,7 @@ namespace Fan.Medias
         /// </summary>
         private async void PrepBlobContainer()
         {
-            var storageAccount = CloudStorageAccount.Parse(_appSettings.BlobStorageConnectionString);
+            var storageAccount = CloudStorageAccount.Parse(_connString);
             if (storageAccount == null)
                 throw new Exception("Azure Blob Storage connection string is not valid.");
 
