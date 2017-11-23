@@ -15,12 +15,19 @@ namespace Fan.Web
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
+            // Setting values are being overriden in the order of how builder adds them.
+            // For example AddEnvironmentVariables() will enable Azure App settings to override what is
+            // in appsettings.Production.json which overrides appsettings.json.  
+            // For envrionments that don't have ASPNETCORE_ENVIRONMENT set, it gets Production.
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(args)
                 .Build();
 
+            // We always log to Application Insights, the key is from either appsettings.json or Azure App Service > App settings
             Log.Logger = new LoggerConfiguration()
                .ReadFrom.Configuration(configuration)
                .Enrich.FromLogContext()
