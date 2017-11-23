@@ -1,9 +1,5 @@
-﻿using Fan.Enums;
-using Fan.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.Data
@@ -11,42 +7,30 @@ namespace Fan.Data
     /// <summary>
     /// Sql implementation of the <see cref="IMetaRepository"/> contract.
     /// </summary>
-    public class SqlMetaRepository : EFRepository<Meta>, IMetaRepository
+    public class SqlMetaRepository : EntityRepository<Meta>, IMetaRepository
     {
-        private readonly CoreDbContext _db;
+        private readonly FanDbContext _db;
 
-        public SqlMetaRepository(CoreDbContext db) : base(db)
+        public SqlMetaRepository(FanDbContext db) : base(db)
         {
             _db = db;
         }
 
         /// <summary>
-        /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
+        /// Returns all the meta records, returns empty list if no records are found.
         /// </summary>
-        /// <param name="key"></param>
         /// <returns></returns>
-        public async Task<Meta> GetAsync(string key) =>
-             await _db.Metas.SingleOrDefaultAsync(m => m.Key.Equals(key, StringComparison.CurrentCultureIgnoreCase));
+        /// <remarks>
+        /// TODO I should probably limit this instead of return all.
+        /// </remarks>
+        public async Task<List<Meta>> AllAsync() => await _entities.AsNoTracking().ToListAsync();
 
         /// <summary>
-        /// Returns a list of <see cref="Meta"/> records.
+        /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
         /// </summary>
-        /// <param name="keySegment"></param>
-        /// <param name="compareBy"></param>
+        /// <param name="key">The caller should pass this key in proper casing.</param>
         /// <returns></returns>
-        public async Task<List<Meta>> GetListAsync(string keySegment, EMetaKeyCompareBy compareBy)
-        {
-            switch (compareBy)
-            {
-                case EMetaKeyCompareBy.StartsWith:
-                    return await _db.Metas.Where(m => m.Key.StartsWith(keySegment)).ToListAsync();
-
-                case EMetaKeyCompareBy.EndsWith:
-                    return await _db.Metas.Where(m => m.Key.EndsWith(keySegment)).ToListAsync();
-
-                default:
-                    return await _db.Metas.Where(m => m.Key.Contains(keySegment)).ToListAsync();
-            }
-        }
+        public async Task<Meta> GetAsync(string key) =>
+             await _entities.SingleOrDefaultAsync(m => m.Key == key);
     }
 }

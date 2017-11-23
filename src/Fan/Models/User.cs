@@ -12,15 +12,15 @@ namespace Fan.Models
         }
 
         /// <summary>
+        /// When the user was created.
+        /// </summary>
+        public DateTimeOffset CreatedOn { get; set; }
+
+        /// <summary>
         /// The friendly name to display on posts.
         /// </summary>
         [Required]
         [StringLength(maximumLength: 256)]
         public string DisplayName { get; set; }
-
-        /// <summary>
-        /// When the user was created.
-        /// </summary>
-        public DateTimeOffset CreatedOn { get; set; }
     }
 }

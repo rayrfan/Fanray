@@ -1,6 +1,4 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Enums;
-using Fan.Exceptions;
 using System;
 
 namespace Fan.Blogs.Models
@@ -42,5 +40,7 @@ namespace Fan.Blogs.Models
         public int PageSize { get; set; } = 10;
         public string CategorySlug { get; set; }
         public string TagSlug { get; set; }
+        public int Year { get; set; }
+        public int? Month { get; set; }
     }
 }

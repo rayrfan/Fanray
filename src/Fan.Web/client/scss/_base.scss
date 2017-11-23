@@ -33,7 +33,14 @@ p {
 }
 
 img {
-    max-width: 100%
+    // https://www.w3schools.com/css/css_rwd_images.asp
+    max-width: 100%;
+    height: auto;
+}
+
+ul {
+    // should I do this globally or just for blog post?
+    list-style-type: square
 }
 
 // form

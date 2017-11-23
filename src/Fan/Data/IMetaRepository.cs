@@ -1,6 +1,4 @@
-﻿using Fan.Enums;
-using Fan.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Data
@@ -11,18 +9,16 @@ namespace Fan.Data
     public interface IMetaRepository : IRepository<Meta>
     {
         /// <summary>
-        /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
+        /// Returns a list of all <see cref="Meta"/>, returns empty list if no records are found.
         /// </summary>
-        /// <param name="key"></param>
         /// <returns></returns>
-        Task<Meta> GetAsync(string key);
+        Task<List<Meta>> AllAsync();
 
         /// <summary>
-        /// Returns a list of <see cref="Meta"/> based on keySegment and how it's compared
+        /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
         /// </summary>
-        /// <param name="keySegment"></param>
-        /// <param name="compareBy"></param>
+        /// <param name="key">The key must be in proper case.</param>
         /// <returns></returns>
-        Task<List<Meta>> GetListAsync(string keySegment, EMetaKeyCompareBy compareBy);
+        Task<Meta> GetAsync(string key);
     }
 }

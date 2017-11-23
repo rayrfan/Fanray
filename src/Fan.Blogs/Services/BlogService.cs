@@ -1,22 +1,22 @@
 ﻿using AutoMapper;
 using Fan.Blogs.Data;
 using Fan.Blogs.Enums;
+using Fan.Blogs.Events;
 using Fan.Blogs.Helpers;
 using Fan.Blogs.Models;
 using Fan.Blogs.Validators;
-using Fan.Enums;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Models;
-using Fan.Services;
+using Fan.Settings;
+using Fan.Shortcodes;
 using FluentValidation.Results;
 using Humanizer;
-using Microsoft.AspNetCore.Hosting;
+using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -25,41 +25,56 @@ namespace Fan.Blogs.Services
 {
     public class BlogService : IBlogService
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ISettingService _settingSvc;
         private readonly ICategoryRepository _catRepo;
         private readonly IPostRepository _postRepo;
         private readonly ITagRepository _tagRepo;
-        private readonly IMediaRepository _mediaRepo;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
+        private readonly IShortcodeService _shortcodeSvc;
+        private readonly IMediator _mediator;
 
         public BlogService(
             ISettingService settingService,
             ICategoryRepository catRepo,
             IPostRepository postRepo,
             ITagRepository tagRepo,
-            IMediaRepository mediaRepo,
-            IHostingEnvironment env,
             IDistributedCache cache,
             ILogger<BlogService> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IShortcodeService shortcodeService,
+            IMediator mediator) 
         {
             _settingSvc = settingService;
             _catRepo = catRepo;
             _postRepo = postRepo;
             _tagRepo = tagRepo;
-            _mediaRepo = mediaRepo;
-            _hostingEnvironment = env;
             _cache = cache;
             _mapper = mapper;
             _logger = logger;
+            _shortcodeSvc = shortcodeService;
+            _mediator = mediator;
         }
+
+        // -------------------------------------------------------------------- Cache
 
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
         public const string CACHE_KEY_ALL_TAGS = "BlogTags";
         public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
+        public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
+        public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
+
+        private async Task InvalidateAllBlogCache()
+        {
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
+        }
 
         // -------------------------------------------------------------------- Categories
 
@@ -70,9 +85,10 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Category> CreateCategoryAsync(Category category)
         {
-            category = await this.PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
+            category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); // TODO what about posts
+
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); 
 
             return category;
         }
@@ -102,6 +118,7 @@ namespace Fan.Blogs.Services
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
         }
 
         /// <summary>
@@ -115,24 +132,26 @@ namespace Fan.Blogs.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                throw new FanException($"Category with id '{id}' is not found.");
+                throw new FanException($"Category with id {id} is not found.");
             }
 
             return cat;
         }
 
         /// <summary>
-        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is not found.
+        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is null or not found.
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
         public async Task<Category> GetCategoryAsync(string slug)
         {
+            if (slug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
+
             var cats = await GetCategoriesAsync();
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                throw new FanException($"Category with slug '{slug}' is not found.");
+                throw new FanException($"Category '{slug}' does not exist.");
             }
 
             return cat;
@@ -144,7 +163,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, new TimeSpan(0, 10, 0), async () => {
+            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
                 return await _catRepo.GetListAsync();
             });
         }
@@ -157,8 +176,9 @@ namespace Fan.Blogs.Services
         public async Task<Category> UpdateCategoryAsync(Category category)
         {
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
-            category = await _catRepo.UpdateAsync(category);
+            await _catRepo.UpdateAsync(category);
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
 
             return category;
         }
@@ -188,6 +208,7 @@ namespace Fan.Blogs.Services
         {
             await _tagRepo.DeleteAsync(id);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
         }
 
         /// <summary>
@@ -201,7 +222,7 @@ namespace Fan.Blogs.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                throw new FanException($"Tag with id '{id}' is not found.");
+                throw new FanException($"Tag with id {id} is not found.");
             }
 
             return tag;
@@ -214,11 +235,13 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Tag> GetTagAsync(string slug)
         {
+            if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+
             var tags = await this.GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException($"Tag with slug '{slug}' is not found.");
+                throw new FanException($"Tag '{slug}' does not exist.");
             }
 
             return tag;
@@ -230,7 +253,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<List<Tag>> GetTagsAsync()
         {
-            return await _cache.GetAsync<List<Tag>>(CACHE_KEY_ALL_TAGS, new TimeSpan(0, 10, 0), async () => {
+            return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
                 return await _tagRepo.GetListAsync();
             });
         }
@@ -243,104 +266,52 @@ namespace Fan.Blogs.Services
         public async Task<Tag> UpdateTagAsync(Tag tag)
         {
             tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
-            tag = await _tagRepo.UpdateAsync(tag);
+            await _tagRepo.UpdateAsync(tag);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
 
             return tag;
         }
 
-        // -------------------------------------------------------------------- Media
+        // -------------------------------------------------------------------- Archives
 
         /// <summary>
-        /// 
+        /// Returns archive information.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="name"></param>
-        /// <param name="content"></param>
         /// <returns></returns>
-        public async Task<string> UploadMediaAsync(int userId, string name, byte[] content)
+        public async Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync()
         {
-            // verify ext is supported
-            string ext = Path.GetExtension(name);
-            if (ext.IsNullOrEmpty() || !BlogConst.Accepted_Image_Types.Contains(ext, StringComparer.InvariantCultureIgnoreCase))
-                throw new FanException("Upload image type is not supported.");
-
-            // time
-            var uploadedOn = DateTimeOffset.UtcNow;
-            var year = uploadedOn.Year.ToString();
-            var month = uploadedOn.Month.ToString("d2");
-
-            // directory path to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}",
-                Path.Combine(_hostingEnvironment.WebRootPath),
-                BlogConst.MEDIA_UPLOADS_FOLDER,
-                year,
-                month);
-
-            if (!Directory.Exists(dirPath))
-                Directory.CreateDirectory(dirPath);
-
-            // file path
-            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(name);
-            if (fileNameWithoutExt.Length > BlogConst.MEDIA_FILENAME_MAXLEN)
+            return await _cache.GetAsync(CACHE_KEY_ALL_ARCHIVES, CacheTime_Archives, async () =>
             {
-                fileNameWithoutExt = fileNameWithoutExt.Substring(0, BlogConst.MEDIA_FILENAME_MAXLEN);
-            }
+                var months = new Dictionary<DateTime, int>();
+                var years = new Dictionary<int, List<MonthItem>>();
 
-            string slug = Util.FormatSlug(fileNameWithoutExt); // chinese fn ends up emtpy
-            if (slug.IsNullOrEmpty())
-            {
-                slug = Util.RandomString(6);
-            }
+                var dates = await _postRepo.GetPostDateTimesAsync();
+                foreach (var month in dates)
+                {
+                    months.TryGetValue(month, out int count);
+                    ++count;
+                    months[month] = count;
+                }
 
-            string fileName = $"{slug}{ext}";
-            var filePath = Path.Combine(dirPath, fileName); // C:\Fan.Web\wwwroot\uploads\2017\10\test-pic.jpg
+                foreach (var month in months)
+                {
+                    int year = month.Key.Year;
+                    if (!years.Keys.Contains(year))
+                    {
+                        years.Add(year, new List<MonthItem>());
+                    }
 
-            // user uploads file with an existing name, get a unique name
-            // the problem is olw, if user resizes an image, be aware olw sends it as new file
-            // also olw each time sends two copies of the file, orig and thumb
-            int i = 2;
-            while (File.Exists(filePath))
-            {
-                fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
-                filePath = Path.Combine(dirPath, fileName);
-            }
+                    years[year].Add(new MonthItem
+                    {
+                        Title = month.Key.ToString("MMMM"),
+                        Url = string.Format("/" + BlogRoutes.ARCHIVE_URL_TEMPLATE, year, month.Key.Month.ToString("00")),
+                        Count = month.Value,
+                    });
+                }
 
-            // save file to file sys, always a new file
-            using (var targetStream = File.Create(filePath))
-            using (MemoryStream stream = new MemoryStream(content))
-            {
-                await stream.CopyToAsync(targetStream);
-            }
-
-            // save record to db
-            var media = new Media
-            {
-                UserId = userId,
-                FileName = fileName,
-                Title = fileNameWithoutExt,
-                Description = fileNameWithoutExt,
-                Length = content.LongLength,
-                Type = EMediaType.Image,
-                UploadedOn = uploadedOn,
-            };
-            await _mediaRepo.CreateAsync(media);
-
-            // a challenge here is that this returned url will be hardcoded into post
-            // if user later switches to Blob Storage or CDN instead of file sys
-            // all these post will break. If that happens, the easy remedy is keep 
-            // existing copies of files where they were, not ideal.
-            return $"{BlogConst.MEDIA_UPLOADS_FOLDER}/{year}/{month}/{fileName}";
-        }
-
-        public async Task<Media> UpdateMediaAsync(int id, string title, string description)
-        {
-            var media = await _mediaRepo.GetAsync(id);
-            title = title.IsNullOrEmpty() ? "" : title;
-            media.Title = title.Length > BlogConst.MEDIA_FILENAME_MAXLEN ?
-             title.Substring(0, BlogConst.MEDIA_FILENAME_MAXLEN) : title;
-            media.Description = description;
-            return await _mediaRepo.UpdateAsync(media);
+                return years;
+            });
         }
 
         // -------------------------------------------------------------------- BlogPosts 
@@ -355,7 +326,7 @@ namespace Fan.Blogs.Services
             // blogPost is just used as a container of data
             if (blogPost == null) return blogPost;
 
-            // preps BlogPost for saving and gets Post back
+            // preps a post from blog post for saving
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // save post
@@ -364,11 +335,16 @@ namespace Fan.Blogs.Services
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+                await InvalidateAllBlogCache();
             }
 
-            // get BlogPost again
-            return await GetPostAsync(post.Id);
+            // get BlogPost back
+            blogPost =  await GetPostAsync(post.Id);
+
+            // raise event
+            await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
+
+            return blogPost;
         }
 
         /// <summary>
@@ -387,10 +363,10 @@ namespace Fan.Blogs.Services
             await _postRepo.UpdateAsync(post);
 
             // invalidate cache 
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await InvalidateAllBlogCache();
 
             // return a new blogPost with latest data
-            return await this.GetPostAsync(post.Id);
+            return await GetPostAsync(post.Id);
         }
 
         /// <summary>
@@ -401,7 +377,7 @@ namespace Fan.Blogs.Services
         public async Task DeletePostAsync(int id)
         {
             await _postRepo.DeleteAsync(id);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await InvalidateAllBlogCache();
         }
 
         /// <summary>
@@ -417,6 +393,7 @@ namespace Fan.Blogs.Services
         public async Task<BlogPost> GetPostAsync(int id)
         {
             var post = await QueryPostAsync(id, EPostType.BlogPost);
+            if (post == null) throw new FanException("Blog post not found.");
             return await GetBlogPostAsync(post);
         }
 
@@ -436,7 +413,7 @@ namespace Fan.Blogs.Services
         {
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
-
+            if (post == null) throw new FanException("Blog post not found.");
             return await GetBlogPostAsync(post);
         }
 
@@ -456,7 +433,7 @@ namespace Fan.Blogs.Services
             // cache only first page
             if (query.PageIndex == 1)
             {
-                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, new TimeSpan(0, 10, 0), async () =>
+                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, CacheTime_PostsIndex, async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -473,6 +450,8 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<BlogPostList> GetPostsForCategoryAsync(string categorySlug, int pageIndex)
         {
+            if (categorySlug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
+
             // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByCategory)
             {
@@ -492,12 +471,33 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<BlogPostList> GetPostsForTagAsync(string tagSlug, int pageIndex)
         {
+            if (tagSlug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+
             // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByTag)
             {
                 TagSlug = tagSlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
                 PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
+            };
+
+            return await QueryPostsAsync(query);
+        }
+
+        /// <summary>
+        /// Returns a list of blog posts for archive.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public async Task<BlogPostList> GetPostsForArchive(int? year, int? month, int page = 1)
+        {
+            if (!year.HasValue) throw new FanException("Year must be provided.");
+            var query = new PostListQuery(EPostListQueryType.BlogPostsArchive)
+            {
+                Year = year.Value,
+                Month = month
             };
 
             return await QueryPostsAsync(query);
@@ -523,6 +523,42 @@ namespace Fan.Blogs.Services
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = numberOfPosts };
 
             return await QueryPostsAsync(query);
+        }
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SetupAsync(string disqusShortname)
+        {
+            const string DEFAULT_CATEGORY = "Uncategorized";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray";
+            const string WELCOME_POST_BODY = @"<p>To start posting</p><ul><li>Install <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a></li><li>Open OLW &gt; Add blog account... &gt; Other services, type in</li><ul><li>Web address of your blog</li><li>User name</li><li>Password</li></ul></ul>";
+
+            // create blog settings
+            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            {
+                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
+                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
+            });
+            _logger.LogInformation("BlogSettings created.");
+
+            // create welcome post and default category
+            await CreatePostAsync(new BlogPost
+            {
+                CategoryTitle = DEFAULT_CATEGORY,
+                TagTitles = new List<string> { "announcement", "blogging" },
+                Title = WELCOME_POST_TITLE,
+                Body = WELCOME_POST_BODY,
+                UserId = 1,
+                Status = EPostStatus.Published,
+                CommentStatus = ECommentStatus.AllowComments,
+                CreatedOn = DateTimeOffset.Now,
+            });
+            _logger.LogInformation("Welcome post and default category created.");
+            _logger.LogInformation("Blog Setup completes.");
         }
 
         // -------------------------------------------------------------------- Private
@@ -572,7 +608,7 @@ namespace Fan.Blogs.Services
         /// <param name="tax">A category or tag.</param>
         /// <param name="createOrUpdate"></param>
         /// <returns></returns>
-        private async Task<Taxonomy> PrepTaxonomyAsync(Taxonomy tax, ECreateOrUpdate createOrUpdate)
+        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
         {
             // get existing titles and slugs
             IEnumerable<string> existingTitles = null;
@@ -580,13 +616,13 @@ namespace Fan.Blogs.Services
             ETaxonomyType type = ETaxonomyType.Category;
             if (tax is Category)
             {
-                var allCats = await this.GetCategoriesAsync();
+                var allCats = await GetCategoriesAsync();
                 existingTitles = allCats.Select(c => c.Title);
                 existingSlugs = allCats.Select(c => c.Slug);
             }
             else
             {
-                var allTags = await this.GetTagsAsync();
+                var allTags = await GetTagsAsync();
                 existingTitles = allTags.Select(c => c.Title);
                 existingSlugs = allTags.Select(c => c.Slug);
                 type = ETaxonomyType.Tag;
@@ -630,7 +666,7 @@ namespace Fan.Blogs.Services
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create) 
@@ -664,10 +700,10 @@ namespace Fan.Blogs.Services
             // Categories TODO check CategoryTitle first
             if (!string.IsNullOrEmpty(blogPost.CategoryTitle)) // CatTitle takes precedence if available
             {
-                var cat = (await this.GetCategoriesAsync())
+                var cat = (await GetCategoriesAsync())
                     .SingleOrDefault(c => c.Title.Equals(blogPost.CategoryTitle, StringComparison.CurrentCultureIgnoreCase));
                 if (cat == null)
-                    post.Category = await this.CreateCategoryAsync(new Category { Title = blogPost.CategoryTitle });
+                    post.Category = await CreateCategoryAsync(new Category { Title = blogPost.CategoryTitle });
                 else
                     //post.Category = cat; // todo see if id works
                     post.CategoryId = cat.Id;
@@ -742,18 +778,18 @@ namespace Fan.Blogs.Services
         /// <param name="post"></param>
         /// <returns></returns>
         /// <remarks>
-        /// It readies the excerpt and the list of tags.
+        /// It readies CreatedOnFriendly, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
         private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var siteSettings = await _settingSvc.GetSettingsAsync<SiteSettings>();
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
             // Friendly post time if the post was published within 2 days
             // else show the actual date time in setting's timezone
             blogPost.CreatedOnFriendly = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ? 
-                Util.ConvertTime(blogPost.CreatedOn, siteSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
+                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
                 blogPost.CreatedOn.Humanize();
 
             // Title
@@ -772,6 +808,9 @@ namespace Fan.Blogs.Services
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
 
+            // Shortcodes
+            blogPost.Body = _shortcodeSvc.Parse(post.Body);
+
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
         }
@@ -782,9 +821,9 @@ namespace Fan.Blogs.Services
         private async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
-            if (input.Length > BlogConst.POST_TITLE_SLUG_MAXLEN)
+            if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)
             {
-                input = input.Substring(0, BlogConst.POST_TITLE_SLUG_MAXLEN);
+                input = input.Substring(0, PostValidator.POST_TITLE_SLUG_MAXLEN);
             }
 
             // remove/replace odd char, lower case etc

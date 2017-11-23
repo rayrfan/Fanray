@@ -1,6 +1,7 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
 using Fan.Data;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -45,5 +46,11 @@ namespace Fan.Blogs.Data
         /// <param name="query"></param>
         /// <returns></returns>
         Task<(List<Post> posts, int totalCount)> GetListAsync(PostListQuery query);
+
+        /// <summary>
+        /// Returns CreatedOn of all published blog posts, used for archives.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<DateTime>> GetPostDateTimesAsync();
     }
 }

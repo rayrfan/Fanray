@@ -97,20 +97,14 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         Task<Tag> UpdateTagAsync(Tag tag);
 
-        // -------------------------------------------------------------------- Media
+        // -------------------------------------------------------------------- Archive 
 
         /// <summary>
-        /// Uploads media and inserts a record in datasource.
+        /// Returns a dictionary of year and months, the key is year and the value is a list of 
+        /// <see cref="MonthItem"/> objects.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="name"></param>
-        /// <param name="content"></param>
         /// <returns></returns>
-        Task<string> UploadMediaAsync(int userId, string name, byte[] content);
-        /// <summary>
-        /// Updates media title and description.
-        /// </summary>
-        Task<Media> UpdateMediaAsync(int id, string title, string description);
+        Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync();
 
         // -------------------------------------------------------------------- BlogPosts
 
@@ -159,6 +153,14 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         Task<BlogPostList> GetPostsForTagAsync(string tagSlug, int pageIndex);
         /// <summary>
+        /// Returns <see cref="BlogPostList"/> for archive.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        Task<BlogPostList> GetPostsForArchive(int? year, int? month, int page = 1);
+        /// <summary>
         /// Returns all blog post drafts.
         /// </summary>
         /// <returns></returns>
@@ -169,5 +171,13 @@ namespace Fan.Blogs.Services
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         /// <returns></returns>
         Task<List<BlogPost>> GetRecentPostsAsync(int numberOfPosts);
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        Task SetupAsync(string disqusShortname);        
     }
 }

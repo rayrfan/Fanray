@@ -25,7 +25,11 @@ p {
   margin-bottom: 1rem; }
 
 img {
-  max-width: 100%; }
+  max-width: 100%;
+  height: auto; }
+
+ul {
+  list-style-type: square; }
 
 .form-control {
   height: 2.5rem;
@@ -122,7 +126,7 @@ label {
         width: 100%; } }
 
 .site-footer {
-  padding: 2.625em 0 1.75em;
+  padding: 2rem 3rem 1rem 3rem;
   word-wrap: break-word;
   text-align: center;
   bottom: 0; }
@@ -199,6 +203,7 @@ label {
 .posts {
   margin-top: 2rem; }
   .posts .category-title, .posts .tag-title {
+    font-weight: bold;
     padding: 2rem 3rem 0 3rem; }
 
 .post {
@@ -208,7 +213,7 @@ label {
   .post.single {
     margin-top: 2rem; }
   .post .post-header {
-    margin-bottom: 2rem; }
+    margin-bottom: 0.8rem; }
     .post .post-header .post-title {
       line-height: 1;
       font-size: 2.25rem;
@@ -231,8 +236,23 @@ label {
     .post .post-info .post-author,
     .post .post-info .post-date,
     .post .post-info .post-category,
-    .post .post-info .post-tags {
+    .post .post-info .post-tags,
+    .post .post-info #social-list {
       padding: 0 5px; }
+    .post .post-info #social-list a {
+      color: #666;
+      font-size: larger;
+      font-weight: bolder; }
+    .post .post-info #social-list > a {
+      padding: 0 3px; }
+    .post .post-info #social-list .twtr-share {
+      color: #00acee; }
+    .post .post-info #social-list .fb-share {
+      color: #3b5998; }
+    .post .post-info #social-list .goog-share {
+      color: #e93f2e; }
+    .post .post-info #social-list .lnkd-share {
+      color: #0e76a8; }
   .post .post-body {
     line-height: 1.6;
     padding-bottom: 1rem;
@@ -339,6 +359,27 @@ label {
   color: #666;
   margin-right: 4px;
   font-size: 12px; }
+
+.month-list li {
+  font-weight: normal; }
+
+.month-list .year {
+  cursor: pointer;
+  color: #555;
+  font-weight: bold; }
+  .month-list .year li {
+    margin: 0 1rem;
+    padding: 0;
+    font-weight: bold; }
+
+.month-list .year:not(:first-child) .months {
+  display: none; }
+
+.month-list ul ul {
+  display: none; }
+
+.month-list .open {
+  display: block; }
 
 .syntaxhighlighter a,
 .syntaxhighlighter div,

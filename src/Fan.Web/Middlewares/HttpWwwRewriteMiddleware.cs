@@ -1,4 +1,4 @@
-﻿using Fan.Models;
+﻿using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +35,7 @@ namespace Fan.Web.Middlewares
 
                 context.Response.Headers[HeaderNames.Location] = url;
                 context.Response.StatusCode = 301;
-                context.Response.Redirect(url);
+                context.Response.Redirect(url, permanent: true);
                 return Task.CompletedTask;
             }
 

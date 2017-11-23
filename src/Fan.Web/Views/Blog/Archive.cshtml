@@ -1,0 +1,28 @@
+@model BlogPostListViewModel
+
+@{
+    var posts = Model.BlogPostViewModels;
+    var title = Model.ArchiveTitle;
+    ViewData["Title"] = title;
+}
+
+<div class="posts">
+    <h1 class="category-title">
+        Posts for @title
+    </h1>
+
+    @foreach (var post in posts)
+    {
+        <article class="post">
+            <header class="post-header">
+                <h1 class="post-title">
+                    <a href="@post.RelativeLink">@post.Title</a>
+                </h1>
+                @await Html.PartialAsync("_PostInfo", post)
+            </header>
+            <div class="post-body">
+                @Html.Raw(post.Excerpt) <span style="padding-left:5px"><a href="@post.RelativeLink">Read More</a></span>
+            </div>
+        </article>
+    }
+</div>

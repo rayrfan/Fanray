@@ -1,11 +1,15 @@
 ﻿@{
     var cats = await blogService.GetCategoriesAsync();
     var tags = await blogService.GetTagsAsync();
-    var settings = await settingService.GetSettingsAsync<SiteSettings>();
-    var title = ViewData["Title"] == null ? settings.Title : $"{ViewData["Title"]} - {settings.Title}";
-    string description = ViewData["Description"] == null ? settings.Tagline : ViewData["Description"] as string;
+    var years = await blogService.GetArchivesAsync();
+
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+    var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
+
+    var title = ViewData["Title"] == null ? coreSettings.Title : $"{ViewData["Title"]} - {coreSettings.Title}";
+    string description = ViewData["Description"] == null ? coreSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
-    var url = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}";
+    var showDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
 }
 <!DOCTYPE html>
 <html>
@@ -17,13 +21,12 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:domain" content="@domain" />
     <meta name="twitter:title" property="og:title" itemprop="title name" content="@title" />
-    <meta property="og:url" content="@url" />
     @if (!string.IsNullOrEmpty(description))
     {
         <meta name="description" content="@description" />
         <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
     }
-    <link rel="canonical" href="@url" />
+    @RenderSection("Canonical", required: false)
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" /> 
     <environment include="Development">
@@ -38,6 +41,7 @@
         <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+    @await Html.PartialAsync("_Analytics")
 </head>
 <body>
     <nav class="navbar navbar-default navbar-custom">
@@ -47,7 +51,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">@settings.Title</a>
+                <a class="navbar-brand" href="/">@coreSettings.Title</a>
             </div>
 
             <div class="collapse navbar-collapse">
@@ -72,6 +76,10 @@
         <div class="blog-wrapper">
             <div class="blog-content">
                 @RenderBody()
+                <footer class="site-footer">
+                    <p class="text-muted pull-left">&copy; @DateTime.Now.Year - @coreSettings.Title</p>
+                    <p class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></p>
+                </footer>
             </div>
             <aside class="blog-sidebar">
                 <div class="widgets">
@@ -102,13 +110,30 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Archives</h4>
+                        <div class="widget-content">
+                            <ul class="month-list">
+                                @foreach (var year in years)
+                                {
+                                    <li class="year">@year.Key
+                                        <ul class="months">
+                                            @foreach (var item in year.Value)
+                                            {
+                                                <li>
+                                                    <a href="@item.Url">@item.Title</a> (@item.Count)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </aside>
         </div>
     </div>
-    <footer class="site-footer">
-        <p class="text-muted">Copyright &copy; @settings.Title @DateTime.Now.Year - Powered by <a href="https://github.com/FanrayMedia/Fanray">Fanray</a></p>
-    </footer>      
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -127,9 +152,19 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
-        <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
     <script src="~/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.month-list .year').click(function () {
+                $(this).find('.months').slideToggle();
+            });
+        });
+    </script>
+    @if (showDisqus)
+    {
+        <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
+    }
 </body>
 </html>

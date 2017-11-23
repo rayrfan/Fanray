@@ -1,7 +1,6 @@
 ﻿using Fan.Data;
-using Fan.Models;
+using Fan.Settings;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.Linq;
 using Xunit;
 
@@ -12,11 +11,11 @@ namespace Fan.Tests.Data
     /// </summary>
     public class SqlMetaRepositoryTest : DataTestBase
     {
-        private SqlMetaRepository _metaRepo;
+        private SqlMetaRepository _repo;
 
         public SqlMetaRepositoryTest()
         {
-            _metaRepo = new SqlMetaRepository(_db);
+            _repo = new SqlMetaRepository(_db);
         }
 
         /// <summary>
@@ -24,32 +23,33 @@ namespace Fan.Tests.Data
         /// <see cref="DbUpdateException"/> will be thrown.
         /// </summary>
         [Fact]
-        public async void CreateMeta_Throws_DbUpdateException_If_Key_Already_Exists()
+        public async void Create_meta_throws_DbUpdateException_if_key_already_exists()
         {
             // Arrange
             var meta = new Meta { Key = "key", Value = "value" };
             var meta2 = new Meta { Key = "key", Value = "value" };
 
             // Act & Assert
-            await _metaRepo.CreateAsync(meta);
-            var ex = await Assert.ThrowsAsync<DbUpdateException>(() => _metaRepo.CreateAsync(meta2));
+            await _repo.CreateAsync(meta);
+            var ex = await Assert.ThrowsAsync<DbUpdateException>(() => _repo.CreateAsync(meta2));
         }
 
         /// <summary>
-        /// Test for <see cref="SqlMetaRepository.CreateAsync(Meta)"/> method will create a new 
+        /// Test for <see cref="SqlMetaRepository.CreateAsync(Setting)"/> method will create a new 
         /// record in the Meta table.
         /// </summary>
         [Fact]
-        public async void CreateMeta_Creates_A_Meta_In_Db()
+        public async void Create_meta_saves_a_record_in_Core_Setting_table()
         {
             // Arrange
-            var meta = new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) };
+            var meta = new Meta { Key = "Age", Value = "13" };
 
             // Act
-            await _metaRepo.CreateAsync(meta);
+            await _repo.CreateAsync(meta);
 
             // Assert
-            Assert.NotNull(_db.Metas.SingleOrDefault(c => c.Key == "SiteSettings"));
+            var metaAgain = _db.Set<Meta>().SingleOrDefault(c => c.Key == "Age");
+            Assert.Equal("13", metaAgain.Value);
         }
 
         /// <summary>
@@ -57,10 +57,10 @@ namespace Fan.Tests.Data
         /// the key is not found.
         /// </summary>
         [Fact]
-        public async void GetMeta_Returns_Null_If_Key_Does_Not_Exist()
+        public async void Get_meta_returns_null_if_key_does_not_exist()
         {
             // Act
-            var meta = await _metaRepo.GetAsync("NotExist");
+            var meta = await _repo.GetAsync("NotExist");
 
             // Assert
             Assert.Null(meta);
@@ -71,51 +71,50 @@ namespace Fan.Tests.Data
         /// specified by the key if it's in db.
         /// </summary>
         [Fact]
-        public async void GetMeta_Returns_The_Meta_With_Specified_Key()
+        public async void Get_meta_returns_the_record()
         {
             // Arrange
-            await _metaRepo.CreateAsync(new Meta { Key = "SiteSettings", Value = JsonConvert.SerializeObject(new SiteSettings()) });
+            await _repo.CreateAsync(new Meta { Key = "Age", Value = "13" });
 
             // Act
-            var meta = await _metaRepo.GetAsync("SiteSettings");
+            var meta = await _repo.GetAsync("Age");
 
             // Assert
-            Assert.NotNull(meta);
-            Assert.Equal("SiteSettings", meta.Key);
+            Assert.Equal("Age", meta.Key);
         }
 
         /// <summary>
         /// Test for <see cref="SqlMetaRepository.UpdateAsync(Meta)"/> method.
         /// </summary>
         [Fact]
-        public async void UpdateMeta_Updates_It_In_Db()
+        public async void Update_meta_updates_it_in_db()
         {
             // Arrange
-            var meta = await _metaRepo.CreateAsync(new Meta { Key = "key", Value = "value" });
+            var meta = await _repo.CreateAsync(new Meta { Key = "key", Value = "value" });
 
             // Act
             meta.Value = "new value";
-            await _metaRepo.UpdateAsync(meta);
+            await _repo.UpdateAsync(meta);
 
             // Assert
-            var metaAgain = await _metaRepo.GetAsync("key");
-            Assert.Equal("new value", meta.Value);
+            var metaAgain = await _repo.GetAsync("key");
+            Assert.Equal("new value", metaAgain.Value);
         }
 
         /// <summary>
         /// Test for <see cref="SqlMetaRepository.UpdateAsync(Meta)"/> method.
         /// </summary>
         [Fact]
-        public async void UpdateMeta_Updates_A_Record_With_Key_NotFound_Does_Nothing()
+        public async void Update_meta_updates_a_record_with_key_not_found_does_nothing()
         {
             // Arrange
             var meta = new Meta { Key = "key-not-found", Value = "value" };
 
             // Act
-            await _metaRepo.UpdateAsync(meta);
+            await _repo.UpdateAsync(meta);
 
             // Assert
-            var metaAgain = await _metaRepo.GetAsync("key-not-found");
+            var metaAgain = await _repo.GetAsync("key-not-found");
             Assert.Null(metaAgain);
         }
     }

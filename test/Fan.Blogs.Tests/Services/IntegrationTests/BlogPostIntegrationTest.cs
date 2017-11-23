@@ -1,6 +1,6 @@
 ﻿using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
-using Fan.Models;
+using Fan.Blogs.Tests.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;

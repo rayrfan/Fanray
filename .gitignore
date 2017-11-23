@@ -150,7 +150,7 @@ publish/
 *.azurePubxml
 # TODO: Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
-#*.pubxml
+*.pubxml
 *.publishproj
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
@@ -288,6 +288,5 @@ __pycache__/
 *.xsd.cs
 
 # My ignores
-*.sqlite
-logs/
-uploads/
+src/fan.web/logs/
+src/fan.web/wwwroot/media/

@@ -77,4 +77,34 @@
     }
 }
 
+.month-list {
+    li {
+        font-weight: normal;
+    }
+
+    .year {
+        cursor: pointer;
+        color: #555;
+        font-weight: bold;
+
+        li {
+            margin: 0 1rem;
+            padding: 0;
+            font-weight: bold;
+        }
+    }
+
+    // hide months under year that is not on the very top
+    .year:not(:first-child) .months {
+        display: none
+    }
+
+    ul ul {
+        display: none;
+    }
+
+    .open {
+        display: block;
+    }
+}
 

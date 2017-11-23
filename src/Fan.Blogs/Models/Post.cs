@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Data;
 using Fan.Models;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blogs.Models
 {
-    public class Post : BaseEntity
+    public class Post : Entity
     {
         public Post()
         {
@@ -15,9 +16,14 @@ namespace Fan.Blogs.Models
         }
 
         /// <summary>
-        /// Post body.
+        /// Post body in html.
         /// </summary>
         public string Body { get; set; }
+
+        /// <summary>
+        /// Post body in markdown.
+        /// </summary>
+        public string BodyMark { get; set; }
 
         /// <summary>
         /// Category for a blog post, null for page.
@@ -36,6 +42,9 @@ namespace Fan.Blogs.Models
 
         public int CommentCount { get; set; }
 
+        /// <summary>
+        /// Gets and sets if the post allows, needs approval of or no comments.
+        /// </summary>
         public ECommentStatus CommentStatus { get; set; }
 
         /// <summary>
@@ -46,7 +55,7 @@ namespace Fan.Blogs.Models
         /// - When a published post is saved as draft, this maintains the post's CreatedOn.
         ///   When draft is published, unless user sets a new datetime, it maintains the original value.
         /// - When post is display to a user, we show the humanized version <see cref="CreatedOnFriendly"/>
-        ///   or a date time string converted to the <see cref="SiteSettings.TimeZoneId"/>.
+        ///   or a date time string converted to the <see cref="CoreSettings.TimeZoneId"/>.
         /// </remarks>
         public DateTimeOffset CreatedOn { get; set; }
 
@@ -89,11 +98,6 @@ namespace Fan.Blogs.Models
         [Required]
         [StringLength(maximumLength: 256)]
         public string Slug { get; set; }
-
-        /// <summary>
-        /// Page order, null for blog post.
-        /// </summary>
-        public int? SortOrder { get; set; }
 
         /// <summary>
         /// Published or Draft.

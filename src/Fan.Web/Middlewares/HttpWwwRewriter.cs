@@ -1,5 +1,4 @@
-﻿using Fan.Enums;
-using Fan.Models;
+﻿using Fan.Settings;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;

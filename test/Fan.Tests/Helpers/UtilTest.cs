@@ -1,5 +1,6 @@
 ﻿using Fan.Helpers;
 using Fan.Models;
+using Fan.Settings;
 using Humanizer;
 using System;
 using Xunit;
@@ -46,7 +47,7 @@ namespace Fan.Tests.Helpers
         {
             // suppose a site owner lives in US west coast
             // so he sets the site with the following timezone
-            var siteSettings = new SiteSettings
+            var coreSettings = new CoreSettings
             {
                 TimeZoneId = "Pacific Standard Time"
             };
@@ -58,7 +59,7 @@ namespace Fan.Tests.Helpers
 
             // the user wants to see the actual post time in his own timezone
             // Util.ConvertTime returns him that
-            var displayToUser = Util.ConvertTime(createdOn, siteSettings.TimeZoneId);
+            var displayToUser = Util.ConvertTime(createdOn, coreSettings.TimeZoneId);
             Assert.Equal("-07:00:00", displayToUser.Offset.ToString());
         }
 

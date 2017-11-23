@@ -8,13 +8,13 @@ namespace Fan.Tests.Data
     public class DataTestBase : IDisposable
     {
         /// <summary>
-        /// A <see cref="CoreDbContext"/> built with Sqlite in-memory mode.
+        /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
-        protected CoreDbContext _db;
+        protected FanDbContext _db;
 
         public DataTestBase()
         {
-            _db = GetContextWithSqlite(); 
+            _db = GetContextWithSqlite();
         }
 
         public void Dispose()
@@ -26,15 +26,15 @@ namespace Fan.Tests.Data
         /// <summary>
         /// Returns <see cref="CoreDbContext"/> with SQLite Database Provider in-memory mode.
         /// </summary>
-        private CoreDbContext GetContextWithSqlite()
+        private FanDbContext GetContextWithSqlite()
         {
             var connection = new SqliteConnection() { ConnectionString = "Data Source=:memory:" };
             connection.Open();
 
-            var builder = new DbContextOptionsBuilder<CoreDbContext>();
+            var builder = new DbContextOptionsBuilder<FanDbContext>();
             builder.UseSqlite(connection);
 
-            var context = new CoreDbContext(builder.Options);
+            var context = new FanDbContext(builder.Options);
             context.Database.EnsureCreated();
 
             return context;
@@ -43,10 +43,10 @@ namespace Fan.Tests.Data
         /// <summary>
         /// Returns <see cref="CoreDbContext"/> with Entity Framework Core In-Memory Database.
         /// </summary>
-        private CoreDbContext GetContextWithEFCore()
+        private FanDbContext GetContextWithEFCore()
         {
-            var _options = new DbContextOptionsBuilder<CoreDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
-            return new CoreDbContext(_options);
+            var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
+            return new FanDbContext(_options);
         }
     }
 }
