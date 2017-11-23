@@ -35,7 +35,7 @@ namespace Fan.Web.Middlewares
 
                 context.Response.Headers[HeaderNames.Location] = url;
                 context.Response.StatusCode = 301;
-                context.Response.Redirect(url);
+                context.Response.Redirect(url, permanent: true);
                 return Task.CompletedTask;
             }
 
