@@ -5,35 +5,27 @@
   <h3 align="center">Fanray</h3>
   <p align="center">
     A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.
-<table>
-<tr align="center">
-<td valign="top">Stable (master)</td>
-<td valign="bottom">
-<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
-  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true" alt="Build status" />
-</a>
-</td>
-<td valign="bottom">Nightly (dev)</td>
-<td valign="bottom">
-<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
-  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true" alt="Build status" />
-</a>
-</td>
-</tr>
-</table>
   </p>
 </p>
-
 <br>
 
 ## Table of contents
 
+- [Status](#status)
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Open Live Writer](#open-live-writer)
 - [Shortcodes](#shortcodes)
 - [Roadmap](#roadmap)
 - [License](#license)
+
+## Status
+
+| Branch | Status |
+| ------ | ------ |
+| master | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
+| dev | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
+| latest feature | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
 
 ## Features
 
