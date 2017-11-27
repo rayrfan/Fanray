@@ -12,10 +12,11 @@
 ## Table of contents
 
 - [Status](#status)
-- [Features](#features)
 - [Quick Start](#quick-start)
+- [Features](#features)
 - [Open Live Writer](#open-live-writer)
 - [Shortcodes](#shortcodes)
+- [Contributing](#contributing)
 - [Roadmap](#roadmap)
 - [License](#license)
 
@@ -26,23 +27,6 @@
 | master | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
 | dev | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
 | latest feature | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
-
-## Features
-
-Fanray v1.0 highlights:
-
-- Supports [Open Live Writer](#open-live-writer) through MetaWeblog API
-- Easily posts source code and YouTube videos with [Shortcodes](#shortcodes)
-- Provides main and per category RSS feeds, e.g.
-  - Main feed: https://www.fanray.com/feed
-  - Category feed: https://www.fanray.com/posts/categorized/technology/feed
-- Easily configures URL forwarding to https and preferred domain (either www or non-www)
-- Infrastructure
-  - Logging with Serilog to Console, Files, Seq and Application Insights
-  - Caching
-  - File storages on File Sytem and Azure Blob Storage
-  - xUnit tests with SQLite in-memory database
-- Uses Disqus for comments
 
 ## Quick Start
 
@@ -66,6 +50,23 @@ Database is created for you on app initial launch. Below is the default connecti
 ```
 
 You will see the blog setup page on the first launch.
+
+## Features
+
+Fanray v1.0 highlights:
+
+- Supports [Open Live Writer](#open-live-writer) through MetaWeblog API
+- Easily posts source code and YouTube videos with [Shortcodes](#shortcodes)
+- Provides main and per category RSS feeds, e.g.
+  - Main feed: https://www.fanray.com/feed
+  - Category feed: https://www.fanray.com/posts/categorized/technology/feed
+- Easily configures URL forwarding to https and preferred domain (either www or non-www)
+- Infrastructure
+  - Logging with Serilog to Console, Files, Seq and Application Insights
+  - Caching
+  - File storages on File Sytem and Azure Blob Storage
+  - xUnit tests with SQLite in-memory database
+- Uses Disqus for comments
 
 ## Open Live Writer
 
@@ -145,6 +146,10 @@ To start at a certain point in the video, convert the time of that point from mi
 ```
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U&start=75]
 ```
+
+## Contributing
+
+For those interested in contributing then please read [the guidelines](CONTRIBUTING.md).
 
 ## Roadmap
 * **v1.0** _mvp_ (Nov 2017)
