@@ -1,5 +1,4 @@
 before_build:
-  - nuget restore
-
-build:
-  verbosity: minimal
+ - nuget restore
+build_script:
+ - msbuild /verbosity:quiet "Fanray.sln"
