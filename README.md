@@ -4,7 +4,7 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a> and <a href="https://github.com/aspnet/EntityFrameworkCore">Entity Framework Core</a>.
+    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.
   </p>
 </p>
 
@@ -144,4 +144,4 @@ To start at a certain point in the video, convert the time of that point from mi
 
 ## License
 
-This project is licensed under [BSD 3](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
+This project is licensed under [Apache-2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0)).
