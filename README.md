@@ -4,7 +4,9 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.
+    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.<br/>
+Stable (master): [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
+Nightly (dev): [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev)
   </p>
 </p>
 
