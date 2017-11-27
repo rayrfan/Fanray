@@ -4,9 +4,23 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.<br/>
-Stable (master): [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
-Nightly (dev): [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev)
+    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.
+<table>
+<tr align="center">
+<td valign="top">Stable (master)</td>
+<td valign="bottom">
+<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
+  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true" alt="Build status" />
+</a>
+</td>
+<td valign="bottom">Nightly (dev)</td>
+<td valign="bottom">
+<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
+  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true" alt="Build status" />
+</a>
+</td>
+</tr>
+</table>
   </p>
 </p>
 
