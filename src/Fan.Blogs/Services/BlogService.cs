@@ -161,10 +161,15 @@ namespace Fan.Blogs.Services
         /// Returns all categories, cached after calls to DAL.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// This method must return all categories as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
+        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
+        /// it must be done in presentation layer.
+        /// </remarks>
         public async Task<List<Category>> GetCategoriesAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
-                return (await _catRepo.GetListAsync()).Where(c => c.Count > 0).ToList();
+                return await _catRepo.GetListAsync();
             });
         }
 
@@ -251,10 +256,19 @@ namespace Fan.Blogs.Services
         /// Returns all tags, cached after calls to DAL.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// This method must return all tags as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
+        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
+        /// it must be done in presentation layer.
+        /// 
+        /// TODO: currently create and update post depend on all tags instead for querying each tag 
+        /// individually to db each time, this saves some db round trip. however there is fine line
+        /// for how large the number of tags grow, in which case we need a better strategy.
+        /// </remarks>
         public async Task<List<Tag>> GetTagsAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
-                return (await _tagRepo.GetListAsync()).Where(t=>t.Count > 0).ToList();
+                return await _tagRepo.GetListAsync();
             });
         }
 
@@ -726,7 +740,7 @@ namespace Fan.Blogs.Services
             {
                 // make sure list has no empty strings and only unique values
                 blogPost.TagTitles = blogPost.TagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
-                var allTags = await this.GetTagsAsync();
+                var allTags = await GetTagsAsync();
 
                 if (createOrUpdate == ECreateOrUpdate.Create)
                 {
@@ -734,7 +748,7 @@ namespace Fan.Blogs.Services
                     {
                         var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                         if (tag == null)
-                            tag = await this.CreateTagAsync(new Tag { Title = title });
+                            tag = await CreateTagAsync(new Tag { Title = title });
 
                         // NOTE: post.PostTags.Add(new PostTag { Post = post, Tag = tag }); 
                         // would fail with SqlServer, though during testing it worked with Sqlite In-Mem!!
@@ -760,10 +774,10 @@ namespace Fan.Blogs.Services
                     {
                         var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                         if (tag == null)
-                            tag = await this.CreateTagAsync(new Tag { Title = title });
+                            tag = await CreateTagAsync(new Tag { Title = title });
 
-                        // here works because tag is just created so it is tracked
-                        post.PostTags.Add(new PostTag { Post = post, Tag = tag });
+                        // same here, must use TagId instead Tag
+                        post.PostTags.Add(new PostTag { Post = post, TagId = tag.Id });
                     }
                 }
             }
