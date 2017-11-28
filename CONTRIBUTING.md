@@ -1,6 +1,6 @@
 # Contributing
 
-- [Bug and Feature Reqests](#bug-and-feature-requests)
+- [Bug and Feature Requests](#bug-and-feature-requests)
 - [Pull Requests](#pull-requests)
 - [AppVeyor](#appveyor)
 - [License](#license)
@@ -18,8 +18,7 @@ The **`dev`** branch has the code that is being worked on, please branch and cre
 ## AppVeyor
 
 All PRs and commits to the project
-are checked on [AppVeyor](https://www.appveyor.com/), it is configured in `appveyor.yml`. You can setup AppVeyor easily for free for your own fork which means
-you can test your code prior to raising a PR.
+are checked on [AppVeyor](https://www.appveyor.com/). You can setup AppVeyor very easily for free for your own fork which means you can test your code prior to raising a PR.
 
 ## License
 
