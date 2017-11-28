@@ -58,8 +58,9 @@ namespace Fan.Medias
         /// <returns></returns>
         public async Task<string> SaveFileAsync(string fileName, string year, string month, byte[] content, EAppType appId)
         {
-            // blobName "2017/11/filename", container is "media"
-            string blobName = string.Format("{0}/{1}/{2}",
+            // blobName "blog/2017/11/filename", container is "media"
+            string blobName = string.Format("{0}/{1}/{2}/{3}",
+                appId.ToString().ToLowerInvariant(),
                 year,
                 month, 
                 fileName);

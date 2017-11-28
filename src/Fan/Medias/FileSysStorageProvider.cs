@@ -35,10 +35,14 @@ namespace Fan.Medias
         /// <returns></returns>
         public async Task<string> SaveFileAsync(string fileName, string year, string month, byte[] content, EAppType appId)
         {
+            // app name
+            var appName = appId.ToString().ToLowerInvariant();
+
             // dir to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}",
+            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}",
                 Path.Combine(_hostingEnvironment.WebRootPath),
                 _appSettings.MediaContainerName,
+                appName,
                 year,
                 month);
 
@@ -47,7 +51,7 @@ namespace Fan.Medias
                 Directory.CreateDirectory(dirPath);
 
             // combine dir and filename
-            var filePath = Path.Combine(dirPath, fileName); 
+            var filePath = Path.Combine(dirPath, fileName);
 
             // make sure file is unique
             int i = 1;
@@ -65,7 +69,7 @@ namespace Fan.Medias
             }
 
             // returns relative path
-            return $"{_appSettings.MediaContainerName}/{year}/{month}/{fileName}";
+            return $"{_appSettings.MediaContainerName}/{appName}/{year}/{month}/{fileName}";
         }
     }
 }
