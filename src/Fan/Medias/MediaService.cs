@@ -104,8 +104,8 @@ namespace Fan.Medias
                 UserId = userId,
                 AppId = appId,
                 FileName = uniqueFileName, // unique filename from storage provider
-                Title = fileNameEncoded,
-                Description = fileNameEncoded,
+                Title = fileNameEncoded, // original filename
+                Description = null,
                 Length = content.LongLength,
                 MediaType = EMediaType.Image,
                 UploadedOn = uploadedOn,
