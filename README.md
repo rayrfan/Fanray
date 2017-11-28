@@ -24,9 +24,9 @@
 
 | Branch | Status |
 | ------ | ------ |
-| master | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
-| dev | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
-| latest feature | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
+| Stable (master) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
+| Weekly (dev) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
+| Nightly (feature) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
 
 ## Quick Start
 
@@ -149,7 +149,7 @@ To start at a certain point in the video, convert the time of that point from mi
 
 ## Contributing
 
-For those interested in contributing then please read [the guidelines](CONTRIBUTING.md).
+Any participation from the community is welcoming, please read the [contributing guidelines](CONTRIBUTING.md).
 
 ## Roadmap
 * **v1.0** _mvp_ (Nov 2017)
@@ -157,4 +157,4 @@ For those interested in contributing then please read [the guidelines](CONTRIBUT
 
 ## License
 
-This project is licensed under [Apache-2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0)).
+This project is licensed under the [Apache 2.0 License](LICENSE).
