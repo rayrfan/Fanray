@@ -3,6 +3,7 @@ using Fan.Helpers;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -43,10 +44,13 @@ namespace Fan.Medias
         /// <param name="appId">Which app it uploaded it.</param>
         /// <returns></returns>
         /// <remarks>
+        /// Note: This method is optimized for metaweblog use with olw, other apps have totally 
+        /// different file logic.
+        /// 
         /// Depending on the storage provider, the returned media url could be relative path 
         /// (File Sys) or absolute path (Azure Blog).
         /// </remarks>
-        public async Task<string> UploadMediaAsync(int userId, string fileName, byte[] content, EAppType appId)
+        public async Task<string> UploadMediaAsync(int userId, string fileName, byte[] content, EAppType appId, EUploadedFrom uploadFrom)
         {
             // verify ext is supported
             var ext = Path.GetExtension(fileName);
@@ -66,33 +70,46 @@ namespace Fan.Medias
             }
 
             // there is a quirk file uploaded from olw had "_2" suffixed to the name
-            if (fileNameWithoutExt.EndsWith("_2"))
+            if (uploadFrom == EUploadedFrom.MetaWeblog && fileNameWithoutExt.EndsWith("_2"))
             {
                 fileNameWithoutExt = fileNameWithoutExt.Remove(fileNameWithoutExt.Length - 2);
             }
 
             // slug file name
-            var slug = Util.FormatSlug(fileNameWithoutExt); // chinese fn ends up emtpy
+            // chinese fn ends up emtpy and the thumb file with chinese fn ends up with only "thumb"
+            var slug = Util.FormatSlug(fileNameWithoutExt); 
             if (slug.IsNullOrEmpty())
             {
                 slug = Util.RandomString(6);
             }
+            else if (uploadFrom == EUploadedFrom.MetaWeblog && slug == "thumb")
+            {
+                slug = string.Concat(Util.RandomString(6), "_thumb");
+            }
             string fileNameSlugged = $"{slug}{ext}";
 
             // save file to storage and get back file path
-            var filePath = await _storageProvider.SaveFileAsync(fileNameSlugged, year, month, content, EAppType.Blog);
+            var filePath = await _storageProvider.SaveFileAsync(userId, fileNameSlugged, year, month, content, EAppType.Blog);
+
+            // encode filename 
+            var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
+
+            // since file name could have been updated for uniqueness
+            var start = filePath.LastIndexOf('/') + 1;
+            var uniqueFileName = filePath.Substring(start, filePath.Length - start);
 
             // save record to db
             var media = new Media
             {
                 UserId = userId,
                 AppId = appId,
-                FileName = fileNameSlugged,
-                Title = fileNameWithoutExt,
-                Description = fileNameWithoutExt,
+                FileName = uniqueFileName, // unique filename from storage provider
+                Title = fileNameEncoded,
+                Description = fileNameEncoded,
                 Length = content.LongLength,
                 MediaType = EMediaType.Image,
                 UploadedOn = uploadedOn,
+                UploadedFrom = uploadFrom,
             };
             await _mediaRepo.CreateAsync(media);
 

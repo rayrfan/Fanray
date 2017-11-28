@@ -27,22 +27,24 @@ namespace Fan.Medias
         /// <summary>
         /// Returns relative path to a file after saving it on the file system.
         /// </summary>
+        /// <param name="userId">The id of the user who uploads.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
         /// <param name="content">The content of file.</param>
         /// <param name="appId">Which app it uploaded it.</param>
         /// <returns></returns>
-        public async Task<string> SaveFileAsync(string fileName, string year, string month, byte[] content, EAppType appId)
+        public async Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId)
         {
             // app name
             var appName = appId.ToString().ToLowerInvariant();
 
             // dir to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}",
-                Path.Combine(_hostingEnvironment.WebRootPath),
+            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}\\{5}",
+                _hostingEnvironment.WebRootPath,
                 _appSettings.MediaContainerName,
                 appName,
+                userId,
                 year,
                 month);
 
@@ -69,7 +71,7 @@ namespace Fan.Medias
             }
 
             // returns relative path
-            return $"{_appSettings.MediaContainerName}/{appName}/{year}/{month}/{fileName}";
+            return $"{_appSettings.MediaContainerName}/{appName}/{userId}/{year}/{month}/{fileName}";
         }
     }
 }
