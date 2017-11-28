@@ -23,7 +23,8 @@ namespace Fan.Blogs.Data
         Task DeleteAsync(int id, int defaultCategoryId);
 
         /// <summary>
-        /// Returns all categories or empty list if no categories found.
+        /// Returns a list of <see cref="Category"/>, the returned objects are not tracked.
+        /// The returned list are order by alphabetically on <see cref="Category.Title"/>.
         /// </summary>
         Task<List<Category>> GetListAsync();
     }

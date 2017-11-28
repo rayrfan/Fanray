@@ -164,7 +164,7 @@ namespace Fan.Blogs.Services
         public async Task<List<Category>> GetCategoriesAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
-                return await _catRepo.GetListAsync();
+                return (await _catRepo.GetListAsync()).Where(c => c.Count > 0).ToList();
             });
         }
 
@@ -218,7 +218,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Tag> GetTagAsync(int id)
         {
-            var tags = await this.GetTagsAsync();
+            var tags = await GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
@@ -254,7 +254,7 @@ namespace Fan.Blogs.Services
         public async Task<List<Tag>> GetTagsAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
-                return await _tagRepo.GetListAsync();
+                return (await _tagRepo.GetListAsync()).Where(t=>t.Count > 0).ToList();
             });
         }
 
