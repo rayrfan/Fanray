@@ -5,7 +5,6 @@ using Fan.Blogs.Services;
 using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -189,6 +188,15 @@ namespace Fan.Blogs.MetaWeblog
             }
         }
 
+        /// <summary>
+        /// Creates a new category. Note only when supportsNewCategoriesInline is false do we get
+        /// a call to this operation, otherwise the new category is created as part of creating a
+        /// post.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<int> CreateCategoryAsync(string name, string userName, string password)
         {
             await EnsureValidUserAsync(userName, password);

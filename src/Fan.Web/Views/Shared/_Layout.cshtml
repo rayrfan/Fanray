@@ -1,6 +1,6 @@
 ﻿@{
-    var cats = await blogService.GetCategoriesAsync();
-    var tags = await blogService.GetTagsAsync();
+    var cats = (await blogService.GetCategoriesAsync()).Where(c => c.Count > 0).ToList();
+    var tags = (await blogService.GetTagsAsync()).Where(t => t.Count > 0).ToList();
     var years = await blogService.GetArchivesAsync();
 
     var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
