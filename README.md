@@ -157,4 +157,4 @@ Any participation from the community is welcoming, please read the [contributing
 
 ## License
 
-This project is licensed under the [Apache 2.0 License](LICENSE).
+This project is licensed under the [Apache 2.0](LICENSE).
