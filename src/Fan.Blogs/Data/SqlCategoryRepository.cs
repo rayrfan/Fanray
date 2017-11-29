@@ -55,6 +55,7 @@ namespace Fan.Blogs.Data
 
         /// <summary>
         /// Returns a list of <see cref="Category"/>, the returned objects are not tracked.
+        /// The returned list are order by alphabetically on <see cref="Category.Title"/>.
         /// </summary>
         public async Task<List<Category>> GetListAsync()
         {
@@ -65,7 +66,7 @@ namespace Fan.Blogs.Data
                         Title = c.Title,
                         Slug = c.Slug,
                         Count = _db.Set<Post>().Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
-                    }).ToListAsync();
+                    }).OrderBy(c => c.Title).ToListAsync();
         }
     }
 }

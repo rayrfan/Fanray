@@ -16,7 +16,8 @@ namespace Fan.Blogs.Data
         Task DeleteAsync(int id);
 
         /// <summary>
-        /// Returns all tags or empty list if no tags found.
+        /// Returns all tags or empty list if no tags found. The returned list is ordered by 
+        /// <see cref="Tag.Count"/> desc.
         /// </summary>
         Task<List<Tag>> GetListAsync();
     }

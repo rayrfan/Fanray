@@ -15,6 +15,15 @@ body {
     body {
       padding-top: 2rem; } }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 1rem;
+  font-family: segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Helvetica Neue, Helvetica, sans-serif; }
+
 a {
   color: #0064c4;
   text-decoration: none !important; }
@@ -30,6 +39,11 @@ img {
 
 ul {
   list-style-type: square; }
+
+pre {
+  border: 1px dashed #e0e0e0;
+  border-radius: 0;
+  background-color: #fcfcfc; }
 
 .form-control {
   height: 2.5rem;
@@ -259,33 +273,20 @@ label {
     border-bottom: 1px dashed #ccc; }
     .post .post-body a:hover {
       text-decoration: underline; }
-    .post .post-body h1, .post .post-body h2, .post .post-body h3, .post .post-body h4, .post .post-body h5, .post .post-body h6 {
-      margin: 0 0 1rem;
-      font-family: segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Helvetica Neue, Helvetica, sans-serif; }
     .post .post-body h1 {
-      font-size: 1.75rem;
-      margin-top: 32px; }
+      font-size: 1.75rem; }
     .post .post-body h2 {
-      font-size: 1.4375rem;
-      margin-top: 32px; }
+      font-size: 1.75rem; }
     .post .post-body h3 {
-      font-size: 1.25rem;
-      margin-top: 30px;
-      margin-bottom: 18px; }
+      font-size: 1.188rem; }
     .post .post-body h4 {
-      font-size: 1.188rem;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      font-size: 1rem; }
     .post .post-body h5 {
       font-size: 1rem;
-      letter-spacing: 1px;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      font-style: italic; }
     .post .post-body h6 {
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      font-size: 1rem;
+      font-style: italic; }
   @media screen and (max-width: 64rem) {
     .post {
       margin-bottom: 1rem;
