@@ -36,7 +36,7 @@ namespace Fan.Blogs.Data
 
         /// <summary>
         /// Returns all tags or empty list if no tags found. The returned list is ordered by 
-        /// <see cref="Tag.Count"/> desc.
+        /// <see cref="Tag.Count"/> desc and then by <see cref="Tag.Title"/>.
         /// </summary>
         public async Task<List<Tag>> GetListAsync()
         {
@@ -52,7 +52,7 @@ namespace Fan.Blogs.Data
                                        from pt in p.PostTags
                                        where pt.TagId == t.Id && p.Status == EPostStatus.Published
                                        select pt).Count(),
-                          }).OrderByDescending(t => t.Count).ToListAsync();
+                          }).OrderByDescending(t => t.Count).ThenBy(t => t.Title).ToListAsync();
         }
     }
 }
