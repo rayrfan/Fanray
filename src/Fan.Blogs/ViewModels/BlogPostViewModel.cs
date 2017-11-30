@@ -54,7 +54,7 @@ namespace Fan.Blogs.ViewModels
 
             var requestHostShort = request.Host.ToString().StartsWith("www.") ? 
                 request.Host.ToString().Remove(0, 4) : request.Host.ToString();
-            var permalinkShort = $"{requestHostShort}/{permalinkPart}";
+            var permalinkShort = $"{request.Scheme}://{requestHostShort}/{permalinkPart}";
 
             TwitterShareLink = hash.IsNullOrEmpty() ?
                 $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}" :
