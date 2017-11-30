@@ -50,12 +50,17 @@ namespace Fan.Blogs.ViewModels
                 }
                 hash = sb.ToString();
             }
+
+            var requestHostShort = request.Host.ToString().StartsWith("www.") ? 
+                request.Host.ToString().Remove(0, 4) : request.Host.ToString();
+            var permalinkShort = $"{requestHostShort}/{permalinkPart}";
+
             TwitterShareLink = hash.IsNullOrEmpty() ?
-                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}" :
-                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}&hashtags={hash}";
-            FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={Permalink}";
-            GoogleShareLink = $"https://plus.google.com/share?url={Permalink}";
-            LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={Permalink}&title={Title}";
+                $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}" :
+                $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}&hashtags={hash}";
+            FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={permalinkShort}";
+            GoogleShareLink = $"https://plus.google.com/share?url={permalinkShort}";
+            LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={permalinkShort}&title={Title}";
         }
 
         // -------------------------------------------------------------------- BlogPost
