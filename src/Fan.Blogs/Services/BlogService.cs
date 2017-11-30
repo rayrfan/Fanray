@@ -19,7 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Fan.Blogs.Tests")]
 
 namespace Fan.Blogs.Services
 {
@@ -161,6 +164,11 @@ namespace Fan.Blogs.Services
         /// Returns all categories, cached after calls to DAL.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// This method must return all categories as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
+        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
+        /// it must be done in presentation layer.
+        /// </remarks>
         public async Task<List<Category>> GetCategoriesAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
@@ -218,7 +226,7 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         public async Task<Tag> GetTagAsync(int id)
         {
-            var tags = await this.GetTagsAsync();
+            var tags = await GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
@@ -251,6 +259,15 @@ namespace Fan.Blogs.Services
         /// Returns all tags, cached after calls to DAL.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// This method must return all tags as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
+        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
+        /// it must be done in presentation layer.
+        /// 
+        /// TODO: currently create and update post depend on all tags instead for querying each tag 
+        /// individually to db each time, this saves some db round trip. however there is fine line
+        /// for how large the number of tags grow, in which case we need a better strategy.
+        /// </remarks>
         public async Task<List<Tag>> GetTagsAsync()
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
@@ -535,7 +552,7 @@ namespace Fan.Blogs.Services
         {
             const string DEFAULT_CATEGORY = "Uncategorized";
             const string WELCOME_POST_TITLE = "Welcome to Fanray";
-            const string WELCOME_POST_BODY = @"<p>To start posting</p><ul><li>Install <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a></li><li>Open OLW &gt; Add blog account... &gt; Other services, type in</li><ul><li>Web address of your blog</li><li>User name</li><li>Password</li></ul></ul>";
+            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
 
             // create blog settings
             await _settingSvc.UpsertSettingsAsync(new BlogSettings
@@ -726,7 +743,7 @@ namespace Fan.Blogs.Services
             {
                 // make sure list has no empty strings and only unique values
                 blogPost.TagTitles = blogPost.TagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
-                var allTags = await this.GetTagsAsync();
+                var allTags = await GetTagsAsync();
 
                 if (createOrUpdate == ECreateOrUpdate.Create)
                 {
@@ -734,7 +751,7 @@ namespace Fan.Blogs.Services
                     {
                         var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                         if (tag == null)
-                            tag = await this.CreateTagAsync(new Tag { Title = title });
+                            tag = await CreateTagAsync(new Tag { Title = title });
 
                         // NOTE: post.PostTags.Add(new PostTag { Post = post, Tag = tag }); 
                         // would fail with SqlServer, though during testing it worked with Sqlite In-Mem!!
@@ -760,10 +777,10 @@ namespace Fan.Blogs.Services
                     {
                         var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                         if (tag == null)
-                            tag = await this.CreateTagAsync(new Tag { Title = title });
+                            tag = await CreateTagAsync(new Tag { Title = title });
 
-                        // here works because tag is just created so it is tracked
-                        post.PostTags.Add(new PostTag { Post = post, Tag = tag });
+                        // same here, must use TagId instead Tag
+                        post.PostTags.Add(new PostTag { Post = post, TagId = tag.Id });
                     }
                 }
             }
@@ -816,9 +833,21 @@ namespace Fan.Blogs.Services
         }
 
         /// <summary>
-        /// Gets a unique and valid slug for a blog post.
+        /// Returns a unique and valid slug for a blog post.
         /// </summary>
-        private async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
+        /// <param name="input">This could be a slug or post title.</param>
+        /// <param name="createdOn">Used for making sure slug is unique by searching posts.</param>
+        /// <param name="createOrUpdate">Whether the operation is create or update post.</param>
+        /// <param name="blogPostId">Used for making sure slug is unique when updating.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If input is slug, either this is update or a create with user inputted slug, then <see cref="Util.FormatSlug(string)"/>
+        /// will not alter it. This is very important for SEO as updating slug on an existing post will
+        /// break links in search results. On the other hand, if user deliberately updated the slug
+        /// when doing an update on post, then it will alter it accordingly. Please see the test case
+        /// on this method.
+        /// </remarks>
+        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)

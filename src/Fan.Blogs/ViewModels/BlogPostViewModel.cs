@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Fan.Blogs.ViewModels
 {
@@ -25,7 +26,7 @@ namespace Fan.Blogs.ViewModels
             Author = blogPost.User.DisplayName;
             CreatedOn = blogPost.CreatedOn;
             CreatedOnFriendly = blogPost.CreatedOnFriendly;
-            Tags = blogPost.Tags;
+            Tags = blogPost.Tags.OrderBy(t => t.Title).ToList();
             Category = blogPost.Category;
 
             RelativeLink = string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, CreatedOn.Year, CreatedOn.Month, CreatedOn.Day, blogPost.Slug);
@@ -50,12 +51,17 @@ namespace Fan.Blogs.ViewModels
                 }
                 hash = sb.ToString();
             }
+
+            var requestHostShort = request.Host.ToString().StartsWith("www.") ? 
+                request.Host.ToString().Remove(0, 4) : request.Host.ToString();
+            var permalinkShort = $"{request.Scheme}://{requestHostShort}/{permalinkPart}";
+
             TwitterShareLink = hash.IsNullOrEmpty() ?
-                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}" :
-                $"https://twitter.com/intent/tweet?text={Title}&url={Permalink}&hashtags={hash}";
-            FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={Permalink}";
-            GoogleShareLink = $"https://plus.google.com/share?url={Permalink}";
-            LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={Permalink}&title={Title}";
+                $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}" :
+                $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}&hashtags={hash}";
+            FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={permalinkShort}";
+            GoogleShareLink = $"https://plus.google.com/share?url={permalinkShort}";
+            LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={permalinkShort}&title={Title}";
         }
 
         // -------------------------------------------------------------------- BlogPost

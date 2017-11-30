@@ -4,37 +4,29 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a> and <a href="https://github.com/aspnet/EntityFrameworkCore">Entity Framework Core</a>.
+    A blog built with <a href="https://github.com/aspnet/Home">ASP.NET Core</a>.
   </p>
 </p>
-
 <br>
 
 ## Table of contents
 
-- [Features](#features)
+- [Status](#status)
 - [Quick Start](#quick-start)
+- [Features](#features)
 - [Open Live Writer](#open-live-writer)
 - [Shortcodes](#shortcodes)
+- [Contributing](#contributing)
 - [Roadmap](#roadmap)
 - [License](#license)
 
-## Features
+## Status
 
-Fanray v1.0 highlights:
-
-- Supports [Open Live Writer](#open-live-writer) through MetaWeblog API
-- Easily posts source code and YouTube videos with [Shortcodes](#shortcodes)
-- Provides main and per category RSS feeds, e.g.
-  - Main feed: https://www.fanray.com/feed
-  - Category feed: https://www.fanray.com/posts/categorized/technology/feed
-- Easily configures URL forwarding to https and preferred domain (either www or non-www)
-- Infrastructure
-  - Logging with Serilog to Console, Files, Seq and Application Insights
-  - Caching
-  - File storages on File Sytem and Azure Blob Storage
-  - xUnit tests with SQLite in-memory database
-- Uses Disqus for comments
+| Branch | Status |
+| ------ | ------ |
+| Stable (master) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
+| Weekly (dev) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
+| Nightly (feature) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
 
 ## Quick Start
 
@@ -58,6 +50,23 @@ Database is created for you on app initial launch. Below is the default connecti
 ```
 
 You will see the blog setup page on the first launch.
+
+## Features
+
+Fanray v1.0 highlights:
+
+- Supports [Open Live Writer](#open-live-writer) through MetaWeblog API
+- Easily posts source code and YouTube videos with [Shortcodes](#shortcodes)
+- Provides main and per category RSS feeds, e.g.
+  - Main feed: https://www.fanray.com/feed
+  - Category feed: https://www.fanray.com/posts/categorized/technology/feed
+- Easily configures URL forwarding to https and preferred domain (either www or non-www)
+- Infrastructure
+  - Logging with Serilog to Console, Files, Seq and Application Insights
+  - Caching
+  - File storages on File Sytem and Azure Blob Storage
+  - xUnit tests with SQLite in-memory database
+- Uses Disqus for comments
 
 ## Open Live Writer
 
@@ -138,10 +147,14 @@ To start at a certain point in the video, convert the time of that point from mi
 [youtube https://www.youtube.com/watch?v=MNor4dYXa6U&start=75]
 ```
 
+## Contributing
+
+Any participation from the community is welcoming, please read the [contributing guidelines](CONTRIBUTING.md).
+
 ## Roadmap
 * **v1.0** _mvp_ (Nov 2017)
 * **v1.1** _admin console_ 
 
 ## License
 
-This project is licensed under [BSD 3](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
+This project is licensed under the [Apache 2.0](LICENSE).

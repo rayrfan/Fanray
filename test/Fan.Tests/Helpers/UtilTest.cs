@@ -3,6 +3,7 @@ using Fan.Models;
 using Fan.Settings;
 using Humanizer;
 using System;
+using System.Net;
 using Xunit;
 
 namespace Fan.Tests.Helpers
@@ -76,6 +77,15 @@ namespace Fan.Tests.Helpers
             Assert.Equal("now", DateTimeOffset.Now.Humanize()); // now
             Assert.Equal("now", DateTime.UtcNow.Humanize()); // now
             Assert.NotEqual("now", DateTime.Now.Humanize()); // 7 hours ago or wherever you are running
+        }
+
+        [Theory]
+        [InlineData("你好。", "你好。")]
+        [InlineData("c#", "c#")]
+        [InlineData("<h1>", "&lt;h1&gt;")]
+        public void WebUtility_HtmlEncode_Test(string input, string expected)
+        {
+            Assert.Equal(expected, WebUtility.HtmlEncode(input));
         }
     }
 }

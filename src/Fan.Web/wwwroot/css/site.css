@@ -31,6 +31,10 @@ img {
 ul {
   list-style-type: square; }
 
+pre {
+  border: 1px dashed #e0e0e0;
+  border-radius: 0; }
+
 .form-control {
   height: 2.5rem;
   background: none;
@@ -266,26 +270,25 @@ label {
       font-size: 1.75rem;
       margin-top: 32px; }
     .post .post-body h2 {
-      font-size: 1.4375rem;
-      margin-top: 32px; }
+      font-size: 1.75rem;
+      margin-top: 30px; }
     .post .post-body h3 {
-      font-size: 1.25rem;
-      margin-top: 30px;
-      margin-bottom: 18px; }
-    .post .post-body h4 {
       font-size: 1.188rem;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      margin-top: 30px; }
+    .post .post-body h4 {
+      font-size: 1rem;
+      margin-top: 30px;
+      margin-bottom: 12px; }
     .post .post-body h5 {
       font-size: 1rem;
-      letter-spacing: 1px;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      font-style: italic;
+      margin-top: 30px;
+      margin-bottom: 12px; }
     .post .post-body h6 {
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-      margin-top: 36px;
-      margin-bottom: 6px; }
+      font-size: 1rem;
+      font-style: italic;
+      margin-top: 30px;
+      margin-bottom: 12px; }
   @media screen and (max-width: 64rem) {
     .post {
       margin-bottom: 1rem;
