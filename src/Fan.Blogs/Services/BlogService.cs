@@ -19,7 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Fan.Blogs.Tests")]
 
 namespace Fan.Blogs.Services
 {
@@ -830,9 +833,21 @@ namespace Fan.Blogs.Services
         }
 
         /// <summary>
-        /// Gets a unique and valid slug for a blog post.
+        /// Returns a unique and valid slug for a blog post.
         /// </summary>
-        private async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
+        /// <param name="input">This could be a slug or post title.</param>
+        /// <param name="createdOn">Used for making sure slug is unique by searching posts.</param>
+        /// <param name="createOrUpdate">Whether the operation is create or update post.</param>
+        /// <param name="blogPostId">Used for making sure slug is unique when updating.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If input is slug, either this is update or a create with user inputted slug, then <see cref="Util.FormatSlug(string)"/>
+        /// will not alter it. This is very important for SEO as updating slug on an existing post will
+        /// break links in search results. On the other hand, if user deliberately updated the slug
+        /// when doing an update on post, then it will alter it accordingly. Please see the test case
+        /// on this method.
+        /// </remarks>
+        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)
