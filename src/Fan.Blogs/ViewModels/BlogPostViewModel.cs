@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Fan.Blogs.ViewModels
 {
@@ -25,7 +26,7 @@ namespace Fan.Blogs.ViewModels
             Author = blogPost.User.DisplayName;
             CreatedOn = blogPost.CreatedOn;
             CreatedOnFriendly = blogPost.CreatedOnFriendly;
-            Tags = blogPost.Tags;
+            Tags = blogPost.Tags.OrderBy(t => t.Title).ToList();
             Category = blogPost.Category;
 
             RelativeLink = string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, CreatedOn.Year, CreatedOn.Month, CreatedOn.Day, blogPost.Slug);
