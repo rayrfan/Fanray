@@ -49,6 +49,17 @@ namespace Fan.Web
              */
             services.AddDbContext<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Cors
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
+
             // Identity
             services.AddIdentity<User, Role>(options =>
             {
@@ -136,9 +147,9 @@ namespace Fan.Web
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
             routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
+            routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
-            routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
             BlogRoutes.RegisterRoutes(routes);
 
