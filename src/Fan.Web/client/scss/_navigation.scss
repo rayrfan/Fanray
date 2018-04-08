@@ -5,6 +5,7 @@
     width: 100%;
     z-index: 3;
     font-family: $font-family-base;
+
     .navbar-brand {
         font-weight: 800;
     }
@@ -15,11 +16,16 @@
         font-size: 12px;
     }
 
-    .nav li a {
+    .nav li a, .nav li button /* logout */ {
         text-transform: uppercase;
         font-size: 12px;
         font-weight: 800;
         letter-spacing: 1px;
+    }
+
+    // logout
+    .navbar-btn {
+        margin:14px 0 0 14px;        
     }
 
     @media only screen and (min-width: 768px) {
