@@ -97,8 +97,19 @@ namespace Fan.Web
             services.AddSingleton<IShortcodeService>(shortcodeService);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            // Mvc
-            services.AddMvc();
+            // Mvc and Razor Pages
+
+            // if you update the roles and find the app not working, try logout then login https://stackoverflow.com/a/48177723/32240
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminRoles", policy => policy.RequireRole("Administrator", "Editor"));
+            });
+
+            services.AddMvc()
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                });
 
             // AppInsights
             services.AddApplicationInsightsTelemetry(Configuration);
@@ -122,7 +133,7 @@ namespace Fan.Web
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
             app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();
-            app.UseAuthentication();
+            app.UseAuthentication(); // UseIdentity is obsolete, UseAuth is recommended
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
