@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Html2Markdown" Version="3.1.0.265" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
-    <PackageReference Include="Moq" Version="4.7.145" />
-    <PackageReference Include="ReverseMarkdown" Version="1.4.0" />
+    <PackageReference Include="Html2Markdown" Version="3.2.1.341" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="ReverseMarkdown" Version="1.5.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.console" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
