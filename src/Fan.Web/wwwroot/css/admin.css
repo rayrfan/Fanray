@@ -1,0 +1,53 @@
+﻿/* Ensure layout covers the entire screen. */
+
+html {
+    height: 100%;
+}
+
+/* Stack toolbar and content on top of each other. */
+
+.admin-body {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    min-height: 100%;
+}
+
+/* Place drawer and main next to each other. */
+
+.admin-content {
+    display: flex;
+    flex: 1 1 auto;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.admin-main {
+    padding-left: 16px;
+    padding-right: 16px;
+    min-width: auto;
+    width: 100%;
+}
+
+#extra-wide-content {
+    width: 200vw;
+}
+
+#extra-tall-content {
+    height: 200vh;
+}
+
+#avatar-menu {
+    margin-top: 8px;
+    margin-right: 8px;
+}
+
+a.material-icons {
+    text-decoration: none;
+}
+
+.mdc-select-div {
+    margin-right: 8px;
+}

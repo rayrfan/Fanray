@@ -3,77 +3,102 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin Console</title>
-
+    <title>@ViewData["Title"] - Fanray Admin Console</title>
     <environment include="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/lib/material-components-web/material-components-web.css">
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/lib/material-components-web/material-components-web.min.css">
     </environment>
-
-    <style>
-        body {
-            padding-top: 50px;
-            padding-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/admin.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
-<body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-page="/Index" class="navbar-brand">Admin Console</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-page="/Index">Home</a></li>
-                    <li><a asp-page="/About">About</a></li>
-                    <li><a asp-page="/Contact">Contact</a></li>
-                </ul>
-                @await Html.PartialAsync("_LoginPartial")
-            </div>
+<body class="mdc-typography admin-body">
+    @* Top Toolbar *@
+    <header class="mdc-toolbar mdc-toolbar--fixed">
+        <div class="mdc-toolbar__row">
+            <section class="mdc-toolbar__section mdc-toolbar__section--align-start">
+                <span class="mdc-toolbar__title catalog-title">Fanray Admin Console</span>
+            </section>
+            <section class="mdc-toolbar__section mdc-toolbar__section--align-end" role="toolbar">
+                <div class="mdc-menu-anchor">
+                    <a id="menu-button">
+                        <img class="mdc-list-item__graphic"
+                             src="https://material-components-web.appspot.com/images/animal1.svg"
+                             width="56" height="56" alt="Panda">
+                    </a>
+                    <div class="mdc-menu" style="position: absolute;" tabindex="-1" id="avatar-menu">
+                        <ul class="mdc-menu__items mdc-list" role="menu" aria-hidden="true">
+                            <li class="mdc-list-item" role="menuitem" tabindex="0">Profile</li>
+                            <li class="mdc-list-divider" role="separator"></li>
+                            <li class="mdc-list-item" role="menuitem" tabindex="0">Logout</li>
+                        </ul>
+                    </div>
+                    <a href="/">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">exit_to_app</i>
+                    </a>
+                </div>                
+            </section>
         </div>
-    </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2017 - WebApplication1</p>
-        </footer>
+    </header>
+
+    <div class="admin-content mdc-toolbar-fixed-adjust">
+        @* Side Nav mdc-list-item--selected*@
+        <nav id="admin-drawer" class="mdc-drawer mdc-drawer--permanent">
+            <div class="mdc-list-group">
+                <nav class="mdc-list">
+                    <a asp-page="./Index" class="mdc-list-item mdc-list-item--selected">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">list</i>Posts
+                    </a>
+                    <a class="mdc-list-item" href="#">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">insert_photo</i>Media
+                    </a>
+                    <a class="mdc-list-item" href="#">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">label</i>Tags
+                    </a>
+                    <a class="mdc-list-item" href="#">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">widgets</i>Widgets
+                    </a>
+                </nav>
+
+                <hr class="mdc-list-divider">
+
+                <nav class="mdc-list">
+                    <a class="mdc-list-item" href="#">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">library_books</i>Blogs
+                    </a>
+                    <a asp-page="./Users" class="mdc-list-item">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">supervisor_account</i>Users
+                    </a>
+                    <a class="mdc-list-item" href="#">
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">settings</i>Settings
+                    </a>
+                </nav>
+            </div>
+        </nav>
+        @* Main Content *@
+        <main class="admin-main">
+            @RenderBody()
+        </main>
     </div>
 
     <environment include="Development">
-        <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/lib/material-components-web/material-components-web.js"></script>
     </environment>
     <environment exclude="Development">
-        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
-                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous"
-                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
-        </script>
-        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-                crossorigin="anonymous"
-                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
-        </script>
-        <script src="~/js/site.min.js" asp-append-version="true"></script>
+        <script src="~/lib/material-components-web/material-components-web.min.js"></script>
     </environment>
-
     @RenderSection("Scripts", required: false)
+    @* Avatar Dropdown Menu *@
+    <script>
+        var menuEl = document.querySelector('#avatar-menu');
+        var menu = new mdc.menu.MDCMenu(menuEl);
+        var menuButtonEl = document.querySelector('#menu-button');
+        menuButtonEl.addEventListener('click', function () {
+            menu.open = !menu.open;
+        });
+    </script>
 </body>
 </html>
