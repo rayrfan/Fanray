@@ -10,6 +10,9 @@
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
+                <a href="/admin">Admin</a>
+            </li>
+            <li>
                 <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello @((await UserManager.FindByNameAsync(User.Identity.Name)).DisplayName)!</a>
             </li>
             <li>
