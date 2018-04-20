@@ -5,6 +5,7 @@
   "scripts": {
     "copy": "npm-run-all copy:*",
     "copy:bootstrap": "cpx node_modules/bootstrap/dist/** wwwroot/lib/bootstrap/dist",
+    "copy:material": "cpx node_modules/material-components-web/dist/** wwwroot/lib/material-components-web",
     "copy:jquery": "cpx node_modules/jquery/dist/* wwwroot/lib/jquery/dist",
     "copy:jquery-val": "cpx node_modules/jquery-validation/dist/* wwwroot/lib/jquery-validation/dist",
     "copy:jquery-val-unob": "cpx node_modules/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js wwwroot/lib/jquery-validation-unobtrusive",
@@ -19,6 +20,7 @@
   "dependencies": {
     "bootstrap": "3.3.7",
     "font-awesome": "4.7.0",
+    "material-components-web": "0.34.1",
     "jquery": "3.2.1",
     "jquery-validation-unobtrusive": "3.2.6"
   },
