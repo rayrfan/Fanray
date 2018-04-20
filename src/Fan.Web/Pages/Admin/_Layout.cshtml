@@ -49,16 +49,19 @@
         <nav id="admin-drawer" class="mdc-drawer mdc-drawer--permanent">
             <div class="mdc-list-group">
                 <nav class="mdc-list">
-                    <a asp-page="./Index" class="mdc-list-item mdc-list-item--selected">
+                    <a asp-page="/admin/index" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">list</i>Posts
                     </a>
-                    <a class="mdc-list-item" href="#">
+                    <a asp-page="/admin/compose" class="mdc-list-item" is-active-nav>
+                        <i class="material-icons mdc-list-item__graphic" aria-hidden="true">mode_edit</i>Compose
+                    </a>
+                    <a asp-page="/admin/media" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">insert_photo</i>Media
                     </a>
-                    <a class="mdc-list-item" href="#">
+                    <a asp-page="/admin/tags" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">label</i>Tags
                     </a>
-                    <a class="mdc-list-item" href="#">
+                    <a asp-page="/admin/widgets" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">widgets</i>Widgets
                     </a>
                 </nav>
@@ -66,13 +69,13 @@
                 <hr class="mdc-list-divider">
 
                 <nav class="mdc-list">
-                    <a class="mdc-list-item" href="#">
+                    <a asp-page="/admin/blogs" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">library_books</i>Blogs
                     </a>
-                    <a asp-page="./Users" class="mdc-list-item">
+                    <a asp-page="/admin/users" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">supervisor_account</i>Users
                     </a>
-                    <a class="mdc-list-item" href="#">
+                    <a asp-page="/admin/settings" class="mdc-list-item" is-active-nav>
                         <i class="material-icons mdc-list-item__graphic" aria-hidden="true">settings</i>Settings
                     </a>
                 </nav>

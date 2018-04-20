@@ -1,9 +1,54 @@
 ﻿@page
 @model Fan.Web.Pages.Admin.IndexModel
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Posts";
     Layout = "~/Pages/Admin/_Layout.cshtml";
 }
 
-<h2>Admin Console Index</h2>
-
+@* Toolbar *@
+<header class="mdc-toolbar" style="margin-top: 10px; background-color: white">
+    <div class="mdc-toolbar__row">
+        <section class="mdc-toolbar__section mdc-toolbar__section--align-start">
+            <!-- <i class="material-icons mdc-toolbar__menu-icon">menu</i>
+                <span class="mdc-toolbar__title">Posts</span>
+            </section>
+            <section class="mdc-toolbar__section mdc-toolbar__section--align-end" role="toolbar"> -->
+            <div class="mdc-layout-grid__cell">
+                <div id="hero-js-select" class="mdc-select mdc-select-div">
+                    <select class="mdc-select__native-control" style="font-weight:bold">
+                        <option value="grains" selected>
+                            Programming a long name
+                        </option>
+                        <option value="fruit">
+                            Living
+                        </option>
+                    </select>
+                    <div class="mdc-select__label mdc-select__label--float-above">Blogs</div>
+                    <div class="mdc-select__bottom-line"></div>
+                </div>
+            </div>
+            <!-- Tabs with chips -->
+            <nav id="basic-tab-bar" class="mdc-tab-bar">
+                <a class="mdc-tab mdc-tab--active" href="#one">
+                    Published
+                    <div class="demo-chip mdc-chip" tabindex="0">
+                        <div class="mdc-chip__text">13</div>
+                    </div>
+                </a>
+                <a class="mdc-tab" href="#two">Draft</a>
+                <a class="mdc-tab" href="#three">Trash</a>
+                <span class="mdc-tab-bar__indicator"></span>
+            </nav>
+            <!-- Buttons -->
+            <button class="mdc-button mdc-button--raised" disabled>
+                1 - 50 of 100
+            </button>
+            <button class="mdc-button">
+                <i class="material-icons mdc-list-item__graphic" aria-hidden="true">keyboard_arrow_left</i>
+            </button>
+            <button class="mdc-button">
+                <i class="material-icons mdc-list-item__graphic" aria-hidden="true">keyboard_arrow_right</i>
+            </button>
+        </section>
+    </div>
+</header>
