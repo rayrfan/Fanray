@@ -91,11 +91,6 @@ namespace Fan.Blogs.Models
         /// <summary>
         /// The post slug.
         /// </summary>
-        /// <remarks>
-        /// User is allowed to modify slug. If title is not given when saving post as draft 
-        /// this will be the id of the post.
-        /// </remarks>
-        [Required]
         [StringLength(maximumLength: 256)]
         public string Slug { get; set; }
 

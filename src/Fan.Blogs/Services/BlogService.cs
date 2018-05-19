@@ -673,11 +673,14 @@ namespace Fan.Blogs.Services
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
             // Validation
-            var validator = new PostValidator();
-            ValidationResult result = await validator.ValidateAsync(blogPost);
-            if (!result.IsValid)
+            if (blogPost.Status != EPostStatus.Draft) // skip if it's a draft
             {
-                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} blog post.", result.Errors);
+                var validator = new PostValidator();
+                ValidationResult result = await validator.ValidateAsync(blogPost);
+                if (!result.IsValid)
+                {
+                    throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} blog post.", result.Errors);
+                }
             }
 
             // Get post
@@ -700,9 +703,14 @@ namespace Fan.Blogs.Services
             if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = post.CreatedOn;
             else post.UpdatedOn = null;
 
-            // Slug before Title
-            post.Slug = await GetBlogPostSlugAsync(blogPost.Slug.IsNullOrEmpty() ? blogPost.Title : blogPost.Slug,
-                post.CreatedOn, createOrUpdate, blogPost.Id);
+            // Slug 
+            if (blogPost.Status == EPostStatus.Draft && blogPost.Title.IsNullOrEmpty())
+                post.Slug = null; // if user save a draft with empty title
+            else
+                post.Slug = await GetBlogPostSlugAsync(blogPost.Slug.IsNullOrEmpty() ? blogPost.Title : blogPost.Slug,
+                                                       post.CreatedOn, createOrUpdate, blogPost.Id);
+
+            // Title
             post.Title = blogPost.Title; // looks like OLW html encodes post title
 
             // Body & Excerpt, UserId

@@ -111,6 +111,10 @@ namespace Fan.Web
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
                 });
 
+            // To make ajax work with razor pages, without this ajax post will get 404 
+            // http://www.talkingdotnet.com/handle-ajax-requests-in-asp-net-core-razor-pages/
+            services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
+
             // AppInsights
             services.AddApplicationInsightsTelemetry(Configuration);
         }

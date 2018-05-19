@@ -4,23 +4,20 @@ This class library provides the infrastructure to all the other libraries, such 
 
 ## Migrations
 
-The Migrations folder contains EF migrations, I try to keep one migration for each release.  Follow these steps to get started.
+The Migrations folder contains EF migrations.  If you make changes to any model class that derives from Entity, say you added a property to Post class, then follow these steps
 
-1. Open Package Manager Console, select "src\Fan" as the Default project, then run
+1. Open Package Manager Console, select "src\Fan" as the Default project, then run for example
 
-  `Add-Migration NameOfTheMigration`
+`Add-Migration UpdatePost`
 
-This will add a new folder "Fan/Migrations" with a migration named NameOfTheMigration
+This will create folder "Fan/Migrations" if not already there with a migration named UdpatePost prefixed with timestamp.
 
-2. Either run the app ctrl + f5, the site is up running with db automatically created, or run
+2. Then you can just run the app ctrl + f5, the site is up running with db automatically created.
 
-`Update-Database`
+Run `Update-Database` should work too without running the app, but it gave me a error message 
 
-3. If any of the Entity derived models are updated, for example say by adding a property to Post class, then repeat the process
-
-`Add-Migration NewMigrationName`
-
-This will add a new migration, ctrl + f5, site is up running with Post table having the new column added automatically in db.
+"The index 'IX_Blog_Post_Slug' is dependent on column 'Slug'.
+ALTER TABLE ALTER COLUMN Slug failed because one or more objects access this column."
 
 ## Azure Blob Storage
 
