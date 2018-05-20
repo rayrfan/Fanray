@@ -13,7 +13,7 @@ namespace Fan.Medias
         /// <param name="appId">Which fanray app it uploaded it.</param>
         /// <param name="uploadFrom">Which client uploaded it.</param>
         /// <returns></returns>
-        Task<string> UploadMediaAsync(int userId, string name, byte[] content, EAppType appId, EUploadedFrom uploadFrom);
+        Task<string> UploadImageAsync(int userId, string name, byte[] content, EAppType appId, EUploadedFrom uploadFrom);
         /// <summary>
         /// Updates media title and description.
         /// </summary>

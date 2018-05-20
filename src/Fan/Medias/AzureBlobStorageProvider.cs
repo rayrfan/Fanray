@@ -48,7 +48,7 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns full path to a file after saving it to Azure Blob Storage.
+        /// Returns fileName as it could be updated if there already exists a file with same name.
         /// </summary>
         /// <param name="userId">The id of the user who uploads.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
@@ -84,7 +84,11 @@ namespace Fan.Medias
             // create blob with contents
             await blob.UploadFromByteArrayAsync(content, 0, content.Length);
 
-            return blob.Uri.ToString();
+            // get the filename part
+            var start = blobName.LastIndexOf('/') + 1;
+            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
+
+            return uniqueFileName;
         }
     }
 }

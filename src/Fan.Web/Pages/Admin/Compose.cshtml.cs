@@ -253,7 +253,7 @@ namespace Fan.Web.Pages.Admin
             {
                 using (Stream s = image.OpenReadStream())
                 {
-                    var url = await _mediaSvc.UploadMediaAsync(userId, image.FileName,
+                    var url = await _mediaSvc.UploadImageAsync(userId, image.FileName,
                             ReadFully(s), EAppType.Blog, EUploadedFrom.Browser);
                     urls.Add(url);
                 }

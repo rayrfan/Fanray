@@ -14,6 +14,11 @@ namespace Fan.Medias
     public class MediaService : IMediaService
     {
         /// <summary>
+        /// This will prefix the image url to trigger <see cref="Image.cshtml"/>.
+        /// </summary>
+        public const string IMAGE_HANDLER_PATH = "/image";
+
+        /// <summary>
         /// Max len for a media filename is 128.
         /// </summary>
         public const int MEDIA_FILENAME_MAXLEN = 128;
@@ -36,7 +41,7 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns media url after upload to storage.
+        /// Returns image handler url after upload to storage.
         /// </summary>
         /// <param name="userId">Id of the user uploading the media.</param>
         /// <param name="fileName">File name with ext.</param>
@@ -50,7 +55,7 @@ namespace Fan.Medias
         /// Depending on the storage provider, the returned media url could be relative path 
         /// (File Sys) or absolute path (Azure Blog).
         /// </remarks>
-        public async Task<string> UploadMediaAsync(int userId, string fileName, byte[] content, EAppType appId, EUploadedFrom uploadFrom)
+        public async Task<string> UploadImageAsync(int userId, string fileName, byte[] content, EAppType appId, EUploadedFrom uploadFrom)
         {
             // verify ext is supported
             var ext = Path.GetExtension(fileName);
@@ -88,15 +93,11 @@ namespace Fan.Medias
             }
             string fileNameSlugged = $"{slug}{ext}";
 
-            // save file to storage and get back file path
-            var filePath = await _storageProvider.SaveFileAsync(userId, fileNameSlugged, year, month, content, EAppType.Blog);
+            // save file to storage and get a unique file name
+            var uniqueFileName = await _storageProvider.SaveFileAsync(userId, fileNameSlugged, year, month, content, EAppType.Blog);
 
             // encode filename 
             var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
-
-            // since file name could have been updated for uniqueness
-            var start = filePath.LastIndexOf('/') + 1;
-            var uniqueFileName = filePath.Substring(start, filePath.Length - start);
 
             // save record to db
             var media = new Media
@@ -113,7 +114,7 @@ namespace Fan.Medias
             };
             await _mediaRepo.CreateAsync(media);
 
-            return filePath;
+            return $"{IMAGE_HANDLER_PATH}/{appId.ToString().ToLower()}/{userId}/{year}/{month}/{uniqueFileName}";
         }
 
         public async Task<Media> UpdateMediaAsync(int id, string title, string description)

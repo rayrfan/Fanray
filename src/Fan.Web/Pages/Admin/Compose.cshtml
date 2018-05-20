@@ -257,7 +257,7 @@
                             var urls = response.data;
                             const range = quill.getSelection();
                             for (var i = 0; i < urls.length; i++) {
-                                quill.insertEmbed(range.index, 'image', `/${urls[i]}`);
+                                quill.insertEmbed(range.index, 'image', urls[i]);
                             }
                          })
                          .catch(function (error) {

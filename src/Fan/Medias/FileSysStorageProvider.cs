@@ -25,7 +25,7 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns relative path to a file after saving it on the file system.
+        /// Returns uniequ fileName, as it could be updated if there already exists a file with same name.
         /// </summary>
         /// <param name="userId">The id of the user who uploads.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
@@ -70,8 +70,7 @@ namespace Fan.Medias
                 await stream.CopyToAsync(targetStream);
             }
 
-            // returns relative path
-            return $"{_appSettings.MediaContainerName}/{appName}/{userId}/{year}/{month}/{fileName}";
+            return fileName;
         }
     }
 }
