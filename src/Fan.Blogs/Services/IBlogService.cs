@@ -164,7 +164,7 @@ namespace Fan.Blogs.Services
         /// Returns all blog post drafts.
         /// </summary>
         /// <returns></returns>
-        Task<List<BlogPost>> GetPostsForDraftsAsync();
+        Task<BlogPostList> GetPostsForDraftsAsync();
         /// <summary>
         /// Returns specified number of <see cref="BlogPost"/> used by metaweblog.
         /// </summary>

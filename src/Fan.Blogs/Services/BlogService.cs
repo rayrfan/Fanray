@@ -524,7 +524,7 @@ namespace Fan.Blogs.Services
         /// Returns a list of blog drafts.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<BlogPost>> GetPostsForDraftsAsync()
+        public async Task<BlogPostList> GetPostsForDraftsAsync()
         {
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogDrafts);
 
