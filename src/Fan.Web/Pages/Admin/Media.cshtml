@@ -1,0 +1,23 @@
+﻿@page
+@model Fan.Web.Pages.Admin.MediaModel
+@{
+    ViewData["Title"] = "Media";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+
+<h2>Media</h2>
+<div id="components-demo">
+    <button-counter></button-counter>
+</div>
+@section  VueComponents {
+    <script>
+        Vue.component('button-counter', {
+            data: function () {
+                return {
+                    count: 0
+                }
+            },
+            template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+        });
+   </script>
+}
