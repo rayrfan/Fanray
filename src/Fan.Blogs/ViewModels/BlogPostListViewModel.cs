@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace Fan.Blogs.ViewModels
     /// </remarks>
     public class BlogPostListViewModel
     {
-        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request)
+        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, int currentPage = 1)
         {
             BlogPostViewModels = new List<BlogPostViewModel>();
             foreach (var blogPost in blogPostList)
@@ -21,7 +22,19 @@ namespace Fan.Blogs.ViewModels
             }
             ShowExcerpt = blogSettings.ShowExcerpt;
             PostCount = blogPostList.PostCount;
-            PageCount = blogPostList.PageCount;
+            //PageCount = blogPostList.PageCount;
+
+            if (currentPage <= 0) currentPage = 1;
+            if ((currentPage * BlogService.DEFAULT_PAGE_SIZE) < PostCount)
+            {
+                ShowOlder = true;
+                OlderPageIndex = currentPage + 1;
+            }
+            if (currentPage > 1)
+            {
+                ShowNewer = true;
+                NewerPageIndex = currentPage - 1;
+            }
         }
 
         public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Category cat)
@@ -53,7 +66,7 @@ namespace Fan.Blogs.ViewModels
         /// <summary>
         /// Total number of pages based on <see cref="PostCount"/>.
         /// </summary>
-        public int PageCount { get; }
+        //public int PageCount { get; }
 
         /// <summary>
         /// Tag title to show on Tag.cshtml page.
@@ -67,5 +80,10 @@ namespace Fan.Blogs.ViewModels
         /// Archive title to show on Archive.cshtml page.
         /// </summary>
         public string ArchiveTitle { get; set; }
+
+        public bool ShowOlder { get; set; }
+        public bool ShowNewer { get; set; }
+        public int OlderPageIndex { get; set; }
+        public int NewerPageIndex { get; set; }
     }
 }
