@@ -171,17 +171,17 @@ namespace Fan.Blogs.Controllers
                 var sw = new StringWriter();
                 using (XmlWriter xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
                 {
-                    var posts = cat == null ?
+                    var postList = cat == null ?
                                 await _blogSvc.GetPostsAsync(1) :
                                 await _blogSvc.GetPostsForCategoryAsync(cat.Slug, 1);
                     var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                    var vm = new BlogPostListViewModel(posts, blogSettings, Request);
+                    var vm = new BlogPostListViewModel(postList, blogSettings, Request);
 
                     var channelTitle = cat == null ? "Fanray" : $"{cat.Title} - Fanray";
                     var channelDescription = coreSettings.Tagline;
                     var channelLink = $"{Request.Scheme}://{Request.Host}";
-                    var channelLastPubDate = posts.Count <= 0 ? DateTimeOffset.UtcNow : posts[0].CreatedOn;
+                    var channelLastPubDate = postList.Posts.Count <= 0 ? DateTimeOffset.UtcNow : postList.Posts[0].CreatedOn;
 
                     var writer = new RssFeedWriter(xmlWriter);
                     await writer.WriteTitle(channelTitle);

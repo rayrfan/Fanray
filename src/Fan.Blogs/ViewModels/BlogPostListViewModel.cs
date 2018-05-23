@@ -16,13 +16,12 @@ namespace Fan.Blogs.ViewModels
         public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, int currentPage = 1)
         {
             BlogPostViewModels = new List<BlogPostViewModel>();
-            foreach (var blogPost in blogPostList)
+            foreach (var blogPost in blogPostList.Posts)
             {
                 BlogPostViewModels.Add(new BlogPostViewModel(blogPost, blogSettings, request));
             }
             ShowExcerpt = blogSettings.ShowExcerpt;
             PostCount = blogPostList.PostCount;
-            //PageCount = blogPostList.PageCount;
 
             if (currentPage <= 0) currentPage = 1;
             if ((currentPage * BlogService.DEFAULT_PAGE_SIZE) < PostCount)

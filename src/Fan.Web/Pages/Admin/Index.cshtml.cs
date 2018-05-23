@@ -46,7 +46,8 @@ namespace Fan.Web.Pages.Admin
         /// </summary>
         public string JsonBlogs { get; set; }
         public string JsonStatus { get; set; }
-        
+
+        public string ActiveStatus { get; set; }
 
         public async Task OnGetAsync(int? blogId, string status)
         {
@@ -61,6 +62,8 @@ namespace Fan.Web.Pages.Admin
             if (!blog.HasValue) blog = 1;
 
             BlogPostList postList = null;
+            ActiveStatus = status;
+
             if (status == "draft")
                 postList = await _blogSvc.GetPostsForDraftsAsync();
             else if (status == "trashed")
@@ -68,7 +71,7 @@ namespace Fan.Web.Pages.Admin
             else
                 postList = await _blogSvc.GetPostsAsync(1);
 
-            var list = from p in postList
+            var list = from p in postList.Posts
                        select new PostVM
                        {
                            Id = p.Id,
@@ -107,14 +110,6 @@ namespace Fan.Web.Pages.Admin
             }
 
             return JsonConvert.SerializeObject(list);
-        }
-
-        // https://stackoverflow.com/a/972323/32240
-        public static IEnumerable<T> GetValues<T>()
-        {
-            return
-                (T[])Enum.GetValues(typeof(T));
-                //Enum.GetValues(typeof(T)).Cast<T>();
         }
     }
 }

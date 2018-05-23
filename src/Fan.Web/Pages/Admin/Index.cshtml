@@ -74,7 +74,8 @@
             selectedBlog: 1,
             blogs: @Html.Raw(Model.JsonBlogs),
             posts: @Html.Raw(Model.JsonPosts),
-            statuses: @Html.Raw(Model.JsonStatus),   
+            statuses: @Html.Raw(Model.JsonStatus), 
+            activeStatus: '@Model.ActiveStatus',
             postCount: @Model.TotalPostCount,
             pagination: {
                 page: 1,
@@ -96,20 +97,9 @@
                 return `?blog=${this.selectedBlog}&status=${status.toLowerCase()}`;
             },
             tabSelected: function (status) {
-                let stat = this.getParam('status');
-                if (!stat) stat = 'published';
-                if (stat.toUpperCase() === status.toUpperCase())
+                if (this.activeStatus.toUpperCase() === status.toUpperCase())
                     return false;
                 return true;
-            },
-            getParam: function (name, url) { 
-                if (!url) url = window.location.href;
-                name = name.replace(/[\[\]]/g, "\\$&");
-                let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                    results = regex.exec(url);
-                if (!results) return null;
-                if (!results[2]) return '';
-                return decodeURIComponent(results[2].replace(/\+/g, " "));
             },
         }
     });

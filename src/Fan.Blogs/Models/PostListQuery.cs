@@ -1,4 +1,5 @@
 ﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Services;
 using System;
 
 namespace Fan.Blogs.Models
@@ -36,8 +37,8 @@ namespace Fan.Blogs.Models
         public EPostListQueryType QueryType { get; set; } = EPostListQueryType.BlogPosts;
         public int? RootId { get; set; }
         public int? ParentId { get; set; }
-        public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageIndex { get; set; } = BlogService.DEFAULT_PAGE_INDEX;
+        public int PageSize { get; set; } = BlogService.DEFAULT_PAGE_SIZE;
         public string CategorySlug { get; set; }
         public string TagSlug { get; set; }
         public int Year { get; set; }

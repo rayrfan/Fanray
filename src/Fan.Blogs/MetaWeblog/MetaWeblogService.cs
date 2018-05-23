@@ -144,7 +144,7 @@ namespace Fan.Blogs.MetaWeblog
             {
                 var recentPosts = await _blogSvc.GetRecentPostsAsync(numberOfPosts);
                 var posts = new List<MetaPost>();
-                foreach (var p in recentPosts)
+                foreach (var p in recentPosts.Posts)
                 {
                     posts.Add(ToMetaPost(p, rootUrl));
                 }
