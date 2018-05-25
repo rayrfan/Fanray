@@ -11,8 +11,7 @@
 <blog-posts inline-template>
     <div style="width:80%">
         <v-tabs style="margin-bottom: 18px">
-            <v-tab v-for="s in statuses" :key="s.value"
-                   @@click="getPosts(s.text)">
+            <v-tab v-for="s in statuses" :key="s.id" @@click="getPosts(s.text)">
                 {{ s.text }} ({{ s.count }})
             </v-tab>
         </v-tabs>

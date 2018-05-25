@@ -38,8 +38,11 @@ namespace Fan.Web.Pages.Admin
 
         public class StatusVm
         {
+            /// <summary>
+            /// When using Vuetify Tabs, the property to bind its key must be named "id".
+            /// </summary>
+            public int Id { get; set; }
             public string Text { get; set; }
-            public int Value { get; set; }
             public int Count { get; set; }
         }
 
@@ -100,8 +103,8 @@ namespace Fan.Web.Pages.Admin
             var postCount = await _blogSvc.GetPostCountAsync();
             var statusVms = new List<StatusVm>
             {
-                new StatusVm { Text = "Published", Value = (int)EPostStatus.Published, Count = postCount.Published },
-                new StatusVm { Text = "Drafts", Value = (int)EPostStatus.Draft, Count = postCount.Draft }
+                new StatusVm { Text = "Published", Id = (int)EPostStatus.Published, Count = postCount.Published },
+                new StatusVm { Text = "Drafts", Id = (int)EPostStatus.Draft, Count = postCount.Draft }
             };
 
             // prep vm
