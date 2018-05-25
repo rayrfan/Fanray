@@ -34,13 +34,6 @@
                                  v-model="drawer"
                                  style="padding: 0 8px">
                 <v-list dense>
-                    <v-select :items="blogs"
-                              v-model="selectedBlog"
-                              label="Blog"
-                              class="input-group--focused"
-                              @@input="onDrawerFieldsChange"
-                              item-value="value">
-                    </v-select>
                     <v-menu ref="menuDate"
                             lazy
                             :close-on-content-click="false"
@@ -59,6 +52,13 @@
                                       readonly></v-text-field>
                         <v-date-picker v-model="date" @@input="$refs.menuDate.save(date)"></v-date-picker>
                     </v-menu>
+                    <v-select :items="cats"
+                              v-model="selectedCat"
+                              label="Categories"
+                              class="input-group--focused"
+                              @@input="onDrawerFieldsChange"
+                              item-value="value">
+                    </v-select>
                     <v-select v-model="selectedTags"
                               label="Tags (delimiter: tab)"
                               chips
@@ -129,12 +129,12 @@
                 disableSave: false,
                 saveText: 'Save',
                 drawer: null,
-                selectedBlog: 1,
-                blogs: @Html.Raw(Model.Post.AllBlogsJson),
+                selectedCat: 1,
+                cats: @Html.Raw(Model.JsonCats),
                 date: '@Model.Post.PostDate',
                 menuDate: false,
-                selectedTags: @Html.Raw(Model.Post.TagsJson),
-                tags: @Html.Raw(Model.Post.AllTagsJson),
+                selectedTags: @Html.Raw(Model.JsonSelectedTags),
+                tags: @Html.Raw(Model.JsonTags),
                 slug: '@Model.Post.Slug',
                 excerpt: '@Model.Post.Excerpt',
                 title: '@Model.Post.Title',
@@ -164,7 +164,7 @@
                     return {
                         id: this.id,
                         title: this.title,
-                        blogId: this.selectedBlog,
+                        blogId: this.selectedCat,
                         postDate: this.date,
                         tags: this.selectedTags,
                         slug: this.slug,

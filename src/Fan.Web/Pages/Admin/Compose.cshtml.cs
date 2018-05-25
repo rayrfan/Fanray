@@ -52,18 +52,6 @@ namespace Fan.Web.Pages.Admin
             public List<string> Tags { get; set; }
             public string Slug { get; set; }
             public string Excerpt { get; set; }
-
-            public string TagsJson { get; set; }
-            public string AllTagsJson { get; set; }
-            public string AllBlogsJson { get; set; }
-        }
-
-        public class Blog
-        {
-            [JsonProperty]
-            public string text { get; set; }
-            [JsonProperty]
-            public int value { get; set; }
         }
 
         /// <summary>
@@ -86,6 +74,17 @@ namespace Fan.Web.Pages.Admin
         public ComposePost Post { get; set; }
 
         /// <summary>
+        /// All categories.
+        /// </summary>
+        public string JsonCats { get; set; }
+        /// <summary>
+        /// All tags.
+        /// </summary>
+        public string JsonTags { get; set; }
+        public string JsonSelectedTags { get; set; }
+
+
+        /// <summary>
         /// When user edits a post, it retrieves the post
         /// </summary>
         public async Task OnGetAsync(int postId)
@@ -102,11 +101,11 @@ namespace Fan.Web.Pages.Admin
                     Body = post.Body,
                     PostDate = post.CreatedOn.ToString("yyyy-MM-dd"),
                     Tags = post.TagTitles,
-                    TagsJson = JsonConvert.SerializeObject(post.TagTitles),
                     Slug = post.Slug,
                     Excerpt = post.Excerpt,
                 };
 
+                JsonSelectedTags = JsonConvert.SerializeObject(post.TagTitles);
                 _logger.LogDebug("Composer Post: {@Post}");
             }
             else 
@@ -116,31 +115,35 @@ namespace Fan.Web.Pages.Admin
                     Title = "",
                     Body = "",
                     PostDate = DateTimeOffset.Now.ToString("yyyy-MM-dd"),
-                    TagsJson = JsonConvert.SerializeObject(new string[0]),
                 };
+
+                JsonSelectedTags = JsonConvert.SerializeObject(new string[0]);
             }
 
             var tags = await _blogSvc.GetTagsAsync();
             string[] allTags = tags.Select(t => t.Title).ToArray();
-            Post.AllTagsJson = JsonConvert.SerializeObject(allTags);
+            JsonTags = JsonConvert.SerializeObject(allTags);
 
-            var cats = await _blogSvc.GetCategoriesAsync();
-            var blogs = from c in cats
-                               select new Blog {
-                                   value = c.Id,
-                                   text = c.Title,
-                               };
+            JsonCats = await GetJsonCatsAsync();
+        }
 
-            // https://stackoverflow.com/a/7555096/32240
-            var serializer = new JsonSerializer();
-            var stringWriter = new StringWriter();
-            using (var writer = new JsonTextWriter(stringWriter))
-            {
-                writer.QuoteName = false;
-                serializer.Serialize(writer, blogs);
-            }
+        public class TextValue
+        {
+            public string Text { get; set; }
+            public int Value { get; set; }
+        }
 
-            Post.AllBlogsJson = stringWriter.ToString(); //JsonConvert.SerializeObject(blogs);
+        private async Task<string> GetJsonCatsAsync()
+        {
+            var categories = await _blogSvc.GetCategoriesAsync();
+            var cats = from c in categories
+                        select new TextValue
+                        {
+                            Value = c.Id,
+                            Text = c.Title,
+                        };
+
+            return JsonConvert.SerializeObject(cats);
         }
 
         /// <summary>
