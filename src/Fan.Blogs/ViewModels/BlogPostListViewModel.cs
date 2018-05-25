@@ -62,10 +62,6 @@ namespace Fan.Blogs.ViewModels
         /// Total number of posts returned for a <see cref="PostListQuery"/>
         /// </summary>
         public int PostCount { get; }
-        /// <summary>
-        /// Total number of pages based on <see cref="PostCount"/>.
-        /// </summary>
-        //public int PageCount { get; }
 
         /// <summary>
         /// Tag title to show on Tag.cshtml page.

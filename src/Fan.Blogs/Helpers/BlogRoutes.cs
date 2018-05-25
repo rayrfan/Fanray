@@ -7,7 +7,7 @@ namespace Fan.Blogs.Helpers
     {
         public const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
         public const string POST_PERMA_URL_TEMPLATE = "post/{0}";
-        public const string POST_EDIT_URL_TEMPLATE = "admin/post/edit/{0}";
+        public const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
         public const string MEDIA_URL_TEMPLATE = "uploads/{0}";
         public const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
         public const string CATEGORY_RSS_URL_TEMPLATE = "posts/categorized/{0}/feed";

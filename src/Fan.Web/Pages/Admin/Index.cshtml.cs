@@ -1,8 +1,8 @@
 ﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
+using Fan.Blogs.Helpers;
 using Fan.Blogs.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,97 +19,98 @@ namespace Fan.Web.Pages.Admin
             _blogSvc = blogService;
         }
 
-        public class PostVM
+        public class PostListVm
+        {
+            public IEnumerable<PostVm> Posts {get;set;}
+            public int TotalPosts { get; set; }
+            public IEnumerable<StatusVm> Statuses { get; set; }
+        }
+
+        public class PostVm
         {
             public int Id { get; set; }
             public string Title { get; set; }
             public string Date { get; set; }
+            public string Author { get; set; }
+            public string EditLink { get; set; }
+            public string PostLink { get; set; }
         }
 
-        public class TextValue
+        public class StatusVm
         {
             public string Text { get; set; }
             public int Value { get; set; }
+            public int Count { get; set; }
         }
 
         /// <summary>
-        /// Total post count for a particular status Published/Draft/Trashed.
-        /// Used for pagination.
+        /// Ajax GET post list view model by status, page number and page size.
         /// </summary>
-        public int TotalPostCount { get; set; }
-        /// <summary>
-        /// The posts based on blog, status and other user selections.
-        /// </summary>
-        public string JsonPosts { get; set; }
-        /// <summary>
-        /// All blogs.
-        /// </summary>
-        public string JsonBlogs { get; set; }
-        public string JsonStatus { get; set; }
-
-        public string ActiveStatus { get; set; }
-
-        public async Task OnGetAsync(int? blogId, string status)
+        /// <remarks>
+        /// NOTE: the parameter cannot be named "page".
+        /// </remarks>
+        public async Task<JsonResult> OnGetPostsAsync(string status, int pageNumber, int pageSize)
         {
-            (JsonPosts, TotalPostCount) = await GetJsonPostsAsync(blogId, status);
-            JsonBlogs = await GetJsonBlogsAsync();
-            JsonStatus = GetJsonPostStatus();
-        }
-
-        private async Task<(string json, int count)> GetJsonPostsAsync(int? blog, string status)
-        {
-            if (string.IsNullOrEmpty(status)) status = "published";
-            if (!blog.HasValue) blog = 1;
-
-            BlogPostList postList = null;
-            ActiveStatus = status;
-
-            if (status == "draft")
-                postList = await _blogSvc.GetPostsForDraftsAsync();
-            else if (status == "trashed")
-                postList = new BlogPostList();
-            else
-                postList = await _blogSvc.GetPostsAsync(1);
-
-            var list = from p in postList.Posts
-                       select new PostVM
-                       {
-                           Id = p.Id,
-                           Title = p.Title,
-                           Date = p.CreatedOn.ToString("yyyy-MM-dd"),
-                       };
-
-            return (JsonConvert.SerializeObject(list), postList.PostCount);
-        }
-
-        private async Task<string> GetJsonBlogsAsync()
-        {
-            var cats = await _blogSvc.GetCategoriesAsync();
-            var blogs = from c in cats
-                        select new TextValue
-                        {
-                            Value = c.Id,
-                            Text = c.Title,
-                        };
-
-            return JsonConvert.SerializeObject(blogs);
+            var list = await GetPostListVmAsync(status, pageNumber, pageSize);
+            return new JsonResult(list);
         }
 
         /// <summary>
-        /// Returns json of <see cref="EPostStatus"/>, like
-        /// [{"Text":"Draft","Value":0},{"Text":"Published","Value":1},{"Text":"Trashed","Value":2},{"Text":"Scheduled","Value":3}]
+        /// Ajax DELETE a post by id, then returns the up to date posts, total posts and post statuses.
         /// </summary>
+        /// <param name="postId"></param>
+        /// <param name="status"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        private string GetJsonPostStatus()
+        public async Task<JsonResult> OnDeleteAsync(int postId, string status, int pageNumber, int pageSize)
         {
-            var list = new List<TextValue>();
-            var values = (EPostStatus[])Enum.GetValues(typeof(EPostStatus));
-            foreach (var v in values)
-            {
-                list.Add(new TextValue { Text = v.ToString(), Value = (int)v });
-            }
+            await _blogSvc.DeletePostAsync(postId);
+            var list = await GetPostListVmAsync(status, pageNumber, pageSize);
+            return new JsonResult(list);
+        }
 
-            return JsonConvert.SerializeObject(list);
+        /// <summary>
+        /// Returns posts, total posts and post statuses.
+        /// </summary>
+        /// <param name="status">The post status <see cref="EPostStatus"/></param>
+        /// <param name="pageNumber">Which page</param>
+        /// <param name="pageSize">How many rows per page</param>
+        /// <returns></returns>
+        private async Task<PostListVm> GetPostListVmAsync(string status, int pageNumber, int pageSize)
+        {
+            // posts and totalPosts
+            var postList = status.Equals("published", StringComparison.InvariantCultureIgnoreCase) ?
+                await _blogSvc.GetPostsAsync(pageNumber, pageSize) :
+                await _blogSvc.GetPostsForDraftsAsync();
+
+            var postVms = from p in postList.Posts
+                          select new PostVm
+                          {
+                              Id = p.Id,
+                              Title = p.Title,
+                              Date = p.CreatedOn.ToString("yyyy-MM-dd"),
+                              Author = p.User.DisplayName,
+                              EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, p.Id),
+                              PostLink = $"{Request.Scheme}://{Request.Host}/" +
+                              string.Format(BlogRoutes.POST_RELATIVE_URL_TEMPLATE, p.CreatedOn.Year, p.CreatedOn.Month, p.CreatedOn.Day, p.Slug),
+                          };
+
+            // statuses
+            var postCount = await _blogSvc.GetPostCountAsync();
+            var statusVms = new List<StatusVm>
+            {
+                new StatusVm { Text = "Published", Value = (int)EPostStatus.Published, Count = postCount.Published },
+                new StatusVm { Text = "Drafts", Value = (int)EPostStatus.Draft, Count = postCount.Draft }
+            };
+
+            // prep vm
+            return new PostListVm
+            {
+                Posts = postVms,
+                TotalPosts = postList.PostCount,
+                Statuses = statusVms,
+            };
         }
     }
 }

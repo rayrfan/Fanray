@@ -44,8 +44,8 @@ namespace Fan.Blogs.Controllers
                 return RedirectToAction("Setup", "Home");
 
             if (!page.HasValue || page <= 0) page = BlogService.DEFAULT_PAGE_INDEX;
-            var posts = await _blogSvc.GetPostsAsync(page.Value);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PageSize);
 
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
             return View(vm);
@@ -160,6 +160,7 @@ namespace Fan.Blogs.Controllers
 
         /// <summary>
         /// Returns the rss xml string for the blog or a blog category. The result is cached for 1 hour.
+        /// The rss feed always returns first page with 10 results.
         /// </summary>
         /// <param name="cat"></param>
         /// <returns></returns>
@@ -172,7 +173,7 @@ namespace Fan.Blogs.Controllers
                 using (XmlWriter xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
                 {
                     var postList = cat == null ?
-                                await _blogSvc.GetPostsAsync(1) :
+                                await _blogSvc.GetPostsAsync(1, 10) :
                                 await _blogSvc.GetPostsForCategoryAsync(cat.Slug, 1);
                     var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();

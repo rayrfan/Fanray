@@ -6,56 +6,48 @@
     Layout = "~/Pages/Admin/_Layout.cshtml";
 }
 
-<v-card id="posts" style="width:80%" height="88px">
-    <v-card-title>
-        <v-select :items="blogs"
-                  v-model="selectedBlog"
-                  label="Blog"
-                  class="input-group--focused"
-                  item-value="value">
-        </v-select>
-        <v-spacer></v-spacer>
-        <v-tabs right>
-            <v-tab v-for="n in statuses" :key="n.value">
-                <v-btn :flat="tabSelected(n.text)" :href="getTabUrl(n.text)">
-                    {{ n.text }} ({{ postCount }})
-                </v-btn>
+@Html.AntiForgeryToken()
 
+<blog-posts inline-template>
+    <div style="width:80%">
+        <v-tabs style="margin-bottom: 18px">
+            <v-tab v-for="s in statuses" :key="s.value"
+                   @@click="getPosts(s.text)">
+                {{ s.text }} ({{ s.count }})
             </v-tab>
         </v-tabs>
-    </v-card-title>
-    <v-data-table hide-headers
-                  :items="posts"
-                  hide-actions
-                  class="elevation-1"
-                  :total-items="pagination.totalItems"
-                   :pagination.sync="pagination">
-        <template slot="items" slot-scope="props">
-            <td>
-                <h3 v-html="props.item.title"></h3>
-                <span>{{ props.item.date }}</span>
-            </td>
-            <td class="right layout px-0">
-                <v-btn icon class="mx-0">
-                    <v-icon color="blue">edit</v-icon>
-                </v-btn>
-                <v-btn icon class="mx-1">
-                    <v-icon color="teal">remove_red_eye</v-icon>
-                </v-btn>
-                <v-btn icon class="mx-3">
-                    <v-icon color="pink">delete</v-icon>
-                </v-btn>
-            </td>
-        </template>
-        <template slot="no-data">
-            <div>You have no posts.</div>
-        </template>
-    </v-data-table>
-    <div class="text-xs-center pt-2">
-        <v-pagination v-model="pagination.page" :length="pages"></v-pagination>
+        <v-data-table :items="posts"
+                      :pagination.sync="pagination"
+                      :total-items="totalPosts"
+                      :loading="loading"
+                      :rows-per-page-items="rowsPerPageItems"
+                      rows-per-page-text=""
+                      hide-headers
+                      class="elevation-1">
+            <template slot="items" slot-scope="props">
+                <td>
+                    <h3 v-if="props.item.title" v-html="props.item.title"></h3>
+                    <h3 v-else style="font-style:italic;color:gray">Untitled</h3>
+                    <span>{{ props.item.date }} by {{ props.item.author }}</span>
+                </td>
+                <td class="right layout px-0">
+                    <v-btn icon class="mx-0" :href="props.item.editLink">
+                        <v-icon color="blue">edit</v-icon>
+                    </v-btn>
+                    <v-btn icon class="mx-1" target="_blank" :href="props.item.postLink">
+                        <v-icon color="teal">remove_red_eye</v-icon>
+                    </v-btn>
+                    <v-btn icon class="mx-3" @@click="deletePost(props.item)">
+                        <v-icon color="pink">delete</v-icon>
+                    </v-btn>
+                </td>
+            </template>
+            <template slot="no-data">
+                <div>You have no posts.</div>
+            </template>
+        </v-data-table>
     </div>
-</v-card>
-
+</blog-posts>
 <v-btn fab
        bottom
        right
@@ -68,40 +60,68 @@
 
 @section Scripts {
     <script>
-    new Vue({
-        el: '#posts',
-        data: () => ({
-            selectedBlog: 1,
-            blogs: @Html.Raw(Model.JsonBlogs),
-            posts: @Html.Raw(Model.JsonPosts),
-            statuses: @Html.Raw(Model.JsonStatus), 
-            activeStatus: '@Model.ActiveStatus',
-            postCount: @Model.TotalPostCount,
-            pagination: {
-                page: 1,
-                rowsPerPage: 5,
-                totalItems: 10,
+        Vue.component('blog-posts', {
+            data: () => ({
+                posts: [],
+                totalPosts: 0,
+                statuses: [],
+                activeStatus: 'published',
+                pagination: {},
+                loading: false,
+                rowsPerPageItems: [10, 25],
+            }),
+            computed: {
+                tok: function () {
+                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
+                },
             },
-        }),
-        computed: {
-            pages() {
-                if (this.pagination.rowsPerPage == null ||
-                    this.pagination.totalItems == null
-                ) return 0
-
-                return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
+            watch: {
+                pagination: {
+                    handler() {
+                        this.getPosts(this.activeStatus);
+                    },
+                    deep: true,
+                },
             },
-        },
-        methods: {
-            getTabUrl: function (status) {
-                return `?blog=${this.selectedBlog}&status=${status.toLowerCase()}`;
+            mounted() {
+                this.getPosts(this.activeStatus);
             },
-            tabSelected: function (status) {
-                if (this.activeStatus.toUpperCase() === status.toUpperCase())
-                    return false;
-                return true;
+            methods: {
+                getPosts: function (status) {
+                    this.activeStatus = status;
+                    this.loading = true;
+                    let url = `/admin/index?handler=posts&status=${status}&pageNumber=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}`;
+                    console.log(url);
+                    axios.get(url).then(response => {
+                        this.posts = response.data.posts;
+                        this.totalPosts = response.data.totalPosts;
+                        this.statuses = response.data.statuses;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                    this.loading = false;
+                },
+                deletePost(item) {
+                    const index = this.posts.indexOf(item);
+                    if (confirm('You are permanently deleting this post, are you sure?')) {
+                        this.loading = true;
+                        let url = `/admin/index?postId=${item.id}&status=${this.activeStatus}&pageNumber=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}`;
+                        console.log(url);
+                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.tok } })
+                            .then(response => {
+                                console.log('deleted');
+                                this.posts.splice(index, 1);
+                                this.posts = response.data.posts;
+                                this.totalPosts = response.data.totalPosts;
+                                this.statuses = response.data.statuses;
+                            })
+                            .catch(function (err) {
+                                console.log(err);
+                            });
+                        this.loading = false;
+                    }
+                },
             },
-        }
-    });
+        });
     </script>
 }

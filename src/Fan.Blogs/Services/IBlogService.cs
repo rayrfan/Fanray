@@ -137,7 +137,7 @@ namespace Fan.Blogs.Services
         /// Returns <see cref="BlogPostList"/> for blog main index.
         /// </summary>
         /// <param name="pageIndex">Pagination 1-based</param>
-        Task<BlogPostList> GetPostsAsync(int pageIndex);
+        Task<BlogPostList> GetPostsAsync(int pageIndex, int pageSize);
         /// <summary>
         /// Returns <see cref="BlogPostList"/> for a blog category.
         /// </summary>
@@ -170,7 +170,15 @@ namespace Fan.Blogs.Services
         /// </summary>
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         /// <returns></returns>
-        Task<List<BlogPost>> GetRecentPostsAsync(int numberOfPosts);
+        Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts);
+
+        // -------------------------------------------------------------------- Stats
+
+        /// <summary>
+        /// Returns total number of posts by each <see cref="EPostStatus"/>.
+        /// </summary>
+        /// <returns></returns>
+        Task<PostCount> GetPostCountAsync();
 
         // -------------------------------------------------------------------- Setup
 

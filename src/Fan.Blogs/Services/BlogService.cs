@@ -62,14 +62,21 @@ namespace Fan.Blogs.Services
 
         // -------------------------------------------------------------------- Cache
 
+        /// <summary>
+        /// By default show 10 posts per page.
+        /// </summary>
+        public const int DEFAULT_PAGE_SIZE = 10;
+        public const int DEFAULT_PAGE_INDEX = 1;
         public const string CACHE_KEY_ALL_CATS = "BlogCategories";
         public const string CACHE_KEY_ALL_TAGS = "BlogTags";
         public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
         public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
+        public const string CACHE_KEY_POST_COUNT = "BlogPostCount";
         public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
         public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
         public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
         public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
+        public static TimeSpan CacheTime_PostCount = new TimeSpan(0, 10, 0);
 
         private async Task InvalidateAllBlogCache()
         {
@@ -77,6 +84,7 @@ namespace Fan.Blogs.Services
             await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
             await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
             await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
+            await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
         }
 
         // -------------------------------------------------------------------- Categories
@@ -439,22 +447,22 @@ namespace Fan.Blogs.Services
         /// </summary>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsAsync(int pageIndex)
+        public async Task<BlogPostList> GetPostsAsync(int pageIndex, int pageSize)
         {
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPosts)
             {
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
+                PageSize = pageSize,
             };
 
-            // cache only first page
-            if (query.PageIndex == 1)
-            {
-                return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, CacheTime_PostsIndex, async () =>
-                {
-                    return await QueryPostsAsync(query);
-                });
-            }
+            // TODO cache only first page of the public site not admin
+            //if (query.PageIndex == 1)
+            //{
+            //    return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, CacheTime_PostsIndex, async () =>
+            //    {
+            //        return await QueryPostsAsync(query);
+            //    });
+            //}
 
             return await QueryPostsAsync(query);
         }
@@ -535,11 +543,23 @@ namespace Fan.Blogs.Services
         /// Returns specified number of <see cref="BlogPost"/> used by metaweblog.
         /// </summary>
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
-        public async Task<List<BlogPost>> GetRecentPostsAsync(int numberOfPosts)
+        public async Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts)
         {
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = numberOfPosts };
 
             return await QueryPostsAsync(query);
+        }
+
+        /// <summary>
+        /// Returns total number of posts by each <see cref="EPostStatus"/>.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<PostCount> GetPostCountAsync()
+        {
+            return await _cache.GetAsync(CACHE_KEY_POST_COUNT, CacheTime_PostCount, async () =>
+            {
+                return await _postRepo.GetPostCountAsync();
+            });
         }
 
         // -------------------------------------------------------------------- Setup
@@ -608,12 +628,15 @@ namespace Fan.Blogs.Services
         /// <returns></returns>
         private async Task<BlogPostList> QueryPostsAsync(PostListQuery query)
         {
-            var results = await _postRepo.GetListAsync(query);
+            var (posts, totalCount) = await _postRepo.GetListAsync(query);
 
-            var blogPostList = new BlogPostList(results.totalCount, query.PageSize);
-            foreach (var post in results.posts)
+            var blogPostList = new BlogPostList
             {
-                blogPostList.Add(await GetBlogPostAsync(post));
+                PostCount = totalCount
+            };
+            foreach (var post in posts)
+            {
+                blogPostList.Posts.Add(await GetBlogPostAsync(post));
             }
 
             return blogPostList;
