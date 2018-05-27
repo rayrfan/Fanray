@@ -2,9 +2,7 @@
     display: none
 }
 
-.active-tab
-{
-    color: white;
-    background-color: #489cf7;
+.active-tab {
+    background-color: #d2eafe;
     height: 100%;
 }

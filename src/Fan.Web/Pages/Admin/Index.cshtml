@@ -6,8 +6,6 @@
     Layout = "~/Pages/Admin/_Layout.cshtml";
 }
 
-@Html.AntiForgeryToken()
-
 <blog-posts inline-template>
     <div style="width:80%">
         <v-tabs style="margin-bottom: 18px">
@@ -69,11 +67,6 @@
                 loading: false,
                 rowsPerPageItems: [10, 25],
             }),
-            computed: {
-                tok: function () {
-                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
-                },
-            },
             watch: {
                 pagination: {
                     handler() {
@@ -106,7 +99,7 @@
                         this.loading = true;
                         let url = `/admin/index?postId=${item.id}&status=${this.activeStatus}&pageNumber=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}`;
                         console.log(url);
-                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.tok } })
+                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.$root.tok } })
                             .then(response => {
                                 console.log('deleted');
                                 this.posts.splice(index, 1);

@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{ 
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+    var currentUser = await userManager.GetUserAsync(Context.User);
+}
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -15,6 +19,8 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
+    @Html.AntiForgeryToken()
+
     <div id="app" v-cloak data-app>
         <v-app light>
             @* Drawer *@
@@ -42,28 +48,32 @@
                        color="blue darken-3"
                        dark
                        app
+                       dense
                        fixed>
-                <v-toolbar-title style="width: 300px" class="ml-0 pl-3">
-                    <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                    <span class="hidden-sm-and-down">Fanray Admin Console</span>
-                </v-toolbar-title>
-                <v-text-field flat
-                              solo-inverted
-                              prepend-icon="search"
-                              label="Search"
-                              class="hidden-sm-and-down"></v-text-field>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-toolbar-title class="hidden-sm-and-down">@coreSettings.Title</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-btn icon>
-                    <v-icon>apps</v-icon>
-                </v-btn>
-                <v-btn icon>
-                    <v-icon>notifications</v-icon>
-                </v-btn>
-                <v-btn icon large>
-                    <v-avatar size="32px" tile>
-                        <img src="https://vuetifyjs.com/static/doc-images/logo.svg"
-                             alt="Vuetify">
-                    </v-avatar>
+                <v-menu offset-x offset-y z-index="2" style="font-size:3px">
+                    <v-btn icon slot="activator">
+                        <v-avatar size="32px">
+                            <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName"/>
+                        </v-avatar>
+                    </v-btn>
+                    <v-list>
+                        <v-list-tile @@click="">
+                            <v-list-tile-title>
+                                <v-icon>person</v-icon> Profile
+                            </v-list-tile-title>
+                        </v-list-tile>
+                        <v-list-tile @@click="logout">
+                            <v-list-tile-title>
+                                <v-icon>power_settings_new</v-icon> Logout
+                            </v-list-tile-title>
+                        </v-list-tile>
+                    </v-list>
+                </v-menu>
+                <v-btn icon href="/" title="Go to my blog">
+                    <v-icon>exit_to_app</v-icon>
                 </v-btn>
             </v-toolbar>
             @* Content *@
@@ -96,14 +106,17 @@
                 items: [
                     { icon: 'list', text: 'Posts', url: '/admin', active: false },
                     { icon: 'insert_photo', text: 'Media', url: '/admin/media', active: false },
+                    { icon: 'folder', text: 'Categories', url: '/admin/blogs', active: false },
                     { icon: 'label', text: 'Tags', url: '/admin/tags', active: false },
-                    { icon: 'widgets', text: 'Widgets', url: '/admin/widgets', active: false },
-                    { icon: 'library_books', text: 'Blogs', url: '/admin/blogs', active: false },
+                    //{ icon: 'widgets', text: 'Widgets', url: '/admin/widgets', active: false },
                     { icon: 'supervisor_account', text: 'Users', url: '/admin/users', active: false },
                     { icon: 'settings', text: 'Settings', url: '/admin/settings', active: false },
                 ],
             }),
             computed: {
+                tok: function () {
+                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
+                },
             },
             mounted() {
                 var url = window.location.pathname;
@@ -112,6 +125,16 @@
                 });
             },
             methods: {
+                logout: function () {
+                    console.log('logout');
+                    axios.post('/account/logout', null, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(function (response) {
+                            window.location = '/';
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
             }
         });
     </script>
