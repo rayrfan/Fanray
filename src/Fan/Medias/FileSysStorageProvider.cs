@@ -25,16 +25,72 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns uniequ fileName, as it could be updated if there already exists a file with same name.
+        /// Returns unqiue file name after saveing file byte array to storage.
         /// </summary>
-        /// <param name="userId">The id of the user who uploads.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
+        /// <remarks>
+        /// The storage type can be configured in appsettings.json. The file is stored like the following
+        /// "container/appName/userId/year/month/fileName.ext".
+        /// </remarks>
+        /// <param name="source">The bytes of the file.</param>
+        /// <param name="appId">Which app uploaded file.</param>
+        /// <param name="userId">Who uploaded the file.</param>
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
-        /// <param name="content">The content of file.</param>
-        /// <param name="appId">Which app it uploaded it.</param>
+        /// <param name="fileName">Slugged filename with ext.</param>
+        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, string year, string month, string fileName)
+        {
+            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, year, month, fileName);
+
+            // save source to file sys
+            using (var targetStream = File.Create(filePath))
+            using (MemoryStream stream = new MemoryStream(source))
+            {
+                await stream.CopyToAsync(targetStream);
+            }
+
+            return fileNameUnique;
+        }
+
+        /// <summary>
+        /// Returns unqiue file name after saveing file stream to storage.
+        /// </summary>
+        /// <remarks>
+        /// The storage type can be configured in appsettings.json. The file is stored like the following
+        /// "container/appName/userId/year/month/fileName.ext".
+        /// </remarks>
+        /// <param name="source">The stream of the file.</param>
+        /// <param name="appId">Which app uploaded file.</param>
+        /// <param name="userId">Who uploaded the file.</param>
+        /// <param name="year">Upload year.</param>
+        /// <param name="month">Upload month.</param>
+        /// <param name="fileName">Slugged filename with ext.</param>
+        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, string year, string month, string fileName)
+        {
+            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, year, month, fileName);
+
+            // save source to file sys
+            using (var fileStream = File.Create(filePath))
+            {
+                await source.CopyToAsync(fileStream);
+            }
+
+            return fileNameUnique;
+        }
+
+        /// <summary>
+        /// Returns unique file name and file path.
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="userId"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="fileName"></param>
         /// <returns></returns>
-        public async Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId)
+        /// <remarks>
+        /// If file with incoming filename already exists, this method appends a number to the filename,
+        /// the number starts at 1.
+        /// </remarks>
+        private (string fileNameUnique, string filePath) GetFileInfo(EAppType appId, int userId, string year, string month, string fileName)
         {
             // app name
             var appName = appId.ToString().ToLowerInvariant();
@@ -63,14 +119,7 @@ namespace Fan.Medias
                 filePath = Path.Combine(dirPath, fileName);
             }
 
-            // save file to file sys
-            using (var targetStream = File.Create(filePath))
-            using (MemoryStream stream = new MemoryStream(content))
-            {
-                await stream.CopyToAsync(targetStream);
-            }
-
-            return fileName;
+            return (fileNameUnique: fileName, filePath: filePath);
         }
     }
 }

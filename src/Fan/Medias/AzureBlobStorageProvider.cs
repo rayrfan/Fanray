@@ -48,27 +48,70 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns fileName as it could be updated if there already exists a file with same name.
+        /// Returns unqiue file name after saveing file byte array to storage.
         /// </summary>
-        /// <param name="userId">The id of the user who uploads.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
+        /// <remarks>
+        /// The storage type can be configured in appsettings.json. The file is stored like the following
+        /// "container/appName/userId/year/month/fileName.ext".
+        /// </remarks>
+        /// <param name="source">The bytes of the file.</param>
+        /// <param name="appId">Which app uploaded file.</param>
+        /// <param name="userId">Who uploaded the file.</param>
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
-        /// <param name="content">The content of file.</param>
-        /// <param name="appId">Which app it uploaded it.</param>
-        /// <returns></returns>
-        public async Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId)
+        /// <param name="fileName">Slugged filename with ext.</param>
+        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, string year, string month, string fileName)
+        {
+            var (blob, blobName) = await GetBlobAsync(appId, userId, year, month, fileName);
+
+            // create blob with contents
+            await blob.UploadFromByteArrayAsync(source, 0, source.Length);
+
+            // get the filename part
+            var start = blobName.LastIndexOf('/') + 1;
+            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
+
+            return uniqueFileName;
+        }
+
+        /// <summary>
+        /// Returns unqiue file name after saveing file stream to storage.
+        /// </summary>
+        /// <remarks>
+        /// The storage type can be configured in appsettings.json. The file is stored like the following
+        /// "container/appName/userId/year/month/fileName.ext".
+        /// </remarks>
+        /// <param name="source">The stream of the file.</param>
+        /// <param name="appId">Which app uploaded file.</param>
+        /// <param name="userId">Who uploaded the file.</param>
+        /// <param name="year">Upload year.</param>
+        /// <param name="month">Upload month.</param>
+        /// <param name="fileName">Slugged filename with ext.</param>
+        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, string year, string month, string fileName)
+        {
+            var (blob, blobName) = await GetBlobAsync(appId, userId, year, month, fileName);
+
+            await blob.UploadFromStreamAsync(source);
+
+            // get the filename part
+            var start = blobName.LastIndexOf('/') + 1;
+            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
+
+            return uniqueFileName;
+        }
+
+        private async Task<(CloudBlockBlob blob, string blobName)> GetBlobAsync(EAppType appId, int userId, string year, string month, string fileName)
         {
             // blobName "blog/1/2017/11/filename", container is "media"
             string blobName = string.Format("{0}/{1}/{2}/{3}/{4}",
                 appId.ToString().ToLowerInvariant(),
                 userId,
                 year,
-                month, 
+                month,
                 fileName);
 
             // get a ref to blob which does not call server
-            var blob = _container.GetBlockBlobReference(blobName); 
+            var blob = _container.GetBlockBlobReference(blobName);
 
             // make sure blob is unique
             int i = 1;
@@ -81,14 +124,7 @@ namespace Fan.Medias
             // set content type
             blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
 
-            // create blob with contents
-            await blob.UploadFromByteArrayAsync(content, 0, content.Length);
-
-            // get the filename part
-            var start = blobName.LastIndexOf('/') + 1;
-            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
-
-            return uniqueFileName;
+            return (blob: blob, blobName: blobName);
         }
     }
 }
