@@ -121,8 +121,9 @@ namespace Fan.Medias
                 blob = _container.GetBlockBlobReference(blobName);
             }
 
-            // set content type
+            // set blob properties
             blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
+            blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
 
             return (blob: blob, blobName: blobName);
         }
