@@ -156,7 +156,7 @@ namespace Fan.Web.Pages.Admin
         public async Task<JsonResult> OnPostPublishAsync()
         {
             var blogPost = new BlogPost
-            {
+            {                
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 CategoryId = Post.BlogId,
                 CreatedOn = GetCreatedOn(Post.PostDate),
@@ -254,10 +254,10 @@ namespace Fan.Web.Pages.Admin
             var urls = new List<string>();
             foreach (var image in images)
             {
-                using (Stream s = image.OpenReadStream())
+                using (Stream stream = image.OpenReadStream())
                 {
-                    var url = await _mediaSvc.UploadImageAsync(userId, image.FileName,
-                            ReadFully(s), EAppType.Blog, EUploadedFrom.Browser);
+                    var url = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
+                        image.FileName, EUploadedFrom.Browser);
                     urls.Add(url);
                 }
             }

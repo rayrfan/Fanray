@@ -42,21 +42,88 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns image handler url after upload to storage.
+        /// Returns image url after uploading image byte array to storage.
         /// </summary>
         /// <param name="userId">Id of the user uploading the media.</param>
         /// <param name="fileName">File name with ext.</param>
-        /// <param name="content">File content</param>
+        /// <param name="source">File content</param>
         /// <param name="appId">Which app it uploaded it.</param>
         /// <returns></returns>
         /// <remarks>
-        /// Note: This method is optimized for metaweblog use with olw, other apps have totally 
-        /// different file logic.
-        /// 
-        /// Depending on the storage provider, the returned media url could be relative path 
-        /// (File Sys) or absolute path (Azure Blog).
+        /// This is currently only used by olw and is optimized for metaweblog use with olw, 
+        /// other apps have totally different file logic.  Image is not resized.
         /// </remarks>
-        public async Task<string> UploadImageAsync(int userId, string fileName, byte[] content, EAppType appId, EUploadedFrom uploadFrom)
+        public async Task<string> UploadImageAsync(byte[] source, EAppType appId, int userId, string fileName, EUploadedFrom uploadFrom)
+        {
+            // slugged and encoded file names
+            var (fileNameSlugged, fileNameEncoded) = GetFileNames(fileName, uploadFrom);
+
+            // time
+            var uploadedOn = DateTimeOffset.UtcNow;
+            var year = uploadedOn.Year.ToString();
+            var month = uploadedOn.Month.ToString("d2");
+
+            // save to storage
+            string uniqueFileName = await _storageProvider.SaveFileAsync(source, EAppType.Blog, userId, year, month, fileNameSlugged);
+
+            // create record in db
+            await CreateMediaAsync(userId, appId, uniqueFileName, fileNameEncoded, source.LongLength, uploadedOn, uploadFrom);
+
+            return $"{IMAGE_HANDLER_PATH}/{appId.ToString().ToLower()}/{userId}/{year}/{month}/{uniqueFileName}";
+        }
+
+        /// <summary>
+        /// Returns image url after uploading and resizeing image stream to storage.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="appId"></param>
+        /// <param name="userId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="uploadFrom"></param>
+        /// <returns></returns>
+        public async Task<string> UploadImageAsync(Stream source, EAppType appId, int userId, string fileName, EUploadedFrom uploadFrom)
+        {
+            // slugged and encoded file names
+            var (fileNameSlugged, fileNameEncoded) = GetFileNames(fileName, uploadFrom);
+
+            // time
+            var uploadedOn = DateTimeOffset.UtcNow;
+            var year = uploadedOn.Year.ToString();
+            var month = uploadedOn.Month.ToString("d2");
+
+            // save to storage
+            string uniqueFileName = await _storageProvider.SaveFileAsync(source, EAppType.Blog, userId, year, month, fileNameSlugged);
+
+            // create record in db
+            await CreateMediaAsync(userId, appId, uniqueFileName, fileNameEncoded, source.Length, uploadedOn, uploadFrom);
+
+            return $"{IMAGE_HANDLER_PATH}/{appId.ToString().ToLower()}/{userId}/{year}/{month}/{uniqueFileName}";
+        }
+
+        public async Task<Media> UpdateMediaAsync(int id, string title, string description)
+        {
+            var media = await _mediaRepo.GetAsync(id);
+            title = title.IsNullOrEmpty() ? "" : title;
+            media.Title = title.Length > MEDIA_FILENAME_MAXLEN ?
+             title.Substring(0, MEDIA_FILENAME_MAXLEN) : title;
+            media.Description = description;
+
+            await _mediaRepo.UpdateAsync(media);
+            return media;
+        }
+
+        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber = 1, int pageSize = 50)
+        {
+            return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
+        }
+
+        /// <summary>
+        /// Returns slugged file name.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="uploadFrom"></param>
+        /// <returns></returns>
+        private (string fileNameSlugged, string fileNameEncoded) GetFileNames(string fileName, EUploadedFrom uploadFrom)
         {
             // verify ext is supported
             var ext = Path.GetExtension(fileName);
@@ -83,7 +150,7 @@ namespace Fan.Medias
 
             // slug file name
             // chinese fn ends up emtpy and the thumb file with chinese fn ends up with only "thumb"
-            var slug = Util.FormatSlug(fileNameWithoutExt); 
+            var slug = Util.FormatSlug(fileNameWithoutExt);
             if (slug.IsNullOrEmpty())
             {
                 slug = Util.RandomString(6);
@@ -92,14 +159,17 @@ namespace Fan.Medias
             {
                 slug = string.Concat(Util.RandomString(6), "_thumb");
             }
-            string fileNameSlugged = $"{slug}{ext}";
 
-            // save file to storage and get a unique file name
-            var uniqueFileName = await _storageProvider.SaveFileAsync(content, EAppType.Blog, userId, year, month, fileNameSlugged);
-
-            // encode filename 
+            var fileNameSlugged = $"{slug}{ext}";
             var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
 
+
+            return (fileNameSlugged: fileNameSlugged, fileNameEncoded: fileNameEncoded);
+        }
+
+        private async Task CreateMediaAsync(int userId, EAppType appId, string uniqueFileName, string fileNameEncoded, 
+            long length, DateTimeOffset uploadedOn, EUploadedFrom uploadFrom)
+        {
             // save record to db
             var media = new Media
             {
@@ -108,31 +178,12 @@ namespace Fan.Medias
                 FileName = uniqueFileName, // unique filename from storage provider
                 Title = fileNameEncoded, // original filename
                 Description = null,
-                Length = content.LongLength,
+                Length = length,
                 MediaType = EMediaType.Image,
                 UploadedOn = uploadedOn,
                 UploadedFrom = uploadFrom,
             };
             await _mediaRepo.CreateAsync(media);
-
-            return $"{IMAGE_HANDLER_PATH}/{appId.ToString().ToLower()}/{userId}/{year}/{month}/{uniqueFileName}";
-        }
-
-        public async Task<Media> UpdateMediaAsync(int id, string title, string description)
-        {
-            var media = await _mediaRepo.GetAsync(id);
-            title = title.IsNullOrEmpty() ? "" : title;
-            media.Title = title.Length > MEDIA_FILENAME_MAXLEN ?
-             title.Substring(0, MEDIA_FILENAME_MAXLEN) : title;
-            media.Description = description;
-
-            await _mediaRepo.UpdateAsync(media);
-            return media;
-        }
-
-        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber = 1, int pageSize = 50)
-        {
-            return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
         }
     }
 }
