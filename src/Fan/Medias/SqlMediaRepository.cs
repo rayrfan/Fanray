@@ -1,6 +1,8 @@
 ﻿using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -24,6 +26,15 @@ namespace Fan.Medias
         public async Task<Media> GetAsync(int mediaId)
         {
             return await _entities.SingleAsync(m => m.Id == mediaId);
+        }
+
+        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
+        {
+            return await _entities.Where(m=>m.MediaType == mediaType)
+                                  .OrderByDescending(m => m.UploadedOn)
+                                  .Skip(pageNumber)
+                                  .Take(pageSize)
+                                  .ToListAsync();
         }
     }
 }

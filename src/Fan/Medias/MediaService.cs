@@ -1,6 +1,7 @@
 ﻿using Fan.Exceptions;
 using Fan.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -94,7 +95,7 @@ namespace Fan.Medias
             string fileNameSlugged = $"{slug}{ext}";
 
             // save file to storage and get a unique file name
-            var uniqueFileName = await _storageProvider.SaveFileAsync(userId, fileNameSlugged, year, month, content, EAppType.Blog);
+            var uniqueFileName = await _storageProvider.SaveFileAsync(content, EAppType.Blog, userId, year, month, fileNameSlugged);
 
             // encode filename 
             var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
@@ -127,6 +128,11 @@ namespace Fan.Medias
 
             await _mediaRepo.UpdateAsync(media);
             return media;
+        }
+
+        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber = 1, int pageSize = 50)
+        {
+            return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
         }
     }
 }
