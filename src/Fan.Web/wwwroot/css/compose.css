@@ -2,6 +2,14 @@
     display: none
 }
 
+/* make quill bar sticky when scroll */
+ .ql-toolbar.ql-snow {
+    position: sticky;
+    z-index: 100;
+    background: white;
+    top: 80px;
+}
+
 h1{
         margin: 0 0 1rem;
         font-family: segoe-ui_normal, Segoe UI, Segoe, Segoe WP, Helvetica Neue, Helvetica, sans-serif;
