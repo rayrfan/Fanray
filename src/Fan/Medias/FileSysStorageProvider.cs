@@ -37,13 +37,14 @@ namespace Fan.Medias
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, string year, string month, string fileName)
+        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId,
+                        DateTimeOffset uploadedOn, string fileName, EImageSize size)
         {
-            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, year, month, fileName);
+            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, uploadedOn, fileName, size);
 
             // save source to file sys
             using (var targetStream = File.Create(filePath))
-            using (MemoryStream stream = new MemoryStream(source))
+            using (var stream = new MemoryStream(source))
             {
                 await stream.CopyToAsync(targetStream);
             }
@@ -64,9 +65,10 @@ namespace Fan.Medias
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, string year, string month, string fileName)
+        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId,
+                        DateTimeOffset uploadedOn, string fileName, EImageSize size)
         {
-            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, year, month, fileName);
+            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, uploadedOn, fileName, size);
 
             // save source to file sys
             using (var fileStream = File.Create(filePath))
@@ -84,22 +86,28 @@ namespace Fan.Medias
         /// <param name="userId"></param>
         /// <param name="year"></param>
         /// <param name="month"></param>
-        /// <param name="fileName"></param>
+        /// <param name="fileName">Slugged filename with ext.</param>
         /// <returns></returns>
         /// <remarks>
         /// If file with incoming filename already exists, this method appends a number to the filename,
         /// the number starts at 1.
         /// </remarks>
-        private (string fileNameUnique, string filePath) GetFileInfo(EAppType appId, int userId, string year, string month, string fileName)
+        private (string fileNameUnique, string filePath) GetFileInfo(EAppType appId, int userId, 
+            DateTimeOffset uploadedOn, string fileName, EImageSize size)
         {
-            // app name
+            // dir to save this file in e.g. "wwwroot\media\blog\optimized\1\2018\05"
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
             var appName = appId.ToString().ToLowerInvariant();
+            var qualityStr = size.ToString().ToLowerInvariant();
+            var year = uploadedOn.Year.ToString();
+            var month = uploadedOn.Month.ToString("d2");
 
-            // dir to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}\\{5}",
-                _hostingEnvironment.WebRootPath,
-                _appSettings.MediaContainerName,
+            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}\\{5}\\{6}",
+                root,
+                container,
                 appName,
+                qualityStr,
                 userId,
                 year,
                 month);
@@ -117,6 +125,7 @@ namespace Fan.Medias
             {
                 fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
                 filePath = Path.Combine(dirPath, fileName);
+                i++;
             }
 
             return (fileNameUnique: fileName, filePath: filePath);

@@ -4,31 +4,38 @@ using System.Threading.Tasks;
 
 namespace Fan.Medias
 {
+    /// <summary>
+    /// The media service manages uploaded media files.
+    /// </summary>
+    /// <remarks>
+    /// For images it resizes them, stores them away with storage provider, gets a unique filename,
+    /// encode a title from filename, generates an image url.
+    /// </remarks>
     public interface IMediaService
     {
         /// <summary>
-        /// Returns image url after uploading image byte array to storage.
+        /// Returns image handler url after uploading image byte array to storage. 
         /// </summary>
         /// <remarks>
         /// This is currently only used by olw. Image is not resized.
         /// </remarks>
-        /// <param name="userId">Id of the user uploading the media.</param>
-        /// <param name="fileName">File name with ext.</param>
         /// <param name="source">File content</param>
-        /// <param name="appId">Which fanray app it uploaded it.</param>
+        /// <param name="appType">Which fanray app it uploaded it.</param>
+        /// <param name="userId">Id of the user uploading the media.</param>
+        /// <param name="fileNameOrig">File name with ext.</param>
         /// <param name="uploadFrom">Which client uploaded it.</param>
         /// <returns></returns>
-        Task<string> UploadImageAsync(byte[] source, EAppType appId, int userId, string name, EUploadedFrom uploadFrom);
+        Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
         /// <summary>
-        /// Returns image url after uploading and resizeing image stream to storage.
+        /// Returns image url after uploading image stream to storage.
         /// </summary>
         /// <param name="source"></param>
-        /// <param name="appId"></param>
+        /// <param name="appType"></param>
         /// <param name="userId"></param>
-        /// <param name="fileName"></param>
+        /// <param name="fileNameOrig"></param>
         /// <param name="uploadFrom"></param>
         /// <returns></returns>
-        Task<string> UploadImageAsync(Stream source, EAppType appId, int userId, string fileName, EUploadedFrom uploadFrom);
+        Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
         /// <summary>
         /// Updates media title and description.
         /// </summary>
@@ -40,6 +47,6 @@ namespace Fan.Medias
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber = 1, int pageSize = 50);
+        Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
     }
 }

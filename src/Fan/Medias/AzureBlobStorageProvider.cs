@@ -60,9 +60,9 @@ namespace Fan.Medias
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, string year, string month, string fileName)
+        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize quality)
         {
-            var (blob, blobName) = await GetBlobAsync(appId, userId, year, month, fileName);
+            var (blob, blobName) = await GetBlobAsync(appId, userId, uploadedOn, fileName, quality);
 
             // create blob with contents
             await blob.UploadFromByteArrayAsync(source, 0, source.Length);
@@ -87,9 +87,9 @@ namespace Fan.Medias
         /// <param name="year">Upload year.</param>
         /// <param name="month">Upload month.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, string year, string month, string fileName)
+        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize quality)
         {
-            var (blob, blobName) = await GetBlobAsync(appId, userId, year, month, fileName);
+            var (blob, blobName) = await GetBlobAsync(appId, userId, uploadedOn, fileName, quality);
 
             await blob.UploadFromStreamAsync(source);
 
@@ -100,11 +100,17 @@ namespace Fan.Medias
             return uniqueFileName;
         }
 
-        private async Task<(CloudBlockBlob blob, string blobName)> GetBlobAsync(EAppType appId, int userId, string year, string month, string fileName)
+        private async Task<(CloudBlockBlob blob, string blobName)> GetBlobAsync(EAppType appId, int userId, 
+            DateTimeOffset uploadedOn, string fileName, EImageSize size)
         {
-            // blobName "blog/1/2017/11/filename", container is "media"
-            string blobName = string.Format("{0}/{1}/{2}/{3}/{4}",
-                appId.ToString().ToLowerInvariant(),
+            // blobName "blog/optimized/1/2018/05/filename.ext", container is "media"
+            string appName = appId.ToString().ToLowerInvariant();
+            string qualityStr = size.ToString().ToLowerInvariant();
+            var year = uploadedOn.Year.ToString();
+            var month = uploadedOn.Month.ToString("d2");
+            string blobName = string.Format("{0}/{1}/{2}/{3}/{4}/{5}",
+                appName,
+                qualityStr,
                 userId,
                 year,
                 month,
@@ -119,6 +125,7 @@ namespace Fan.Medias
             {
                 blobName = blobName.Insert(blobName.LastIndexOf('.'), $"-{i}");
                 blob = _container.GetBlockBlobReference(blobName);
+                i++;
             }
 
             // set blob properties

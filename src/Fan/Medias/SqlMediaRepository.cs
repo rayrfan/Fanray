@@ -30,10 +30,13 @@ namespace Fan.Medias
 
         public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
         {
+            int skip = (pageNumber - 1) * pageSize;
+            int take = pageSize;
+
             return await _entities.Where(m=>m.MediaType == mediaType)
                                   .OrderByDescending(m => m.UploadedOn)
-                                  .Skip(pageNumber)
-                                  .Take(pageSize)
+                                  .Skip(skip)
+                                  .Take(take)
                                   .ToListAsync();
         }
     }

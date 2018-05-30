@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
 {
     /// <summary>
-    /// Storage provider contract.
+    /// The storage provider save the incoming file whether its byte[] or stream into the storage.
+    /// It makes sure it gets a unique filename by looking at what is already in storage.
     /// </summary>
     public interface IStorageProvider
     {
@@ -18,10 +20,10 @@ namespace Fan.Medias
         /// <param name="source">The bytes of the file.</param>
         /// <param name="appId">Which app uploaded file.</param>
         /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
+        /// <param name="uploadedOn">When uploaded.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, string year, string month, string fileName);
+        /// <param name="size">Optimized or original</param>
+        Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize size);
 
         /// <summary>
         /// Returns unqiue file name after saveing file stream to storage.
@@ -33,9 +35,9 @@ namespace Fan.Medias
         /// <param name="source">The stream of the file.</param>
         /// <param name="appId">Which app uploaded file.</param>
         /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
+        /// <param name="uploadedOn">Upload year.</param>
         /// <param name="fileName">Slugged filename with ext.</param>
-        Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, string year, string month, string fileName);
+        /// <param name="size">Optimized or original</param>
+        Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize size);
     }
 }
