@@ -9,8 +9,8 @@ using System;
 namespace Fan.Migrations
 {
     [DbContext(typeof(FanDbContext))]
-    [Migration("20180518235757_FanV1.1-alpha")]
-    partial class FanV11alpha
+    [Migration("20180530163323_FanV1_1")]
+    partial class FanV1_1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -165,7 +165,9 @@ namespace Fan.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("AppId");
+                    b.Property<int>("AppType");
+
+                    b.Property<string>("Caption");
 
                     b.Property<string>("Description");
 
@@ -173,9 +175,17 @@ namespace Fan.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Height");
+
                     b.Property<long>("Length");
 
                     b.Property<byte>("MediaType");
+
+                    b.Property<bool>("Optimized");
 
                     b.Property<string>("Title")
                         .HasMaxLength(256);
@@ -185,6 +195,8 @@ namespace Fan.Migrations
                     b.Property<DateTimeOffset>("UploadedOn");
 
                     b.Property<int>("UserId");
+
+                    b.Property<int>("Width");
 
                     b.HasKey("Id");
 
