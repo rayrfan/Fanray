@@ -14,20 +14,18 @@ namespace Fan.Medias
     public interface IMediaService
     {
         /// <summary>
-        /// Returns image handler url after uploading image byte array to storage. 
+        /// Returns <see cref="Media"/> after uploading image byte[] to storage. 
         /// </summary>
-        /// <remarks>
-        /// This is currently only used by olw. Image is not resized.
-        /// </remarks>
         /// <param name="source">File content</param>
         /// <param name="appType">Which fanray app it uploaded it.</param>
         /// <param name="userId">Id of the user uploading the media.</param>
         /// <param name="fileNameOrig">File name with ext.</param>
         /// <param name="uploadFrom">Which client uploaded it.</param>
         /// <returns></returns>
-        Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        Task<Media> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+
         /// <summary>
-        /// Returns image url after uploading image stream to storage.
+        /// Returns <see cref="Media"/> after uploading image stream to storage.
         /// </summary>
         /// <param name="source"></param>
         /// <param name="appType"></param>
@@ -35,13 +33,15 @@ namespace Fan.Medias
         /// <param name="fileNameOrig"></param>
         /// <param name="uploadFrom"></param>
         /// <returns></returns>
-        Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        Task<Media> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+
         /// <summary>
         /// Updates media title and description.
         /// </summary>
         Task<Media> UpdateMediaAsync(int id, string title, string description);
+
         /// <summary>
-        /// Returns a list of <see cref="Media"/> records.
+        /// Returns a list of <see cref="Media"/> records based on search critria.
         /// </summary>
         /// <param name="mediaType"></param>
         /// <param name="pageNumber"></param>

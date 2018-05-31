@@ -51,18 +51,22 @@ namespace Fan.Medias
 
         private readonly IStorageProvider _storageProvider;
         private readonly IMediaRepository _mediaRepo;
+
+        // -------------------------------------------------------------------- constructor
+
         public MediaService(IStorageProvider storageProvider, IMediaRepository mediaRepo)
         {
             _storageProvider = storageProvider;
             _mediaRepo = mediaRepo;
         }
 
+        // -------------------------------------------------------------------- public methods
+
         /// <summary>
-        /// Returns image handler url after uploading image byte array to storage. 
+        /// Returns <see cref="Media"/> after uploading image byte[] to storage. 
         /// </summary>
         /// <returns>
-        /// It saves two copies for each uploaded image, original and optimized, it returns the url to the original.
-        /// The optimized is only used by Admin Media page.
+        /// It saves two copies for each uploaded image, original and optimized.
         /// </returns>
         /// <param name="source"></param>
         /// <param name="appType"></param>
@@ -70,7 +74,7 @@ namespace Fan.Medias
         /// <param name="fileNameOrig"></param>
         /// <param name="uploadFrom"></param>
         /// <returns></returns>
-        public async Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
+        public async Task<Media> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
         {
             // slugged and encoded file names
             var (fileNameSlugged, titleAttri) = ProcessFileName(fileNameOrig, uploadFrom);
@@ -85,21 +89,19 @@ namespace Fan.Medias
             var (uniqueFileName, width, height, optimized) = await ResizeAndSaveAsync(null, source, appType, userId, uploadedOn, fileNameSlugged);
 
             // create record in db
-            await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.LongLength, uploadedOn, uploadFrom,
-                width, height, optimized);
+            var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.LongLength, uploadedOn, uploadFrom,
+                EMediaType.Image, width, height, optimized);
 
-            // an url that will hit Image.cshtml for original
-            return $"{IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{uniqueFileName}";
+            return media;
         }
 
         /// <summary>
-        /// Returns image handler url after uploading image stream to storage. 
+        /// Returns <see cref="Media"/> after uploading image stream to storage.
         /// </summary>
         /// <returns>
-        /// It saves two copies for each uploaded image, original and optimized, it returns the url to the original.
-        /// The optimized is only used by Admin Media page.
+        /// It saves two copies for each uploaded image, original and optimized.
         /// </returns>
-        public async Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
+        public async Task<Media> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
         {
             // slugged and encoded file names
             var (fileNameSlugged, titleAttri) = ProcessFileName(fileNameOrig, uploadFrom);
@@ -114,11 +116,10 @@ namespace Fan.Medias
             var (uniqueFileName, width, height, optimized) = await ResizeAndSaveAsync(source, null, appType, userId, uploadedOn, fileNameSlugged);
 
             // create record in db
-            await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.Length, uploadedOn, uploadFrom,
-                width, height, optimized);
+            var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.Length, uploadedOn, uploadFrom,
+                EMediaType.Image, width, height, optimized);
 
-            // an url that will hit Image.cshtml for original
-            return $"{IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{uniqueFileName}";
+            return media;
         }
 
         public async Task<Media> UpdateMediaAsync(int id, string title, string description)
@@ -133,6 +134,13 @@ namespace Fan.Medias
             return media;
         }
 
+        /// <summary>
+        /// Returns a list of <see cref="Media"/> records based on search critria.
+        /// </summary>
+        /// <param name="mediaType"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
         {
             return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
@@ -195,7 +203,8 @@ namespace Fan.Medias
         /// <remarks>
         /// TODO 
         /// 1. based on aspect ratio corp very tall or wide images.
-        /// 2. figure out better ways to control quality vs file size; should I dec quality by 5 each mb up.
+        /// 2. figure out better ways to control quality vs file size; 
+        /// should I dec quality by 5 each mb up or resize down to 2mb.
         /// 3. should I use a height limit.
         /// </remarks>
         /// <param name="source">Image stream, either source or source2 should be available.</param>
@@ -275,25 +284,30 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Saves <see cref="Media"/> record to datasource.
+        /// Returns a <see cref="Media"/> after saving it to datasource.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="appType"></param>
-        /// <param name="uniqueFileName">unique filename from storage provider</param>
-        /// <param name="titleAttri">Original filename used as title, it is html encoded.</param>
+        /// <param name="uniqueFileName"></param>
+        /// <param name="titleAttri"></param>
         /// <param name="length"></param>
         /// <param name="uploadedOn"></param>
         /// <param name="uploadFrom"></param>
+        /// <param name="mediaType"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="optimized"></param>
         /// <returns></returns>
-        private async Task CreateMediaAsync(int userId, EAppType appType, string uniqueFileName, string titleAttri, 
-            long length, DateTimeOffset uploadedOn, EUploadedFrom uploadFrom, int width, int height, bool optimized)
+        private async Task<Media> CreateMediaAsync(int userId, EAppType appType, string uniqueFileName, string titleAttri, 
+            long length, DateTimeOffset uploadedOn, EUploadedFrom uploadFrom, EMediaType mediaType, 
+            int width = 0, int height = 0, bool optimized = false)
         {
             // get file type, arg exception will throw if the file type is unknow, TODO handle this
             var contentType = MimeTypeMap.GetMimeType(Path.GetExtension(uniqueFileName));
             // if file type is longer than 256 limit, TODO handle that
             var fileType = contentType.Substring(contentType.LastIndexOf("/") + 1).ToLowerInvariant();
 
-            await _mediaRepo.CreateAsync(new Media
+            var media = new Media
             {
                 UserId = userId,
                 AppType = appType,
@@ -301,14 +315,18 @@ namespace Fan.Medias
                 Title = titleAttri,
                 Description = null,
                 Length = length,
-                MediaType = EMediaType.Image,
+                MediaType = mediaType,
                 UploadedOn = uploadedOn,
                 UploadedFrom = uploadFrom,
                 FileType = fileType,
                 Width = width,
                 Height = height,
                 Optimized = optimized,
-            });
+            };
+
+            await _mediaRepo.CreateAsync(media);
+
+            return media;
         }
     }
 }

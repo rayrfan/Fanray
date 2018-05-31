@@ -263,7 +263,14 @@ namespace Fan.Blogs.MetaWeblog
             try
             {
                 var userId = (await _userManager.FindByNameAsync(userName)).Id;
-                var url = await _mediaSvc.UploadImageAsync(mediaObject.Bits, EAppType.Blog, userId, mediaObject.Name, EUploadedFrom.MetaWeblog);
+                var media = await _mediaSvc.UploadImageAsync(mediaObject.Bits, EAppType.Blog, userId, mediaObject.Name, EUploadedFrom.MetaWeblog);
+
+                var appName = media.AppType.ToString().ToLowerInvariant();
+                var year = media.UploadedOn.Year.ToString();
+                var month = media.UploadedOn.Month.ToString("d2");
+                var fileName = media.FileName;
+                var url = $"{MediaService.IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{fileName}";
+
                 return new MetaMediaInfo()
                 {
                     Url = url
