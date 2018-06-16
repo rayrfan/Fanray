@@ -26,6 +26,8 @@ namespace Fan.Web.Pages.Admin
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
 
+        // -------------------------------------------------------------------- constructor
+
         public ComposeModel(
             UserManager<User> userManager,
             IBlogService blogService,
@@ -38,143 +40,138 @@ namespace Fan.Web.Pages.Admin
             _logger = logger;
         }
 
+        // -------------------------------------------------------------------- inner classes
+
         /// <summary>
-        /// Inner class only used by this page.
+        /// The view model for composer.
         /// </summary>
-        public class ComposePost
+        public class ComposeVM
+        {
+            public PostVM Post { get; set; }
+            public bool Published { get; set; }
+            public IEnumerable<CatVM> AllCats { get; set; }
+            public string[] AllTags { get; set; }
+        }
+
+        /// <summary>
+        /// Post view model.
+        /// </summary>
+        public class PostVM
         {
             public int Id { get; set; }
             [Required]
             public string Title { get; set; }
             public string Body { get; set; }
-            public int BlogId { get; set; }
             public string PostDate { get; set; }
-            public List<string> Tags { get; set; }
             public string Slug { get; set; }
             public string Excerpt { get; set; }
+            public int CategoryId { get; set; }
+            public List<string> Tags { get; set; }
         }
 
         /// <summary>
-        /// Returns true if either post id less than or equal to 0 or post status is draft,
-        /// otherwise false.
+        /// Category view model for Categories dropdown, property names must be "Value" and "Text".
         /// </summary>
-        /// <remarks>
-        /// User could save an existing published post back to a draft, in this case post id
-        /// would be greater than 0 but status would be draft.
-        /// </remarks>
-        public bool IsNew { get; set; }
-
-        /// <summary>
-        /// The post being composed.
-        /// </summary>
-        /// <remarks>
-        /// When ajax POST, this property will be bound.
-        /// </remarks>
-        [FromBody]
-        public ComposePost Post { get; set; }
-
-        /// <summary>
-        /// All categories.
-        /// </summary>
-        public string JsonCats { get; set; }
-        /// <summary>
-        /// All tags.
-        /// </summary>
-        public string JsonTags { get; set; }
-        public string JsonSelectedTags { get; set; }
-
-
-        /// <summary>
-        /// When user edits a post, it retrieves the post
-        /// </summary>
-        public async Task OnGetAsync(int postId)
+        public class CatVM
         {
-            if (postId > 0)
+            public int Value { get; set; }
+            public string Text { get; set; }
+        }
+
+        // -------------------------------------------------------------------- public methods
+
+        /// <summary>
+        /// Ajax GET to return <see cref="ComposeVM"/> to initialize the page.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: the parameter cannot be named "page".
+        /// </remarks>
+        /// <param name="postId">0 for a new post or an existing post id</param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnGetPostAsync(int postId)
+        {
+            PostVM postVm;
+            bool published = false;
+            if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetPostAsync(postId);
-                IsNew = post.Status == EPostStatus.Draft;
-
-                Post = new ComposePost
+                postVm = new PostVM
                 {
                     Id = post.Id,
                     Title = post.Title,
                     Body = post.Body,
                     PostDate = post.CreatedOn.ToString("yyyy-MM-dd"),
-                    Tags = post.TagTitles,
                     Slug = post.Slug,
                     Excerpt = post.Excerpt,
+                    CategoryId = post.CategoryId ?? 1,
+                    Tags = post.TagTitles,
                 };
 
-                JsonSelectedTags = JsonConvert.SerializeObject(post.TagTitles);
-                _logger.LogDebug("Composer Post: {@Post}");
+                published = post.Status == EPostStatus.Published;
             }
-            else 
+            else // new post
             {
-                IsNew = true;
-                Post = new ComposePost {
+                postVm = new PostVM
+                {
                     Title = "",
                     Body = "",
                     PostDate = DateTimeOffset.Now.ToString("yyyy-MM-dd"),
+                    CategoryId = 1,
+                    Tags = new List<string>(),
                 };
-
-                JsonSelectedTags = JsonConvert.SerializeObject(new string[0]);
             }
 
-            var tags = await _blogSvc.GetTagsAsync();
-            string[] allTags = tags.Select(t => t.Title).ToArray();
-            JsonTags = JsonConvert.SerializeObject(allTags);
-
-            JsonCats = await GetJsonCatsAsync();
-        }
-
-        public class TextValue
-        {
-            public string Text { get; set; }
-            public int Value { get; set; }
-        }
-
-        private async Task<string> GetJsonCatsAsync()
-        {
             var categories = await _blogSvc.GetCategoriesAsync();
-            var cats = from c in categories
-                        select new TextValue
-                        {
-                            Value = c.Id,
-                            Text = c.Title,
-                        };
+            var allCats = from c in categories
+                       select new CatVM
+                       {
+                           Value = c.Id,
+                           Text = c.Title,
+                       };
 
-            return JsonConvert.SerializeObject(cats);
+            var tags = await _blogSvc.GetTagsAsync();
+            var allTags = tags.Select(t => t.Title).ToArray();
+
+            return new JsonResult(new ComposeVM
+            {
+                Post = postVm,
+                Published = published,
+                AllCats = allCats,
+                AllTags = allTags,
+            });
         }
 
         /// <summary>
-        /// Publish the post.
+        /// Ajax POST to publish a post.
         /// </summary>
-        /// <returns>The post's url.</returns>
+        /// <returns>
+        /// Absolute URL to the post.
+        /// </returns>
         /// <remarks>
         /// The post could be new or previously published.
         /// </remarks>
-        public async Task<JsonResult> OnPostPublishAsync()
+        public async Task<JsonResult> OnPostPublishAsync([FromBody]PostVM post)
         {
             var blogPost = new BlogPost
             {                
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = Post.BlogId,
-                CreatedOn = GetCreatedOn(Post.PostDate),
-                TagTitles = Post.Tags,
-                Slug = Post.Slug,
-                Excerpt = Post.Excerpt,
-                Title = Post.Title,
-                Body = Post.Body,
+                CategoryId = post.CategoryId,
+                CreatedOn = GetCreatedOn(post.PostDate),
+                TagTitles = post.Tags,
+                Slug = post.Slug,
+                Excerpt = post.Excerpt,
+                Title = post.Title,
+                Body = post.Body,
                 Status = EPostStatus.Published,
             };
 
-            if (Post.Id <= 0)
+            if (post.Id <= 0)
             {
                 blogPost = await _blogSvc.CreatePostAsync(blogPost);
             }
             else
             {
-                blogPost.Id = Post.Id;
+                blogPost.Id = post.Id;
                 blogPost = await _blogSvc.UpdatePostAsync(blogPost);
             }
 
@@ -182,22 +179,24 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// Update an existing published post.
+        /// Ajax POST to update an existing published post.
         /// </summary>
-        /// <returns></returns>
-        public async Task<JsonResult> OnPostUpdateAsync()
+        /// <returns>
+        /// Absolute URL to the post.
+        /// </returns>
+        public async Task<JsonResult> OnPostUpdateAsync([FromBody]PostVM post)
         {
             var blogPost = new BlogPost
             {
-                Id = Post.Id,
+                Id = post.Id,
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = Post.BlogId,
-                CreatedOn = GetCreatedOn(Post.PostDate),
-                TagTitles = Post.Tags,
-                Slug = Post.Slug,
-                Excerpt = Post.Excerpt,
-                Title = Post.Title,
-                Body = Post.Body,
+                CategoryId = post.CategoryId,
+                CreatedOn = GetCreatedOn(post.PostDate),
+                TagTitles = post.Tags,
+                Slug = post.Slug,
+                Excerpt = post.Excerpt,
+                Title = post.Title,
+                Body = post.Body,
                 Status = EPostStatus.Published,
             };
             blogPost = await _blogSvc.UpdatePostAsync(blogPost);
@@ -205,34 +204,36 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// Saves a post as draft.
+        /// Ajax POST to save a post as draft.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// The updated <see cref="BlogPost"/>.
+        /// </returns>
         /// <remarks>
-        /// This is initiated by either auto save or user clicks on Save.
+        /// This is called by either auto save or user clicking on Save.
         /// </remarks>
-        public async Task<JsonResult> OnPostSaveAsync()
+        public async Task<JsonResult> OnPostSaveAsync([FromBody]PostVM post)
         {
             var blogPost = new BlogPost
             {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = Post.BlogId,
-                CreatedOn = GetCreatedOn(Post.PostDate),
-                TagTitles = Post.Tags,
-                Slug = Post.Slug,
-                Excerpt = Post.Excerpt,
-                Title = Post.Title,
-                Body = Post.Body,
+                CategoryId = post.CategoryId,
+                CreatedOn = GetCreatedOn(post.PostDate),
+                TagTitles = post.Tags,
+                Slug = post.Slug,
+                Excerpt = post.Excerpt,
+                Title = post.Title,
+                Body = post.Body,
                 Status = EPostStatus.Draft,
             };
 
-            if (Post.Id <= 0)
+            if (post.Id <= 0)
             {
                 blogPost = await _blogSvc.CreatePostAsync(blogPost);
             }
             else
             {
-                blogPost.Id = Post.Id;
+                blogPost.Id = post.Id;
                 blogPost = await _blogSvc.UpdatePostAsync(blogPost);
             }
 
@@ -240,13 +241,15 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// Upload images.
+        /// Ajax POST to upload images.
         /// </summary>
-        /// <param name="images"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// The name of images param must match formData.append('images', files[i]);
-        /// </remarks>
+        /// <returns>
+        /// A list of urls to original sized images.
+        /// </returns>
+        /// <param name="images">
+        /// The name of this parameter must match <code>formData.append('images', files[i]); </code>
+        /// in the uploadImages method in javascript.
+        /// </param>
         public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
         {
             var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
@@ -256,8 +259,18 @@ namespace Fan.Web.Pages.Admin
             {
                 using (Stream stream = image.OpenReadStream())
                 {
-                    var url = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
+                    var media = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
                         image.FileName, EUploadedFrom.Browser);
+
+                    var appName = media.AppType.ToString().ToLowerInvariant();
+                    var year = media.UploadedOn.Year.ToString();
+                    var month = media.UploadedOn.Month.ToString("d2");
+                    var fileName = media.FileName;
+
+                    var url = $"{MediaService.IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{fileName}";
+                    // adding base url so that image could show up in OLW, otherwise it'd nice to not append base url
+                    url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}" + url;
+
                     urls.Add(url);
                 }
             }
@@ -265,19 +278,7 @@ namespace Fan.Web.Pages.Admin
             return new JsonResult(urls);
         }
 
-        private static byte[] ReadFully(Stream input)
-        {
-            byte[] buffer = new byte[16 * 1024];
-            using (MemoryStream ms = new MemoryStream())
-            {
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    ms.Write(buffer, 0, read);
-                }
-                return ms.ToArray();
-            }
-        }
+        // -------------------------------------------------------------------- private methods
 
         private string GetPostAbsoluteUrl(BlogPost blogPost)
         {
@@ -287,9 +288,9 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// Given a user input date "2018-05-18", returns a DateTimeOffset with also current time.
+        /// Returns a DateTimeOffset by appending current time to the given date string for example "2018-05-18".
         /// </summary>
-        /// <param name="date"></param>
+        /// <param name="date">A date string for example "2018-05-18"</param>
         /// <returns></returns>
         private DateTimeOffset GetCreatedOn(string date)
         {

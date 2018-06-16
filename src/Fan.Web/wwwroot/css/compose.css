@@ -5,7 +5,7 @@
 /* make quill bar sticky when scroll */
  .ql-toolbar.ql-snow {
     position: sticky;
-    z-index: 100;
+    z-index: 2; /* qbar won't be on top of drawer */
     background: white;
     top: 80px;
 }

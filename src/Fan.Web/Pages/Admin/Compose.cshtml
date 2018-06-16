@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <title>@ViewData["Title"] - Fanray Admin Console</title>
+    <title>@ViewData["Title"] - Fanray</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
     <link href="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css" rel="stylesheet">
@@ -43,7 +43,7 @@
                             full-width
                             :nudge-right="40"
                             min-width="290px"
-                            @@input="onDrawerFieldsChange"
+                            @@input="onFieldsChange"
                             :return-value.sync="date">
                         <v-text-field slot="activator"
                                       label="Date"
@@ -53,28 +53,28 @@
                         <v-date-picker v-model="date" @@input="$refs.menuDate.save(date)"></v-date-picker>
                     </v-menu>
                     <v-select :items="cats"
-                              v-model="selectedCat"
+                              v-model="selectedCatId"
                               label="Categories"
                               class="input-group--focused"
-                              @@input="onDrawerFieldsChange"
+                              @@input="onFieldsChange"
                               item-value="value">
                     </v-select>
                     <v-select v-model="selectedTags"
                               label="Tags (delimiter: tab)"
                               chips
                               tags
-                              @@input="onDrawerFieldsChange"
+                              @@input="onFieldsChange"
                               :items="tags"
                               class="input-group--focused"></v-select>
                     <v-text-field name="input-2"
                                   label="Slug"
                                   v-model="slug"
-                                  @@input="onDrawerFieldsChange"
+                                  @@input="onFieldsChange"
                                   class="input-group--focused"></v-text-field>
                     <v-text-field name="input-7-2"
                                   label="Excerpt"
                                   v-model="excerpt"
-                                  @@input="onDrawerFieldsChange"
+                                  @@input="onFieldsChange"
                                   class="input-group--focused"
                                   multi-line></v-text-field>
                 </v-list>
@@ -86,21 +86,19 @@
                        :clipped-left="$vuetify.breakpoint.mdAndUp"
                        fixed>
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                <v-btn @@click="pub" v-if="isNew" :disabled="disablePubUpd" color="orange">Publish</v-btn>
-                <v-btn @@click="pub" v-if="!isNew" :disabled="disablePubUpd" color="orange">Update</v-btn>
+                <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
                 <v-btn>Preview</v-btn>
-                <v-btn @@click="saveDraft" flat small v-if="saveEnabled" :disabled="disableSave" v-text="saveText" color="orange"></v-btn>
+                <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" v-text="saveText" color="orange"></v-btn>
                 <v-spacer></v-spacer>
-                <v-btn @@click="revert" v-if="!isNew">Revert to draft</v-btn>
+                <v-btn @@click="revert" v-if="published">Revert to draft</v-btn>
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
             <v-content style="margin: 4px 23px">
                 <v-text-field label="Title" v-model="title"
-                              @@input="onDrawerFieldsChange"
+                              @@input="onFieldsChange"
                               @@change="saveDraft"></v-text-field>
-                <div id="editor" style="border:0 solid black" v-html="content">
-                </div>
+                <div id="editor" style="border:0 solid black"></div>
             </v-content>
         </v-app>
     </div>
@@ -123,23 +121,26 @@
         var app = new Vue({
             el: '#app',
             data: () => ({
-                id: @Model.Post.Id,
-                isNew: @Model.IsNew.ToString().ToLower(),
-                saveEnabled: false,
+                id: 0,
+                published: false,
+                pubClicked: false,
+                pubText: '',
+                showSave: false,
                 disableSave: false,
                 saveText: 'Save',
+                closing: true,
+                fieldChanged: false,
                 drawer: null,
-                selectedCat: 1,
-                cats: @Html.Raw(Model.JsonCats),
-                date: '@Model.Post.PostDate',
                 menuDate: false,
-                selectedTags: @Html.Raw(Model.JsonSelectedTags),
-                tags: @Html.Raw(Model.JsonTags),
-                slug: '@Model.Post.Slug',
-                excerpt: '@Model.Post.Excerpt',
-                title: '@Model.Post.Title',
-                content: '@Html.Raw(Model.Post.Body)',
-                quill: {},
+                date: '',
+                selectedCatId: 1,
+                cats: [],
+                selectedTags: [],
+                tags: [],
+                slug: '',
+                excerpt: '',
+                title: '',
+                quill: null,
                 toolbarOptions: [
                     [{ 'header': [false, 1, 2, 3, 4, 5, 6,] }],
                     ['bold', 'italic', 'underline', 'strike'],
@@ -149,101 +150,123 @@
                     [{ 'align': '' }, { 'align': 'center' }, { 'align': 'right' }, { 'align': 'justify' }],
                     [{ 'indent': '-1' }, { 'indent': '+1' }],
                     [{ 'color': [] }, { 'background': [] }],
-                    [{ 'script': 'sub' }, { 'script': 'super' }],
                     ['clean'],
                 ],
             }),
             computed: {
-                disablePubUpd: function () {
-                    return this.title.trim().length <= 0;
+                disablePubButton() {
+                    return this.title.trim().length <= 0 || this.pubClicked;
                 },
                 tok: function () {
                     return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
                 },
                 payload: function () {
+                    let content = this.quill.root.innerHTML;
+                    if (content === '<p><br></p>') content = '';
+
                     return {
                         id: this.id,
-                        title: this.title,
-                        blogId: this.selectedCat,
                         postDate: this.date,
+                        categoryId: this.selectedCatId,
                         tags: this.selectedTags,
                         slug: this.slug,
                         excerpt: this.excerpt,
+                        title: this.title,
+                        body: content,
                     }
                 },
             },
             mounted() {
-                hljs.configure({
-                    languages: ['cs', 'css', 'java', 'javascript', 'markdown', 'ruby', 'python', 'scss', 'sql', 'typescript', 'xml']
-                });
-
-                quill = new Quill('#editor', {
-                    modules: {
-                        syntax: true,
-                        toolbar: this.toolbarOptions,
-                        imageResize: {},
-                    },
-                    theme: 'snow'
-                });
-
-                // img upload
-                let toolbar = quill.getModule('toolbar');
-                toolbar.addHandler('image', function () {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
-                    input.setAttribute('multiple', null);
-                    input.click();
-                    input.onchange = () => {
-                        app.uploadImages(input.files);
-                    };
-                });
-
-                // auto save
-                var Delta = Quill.import('delta');
-                var change = new Delta(); // store accumulated changes
-                quill.on('text-change', function (delta) {
-                    change = change.compose(delta);
-                });
-                setInterval(function () { // save periodically
-                    if (change.length() > 0) {
-                        app.saveDraft();
-                        change = new Delta();
-                    }
-                }, 5 * 1000);
-                window.onbeforeunload = function () { // check for unsaved
-                    if (change.length() > 0) {
-                        return 'There are unsaved changes. Are you sure you want to leave?';
-                    }
-                }
+                this.initHighlight();
+                this.initEditor();
             },
             methods: {
-                onDrawerFieldsChange() {
-                    if (!this.isNew) return;
-                    if (!this.saveEnabled) this.saveEnabled = true;
+                initEditor() {
+                    this.quill = new Quill('#editor', {
+                        modules: {
+                            syntax: true,
+                            toolbar: this.toolbarOptions,
+                            imageResize: {},
+                        },
+                        theme: 'snow'
+                    });
+
+                    this.id = window.location.href.substring(window.location.href.lastIndexOf("/") + 1) | 0;
+                    axios.get(`/admin/compose?handler=post&postId=${this.id}`).then(resp => {
+                        this.date = resp.data.post.postDate;
+                        this.selectedCatId = resp.data.post.categoryId;
+                        this.selectedTags = resp.data.post.tags;
+                        this.slug = resp.data.post.slug;
+                        this.excerpt = resp.data.post.excerpt;
+                        this.title = resp.data.post.title;
+                        this.quill.clipboard.dangerouslyPasteHTML(resp.data.post.body);
+                        this.published = resp.data.published;
+                        this.cats = resp.data.allCats;
+                        this.tags = resp.data.allTags;
+                        this.pubText = this.published ? 'Update' : 'Publish';
+
+                        // auto save, detect change after data comes back
+                        let Delta = Quill.import('delta');
+                        let change = new Delta();
+                        this.quill.on('text-change', (delta) => {
+                            change = change.compose(delta);
+                        });
+                        setInterval(() => {
+                            if (change.length() > 0 && !this.published) {
+                                this.saveDraft();
+                                change = new Delta();
+                            }
+                        }, 5000);
+                        window.onbeforeunload = () => {
+                            if ( (change.length() > 0 || this.fieldChanged) && this.closing) {
+                                return 'There are unsaved changes. Are you sure you want to leave?';
+                            }
+                        }
+                    });
+
+                    // img upload
+                    let toolbar = this.quill.getModule('toolbar');
+                    toolbar.addHandler('image', function () {
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.setAttribute('multiple', null);
+                        input.click();
+                        input.onchange = () => {
+                            app.uploadImages(input.files);
+                        };
+                    });                   
+                },
+                initHighlight() {
+                    hljs.configure({
+                        languages: ['cs', 'css', 'java', 'javascript', 'markdown', 'ruby', 'python', 'scss', 'sql', 'typescript', 'xml']
+                    });
+                },
+                onFieldsChange() {
+                    this.fieldChanged = true;
+                    if (this.published) return;
+                    if (!this.showSave) this.showSave = true;
                     this.disableSave = false;
                     this.saveText = 'Save';
                 },
                 saveDraft() {
-                    if (!this.saveEnabled) this.saveEnabled = true;
+                    if (!this.showSave) this.showSave = true;
                     this.disableSave = true;
                     this.saveText = 'Saving...';
 
-                    let payload = Object.assign({ body: quill.root.innerHTML }, this.payload);
-                    console.log(payload);
-                    axios.post('/admin/compose?handler=save', payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(function (response) {
-                            app.id = response.data.id;
-                            app.slug = response.data.slug;
+                    console.log(this.payload);
+                    axios.post('/admin/compose?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(resp => {
+                            this.id = resp.data.id;
+                            this.slug = resp.data.slug;
                         })
-                        .catch(function (error) {
-                            console.log(error);
-                        });
+                        .catch(err => { console.log(err); });
 
                     this.saveText = 'Saved';
                 },
                 revert() {
-                    this.isNew = true;
+                    this.published = false;
+                    this.pubText = this.published ? 'Update' : 'Publish';
                     this.saveDraft();
                 },
                 uploadImages(files) {
@@ -253,28 +276,26 @@
                     }
 
                     axios.post('/admin/compose?handler=image', formData, { headers: { 'XSRF-TOKEN': this.tok } })
-                         .then(function (response) {
-                            var urls = response.data;
-                            const range = quill.getSelection();
+                        .then(resp => {
+                            var urls = resp.data;
+                            const range = this.quill.getSelection();
                             for (var i = 0; i < urls.length; i++) {
-                                quill.insertEmbed(range.index, 'image', urls[i]);
+                                this.quill.insertEmbed(range.index, 'image', urls[i]);
                             }
-                         })
-                         .catch(function (error) {
-                            console.log(error);
-                         });
+                        })
+                        .catch(err => { console.log(err); });
                 },
                 pub() {
-                    const url = this.isNew ? '/admin/compose?handler=publish' : '/admin/compose?handler=update';
-                    let payload = Object.assign({ body: quill.root.innerHTML }, this.payload);
-                    axios.post(url, payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(function (response) {
-                            console.log(response.data);
-                            window.location.replace(response.data);
+                    this.closing = false;
+                    this.pubClicked = true;
+                    this.pubText = this.published ? 'Updating...' : 'Publishing...';
+
+                    const url = this.published ? '/admin/compose?handler=update' : '/admin/compose?handler=publish';
+                    axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(resp => {
+                            window.location.replace(resp.data);
                         })
-                        .catch(function (error) {
-                            console.log(error);
-                        });
+                        .catch(err => { console.log(err); });
                 },
             },
         });
