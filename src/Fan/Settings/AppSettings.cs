@@ -54,10 +54,5 @@ namespace Fan.Settings
         /// https://your-blob-acct-name.blob.core.windows.net/media/2017/11/file-name.ext
         /// </remarks>
         public string MediaContainerName { get; set; } = "media";
-
-        /// <summary>
-        /// Storage account name.
-        /// </summary>
-        public string StorageAccountName { get; set; } = "devstoreaccount1";
     }
 }

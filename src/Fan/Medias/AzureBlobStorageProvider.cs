@@ -16,30 +16,36 @@ namespace Fan.Medias
     /// </summary>
     public class AzureBlobStorageProvider : IStorageProvider
     {
-        private static CloudBlobContainer _container;
-        private readonly string _connString;
-        private readonly AppSettings _appSettings;
+        private readonly CloudBlobContainer _container;
+        private readonly CloudStorageAccount _storageAccount;
+
         public AzureBlobStorageProvider(IConfiguration configuration, IServiceProvider serviceProvider)
         {
-            _connString = configuration.GetConnectionString("BlobStorageConnectionString");
-            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+            var connString = configuration.GetConnectionString("BlobStorageConnectionString");
+
+            _storageAccount = CloudStorageAccount.Parse(connString);
+            if (_storageAccount == null)
+                throw new Exception("Azure Blob Storage connection string is not valid.");
+
+            var appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+
+            var blobClient = _storageAccount.CreateCloudBlobClient();
+            // get a ref to container does not call server
+            _container = blobClient.GetContainerReference(appSettings.MediaContainerName);
+
             PrepBlobContainer();
         }
+
+        /// <summary>
+        /// The absolute URI endpoint to blob, e.g. "http://127.0.0.1:10000/devstoreaccount1" in dev.
+        /// </remarks>
+        public string StorageEndpoint => _storageAccount.BlobEndpoint.AbsoluteUri.ToString();
 
         /// <summary>
         /// Prepares blob container.
         /// </summary>
         private async void PrepBlobContainer()
         {
-            var storageAccount = CloudStorageAccount.Parse(_connString);
-            if (storageAccount == null)
-                throw new Exception("Azure Blob Storage connection string is not valid.");
-
-            // get client
-            var blobClient = storageAccount.CreateCloudBlobClient();
-
-            // get a ref to contain which does not call server
-            _container = blobClient.GetContainerReference(_appSettings.MediaContainerName);
             await _container.CreateIfNotExistsAsync();
             await _container.SetPermissionsAsync(new BlobContainerPermissions
             {

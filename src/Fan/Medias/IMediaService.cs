@@ -14,26 +14,36 @@ namespace Fan.Medias
     public interface IMediaService
     {
         /// <summary>
-        /// Returns <see cref="Media"/> after uploading image byte[] to storage. 
+        /// Uploads image byte[] to storage and returns absolute image URL.
         /// </summary>
         /// <param name="source">File content</param>
         /// <param name="appType">Which fanray app it uploaded it.</param>
         /// <param name="userId">Id of the user uploading the media.</param>
         /// <param name="fileNameOrig">File name with ext.</param>
         /// <param name="uploadFrom">Which client uploaded it.</param>
-        /// <returns></returns>
-        Task<Media> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        /// <remarks>
+        /// It resizes image to original and optimzed copies based on conditions.
+        /// </remarks>
+        /// <returns>
+        /// Returns absolute, original, image handler enabled URL to the image.
+        /// </returns>
+        Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
 
         /// <summary>
-        /// Returns <see cref="Media"/> after uploading image stream to storage.
+        /// Uploads image stream to storage and returns absolute image URL.
         /// </summary>
         /// <param name="source"></param>
         /// <param name="appType"></param>
         /// <param name="userId"></param>
         /// <param name="fileNameOrig"></param>
         /// <param name="uploadFrom"></param>
-        /// <returns></returns>
-        Task<Media> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        /// <remarks>
+        /// It resizes image to original and optimzed copies based on conditions.
+        /// </remarks>
+        /// <returns>
+        /// Returns absolute, original, image handler enabled URL to the image.
+        /// </returns>
+        Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
 
         /// <summary>
         /// Updates media title and description.

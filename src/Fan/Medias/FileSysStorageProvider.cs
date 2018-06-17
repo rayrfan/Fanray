@@ -1,5 +1,6 @@
 ﻿using Fan.Settings;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,11 +19,19 @@ namespace Fan.Medias
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly AppSettings _appSettings;
-        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider)
+        private readonly HttpRequest _request;
+
+        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor)
         {
             _hostingEnvironment = env;
             _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+            _request = httpContextAccessor.HttpContext.Request;
         }
+
+        /// <summary>
+        /// The absolute URI endpoint to file, e.g. "https://localhost:44381" or "https://www.fanray.com".
+        /// </summary>
+        public string StorageEndpoint => $"{_request.Scheme}://{_request.Host}{_request.PathBase}";
 
         /// <summary>
         /// Returns unqiue file name after saveing file byte array to storage.

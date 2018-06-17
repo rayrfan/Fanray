@@ -11,6 +11,11 @@ namespace Fan.Medias
     public interface IStorageProvider
     {
         /// <summary>
+        /// The absolute URI endpoint to resource.
+        /// </summary>
+        string StorageEndpoint { get; }
+
+        /// <summary>
         /// Returns unqiue file name after saveing file byte array to storage.
         /// </summary>
         /// <remarks>

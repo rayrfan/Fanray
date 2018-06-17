@@ -1,6 +1,7 @@
 ﻿using Fan.Exceptions;
 using Fan.Helpers;
 using ImageMagick;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,30 +52,36 @@ namespace Fan.Medias
 
         private readonly IStorageProvider _storageProvider;
         private readonly IMediaRepository _mediaRepo;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         // -------------------------------------------------------------------- constructor
 
-        public MediaService(IStorageProvider storageProvider, IMediaRepository mediaRepo)
+        public MediaService(IStorageProvider storageProvider, 
+            IMediaRepository mediaRepo,
+            IHttpContextAccessor httpContextAccessor)
         {
             _storageProvider = storageProvider;
             _mediaRepo = mediaRepo;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // -------------------------------------------------------------------- public methods
 
         /// <summary>
-        /// Returns <see cref="Media"/> after uploading image byte[] to storage. 
+        /// Uploads image byte[] to storage and returns absolute image URL.
         /// </summary>
+        /// <param name="source">File content</param>
+        /// <param name="appType">Which fanray app it uploaded it.</param>
+        /// <param name="userId">Id of the user uploading the media.</param>
+        /// <param name="fileNameOrig">File name with ext.</param>
+        /// <param name="uploadFrom">Which client uploaded it.</param>
+        /// <remarks>
+        /// It resizes image to original and optimzed copies based on conditions.
+        /// </remarks>
         /// <returns>
-        /// It saves two copies for each uploaded image, original and optimized.
+        /// Returns absolute, original, image handler enabled URL to the image.
         /// </returns>
-        /// <param name="source"></param>
-        /// <param name="appType"></param>
-        /// <param name="userId"></param>
-        /// <param name="fileNameOrig"></param>
-        /// <param name="uploadFrom"></param>
-        /// <returns></returns>
-        public async Task<Media> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
+        public async Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
         {
             // slugged and encoded file names
             var (fileNameSlugged, titleAttri) = ProcessFileName(fileNameOrig, uploadFrom);
@@ -92,16 +99,24 @@ namespace Fan.Medias
             var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.LongLength, uploadedOn, uploadFrom,
                 EMediaType.Image, width, height, optimized);
 
-            return media;
+            return GetImageUrl(media, uploadFrom);
         }
 
         /// <summary>
-        /// Returns <see cref="Media"/> after uploading image stream to storage.
+        /// Uploads image stream to storage and returns absolute image URL.
         /// </summary>
+        /// <param name="source"></param>
+        /// <param name="appType"></param>
+        /// <param name="userId"></param>
+        /// <param name="fileNameOrig"></param>
+        /// <param name="uploadFrom"></param>
+        /// <remarks>
+        /// It resizes image to original and optimzed copies based on conditions.
+        /// </remarks>
         /// <returns>
-        /// It saves two copies for each uploaded image, original and optimized.
+        /// Returns absolute, original, image handler enabled URL to the image.
         /// </returns>
-        public async Task<Media> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
+        public async Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom)
         {
             // slugged and encoded file names
             var (fileNameSlugged, titleAttri) = ProcessFileName(fileNameOrig, uploadFrom);
@@ -119,7 +134,7 @@ namespace Fan.Medias
             var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.Length, uploadedOn, uploadFrom,
                 EMediaType.Image, width, height, optimized);
 
-            return media;
+            return GetImageUrl(media, uploadFrom);
         }
 
         public async Task<Media> UpdateMediaAsync(int id, string title, string description)
@@ -145,8 +160,26 @@ namespace Fan.Medias
         {
             return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
         }
-       
+
         // -------------------------------------------------------------------- private
+
+        /// <summary>
+        /// Returns absolute, original, image handler enabled URL to the image.
+        /// </summary>
+        /// <param name="media"></param>
+        /// <param name="uploadFrom"></param>
+        /// <returns></returns>
+        private string GetImageUrl(Media media, EUploadedFrom uploadFrom)
+        {
+            var appName = media.AppType.ToString().ToLowerInvariant();
+            var year = media.UploadedOn.Year.ToString();
+            var month = media.UploadedOn.Month.ToString("d2");
+            var fileName = media.FileName;
+            var userId = media.UserId;
+            var request = _httpContextAccessor.HttpContext.Request;
+
+            return $"{request.Scheme}://{request.Host}{request.PathBase}{IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{fileName}";
+        }
 
         /// <summary>
         /// Takes the original filename user is uploading and returns a slugged filename and title attribute.

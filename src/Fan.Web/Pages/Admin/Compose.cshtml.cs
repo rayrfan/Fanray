@@ -259,17 +259,8 @@ namespace Fan.Web.Pages.Admin
             {
                 using (Stream stream = image.OpenReadStream())
                 {
-                    var media = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
+                    var url = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
                         image.FileName, EUploadedFrom.Browser);
-
-                    var appName = media.AppType.ToString().ToLowerInvariant();
-                    var year = media.UploadedOn.Year.ToString();
-                    var month = media.UploadedOn.Month.ToString("d2");
-                    var fileName = media.FileName;
-
-                    var url = $"{MediaService.IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{fileName}";
-                    // adding base url so that image could show up in OLW, otherwise it'd nice to not append base url
-                    url = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}" + url;
 
                     urls.Add(url);
                 }
