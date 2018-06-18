@@ -53,7 +53,7 @@
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-toolbar-title class="hidden-sm-and-down">@coreSettings.Title</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-menu offset-x offset-y z-index="2" style="font-size:3px">
+                <v-menu offset-x offset-y z-index="2">
                     <v-btn icon slot="activator">
                         <v-avatar size="32px">
                             <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName"/>
@@ -78,11 +78,7 @@
             </v-toolbar>
             @* Content *@
             <v-content>
-                <v-container fluid fill-height>
-                    <v-layout justify-center>
-                        @RenderBody()
-                    </v-layout>
-                </v-container>
+                @RenderBody()
             </v-content>
         </v-app>
     </div>
@@ -95,7 +91,7 @@
         <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.js"></script>
     </environment>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
-    @RenderSection("Scripts", required: false)
+    @RenderSection("ComponentScripts", required: false)
     <script>
         var app = new Vue({
             el: '#app',
@@ -106,7 +102,7 @@
                 items: [
                     { icon: 'list', text: 'Posts', url: '/admin', active: false },
                     { icon: 'insert_photo', text: 'Media', url: '/admin/media', active: false },
-                    { icon: 'folder', text: 'Categories', url: '/admin/blogs', active: false },
+                    { icon: 'folder', text: 'Categories', url: '/admin/categories', active: false },
                     { icon: 'label', text: 'Tags', url: '/admin/tags', active: false },
                     //{ icon: 'widgets', text: 'Widgets', url: '/admin/widgets', active: false },
                     { icon: 'supervisor_account', text: 'Users', url: '/admin/users', active: false },
