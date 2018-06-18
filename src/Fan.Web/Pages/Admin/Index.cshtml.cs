@@ -19,14 +19,16 @@ namespace Fan.Web.Pages.Admin
             _blogSvc = blogService;
         }
 
-        public class PostListVm
+        public class PostListVM
         {
-            public IEnumerable<PostVm> Posts {get;set;}
+            public IEnumerable<PostVM> Posts {get;set;}
             public int TotalPosts { get; set; }
-            public IEnumerable<StatusVm> Statuses { get; set; }
+            public IEnumerable<StatusVM> Statuses { get; set; }
+            public int PublishedCount { get; set; }
+            public int DraftCount { get; set; }
         }
 
-        public class PostVm
+        public class PostVM
         {
             public int Id { get; set; }
             public string Title { get; set; }
@@ -36,7 +38,7 @@ namespace Fan.Web.Pages.Admin
             public string PostLink { get; set; }
         }
 
-        public class StatusVm
+        public class StatusVM
         {
             /// <summary>
             /// When using Vuetify Tabs, the property to bind its key must be named "id".
@@ -80,7 +82,10 @@ namespace Fan.Web.Pages.Admin
         /// <param name="pageNumber">Which page</param>
         /// <param name="pageSize">How many rows per page</param>
         /// <returns></returns>
-        private async Task<PostListVm> GetPostListVmAsync(string status, int pageNumber, int pageSize)
+        /// <remarks>
+        /// I did a workaround for tabs, couldn't get "statuses" to work as the tab is not initially selected.
+        /// </remarks>
+        private async Task<PostListVM> GetPostListVmAsync(string status, int pageNumber, int pageSize)
         {
             // posts and totalPosts
             var postList = status.Equals("published", StringComparison.InvariantCultureIgnoreCase) ?
@@ -88,7 +93,7 @@ namespace Fan.Web.Pages.Admin
                 await _blogSvc.GetPostsForDraftsAsync();
 
             var postVms = from p in postList.Posts
-                          select new PostVm
+                          select new PostVM
                           {
                               Id = p.Id,
                               Title = p.Title,
@@ -101,18 +106,20 @@ namespace Fan.Web.Pages.Admin
 
             // statuses
             var postCount = await _blogSvc.GetPostCountAsync();
-            var statusVms = new List<StatusVm>
+            var statusVMs = new List<StatusVM>
             {
-                new StatusVm { Text = "Published", Id = (int)EPostStatus.Published, Count = postCount.Published },
-                new StatusVm { Text = "Drafts", Id = (int)EPostStatus.Draft, Count = postCount.Draft }
+                new StatusVM { Text = "Published", Id = (int)EPostStatus.Published, Count = postCount.Published },
+                new StatusVM { Text = "Drafts", Id = (int)EPostStatus.Draft, Count = postCount.Draft },
             };
 
             // prep vm
-            return new PostListVm
+            return new PostListVM
             {
                 Posts = postVms,
                 TotalPosts = postList.PostCount,
-                Statuses = statusVms,
+                Statuses = statusVMs,
+                PublishedCount = postCount.Published,
+                DraftCount = postCount.Draft,
             };
         }
     }
