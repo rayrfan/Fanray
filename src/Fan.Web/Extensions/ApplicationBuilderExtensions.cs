@@ -25,28 +25,5 @@ namespace Microsoft.AspNetCore.Builder
         {
             return builder.UseMiddleware<HttpWwwRewriteMiddleware>();
         }
-
-        /// <summary>
-        /// Add middleware that sets HSTS response header for ensuring subsequent requests are made over HTTPS only.
-        /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security for more details.
-        /// </summary>
-        /// <param name="builder">The <see cref="IApplicationBuilder"/>.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseHsts(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<HstsMiddleware>(new HstsOptions());
-        }
-
-        /// <summary>
-        /// Add middleware that sets HSTS response header for ensuring subsequent requests are made over HTTPS only.
-        /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security for more details.
-        /// </summary>
-        /// <param name="builder">The <see cref="IApplicationBuilder"/>.</param>
-        /// <param name="options">The <see cref="HstsOptions"/> to use.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseHsts(this IApplicationBuilder builder, HstsOptions options)
-        {
-            return builder.UseMiddleware<HstsMiddleware>(options);
-        }
     }
 }
