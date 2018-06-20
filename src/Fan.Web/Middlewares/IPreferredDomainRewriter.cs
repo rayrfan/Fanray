@@ -2,7 +2,7 @@
 
 namespace Fan.Web.Middlewares
 {
-    public interface IHttpWwwRewriter
+    public interface IPreferredDomainRewriter
     {
         /// <summary>
         /// Returns true if request url requires a url rewrite based on appsettings, 

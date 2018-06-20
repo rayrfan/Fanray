@@ -8,22 +8,21 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Adds <see cref="MetaWeblogMiddleware"/> to the application's request pipeline.
         /// </summary>
-        /// <param name="builder"></param>
+        /// <param name="app"></param>
         /// <returns></returns>
-        public static IApplicationBuilder UseMetablog(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseMetablog(this IApplicationBuilder app)
         {
-            return builder.UseMiddleware<MetaWeblogMiddleware>();
+            return app.UseMiddleware<MetaWeblogMiddleware>();
         }
 
         /// <summary>
-        /// Adds <see cref="HttpWwwRewriteMiddleware"/> for redirect between http / https and 
-        /// preferred domain www / nonwww.
+        /// Adds <see cref="PreferredDomainMiddleware"/> for redirecting requests to the preferred domain www or nonwww.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <returns></returns>
-        public static IApplicationBuilder UseHttpWwwRewrite(this IApplicationBuilder builder)
+        /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/> for preferred domain rewrite.</returns>
+        public static IApplicationBuilder UsePreferredDomain(this IApplicationBuilder app)
         {
-            return builder.UseMiddleware<HttpWwwRewriteMiddleware>();
+            return app.UseMiddleware<PreferredDomainMiddleware>();
         }
     }
 }

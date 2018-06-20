@@ -22,20 +22,6 @@ namespace Fan.Settings
         public EPreferredDomain PreferredDomain { get; set; } = EPreferredDomain.Auto;
 
         /// <summary>
-        /// Whether to use https: false (default) or true.
-        /// </summary>
-        /// <remarks>
-        /// - false, will not forward http to https
-        /// - true, will forward http to https
-        /// 
-        /// Note if user sets this value to false but is already using https, I don't downgrade 
-        /// you to http as this is good for SEO, Google strongly recommend all website to use https.
-        /// Also if you are running locally with console, set this value to false as console may 
-        /// not support https.
-        /// </remarks>
-        public bool UseHttps { get; set; } = false;
-
-        /// <summary>
         /// The storage type of uploaded media files: "FileSystem" (default) or "AzureBlob".
         /// </summary>
         /// <remarks>

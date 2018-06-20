@@ -94,7 +94,7 @@ namespace Fan.Web
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
-            services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
+            services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
             var appSettingsConfigSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsConfigSection);
             var appSettings = appSettingsConfigSection.Get<AppSettings>();
@@ -155,7 +155,8 @@ namespace Fan.Web
                 app.UseHsts();
             }
 
-            app.UseHttpWwwRewrite(); // TODO get rid of http option and use app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
+            app.UsePreferredDomain(); 
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
             app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();

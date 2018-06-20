@@ -5,36 +5,31 @@ using System.Linq;
 
 namespace Fan.Web.Middlewares
 {
-    public class HttpWwwRewriter : IHttpWwwRewriter
+    public class PreferredDomainRewriter : IPreferredDomainRewriter
     {
-        private ILogger<HttpWwwRewriter> _logger;
-        private bool _schemeRequireUpdate;
+        private ILogger<PreferredDomainRewriter> _logger;
         private bool _hostRequireWwwAddition;
         private bool _hostRequireWwwRemoval;
 
-        public HttpWwwRewriter(ILogger<HttpWwwRewriter> logger)
+        public PreferredDomainRewriter(ILogger<PreferredDomainRewriter> logger)
         {
             _logger = logger;
         }
 
         /// <summary>
-        /// Returns true if request url requires a url rewrite based on appsettings, 
-        /// the out param url will be the new url to redirect to.
+        /// Returns true if request requires a url rewrite based on appsettings.
         /// </summary>
         /// <param name="appSettings"></param>
         /// <param name="requestUrl"></param>
-        /// <param name="url"></param>
+        /// <param name="url">The new URL to redirect to as an out parameter.</param>
         /// <returns></returns>
         public bool ShouldRewrite(AppSettings appSettings, string requestUrl, out string url)
         {
             Uri uri = new Uri(requestUrl);
             string host = uri.Authority; // host with port
 
-            // if useHttps is set to false, but the user is using https, that's ok
-            _schemeRequireUpdate = appSettings.UseHttps && uri.Scheme != "https";
-
             // add www if domain does not start with www and domain has only 1 dot, 
-            // so yoursite.azurewebsites.net and localhost:1234 would disqualify it
+            // so yoursite.azurewebsites.net or localhost:1234 would disqualify it
             _hostRequireWwwAddition = appSettings.PreferredDomain == EPreferredDomain.Www &&
                                       !host.StartsWith("www.") &&
                                       host.Count(s => s == '.') == 1;
@@ -43,13 +38,11 @@ namespace Fan.Web.Middlewares
             _hostRequireWwwRemoval = appSettings.PreferredDomain == EPreferredDomain.NonWww && host.StartsWith("www.");
 
             url = GetUrl(uri.Scheme, host, uri.PathAndQuery, uri.Fragment);
-            return _schemeRequireUpdate || _hostRequireWwwAddition || _hostRequireWwwRemoval;
+            return _hostRequireWwwAddition || _hostRequireWwwRemoval;
         }
 
         private string GetUrl(string scheme, string host, string pathAndQuery, string fragment)
         {
-            scheme = _schemeRequireUpdate ? "https" : scheme;
-
             if (_hostRequireWwwAddition)
             {
                 host = $"www.{host}";
