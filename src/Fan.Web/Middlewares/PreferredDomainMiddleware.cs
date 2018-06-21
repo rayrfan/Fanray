@@ -1,7 +1,5 @@
 ﻿using Fan.Settings;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -35,28 +33,24 @@ namespace Fan.Web.Middlewares
         /// <summary>
         /// Invokes the PreferredDomainMiddleware.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="rewriter"></param>
+        /// <param name="context">The http context.</param>
+        /// <param name="settings"><see cref="AppSettings"/></param>
+        /// <param name="rewriter"><see cref="IPreferredDomainRewriter"/></param>
         /// <returns></returns>
-        public Task Invoke(HttpContext context, IPreferredDomainRewriter rewriter)
+        public Task Invoke(HttpContext context, IOptionsSnapshot<AppSettings> settings, IPreferredDomainRewriter rewriter)
         {
-            // has to locate service instead of inject in for appsettings update to be picked up in middleware automatically
-            var settings = context.RequestServices.GetService<IOptionsSnapshot<AppSettings>>().Value;
-            _logger.LogDebug("PreferredDomain {@PreferredDomain}", settings.PreferredDomain);
-            
-            // if need to rewrite
-            if (rewriter.ShouldRewrite(settings, context.Request.GetDisplayUrl(), out string url))
+            var url = rewriter.Rewrite(context.Request, settings.Value.PreferredDomain);
+            if (url == null)
             {
-                _logger.LogInformation("RewriteUrl: {@RewriteUrl}", url);
-
-                context.Response.Headers[HeaderNames.Location] = url;
-                context.Response.StatusCode = 301;
-                //context.Response.Redirect(url, permanent: true);
-                return Task.CompletedTask;
+                // no rewrite is needed
+                return _next(context);
             }
 
-            // if no need to rewrite
-            return _next(context);
+            _logger.LogInformation("RewriteUrl: {@RewriteUrl}", url);
+            context.Response.Headers[HeaderNames.Location] = url;
+            context.Response.StatusCode = 301;
+            
+            return Task.CompletedTask;
         }
     }
 }

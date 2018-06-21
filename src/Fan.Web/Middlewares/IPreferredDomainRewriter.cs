@@ -1,17 +1,17 @@
 ﻿using Fan.Settings;
+using Microsoft.AspNetCore.Http;
 
 namespace Fan.Web.Middlewares
 {
     public interface IPreferredDomainRewriter
     {
         /// <summary>
-        /// Returns true if request url requires a url rewrite based on appsettings, 
-        /// the out param url will be the new url to redirect to.
+        /// Rewrties URL to preferred domain and returns new URL if a redirect is necessary or null
+        /// if no redirect is needed.
         /// </summary>
-        /// <param name="appSettings"></param>
-        /// <param name="requestUrl"></param>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        bool ShouldRewrite(AppSettings appSettings, string requestUrl, out string url);
+        /// <param name="request">The incoming request.</param>
+        /// <param name="preferredDomain">The <see cref="EPreferredDomain"/> of <see cref="AppSettings"/>.</param>
+        /// <returns>The new URL to redirect to as an out parameter.</returns>
+        string Rewrite(HttpRequest request, EPreferredDomain preferredDomain);
     }
 }

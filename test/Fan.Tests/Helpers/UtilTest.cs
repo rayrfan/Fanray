@@ -87,5 +87,27 @@ namespace Fan.Tests.Helpers
         {
             Assert.Equal(expected, WebUtility.HtmlEncode(input));
         }
+
+        /// <summary>
+        /// Test <see cref="Uri"/> class, I use this class as a parser and it's important to 
+        /// understand what it does.
+        /// </summary>
+        [Fact]
+        public void TestUri()
+        {
+            Uri uri = new Uri("http://test.com/about?name=john&age=10#abc");
+            Assert.Equal("/about", uri.AbsolutePath);
+            Assert.Equal("http://test.com/about?name=john&age=10#abc", uri.AbsoluteUri);
+            Assert.Equal("test.com", uri.Authority);
+            Assert.Equal("test.com", uri.DnsSafeHost);
+            Assert.Equal("#abc", uri.Fragment);
+            Assert.Equal("test.com", uri.Host);
+            Assert.Equal("http://test.com/about?name=john&age=10#abc", uri.OriginalString);
+            Assert.Equal("/about?name=john&age=10", uri.PathAndQuery);
+            Assert.Equal(80, uri.Port);
+            Assert.Equal("?name=john&age=10", uri.Query);
+            Assert.Equal("http", uri.Scheme);
+            Assert.Equal(2, uri.Segments.Length);
+        }
     }
 }
