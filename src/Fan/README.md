@@ -36,6 +36,9 @@ If you are starting fresh with a new database, all migrations will be applied as
   - roll back the snapshot file with git
   - point to a new db and run the app
 
+- `Script-Migration` will generate a SQL script from migrations.
+e.g. `Script-Migration -Idempotent from FanSchemaV1` will generate a script since the `FanSchemaV1` which covers only `FanV1_1`
+
 - `Update-Database` should apply your migration without running the app, but it could error out with a message like this one,
 
 "The index 'IX_Blog_Post_Slug' is dependent on column 'Slug'.
