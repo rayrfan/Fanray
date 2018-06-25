@@ -1,7 +1,7 @@
 ﻿namespace Fan.Settings
 {
     /// <summary>
-    /// Core settings.
+    /// Core settings for the site.
     /// </summary>
     public class CoreSettings : ISettings
     {
@@ -27,5 +27,42 @@
         /// https://analytics.google.com
         /// </remarks>
         public string GoogleAnalyticsTrackingID { get; set; }
+
+        /// <summary>
+        /// Has the setup happened, true will let system skip setup, false will forward to setup page.
+        /// </summary>
+        public bool SetupDone { get; set; } = false;
+
+        // -------------------------------------------------------------------- Social Links
+
+        /// <summary>
+        /// Gets or sets a GitHub page URL.
+        /// </summary>
+        public string GitHubLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets a Facebook page URL.
+        /// </summary>
+        public string FacebookLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets a Twitter URL.
+        /// </summary>
+        public string TwitterLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets a YouTube channel URL.
+        /// </summary>
+        public string YouTubeLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets an Instagram URL.
+        /// </summary>
+        public string InstagramLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets a LinkedIn URL.
+        /// </summary>
+        public string LinkedInLink { get; set; }
     }
 }

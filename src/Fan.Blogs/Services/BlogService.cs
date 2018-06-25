@@ -60,6 +60,13 @@ namespace Fan.Blogs.Services
             _mediator = mediator;
         }
 
+        // -------------------------------------------------------------------- Const
+
+        /// <summary>
+        /// How many words to extract into excerpt from body. Default 55.
+        /// </summary>
+        public const int EXCERPT_WORD_LIMIT = 55;
+
         // -------------------------------------------------------------------- Cache
 
         /// <summary>
@@ -482,7 +489,7 @@ namespace Fan.Blogs.Services
             {
                 CategorySlug = categorySlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
+                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -503,7 +510,7 @@ namespace Fan.Blogs.Services
             {
                 TagSlug = tagSlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PageSize,
+                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -844,7 +851,7 @@ namespace Fan.Blogs.Services
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
 
             // Excerpt
-            blogPost.Excerpt = post.Excerpt.IsNullOrEmpty() ? Util.GetExcerpt(post.Body, blogSettings.ExcerptWordLimit) : post.Excerpt;
+            blogPost.Excerpt = post.Excerpt.IsNullOrEmpty() ? Util.GetExcerpt(post.Body, EXCERPT_WORD_LIMIT) : post.Excerpt;
 
             // CategoryTitle
             blogPost.CategoryTitle = post.Category.Title;

@@ -12,21 +12,17 @@ namespace Fan.Blogs.Models
     public class BlogSettings : ISettings
     {
         /// <summary>
-        /// Number of blog posts to show. Default 10.
+        /// Number of blog posts to show on a page. Default 10.
         /// </summary>
-        public int PageSize { get; set; } = 10; 
+        public int PostPerPage { get; set; } = 10; 
         /// <summary>
         /// There must be one default category. Default 1.
         /// </summary>
         public int DefaultCategoryId { get; set; } = 1;
         /// <summary>
-        /// How many words to extract into excerpt from body. Default 55.
+        /// What type of display for each blog post in a list of posts.
         /// </summary>
-        public int ExcerptWordLimit { get; set; } = 55;
-        /// <summary>
-        /// Should blog show a list of excerpt instead of body. Default false.
-        /// </summary>
-        public bool ShowExcerpt { get; set; } = false;
+        public EPostListDisplay PostListDisplay { get; set; } = EPostListDisplay.FullBody;
 
         // -------------------------------------------------------------------- Comments
 
@@ -34,11 +30,12 @@ namespace Fan.Blogs.Models
         /// Whether to allow people to post comments on blog posts.
         /// </summary>
         /// <remarks>
-        /// This is the default value to blog post comment, it can be overriden by individaul post
-        /// <see cref="Post.CommentStatus"/>.
+        /// When turning on this setting, it will not hide any existing comments, it will not allow
+        /// visitors to post comments on new or existing posts.
+        /// 
+        /// This setting may be overridden by individual posts <see cref="Post.CommentStatus"/>.
         /// </remarks>
-        public bool AllowCommentsOnBlogPost { get; set; } = true;
-
+        public bool AllowComments { get; set; } = true;
         /// <summary>
         /// Which comment system to use. Default Disqus.
         /// </summary>
@@ -54,11 +51,11 @@ namespace Fan.Blogs.Models
         // -------------------------------------------------------------------- RSS
 
         /// <summary>
-        /// Gets or sets whether rss feed should show full text or excerpt. Default false.
+        /// Gets or sets whether feed should show full text or excerpt. Default false.
         /// </summary>
         /// <remarks>
         /// For each article in a feed, show
         /// </remarks>
-        public bool RssShowExcerpt { get; set; } = false;
+        public bool FeedShowExcerpt { get; set; } = false;
     }
 }

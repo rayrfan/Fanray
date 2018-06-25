@@ -36,7 +36,7 @@ namespace Fan.Blogs.ViewModels
             EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, blogPost.Id);
 
             DisqusPageIdentifier = $"{ECommentTargetType.BlogPost}_{blogPost.Id}";
-            ShowDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
+            ShowDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus;
             DisqusShortname = blogSettings.DisqusShortname;
 
             var hash = "";

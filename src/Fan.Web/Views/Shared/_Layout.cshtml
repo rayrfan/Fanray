@@ -9,7 +9,7 @@
     var title = ViewData["Title"] == null ? coreSettings.Title : $"{ViewData["Title"]} - {coreSettings.Title}";
     string description = ViewData["Description"] == null ? coreSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
-    var showDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
+    var showDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus;
 }
 <!DOCTYPE html>
 <html>

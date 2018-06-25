@@ -45,7 +45,7 @@ namespace Fan.Blogs.Controllers
 
             if (!page.HasValue || page <= 0) page = BlogService.DEFAULT_PAGE_INDEX;
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PageSize);
+            var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PostPerPage);
 
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
             return View(vm);
@@ -198,7 +198,7 @@ namespace Fan.Blogs.Controllers
                         {
                             Id = postVM.Permalink, // guid https://www.w3schools.com/xml/rss_tag_guid.asp
                             Title = post.Title,
-                            Description = blogSettings.RssShowExcerpt ? post.Excerpt : post.Body,
+                            Description = blogSettings.FeedShowExcerpt ? post.Excerpt : post.Body,
                             Published = post.CreatedOn,
                         };
 

@@ -1,4 +1,5 @@
-﻿using Fan.Blogs.Models;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Models;
 using Fan.Blogs.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Fan.Blogs.ViewModels
             {
                 BlogPostViewModels.Add(new BlogPostViewModel(blogPost, blogSettings, request));
             }
-            ShowExcerpt = blogSettings.ShowExcerpt;
+            PostListDisplay = blogSettings.PostListDisplay;
             PostCount = blogPostList.PostCount;
 
             if (currentPage <= 0) currentPage = 1;
@@ -54,9 +55,9 @@ namespace Fan.Blogs.ViewModels
         public List<BlogPostViewModel> BlogPostViewModels { get; }
 
         /// <summary>
-        /// Whether to show full body or excerpt.
+        /// What type of display for each blog post in a list of posts.
         /// </summary>
-        public bool ShowExcerpt { get; }
+        public EPostListDisplay PostListDisplay { get; }
 
         /// <summary>
         /// Total number of posts returned for a <see cref="PostListQuery"/>

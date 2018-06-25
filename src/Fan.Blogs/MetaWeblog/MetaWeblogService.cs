@@ -322,7 +322,7 @@ namespace Fan.Blogs.MetaWeblog
             if (commentPolicy.IsNullOrEmpty())
             {
                 var settings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                return settings.AllowCommentsOnBlogPost ? ECommentStatus.AllowComments : ECommentStatus.NoComments;
+                return settings.AllowComments ? ECommentStatus.AllowComments : ECommentStatus.NoComments;
             }
             else if (commentPolicy == "1")
             {
