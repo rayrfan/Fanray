@@ -24,5 +24,14 @@ namespace Microsoft.AspNetCore.Builder
         {
             return app.UseMiddleware<PreferredDomainMiddleware>();
         }
+
+        /// <summary>
+        /// Adds <see cref="SetupMiddleware"/> to check if site needs to be setup.
+        /// </summary>
+        /// <param name="app">Builder for configuring an application's request pipeline</param>
+        public static IApplicationBuilder UseSetup(this IApplicationBuilder app)
+        {
+            return app.UseMiddleware<SetupMiddleware>();
+        }
     }
 }

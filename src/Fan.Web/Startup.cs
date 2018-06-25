@@ -156,7 +156,8 @@ namespace Fan.Web
             }
 
             app.UseHttpsRedirection();
-            app.UsePreferredDomain(); 
+            app.UsePreferredDomain();
+            app.UseSetup();
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
             app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();
@@ -174,7 +175,6 @@ namespace Fan.Web
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
