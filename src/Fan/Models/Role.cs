@@ -5,6 +5,8 @@ namespace Fan.Models
 {
     public class Role : IdentityRole<int>
     {
+        public const string ADMINISTRATOR_ROLE = "Administrator";
+
         /// <summary>
         /// A brief description of what the role is about.
         /// </summary>
