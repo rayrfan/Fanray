@@ -48,6 +48,13 @@ namespace Fan.Migrations
                 table: "Core_Media",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.feedshowexcerpt' WHERE [Key] = 'blogsettings.rssshowexcerpt';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.postperpage' WHERE [Key] = 'blogsettings.pagesize';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Value] = 1 WHERE [Key] = 'blogsettings.showexcerpt';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.postlistdisplay' WHERE [Key] = 'blogsettings.showexcerpt';");
+            migrationBuilder.Sql("DELETE FROM [Core_Meta] WHERE [Key] = 'blogsettings.excerptwordlimit';");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -85,6 +92,13 @@ namespace Fan.Migrations
                 name: "AppType",
                 table: "Core_Media",
                 newName: "AppId");
+
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcommentsonblogpost' WHERE [Key] = 'blogsettings.allowcomments';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.rssshowexcerpt' WHERE [Key] = 'blogsettings.feedshowexcerpt';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.pagesize' WHERE [Key] = 'blogsettings.postperpage';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Value] = 'False' WHERE [Key] = 'blogsettings.postlistdisplay';");
+            migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.showexcerpt' WHERE [Key] = 'blogsettings.postlistdisplay';");
+            migrationBuilder.Sql("INSERT INTO [Core_Meta] VALUES('blogsettings.excerptwordlimit', 55);");
         }
     }
 }
