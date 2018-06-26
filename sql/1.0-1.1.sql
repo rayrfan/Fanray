@@ -55,6 +55,19 @@ GO
 
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV1_1')
 BEGIN
+    DECLARE @var1 sysname;
+    SELECT @var1 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Core_User]') AND [c].[name] = N'DisplayName');
+    IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [Core_User] DROP CONSTRAINT [' + @var1 + '];');
+    ALTER TABLE [Core_User] ALTER COLUMN [DisplayName] nvarchar(256) NULL;
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV1_1')
+BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';
 END;
 

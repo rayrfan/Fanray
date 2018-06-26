@@ -49,6 +49,14 @@ namespace Fan.Migrations
                 nullable: false,
                 defaultValue: false);
 
+            migrationBuilder.AlterColumn<string>(
+                name: "DisplayName",
+                table: "Core_User",
+                maxLength: 256,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldMaxLength: 256);
+
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.feedshowexcerpt' WHERE [Key] = 'blogsettings.rssshowexcerpt';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.postperpage' WHERE [Key] = 'blogsettings.pagesize';");
@@ -92,6 +100,15 @@ namespace Fan.Migrations
                 name: "AppType",
                 table: "Core_Media",
                 newName: "AppId");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DisplayName",
+                table: "Core_User",
+                maxLength: 256,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldMaxLength: 256,
+                oldNullable: true);
 
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcommentsonblogpost' WHERE [Key] = 'blogsettings.allowcomments';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.rssshowexcerpt' WHERE [Key] = 'blogsettings.feedshowexcerpt';");

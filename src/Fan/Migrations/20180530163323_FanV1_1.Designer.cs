@@ -16,440 +16,449 @@ namespace Fan.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
+                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Fan.Blogs.Models.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Description");
+                b.Property<string>("Description");
 
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Slug")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                b.HasKey("Id")
+                    .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasAnnotation("SqlServer:Clustered", true);
+                b.HasIndex("Slug")
+                    .IsUnique()
+                    .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.ToTable("Blog_Category");
-                });
+                b.ToTable("Blog_Category");
+            });
 
             modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Body");
+                b.Property<string>("Body");
 
-                    b.Property<string>("BodyMark");
+                b.Property<string>("BodyMark");
 
-                    b.Property<int?>("CategoryId");
+                b.Property<int?>("CategoryId");
 
-                    b.Property<int>("CommentCount");
+                b.Property<int>("CommentCount");
 
-                    b.Property<byte>("CommentStatus");
+                b.Property<byte>("CommentStatus");
 
-                    b.Property<DateTimeOffset>("CreatedOn");
+                b.Property<DateTimeOffset>("CreatedOn");
 
-                    b.Property<string>("Excerpt");
+                b.Property<string>("Excerpt");
 
-                    b.Property<int?>("ParentId");
+                b.Property<int?>("ParentId");
 
-                    b.Property<int?>("RootId");
+                b.Property<int?>("RootId");
 
-                    b.Property<string>("Slug")
-                        .HasMaxLength(256);
+                b.Property<string>("Slug")
+                    .HasMaxLength(256);
 
-                    b.Property<byte>("Status");
+                b.Property<byte>("Status");
 
-                    b.Property<string>("Title")
-                        .HasMaxLength(256);
+                b.Property<string>("Title")
+                    .HasMaxLength(256);
 
-                    b.Property<byte>("Type");
+                b.Property<byte>("Type");
 
-                    b.Property<DateTimeOffset?>("UpdatedOn");
+                b.Property<DateTimeOffset?>("UpdatedOn");
 
-                    b.Property<int>("UserId");
+                b.Property<int>("UserId");
 
-                    b.Property<int>("ViewCount");
+                b.Property<int>("ViewCount");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                b.HasIndex("CategoryId");
 
-                    b.HasIndex("ParentId");
+                b.HasIndex("ParentId");
 
-                    b.HasIndex("Slug");
+                b.HasIndex("Slug");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.HasIndex("Type", "Status", "CreatedOn", "Id");
+                b.HasIndex("Type", "Status", "CreatedOn", "Id");
 
-                    b.ToTable("Blog_Post");
-                });
+                b.ToTable("Blog_Post");
+            });
 
             modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
-                {
-                    b.Property<int>("PostId");
+            {
+                b.Property<int>("PostId");
 
-                    b.Property<int>("TagId");
+                b.Property<int>("TagId");
 
-                    b.HasKey("PostId", "TagId");
+                b.HasKey("PostId", "TagId");
 
-                    b.HasIndex("TagId");
+                b.HasIndex("TagId");
 
-                    b.ToTable("Blog_PostTag");
-                });
+                b.ToTable("Blog_PostTag");
+            });
 
             modelBuilder.Entity("Fan.Blogs.Models.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Color")
-                        .HasMaxLength(32);
+                b.Property<string>("Color")
+                    .HasMaxLength(32);
 
-                    b.Property<string>("Description");
+                b.Property<string>("Description");
 
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Slug")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                b.HasKey("Id")
+                    .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasAnnotation("SqlServer:Clustered", true);
+                b.HasIndex("Slug")
+                    .IsUnique()
+                    .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.ToTable("Blog_Tag");
-                });
+                b.ToTable("Blog_Tag");
+            });
 
             modelBuilder.Entity("Fan.Data.Meta", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Key")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<string>("Value");
+                b.Property<string>("Value");
 
-                    b.HasKey("Id")
-                        .HasAnnotation("SqlServer:Clustered", false);
+                b.HasKey("Id")
+                    .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.HasIndex("Key")
-                        .IsUnique()
-                        .HasAnnotation("SqlServer:Clustered", true);
+                b.HasIndex("Key")
+                    .IsUnique()
+                    .HasAnnotation("SqlServer:Clustered", true);
 
-                    b.ToTable("Core_Meta");
-                });
+                b.ToTable("Core_Meta");
+            });
 
             modelBuilder.Entity("Fan.Medias.Media", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AppType");
+                b.Property<int>("AppType");
 
-                    b.Property<string>("Caption");
+                b.Property<string>("Caption");
 
-                    b.Property<string>("Description");
+                b.Property<string>("Description");
 
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("FileName")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("FileType")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<int>("Height");
+                b.Property<int>("Height");
 
-                    b.Property<long>("Length");
+                b.Property<long>("Length");
 
-                    b.Property<byte>("MediaType");
+                b.Property<byte>("MediaType");
 
-                    b.Property<bool>("Optimized");
+                b.Property<bool>("Optimized");
 
-                    b.Property<string>("Title")
-                        .HasMaxLength(256);
+                b.Property<string>("Title")
+                    .HasMaxLength(256);
 
-                    b.Property<byte>("UploadedFrom");
+                b.Property<byte>("UploadedFrom");
 
-                    b.Property<DateTimeOffset>("UploadedOn");
+                b.Property<DateTimeOffset>("UploadedOn");
 
-                    b.Property<int>("UserId");
+                b.Property<int>("UserId");
 
-                    b.Property<int>("Width");
+                b.Property<int>("Width");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.HasIndex("MediaType", "UploadedOn");
+                b.HasIndex("MediaType", "UploadedOn");
 
-                    b.ToTable("Core_Media");
-                });
+                b.ToTable("Core_Media");
+            });
 
             modelBuilder.Entity("Fan.Models.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken();
 
-                    b.Property<string>("Description");
+                b.Property<string>("Description");
 
-                    b.Property<bool>("IsSystemRole");
+                b.Property<bool>("IsSystemRole");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(256);
+                b.Property<string>("Name")
+                    .HasMaxLength(256);
 
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256);
+                b.Property<string>("NormalizedName")
+                    .HasMaxLength(256);
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                b.HasIndex("NormalizedName")
+                    .IsUnique()
+                    .HasName("RoleNameIndex")
+                    .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("Core_Role");
-                });
+                b.ToTable("Core_Role");
+            });
 
             modelBuilder.Entity("Fan.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AccessFailedCount");
+                b.Property<int>("AccessFailedCount");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
+                b.Property<string>("ConcurrencyStamp")
+                    .IsConcurrencyToken();
 
-                    b.Property<DateTimeOffset>("CreatedOn");
+                b.Property<DateTimeOffset>("CreatedOn");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("DisplayName")
+                    .HasMaxLength(256);
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(256);
+                b.Property<string>("Email")
+                    .HasMaxLength(256);
 
-                    b.Property<bool>("EmailConfirmed");
+                b.Property<bool>("EmailConfirmed");
 
-                    b.Property<bool>("LockoutEnabled");
+                b.Property<bool>("LockoutEnabled");
 
-                    b.Property<DateTimeOffset?>("LockoutEnd");
+                b.Property<DateTimeOffset?>("LockoutEnd");
 
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256);
+                b.Property<string>("NormalizedEmail")
+                    .HasMaxLength(256);
 
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256);
+                b.Property<string>("NormalizedUserName")
+                    .HasMaxLength(256);
 
-                    b.Property<string>("PasswordHash");
+                b.Property<string>("PasswordHash");
 
-                    b.Property<string>("PhoneNumber");
+                b.Property<string>("PhoneNumber");
 
-                    b.Property<bool>("PhoneNumberConfirmed");
+                b.Property<bool>("PhoneNumberConfirmed");
 
-                    b.Property<string>("SecurityStamp");
+                b.Property<string>("SecurityStamp");
 
-                    b.Property<bool>("TwoFactorEnabled");
+                b.Property<bool>("TwoFactorEnabled");
 
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256);
+                b.Property<string>("UserName")
+                    .HasMaxLength(256);
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("NormalizedEmail")
-                        .HasName("EmailIndex");
+                b.HasIndex("NormalizedEmail")
+                    .HasName("EmailIndex");
 
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                b.HasIndex("NormalizedUserName")
+                    .IsUnique()
+                    .HasName("UserNameIndex")
+                    .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("Core_User");
-                });
+                b.ToTable("Core_User");
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ClaimType");
+                b.Property<string>("ClaimType");
 
-                    b.Property<string>("ClaimValue");
+                b.Property<string>("ClaimValue");
 
-                    b.Property<int>("RoleId");
+                b.Property<int>("RoleId");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("RoleId");
+                b.HasIndex("RoleId");
 
-                    b.ToTable("Core_RoleClaim");
-                });
+                b.ToTable("Core_RoleClaim");
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ClaimType");
+                b.Property<string>("ClaimType");
 
-                    b.Property<string>("ClaimValue");
+                b.Property<string>("ClaimValue");
 
-                    b.Property<int>("UserId");
+                b.Property<int>("UserId");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.ToTable("Core_UserClaim");
-                });
+                b.ToTable("Core_UserClaim");
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-                {
-                    b.Property<string>("LoginProvider");
+            {
+                b.Property<string>("LoginProvider");
 
-                    b.Property<string>("ProviderKey");
+                b.Property<string>("ProviderKey");
 
-                    b.Property<string>("ProviderDisplayName");
+                b.Property<string>("ProviderDisplayName");
 
-                    b.Property<int>("UserId");
+                b.Property<int>("UserId");
 
-                    b.HasKey("LoginProvider", "ProviderKey");
+                b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.ToTable("Core_UserLogin");
-                });
+                b.ToTable("Core_UserLogin");
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.Property<int>("UserId");
+            {
+                b.Property<int>("UserId");
 
-                    b.Property<int>("RoleId");
+                b.Property<int>("RoleId");
 
-                    b.HasKey("UserId", "RoleId");
+                b.HasKey("UserId", "RoleId");
 
-                    b.HasIndex("RoleId");
+                b.HasIndex("RoleId");
 
-                    b.ToTable("Core_UserRole");
-                });
+                b.ToTable("Core_UserRole");
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-                {
-                    b.Property<int>("UserId");
+            {
+                b.Property<int>("UserId");
 
-                    b.Property<string>("LoginProvider");
+                b.Property<string>("LoginProvider");
 
-                    b.Property<string>("Name");
+                b.Property<string>("Name");
 
-                    b.Property<string>("Value");
+                b.Property<string>("Value");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+                b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("Core_UserToken");
-                });
+                b.ToTable("Core_UserToken");
+            });
 
             modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
-                {
-                    b.HasOne("Fan.Blogs.Models.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
+            {
+                b.HasOne("Fan.Blogs.Models.Category", "Category")
+                    .WithMany()
+                    .HasForeignKey("CategoryId");
 
-                    b.HasOne("Fan.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+                b.HasOne("Fan.Models.User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
-                {
-                    b.HasOne("Fan.Blogs.Models.Post", "Post")
-                        .WithMany("PostTags")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
+            {
+                b.HasOne("Fan.Blogs.Models.Post", "Post")
+                    .WithMany("PostTags")
+                    .HasForeignKey("PostId")
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Blogs.Models.Tag", "Tag")
-                        .WithMany("PostTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+                b.HasOne("Fan.Blogs.Models.Tag", "Tag")
+                    .WithMany("PostTags")
+                    .HasForeignKey("TagId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Fan.Medias.Media", b =>
-                {
-                    b.HasOne("Fan.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("Fan.Models.User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-                {
-                    b.HasOne("Fan.Models.Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("Fan.Models.Role")
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-                {
-                    b.HasOne("Fan.Models.User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("Fan.Models.User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-                {
-                    b.HasOne("Fan.Models.User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("Fan.Models.User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.HasOne("Fan.Models.Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+            {
+                b.HasOne("Fan.Models.Role")
+                    .WithMany()
+                    .HasForeignKey("RoleId")
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Models.User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+                b.HasOne("Fan.Models.User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-                {
-                    b.HasOne("Fan.Models.User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("Fan.Models.User")
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 #pragma warning restore 612, 618
         }
     }
