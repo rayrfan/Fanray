@@ -72,6 +72,13 @@ namespace Fan.Web
             .AddEntityFrameworkStores<FanDbContext>()
             .AddDefaultTokenProviders();
 
+            // LoginPath https://github.com/aspnet/Identity/issues/1414#issuecomment-328185754
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/login";
+                options.AccessDeniedPath = "/denied";
+            });
+
             // Caching
             services.AddDistributedMemoryCache();
 
