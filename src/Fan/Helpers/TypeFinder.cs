@@ -43,29 +43,32 @@ namespace Fan.Helpers
         /// <returns></returns>
         public IEnumerable<Type> Find(Type baseType)
         {
-            try
-            {
-                var types = new List<Type>();
-                foreach (var dll in _dllInfos)
-                {
-                    Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
 
-                    if (baseType.IsInterface)
-                        types.AddRange(assembly.DefinedTypes.Where(t =>
-                            (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
-                            && !t.IsInterface));
-                    else
-                        types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+            var types = new List<Type>();
+            foreach (var dll in _dllInfos)
+            {
+                Assembly assembly;
+                try
+                {
+                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+                }
+                catch (BadImageFormatException ex)
+                {
+                    _logger.LogCritical($"Unable to load dll {dll.FullName} - {ex.Message}");
+                    Trace.TraceError(ex.ToString());
+                    throw ex;
                 }
 
-                return types;
+                if (baseType.IsInterface)
+                    types.AddRange(assembly.DefinedTypes.Where(t =>
+                        (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
+                        && !t.IsInterface));
+                else
+                    types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
             }
-            catch (BadImageFormatException ex)
-            {
-                _logger.LogCritical(ex.Message);
-                Trace.TraceError(ex.ToString());
-                throw ex;
-            }
+
+            return types;
+
         }
 
         /// <summary>
