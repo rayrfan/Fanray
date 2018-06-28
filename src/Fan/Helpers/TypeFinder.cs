@@ -47,7 +47,7 @@ namespace Fan.Helpers
             var types = new List<Type>();
             foreach (var dll in _dllInfos)
             {
-                Assembly assembly;
+                Assembly assembly = null;
                 try
                 {
                     assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
@@ -55,20 +55,21 @@ namespace Fan.Helpers
                 catch (BadImageFormatException ex)
                 {
                     _logger.LogCritical($"Unable to load dll {dll.FullName} - {ex.Message}");
-                    Trace.TraceError(ex.ToString());
-                    throw ex;
+                    Trace.TraceError($"Unable to load dll {dll.FullName} - {ex}");
                 }
 
-                if (baseType.IsInterface)
-                    types.AddRange(assembly.DefinedTypes.Where(t =>
-                        (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
-                        && !t.IsInterface));
-                else
-                    types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                if (assembly != null)
+                {
+                    if (baseType.IsInterface)
+                        types.AddRange(assembly.DefinedTypes.Where(t =>
+                            (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
+                            && !t.IsInterface));
+                    else
+                        types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                }
             }
 
             return types;
-
         }
 
         /// <summary>
