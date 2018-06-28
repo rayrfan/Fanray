@@ -1,6 +1,9 @@
 ﻿using Fan.Data;
+using Fan.Helpers;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace Fan.Tests.Data
@@ -11,9 +14,15 @@ namespace Fan.Tests.Data
         /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
         protected FanDbContext _db;
+        private readonly ITypeFinder _typeFinder;
 
         public DataTestBase()
         {
+            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var loggerTypeFinder = loggerFactory.CreateLogger<TypeFinder>();
+            _typeFinder = new TypeFinder(loggerTypeFinder);
+
             _db = GetContextWithSqlite();
         }
 
@@ -34,7 +43,7 @@ namespace Fan.Tests.Data
             var builder = new DbContextOptionsBuilder<FanDbContext>();
             builder.UseSqlite(connection);
 
-            var context = new FanDbContext(builder.Options);
+            var context = new FanDbContext(builder.Options, _typeFinder);
             context.Database.EnsureCreated();
 
             return context;
@@ -46,7 +55,7 @@ namespace Fan.Tests.Data
         private FanDbContext GetContextWithEFCore()
         {
             var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
-            return new FanDbContext(_options);
+            return new FanDbContext(_options, _typeFinder);
         }
     }
 }

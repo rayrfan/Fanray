@@ -13,8 +13,10 @@ namespace Fan.Data
     /// </summary>
     public class FanDbContext : IdentityDbContext<User, Role, int>
     {
-        public FanDbContext(DbContextOptions<FanDbContext> options) : base(options)
+        ITypeFinder _typeFinder;
+        public FanDbContext(DbContextOptions<FanDbContext> options, ITypeFinder typeFinder) : base(options)
         {
+            _typeFinder = typeFinder;
         }
 
         /// <summary>
@@ -34,9 +36,8 @@ namespace Fan.Data
             var logger = loggerFactory.CreateLogger<FanDbContext>();
 
             // find entities and model builders from app assemblies
-            var typeFinder = new TypeFinder();
-            var entityTypes = typeFinder.Find<Entity>();
-            var modelBuilderTypes = typeFinder.Find<IEntityModelBuilder>();
+            var entityTypes = _typeFinder.Find<Entity>();
+            var modelBuilderTypes = _typeFinder.Find<IEntityModelBuilder>();
 
             // add entity types to the model
             foreach (var type in entityTypes)

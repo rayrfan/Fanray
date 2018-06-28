@@ -1,5 +1,4 @@
 ﻿using Fan.Data;
-using Fan.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Xunit;

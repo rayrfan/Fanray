@@ -1,5 +1,7 @@
 ﻿using Fan.Data;
 using Fan.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Fan.Blogs.Tests.Helpers
@@ -15,7 +17,11 @@ namespace Fan.Blogs.Tests.Helpers
         TypeFinder _typeFinder;
         public TypeFinderTest()
         {
-            _typeFinder = new TypeFinder();
+            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<TypeFinder>();
+
+            _typeFinder = new TypeFinder(logger);
         }
 
         [Fact]
