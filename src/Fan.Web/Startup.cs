@@ -115,7 +115,6 @@ namespace Fan.Web
             shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
             services.AddSingleton<IShortcodeService>(shortcodeService);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<ITypeFinder, TypeFinder>();
 
             // Mvc and Razor Pages
 
