@@ -17,11 +17,8 @@ namespace Fan.Blogs.Tests.Helpers
         TypeFinder _typeFinder;
         public TypeFinderTest()
         {
-            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger<TypeFinder>();
-
-            _typeFinder = new TypeFinder(logger);
+            var loggerFactory = new ServiceCollection().AddLogging().BuildServiceProvider().GetService<ILoggerFactory>();
+            _typeFinder = new TypeFinder(loggerFactory);
         }
 
         [Fact]
