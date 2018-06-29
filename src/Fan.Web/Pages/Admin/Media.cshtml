@@ -1,0 +1,91 @@
+﻿@page
+@model Fan.Web.Pages.Admin.MediaModel
+@{
+    ViewData["Title"] = "Media";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+@section Styles {
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+}
+
+<blog-media inline-template>
+    <v-container fluid fill-height>
+        <v-layout justify-center>
+            <v-flex xs10>
+                <v-card>
+                    <v-toolbar color="pink" dark dense>
+                        <v-toolbar-title>Images</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon @@click="upload">
+                            <v-icon>cloud_upload</v-icon>
+                        </v-btn>
+                    </v-toolbar>
+                    <v-subheader>May</v-subheader>
+                    <v-container fluid grid-list-md>
+                        <v-layout row wrap>
+                            <v-flex v-for="image in images" :key="image.id" style="width:200px;height:200px;">
+                                <img :src="image.url" :alt="image.fileName" class="center" style="width: 100%;height: 100%;object-fit: contain">
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
+                </v-card>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</blog-media>
+
+@section ComponentScripts {
+    <script>
+        Vue.component('blog-media', {
+            data: () => ({
+                images: [],
+            }),
+            mounted() {
+                this.getImages();
+            },
+            methods: {
+                getImages() {
+                    let url = `/admin/media?handler=images`;
+                    console.log(url);
+                    axios.get(url).then(resp => {
+                        this.images = resp.data.images;
+                        console.log(this.images);
+                    }).catch(err => console.log(err));
+                },
+                upload() {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.setAttribute('multiple', null);
+                    input.click();
+                    input.onchange = () => {
+                        const formData = new FormData();
+                        for (let i = 0; i < input.files.length; i++) {
+                            formData.append('images', input.files[i]);
+                        }
+
+                        axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                this.images = resp.data.images;
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            });
+                    };
+                },
+                edit(id) {
+                    console.log('editing image: ' + id);
+                },
+                delete(id) {
+                    console.log('deleting image: ' + id);
+                },
+            },
+        });
+    </script>
+}

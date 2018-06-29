@@ -19,7 +19,6 @@ namespace Fan.Models
         /// <summary>
         /// The friendly name to display on posts.
         /// </summary>
-        [Required]
         [StringLength(maximumLength: 256)]
         public string DisplayName { get; set; }
     }

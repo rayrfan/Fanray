@@ -1,6 +1,6 @@
 ﻿@model BlogPostListViewModel
 @{
-    var showExcerpt = Model.ShowExcerpt;
+    var postListDisplay = Model.PostListDisplay;
     var blogPostViewModels = Model.BlogPostViewModels;
 }
 
@@ -8,25 +8,41 @@
     @foreach (var postVM in blogPostViewModels)
     {
         var blogPost = postVM;
-        <article class="post">
-            <header class="post-header">
-                <h1 class="post-title">
-                    
-                    <a href="@blogPost.RelativeLink">@blogPost.Title</a><br />
-   
-                </h1>
-                @await Html.PartialAsync("_PostInfo", postVM)
-            </header>
+    <article class="post">
+        <header class="post-header">
+            <h1 class="post-title">
+                <a href="@blogPost.RelativeLink">@blogPost.Title</a><br />
+            </h1>
+            @await Html.PartialAsync("_PostInfo", postVM)
+        </header>
+        @if (postListDisplay == EPostListDisplay.Excerpt)
+        {
             <section class="post-body">
-                @if (showExcerpt)
-                {
-                    @Html.Raw(blogPost.Excerpt) <span style="padding-left:5px"><a href="@blogPost.RelativeLink">Read More</a></span>
-                }
-                else
-                {
-                    @Html.Raw(blogPost.Body)
-                }
+                @Html.Raw(blogPost.Excerpt) <span style="padding-left:5px"><a href="@blogPost.RelativeLink">Read More</a></span>
             </section>
-        </article>
+        }
+        else if (postListDisplay == EPostListDisplay.FullBody)
+        {
+            <section class="post-body">
+                @Html.Raw(blogPost.Body)
+            </section>
+        }
+    </article>
     }
 </div>
+
+@if (Model.ShowNewer)
+{
+    if (Model.NewerPageIndex <= 1)
+    {
+        <a class="btn btn-default" href="/" role="button">Newer posts</a>
+    }
+    else
+    {
+        <a class="btn btn-default" href="?page=@Model.NewerPageIndex" role="button">Newer posts</a>
+    }
+}
+@if (Model.ShowOlder)
+{
+    <a class="btn btn-default" href="?page=@Model.OlderPageIndex" role="button">Older posts</a>
+}

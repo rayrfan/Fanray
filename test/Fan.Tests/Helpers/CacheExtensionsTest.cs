@@ -1,11 +1,11 @@
-﻿using Fan.Models;
-using Fan.Settings;
+﻿using Fan.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -58,5 +58,78 @@ namespace Fan.Tests.Helpers
             _svc.Verify(service => service.GetSettingsAsync<CoreSettings>(), Times.Exactly(1));
             Assert.Equal(res1.Title, res2.Title);
         }
+
+        /// <summary>
+        /// Unalbe to cache derived class (is-a), its property TotalStrings is not serialized.
+        /// </summary>
+        [Fact]
+        public async void GetAsync_Is_Not_AbleTo_Cache_StrList()
+        {
+            await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
+            {
+                var list = new StrList
+                {
+                    "test"
+                };
+                list.TotalStrings = 1;
+                return list;
+            });
+
+            var result = await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
+            {
+                return new StrList();
+            });
+
+            Assert.Single(result);
+            Assert.NotEqual(1, result.TotalStrings);
+            Assert.Equal(0, result.TotalStrings);
+        }
+
+        /// <summary>
+        /// Able to cahce containing class (has-a), its property TotalStrings is serialized correctly.
+        /// </summary>
+        [Fact]
+        public async void GetAsync_IsAbleTo_Cache_StrList2()
+        {
+            await _cache.GetAsync("strlist2-cache-key", new TimeSpan(0, 10, 0), async () =>
+            {
+                var list = new StrList2();
+                list.Strings.Add("test");
+                list.TotalStrings = 1;
+                return list;
+            });
+
+            var result = await _cache.GetAsync("strlist2-cache-key", new TimeSpan(0, 10, 0), async () =>
+            {
+                return new StrList2();
+            });
+
+            Assert.Single(result.Strings);
+            Assert.Equal(1, result.TotalStrings);
+        }
+    }
+
+    /// <summary>
+    /// Derived class (is-a) not able to cache the property TotalStrings.
+    /// </summary>
+    class StrList : List<string>
+    {
+        public StrList()
+        {
+        }
+        public int TotalStrings { get; set; }
+    }
+
+    /// <summary>
+    /// Containing class (has-a) is able to cache the property TotalStrings.
+    /// </summary>
+    class StrList2
+    {
+        public StrList2()
+        {
+            Strings = new List<string>();
+        }
+        public List<string> Strings { get; set; }
+        public int TotalStrings { get; set; }
     }
 }

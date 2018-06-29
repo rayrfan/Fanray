@@ -1,0 +1,136 @@
+﻿@page
+
+@model Fan.Web.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Posts";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+<blog-posts inline-template>
+    <v-container fluid fill-height>
+        <v-layout justify-center>
+            <v-flex xs10>
+                @*<v-tabs style="margin-bottom: 18px; border: 1px solid #eee">
+                    <v-tab v-for="status in statuses" :key="status.id" @@click="getPosts(status.text)">
+                        {{ status.text }} <v-chip v-if="status.count > 0" small>{{ status.count }}</v-chip>
+                    </v-tab>
+                </v-tabs>*@
+                <v-tabs style="margin-bottom: 18px" class="elevation-1">
+                    <v-tab @@click="getPosts('Published')">
+                        Published <v-chip v-if="publishedCount > 0" small>{{ publishedCount }}</v-chip>
+                    </v-tab>
+                    <v-tab  @@click="getPosts('Draft')">
+                        Draft <v-chip v-if="draftCount > 0" small>{{ draftCount }}</v-chip>
+                    </v-tab>
+                </v-tabs>
+                <v-data-table :items="posts"
+                              :pagination.sync="pagination"
+                              :total-items="totalPosts"
+                              :loading="loading"
+                              :rows-per-page-items="rowsPerPageItems"
+                              rows-per-page-text=""
+                              hide-headers
+                              class="elevation-1">
+                    <template slot="items" slot-scope="props">
+                        <td style="padding: 8px 20px">
+                            <h3 v-if="props.item.title" v-html="props.item.title"></h3>
+                            <h3 v-else style="font-style:italic;color:gray">Untitled</h3>
+                            <span>{{ props.item.date }} by {{ props.item.author }}</span>
+                        </td>
+                        <td class="right layout px-0" style="padding: 8px 20px">
+                            <v-btn icon class="mx-0" :href="props.item.editLink">
+                                <v-icon color="blue">edit</v-icon>
+                            </v-btn>
+                            <v-btn icon class="mx-1" target="_blank" :href="props.item.postLink">
+                                <v-icon color="teal">remove_red_eye</v-icon>
+                            </v-btn>
+                            <v-btn icon class="mx-3" @@click="deletePost(props.item)">
+                                <v-icon color="pink">delete</v-icon>
+                            </v-btn>
+                        </td>
+                    </template>
+                    <template slot="no-data">
+                        <div>You have no posts.</div>
+                    </template>
+                </v-data-table>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</blog-posts>
+
+<v-btn fab
+       bottom
+       right
+       color="pink"
+       dark
+       fixed
+       href="admin/compose">
+    <v-icon>add</v-icon>
+</v-btn>
+
+@section ComponentScripts {
+    <script>
+        Vue.component('blog-posts', {
+            data: () => ({
+                posts: [],
+                totalPosts: 0,
+                statuses: null,
+                publishedCount: 0,
+                draftCount: 0,
+                activeStatus: 'published',
+                pagination: {},
+                loading: false,
+                rowsPerPageItems: [10, 25],
+            }),
+            watch: {
+                pagination: {
+                    handler() {
+                        this.getPosts(this.activeStatus);
+                    },
+                    deep: true,
+                },
+            },
+            mounted() {
+                this.getPosts(this.activeStatus);
+            },
+            methods: {
+                getPosts: function (status) {
+                    this.activeStatus = status;
+                    this.loading = true;
+                    let url = `/admin/index?handler=posts&status=${status}&pageNumber=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}`;
+                    console.log(url);
+                    axios.get(url).then(resp => {
+                        this.posts = resp.data.posts;
+                        this.totalPosts = resp.data.totalPosts;
+                        this.statuses = resp.data.statuses;
+                        console.log(this.statuses);
+                        this.publishedCount = resp.data.publishedCount;
+                        this.draftCount = resp.data.draftCount;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                    this.loading = false;
+                },
+                deletePost(item) {
+                    const index = this.posts.indexOf(item);
+                    if (confirm('You are permanently deleting this post, are you sure?')) {
+                        this.loading = true;
+                        let url = `/admin/index?postId=${item.id}&status=${this.activeStatus}&pageNumber=${this.pagination.page}&pageSize=${this.pagination.rowsPerPage}`;
+                        console.log(url);
+                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                console.log('deleted');
+                                this.posts.splice(index, 1);
+                                this.posts = resp.data.posts;
+                                this.totalPosts = resp.data.totalPosts;
+                                this.statuses = resp.data.statuses;
+                            })
+                            .catch(function (err) {
+                                console.log(err);
+                            });
+                        this.loading = false;
+                    }
+                },
+            },
+        });
+    </script>
+}

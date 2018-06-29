@@ -9,33 +9,26 @@ namespace Fan.Medias
     /// Represents a file user uploads.
     /// </summary>
     /// <remarks>
-    /// When user insert a media into a post by uploading, the values are hardcoded in the post body
-    /// as in the case of an img. 
-    /// 
-    /// For image settings ref https://en.support.wordpress.com/images/image-settings/
-    /// 
-    /// When user uploads medias first, then insert them into the post from browser editor, that is
-    /// when properties like Description and Title will be used.
+    /// https://en.support.wordpress.com/images/image-settings/
     /// </remarks>
     public class Media : Entity
     {
         /// <summary>
-        /// The the app that uploaded the media file.
+        /// The app that uploaded the media file.
         /// </summary>
-        public EAppType AppId { get; set; }
+        public EAppType AppType { get; set; }
 
         /// <summary>
         /// Description of the media.
         /// </summary>
-        /// <remarks>
-        /// For image its the alt text.
-        /// </remarks>
         public string Description { get; set; }
 
         /// <summary>
         /// Name of the file with ext. 
         /// </summary>
         /// <remarks>
+        /// For iamage, this is the title attribute, when you hover over the image.
+        /// If filename exceeds <see cref="MediaService.MEDIA_FILENAME_MAXLEN"/>, it will be shortened.
         /// For blog the name part is slug formatted, for example "test pic.jpg" becomes "test-pic.jpg".
         /// For other apps, it could be a guid value [guid].jpg.
         /// </remarks>
@@ -49,21 +42,18 @@ namespace Fan.Medias
         public long Length { get; set; }
 
         /// <summary>
-        /// Title of the media.
+        /// Title of the media or alt text for image.
         /// </summary>
         /// <remarks>
-        /// The original filename; html title attribute shows as tooltip.
-        /// TODO should I have the string length limit on title?
+        /// For image this is its alt text, since only image has alt attribute I don't dedicate a column for it.
+        /// The <see cref="FileName"/> property will be used as title attribute instead.
         /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Title { get; set; }
 
         /// <summary>
-        /// Image, documents, audio, video.
+        /// Image, documents etc.
         /// </summary>
-        /// <remarks>
-        /// https://en.support.wordpress.com/accepted-filetypes/
-        /// </remarks>
         public EMediaType MediaType { get; set; }
 
         /// <summary>
@@ -85,6 +75,37 @@ namespace Fan.Medias
         /// The id of the user who uploaded this media.
         /// </summary>
         public int UserId { get; set; }
+
+        /// <summary>
+        /// Caption of the media
+        /// </summary>
+        public string Caption { get; set; }
+
+        /// <summary>
+        /// File type of the media, e.g. jpg, png.
+        /// </summary>
+        /// <remarks>
+        /// https://en.support.wordpress.com/accepted-filetypes/
+        /// </remarks>
+        [Required]
+        [StringLength(maximumLength: 256)]
+        public string FileType { get; set; }
+
+        /// <summary>
+        /// Width of an image in px.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// Height of an image in px.
+        /// </summary>
+        public int Height { get; set; }
+
+        /// <summary>
+        /// True if the file is an image and the image size is over <see cref="MediaService.IMAGE_OPTIMIZED_SIZE"/>
+        /// then the <see cref="MediaService"/> will resize it.  False otherwise.
+        /// </summary>
+        public bool Optimized { get; set; }
     }
 }
 

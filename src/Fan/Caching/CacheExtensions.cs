@@ -1,4 +1,4 @@
-﻿using Fan.Helpers;
+﻿using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -21,27 +21,24 @@ namespace Microsoft.Extensions.Caching.Distributed
         /// cache.  First you check if your object is in the cache, if cache has it then just 
         /// return it.  If the cache does not have it, you execute some code to get it, usually 
         /// from database, then you put it in the cache before you finally return it.
-        /// 
-        /// <see cref="IDistributedCache"/> works only with byte[], so I have to convert T to byte[] 
-        /// before putting it into the cache, and convert it back from byte[] into T after taking it 
-        /// out of the cache.
         /// </remarks>
         public async static Task<T> GetAsync<T>(this IDistributedCache cache, string key,
-            TimeSpan cacheTime, Func<Task<T>> acquire) where T : class
+           TimeSpan cacheTime, Func<Task<T>> acquire) where T : class
         {
-            byte[] bytes = await cache.GetAsync(key);
+            string str = await cache.GetStringAsync(key);
 
-            if (bytes != null)
+            if (str != null)
             {
-                return await Serializer.BytesToObjectAsync<T>(bytes);
+                return JsonConvert.DeserializeObject<T>(str);
             }
             else
             {
                 var task = acquire();
                 if (task != null && task.Result != null)
                 {
-                    bytes = await Serializer.ObjectToBytesAsync(task.Result);
-                    await cache.SetAsync(key, bytes, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = cacheTime });
+                    str = await Task.Factory.StartNew(() => JsonConvert.SerializeObject(task.Result));
+
+                    await cache.SetStringAsync(key, str, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = cacheTime });
                 }
 
                 return await task;

@@ -38,14 +38,16 @@ namespace Fan.Blogs.Controllers
         /// Blog index page, redirect to home setup on initial launch.
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
             if (!await _settingSvc.SettingsExist())
                 return RedirectToAction("Setup", "Home");
 
-            var posts = await _blogSvc.GetPostsAsync(1);
+            if (!page.HasValue || page <= 0) page = BlogService.DEFAULT_PAGE_INDEX;
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request);
+            var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PostPerPage);
+
+            var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
             return View(vm);
         }
 
@@ -158,6 +160,7 @@ namespace Fan.Blogs.Controllers
 
         /// <summary>
         /// Returns the rss xml string for the blog or a blog category. The result is cached for 1 hour.
+        /// The rss feed always returns first page with 10 results.
         /// </summary>
         /// <param name="cat"></param>
         /// <returns></returns>
@@ -169,17 +172,17 @@ namespace Fan.Blogs.Controllers
                 var sw = new StringWriter();
                 using (XmlWriter xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
                 {
-                    var posts = cat == null ?
-                                await _blogSvc.GetPostsAsync(1) :
+                    var postList = cat == null ?
+                                await _blogSvc.GetPostsAsync(1, 10) :
                                 await _blogSvc.GetPostsForCategoryAsync(cat.Slug, 1);
                     var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                    var vm = new BlogPostListViewModel(posts, blogSettings, Request);
+                    var vm = new BlogPostListViewModel(postList, blogSettings, Request);
 
                     var channelTitle = cat == null ? "Fanray" : $"{cat.Title} - Fanray";
                     var channelDescription = coreSettings.Tagline;
                     var channelLink = $"{Request.Scheme}://{Request.Host}";
-                    var channelLastPubDate = posts.Count <= 0 ? DateTimeOffset.UtcNow : posts[0].CreatedOn;
+                    var channelLastPubDate = postList.Posts.Count <= 0 ? DateTimeOffset.UtcNow : postList.Posts[0].CreatedOn;
 
                     var writer = new RssFeedWriter(xmlWriter);
                     await writer.WriteTitle(channelTitle);
@@ -195,7 +198,7 @@ namespace Fan.Blogs.Controllers
                         {
                             Id = postVM.Permalink, // guid https://www.w3schools.com/xml/rss_tag_guid.asp
                             Title = post.Title,
-                            Description = blogSettings.RssShowExcerpt ? post.Excerpt : post.Body,
+                            Description = blogSettings.FeedShowExcerpt ? post.Excerpt : post.Body,
                             Published = post.CreatedOn,
                         };
 

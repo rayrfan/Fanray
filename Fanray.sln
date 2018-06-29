@@ -27,6 +27,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Blogs", "src\Fan.Blogs\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Blogs.Tests", "test\Fan.Blogs.Tests\Fan.Blogs.Tests.csproj", "{A142CA86-D324-4CA7-94A6-B5A0A07D0549}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{36CBCC5A-2BEC-415A-97E2-09A4AC8A0872}"
+	ProjectSection(SolutionItems) = preProject
+		sql\1.0-1.1.sql = sql\1.0-1.1.sql
+		sql\README.md = sql\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

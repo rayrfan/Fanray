@@ -1,4 +1,6 @@
-﻿using Fan.Blogs.Models;
+﻿using Fan.Blogs.Enums;
+using Fan.Blogs.Models;
+using Fan.Blogs.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
@@ -12,16 +14,27 @@ namespace Fan.Blogs.ViewModels
     /// </remarks>
     public class BlogPostListViewModel
     {
-        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request)
+        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, int currentPage = 1)
         {
             BlogPostViewModels = new List<BlogPostViewModel>();
-            foreach (var blogPost in blogPostList)
+            foreach (var blogPost in blogPostList.Posts)
             {
                 BlogPostViewModels.Add(new BlogPostViewModel(blogPost, blogSettings, request));
             }
-            ShowExcerpt = blogSettings.ShowExcerpt;
+            PostListDisplay = blogSettings.PostListDisplay;
             PostCount = blogPostList.PostCount;
-            PageCount = blogPostList.PageCount;
+
+            if (currentPage <= 0) currentPage = 1;
+            if ((currentPage * BlogService.DEFAULT_PAGE_SIZE) < PostCount)
+            {
+                ShowOlder = true;
+                OlderPageIndex = currentPage + 1;
+            }
+            if (currentPage > 1)
+            {
+                ShowNewer = true;
+                NewerPageIndex = currentPage - 1;
+            }
         }
 
         public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Category cat)
@@ -42,18 +55,14 @@ namespace Fan.Blogs.ViewModels
         public List<BlogPostViewModel> BlogPostViewModels { get; }
 
         /// <summary>
-        /// Whether to show full body or excerpt.
+        /// What type of display for each blog post in a list of posts.
         /// </summary>
-        public bool ShowExcerpt { get; }
+        public EPostListDisplay PostListDisplay { get; }
 
         /// <summary>
         /// Total number of posts returned for a <see cref="PostListQuery"/>
         /// </summary>
         public int PostCount { get; }
-        /// <summary>
-        /// Total number of pages based on <see cref="PostCount"/>.
-        /// </summary>
-        public int PageCount { get; }
 
         /// <summary>
         /// Tag title to show on Tag.cshtml page.
@@ -67,5 +76,10 @@ namespace Fan.Blogs.ViewModels
         /// Archive title to show on Archive.cshtml page.
         /// </summary>
         public string ArchiveTitle { get; set; }
+
+        public bool ShowOlder { get; set; }
+        public bool ShowNewer { get; set; }
+        public int OlderPageIndex { get; set; }
+        public int NewerPageIndex { get; set; }
     }
 }

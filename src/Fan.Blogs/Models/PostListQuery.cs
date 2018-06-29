@@ -36,8 +36,8 @@ namespace Fan.Blogs.Models
         public EPostListQueryType QueryType { get; set; } = EPostListQueryType.BlogPosts;
         public int? RootId { get; set; }
         public int? ParentId { get; set; }
-        public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; } 
         public string CategorySlug { get; set; }
         public string TagSlug { get; set; }
         public int Year { get; set; }

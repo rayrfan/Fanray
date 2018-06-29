@@ -6,8 +6,8 @@
     public enum EPostStatus : byte
     {
         Draft = 0,
-        Published,
-        Scheduled,
-        Trashed,
+        Published = 1,
+        //Trashed = 2,
+        //Scheduled = 3,
     }
 }

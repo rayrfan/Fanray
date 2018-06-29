@@ -174,5 +174,11 @@ namespace Fan.Blogs.Data
                 .Select(p => new DateTime(p.CreatedOn.Year, p.CreatedOn.Month, 1))
                 .ToListAsync();
         }
+
+        public async Task<PostCount> GetPostCountAsync() => new PostCount
+        {
+            Published = await _entities.Where(p => p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost).CountAsync(),
+            Draft = await _entities.Where(p => p.Status == EPostStatus.Draft && p.Type == EPostType.BlogPost).CountAsync()
+        };
     }
 }

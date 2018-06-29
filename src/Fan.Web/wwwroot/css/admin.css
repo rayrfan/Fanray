@@ -1,0 +1,8 @@
+﻿[v-cloak] {
+    display: none
+}
+
+.active-tab {
+    background-color: #d2eafe;
+    height: 100%;
+}

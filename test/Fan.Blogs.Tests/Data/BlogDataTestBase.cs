@@ -4,6 +4,8 @@ using Fan.Blogs.Tests.Helpers;
 using Fan.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -28,9 +30,11 @@ namespace Fan.Blogs.Tests.Data
         /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
         protected FanDbContext _db;
+        private ILoggerFactory _loggerFactory;
 
         public BlogDataTestBase()
         {
+            _loggerFactory = new ServiceCollection().AddLogging().BuildServiceProvider().GetService<ILoggerFactory>();
             _db = GetContextWithSqlite(); // I can either do sqlite in-mem mode or ef core in-mem db
         }
 
@@ -174,7 +178,7 @@ namespace Fan.Blogs.Tests.Data
             var builder = new DbContextOptionsBuilder<FanDbContext>();
             builder.UseSqlite(connection);
 
-            var context = new FanDbContext(builder.Options);
+            var context = new FanDbContext(builder.Options, _loggerFactory);
             context.Database.EnsureCreated();
 
             return context;
@@ -186,7 +190,7 @@ namespace Fan.Blogs.Tests.Data
         private FanDbContext GetContextWithEFCore()
         {
             var _options = new DbContextOptionsBuilder<FanDbContext>().UseInMemoryDatabase("FanInMemDb").Options;
-            return new FanDbContext(_options);
+            return new FanDbContext(_options, _loggerFactory);
         }
     }
 }

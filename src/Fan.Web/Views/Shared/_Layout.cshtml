@@ -9,7 +9,7 @@
     var title = ViewData["Title"] == null ? coreSettings.Title : $"{ViewData["Title"]} - {coreSettings.Title}";
     string description = ViewData["Description"] == null ? coreSettings.Tagline : ViewData["Description"] as string;
     var domain = Context.Request.Host;
-    var showDisqus = blogSettings.AllowCommentsOnBlogPost && blogSettings.CommentProvider == ECommentProvider.Disqus;
+    var showDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus;
 }
 <!DOCTYPE html>
 <html>
@@ -65,13 +65,14 @@
                     <li>
                         <a href="https://github.com/FanrayMedia/Fanray">GitHub</a>
                     </li>
-                    @*<li>
+                    <li>
                         @await Html.PartialAsync("_LoginPartial")
-                    </li>*@
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+    <partial name="_CookieConsentPartial" />
     <div class="container">
         <div class="blog-wrapper">
             <div class="blog-content">
@@ -116,17 +117,18 @@
                             <ul class="month-list">
                                 @foreach (var year in years)
                                 {
-                                    <li class="year">@year.Key
-                                        <ul class="months">
-                                            @foreach (var item in year.Value)
-                                            {
-                                                <li>
-                                                    <a href="@item.Url">@item.Title</a> (@item.Count)
-                                                </li>
-                                            }
-                                        </ul>
-                                    </li>
-                                }
+                                    <li class="year">
+                                        @year.Key
+                                    <ul class="months">
+                                        @foreach (var item in year.Value)
+                                        {
+                                            <li>
+                                                <a href="@item.Url">@item.Title</a> (@item.Count)
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
                             </ul>
                         </div>
                     </div>

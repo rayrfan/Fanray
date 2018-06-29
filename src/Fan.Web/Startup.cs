@@ -15,11 +15,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Fan.Web
 {
@@ -39,6 +42,14 @@ namespace Fan.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // GDPR support
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             // Db 
             /**
              * AddDbContextPool is an EF Core 2.0 performance enhancement https://docs.microsoft.com/en-us/ef/core/what-is-new/
@@ -60,6 +71,13 @@ namespace Fan.Web
             })
             .AddEntityFrameworkStores<FanDbContext>()
             .AddDefaultTokenProviders();
+
+            // LoginPath https://github.com/aspnet/Identity/issues/1414#issuecomment-328185754
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/login";
+                options.AccessDeniedPath = "/denied";
+            });
 
             // Caching
             services.AddDistributedMemoryCache();
@@ -83,7 +101,7 @@ namespace Fan.Web
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
             services.AddScoped<IMetaWeblogService, MetaWeblogService>();
-            services.AddScoped<IHttpWwwRewriter, HttpWwwRewriter>();
+            services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
             var appSettingsConfigSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsConfigSection);
             var appSettings = appSettingsConfigSection.Get<AppSettings>();
@@ -97,8 +115,35 @@ namespace Fan.Web
             services.AddSingleton<IShortcodeService>(shortcodeService);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            // Mvc
-            services.AddMvc();
+            // Mvc and Razor Pages
+
+            // if you update the roles and find the app not working, try logout then login https://stackoverflow.com/a/48177723/32240
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminRoles", policy => policy.RequireRole("Administrator", "Editor"));
+            });
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options => {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                })
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                });
+
+            // https://stackoverflow.com/q/50472962/32240
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            // To make ajax work with razor pages, without this ajax post will get 404 
+            // http://www.talkingdotnet.com/handle-ajax-requests-in-asp-net-core-razor-pages/
+            services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
 
             // AppInsights
             services.AddApplicationInsightsTelemetry(Configuration);
@@ -109,20 +154,22 @@ namespace Fan.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
-            app.UseHsts();
-            app.UseHttpWwwRewrite();
+            app.UseHttpsRedirection();
+            app.UsePreferredDomain();
+            app.UseSetup();
             app.MapWhen(context => context.Request.Path.ToString().Equals("/olw"), appBuilder => appBuilder.UseMetablog());
             app.UseStatusCodePagesWithReExecute("/Home/ErrorCode/{0}"); // needs to be after hsts and rewrite
             app.UseStaticFiles();
-            app.UseAuthentication();
+            app.UseAuthentication(); // UseIdentity is obsolete, UseAuth is recommended
+            app.UseCookiePolicy();
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
@@ -135,7 +182,6 @@ namespace Fan.Web
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("Setup", "setup", new { controller = "Home", action = "Setup" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });

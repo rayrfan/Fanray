@@ -144,7 +144,7 @@ namespace Fan.Blogs.MetaWeblog
             {
                 var recentPosts = await _blogSvc.GetRecentPostsAsync(numberOfPosts);
                 var posts = new List<MetaPost>();
-                foreach (var p in recentPosts)
+                foreach (var p in recentPosts.Posts)
                 {
                     posts.Add(ToMetaPost(p, rootUrl));
                 }
@@ -263,7 +263,8 @@ namespace Fan.Blogs.MetaWeblog
             try
             {
                 var userId = (await _userManager.FindByNameAsync(userName)).Id;
-                var url = await _mediaSvc.UploadMediaAsync(userId, mediaObject.Name, mediaObject.Bits, EAppType.Blog, EUploadedFrom.MetaWeblog);
+                var url = await _mediaSvc.UploadImageAsync(mediaObject.Bits, EAppType.Blog, userId, mediaObject.Name, EUploadedFrom.MetaWeblog);
+
                 return new MetaMediaInfo()
                 {
                     Url = url
@@ -321,7 +322,7 @@ namespace Fan.Blogs.MetaWeblog
             if (commentPolicy.IsNullOrEmpty())
             {
                 var settings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                return settings.AllowCommentsOnBlogPost ? ECommentStatus.AllowComments : ECommentStatus.NoComments;
+                return settings.AllowComments ? ECommentStatus.AllowComments : ECommentStatus.NoComments;
             }
             else if (commentPolicy == "1")
             {

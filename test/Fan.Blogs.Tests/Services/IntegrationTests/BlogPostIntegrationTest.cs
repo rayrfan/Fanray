@@ -240,5 +240,40 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             // Assert
             Assert.Equal("now", postNow.CreatedOnFriendly);
         }
+
+        /// <summary>
+        /// When author saves a draft with empty title, it's OK.
+        /// </summary>
+        [Fact]
+        public async void Author_Can_Save_Draft_With_Empty_Title_And_Slug()
+        {
+            // Arrange
+            SeedTestPost();
+            var createdOn = DateTimeOffset.Now; // user local time
+            var blogPost = new BlogPost // A user posts this from browser
+            {
+                UserId = Actor.AUTHOR_ID,
+                Title = null,
+                Slug = null,                        // user didn't input
+                Body = "This is my first post",
+                Excerpt = null,                     // user didn't input
+                CategoryId = 1,
+                TagTitles = null,                   // user didn't input
+                CreatedOn = createdOn,
+                Status = EPostStatus.Draft,
+                CommentStatus = ECommentStatus.AllowComments,
+            };
+
+            // Act
+            var result = await _blogSvc.CreatePostAsync(blogPost);
+
+            // Assert
+            Assert.Equal(2, result.Id);
+            Assert.Null(result.Slug);
+            Assert.Null(result.Title);
+            Assert.Equal(createdOn.ToUniversalTime(), result.CreatedOn);
+            Assert.Equal(1, result.Category.Id);
+            Assert.Empty(result.Tags);
+        }
     }
 }

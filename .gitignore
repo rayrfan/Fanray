@@ -288,5 +288,6 @@ __pycache__/
 *.xsd.cs
 
 # My ignores
+package-lock.json
 src/fan.web/logs/
 src/fan.web/wwwroot/media/

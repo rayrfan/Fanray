@@ -52,5 +52,11 @@ namespace Fan.Blogs.Data
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<DateTime>> GetPostDateTimesAsync();
+
+        /// <summary>
+        /// Returns total number of posts by each <see cref="EPostStatus"/>.
+        /// </summary>
+        /// <returns></returns>
+        Task<PostCount> GetPostCountAsync();
     }
 }

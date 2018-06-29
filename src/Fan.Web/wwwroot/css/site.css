@@ -148,11 +148,13 @@ label {
     font-weight: 800;
     text-transform: uppercase;
     font-size: 12px; }
-  .navbar-custom .nav li a {
+  .navbar-custom .nav li a, .navbar-custom .nav li button {
     text-transform: uppercase;
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 1px; }
+  .navbar-custom .navbar-btn {
+    margin: 14px 0 0 14px; }
   @media only screen and (min-width: 768px) {
     .navbar-custom {
       background: transparent;
