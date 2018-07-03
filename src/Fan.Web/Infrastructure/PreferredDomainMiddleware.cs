@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Middlewares
+namespace Fan.Web.Infrastructure
 {
     /// <summary>
     /// A middleware that does preferred domain URL forward based on user option in <see cref="AppSettings.PreferredDomain"/>.

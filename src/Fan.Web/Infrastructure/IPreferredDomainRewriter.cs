@@ -1,7 +1,7 @@
 ﻿using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 
-namespace Fan.Web.Middlewares
+namespace Fan.Web.Infrastructure
 {
     public interface IPreferredDomainRewriter
     {

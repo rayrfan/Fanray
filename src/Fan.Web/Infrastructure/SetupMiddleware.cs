@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Middlewares
+namespace Fan.Web.Infrastructure
 {
     /// <summary>
     /// Middleware to setup the site.

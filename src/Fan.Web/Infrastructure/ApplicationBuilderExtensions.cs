@@ -1,5 +1,5 @@
 ﻿using Fan.Blogs.MetaWeblog;
-using Fan.Web.Middlewares;
+using Fan.Web.Infrastructure;
 
 namespace Microsoft.AspNetCore.Builder
 {
