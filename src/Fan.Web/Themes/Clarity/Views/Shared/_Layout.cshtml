@@ -29,7 +29,7 @@
     @RenderSection("Canonical", required: false)
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" />
-    <link rel="stylesheet" href="~/css/style.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/style.min.css" asp-append-version="true" />
     @await Html.PartialAsync("_Analytics")
 </head>
 <body>
