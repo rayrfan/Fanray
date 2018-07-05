@@ -1,0 +1,15 @@
+﻿@model string
+@{
+    Layout = null;
+}
+
+<rsd xmlns="http://archipelago.phrasewise.com/rsd" version="1.0">
+    <service>
+        <engineName>Fanray</engineName>
+        <engineLink>http://www.fanray.com</engineLink>
+        <homePageLink>@Model</homePageLink>
+        <apis>
+            <api name="MetaWeblog" blogID="@Model" preferred="true" apiLink="@Model/olw" />
+        </apis>
+    </service>
+</rsd>
