@@ -35,12 +35,13 @@ namespace Fan.Web.Pages
         /// <returns></returns>
         public IActionResult OnGet(EAppType appType, EImageSize size, int userId, string year, string month, string fileName)
         {
+            // azure storage local and prd have different ending char
             var endpoint = _storageProvider.StorageEndpoint;
-            var container = _appSettings.MediaContainerName;
+            var container = endpoint.EndsWith('/') ? _appSettings.MediaContainerName : $"/{_appSettings.MediaContainerName}";
             var appName = appType.ToString().ToLowerInvariant();
             var sizeStr = size.ToString().ToLowerInvariant();
 
-            return Redirect($"{endpoint}/{container}/{appName}/{sizeStr}/{userId}/{year}/{month}/{fileName}");
+            return Redirect($"{endpoint}{container}/{appName}/{sizeStr}/{userId}/{year}/{month}/{fileName}");
         }
     }
 }
