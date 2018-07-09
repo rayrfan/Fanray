@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA,SAAU,CACN,OAAO,CAAE,IAAI,CAGjB,OAAQ,CACJ,OAAO,CAAE,KAAK,CACd,gBAAgB,CAAE,IAAI,CAI1B,mBAAoB,CAChB,QAAQ,CAAE,MAAM,CAChB,OAAO,CAAE,CAAC,CACV,UAAU,CAAE,KAAK,CACjB,GAAG,CAAE,IAAI,CAIb,yBAA0B,CACtB,mBAAoB,CAChB,GAAG,CAAE,IAAI",
+"sources": ["../../../Composer/scss/composer.scss"],
+"names": [],
+"file": "composer.min.css"
+}

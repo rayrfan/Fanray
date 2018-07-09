@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Compose";
     Layout = null;
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 }
 
 <!DOCTYPE html>
@@ -12,16 +13,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>@ViewData["Title"] - Fanray</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.1.1/dist/vuetify.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" />
-    <environment include="Development">
-        <link rel="stylesheet" href="~/css/compose.css" />
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="~/css/compose.min.css" />
-    </environment>
-    <link rel="stylesheet" href="~/css/editor.min.css" />
+    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/editor.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/admin/css/composer.min.css" asp-append-version="true" />   
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -29,55 +25,100 @@
     <div id="app" v-cloak>
         <v-app id="inspire" style="background-color:white">
             @* Drawer *@
-            <v-navigation-drawer fixed
+            <v-navigation-drawer 
+                                 fixed
                                  :clipped="$vuetify.breakpoint.mdAndUp"
                                  app
                                  v-model="drawer"
-                                 style="padding: 0 8px">
+                                 >
                 <v-list dense>
+                    <v-card v-if="published"
+                            color="grey lighten-4" style="margin-bottom:8px">
+                        <v-container fill-height
+                                     fluid
+                                     pa-2>
+                            <v-layout fill-height>
+                                <v-flex xs12 align-end flexbox>
+                                    <div class="caption" style="color:#666">Status</div>
+                                    <div style="text-align:center;font-size:inherit">
+                                        <span style="color:teal;padding-right: 5px;font-weight:bold">Published</span><span>on 2018-09-06</span>
+                                    </div>
+                                </v-flex>
+                            </v-layout>
+                        </v-container>
+                        <v-card-actions>
+                            <v-btn small
+                                   style="width:100%"
+                                   color="grey darken-2"
+                                   class="white--text"
+                                   @@click="revert">
+                                <v-icon left dark>undo</v-icon>
+                                Revert to draft
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+
                     <v-menu ref="menuDate"
-                            lazy
                             :close-on-content-click="false"
                             v-model="menuDate"
+                            :return-value.sync="date"
+                            lazy
                             transition="scale-transition"
                             offset-y
                             full-width
-                            :nudge-right="40"
-                            min-width="290px"
-                            @@input="onFieldsChange"
-                            :return-value.sync="date">
-                        <v-text-field slot="activator"
-                                      label="Date"
+                            @@input="onFieldsChange">
+                        <v-text-field label="Date"
+                                      box
+                                      slot="activator"
                                       v-model="date"
-                                      class="input-group--focused"
                                       readonly></v-text-field>
-                        <v-date-picker v-model="date" @@input="$refs.menuDate.save(date)"></v-date-picker>
+                        <v-date-picker v-model="date"
+                                       no-title
+                                       scrollable
+                                       @@input="$refs.menuDate.save(date)"></v-date-picker>
                     </v-menu>
-                    <v-select :items="cats"
+                    <v-select label="Category"
                               v-model="selectedCatId"
-                              label="Categories"
-                              class="input-group--focused"
-                              @@input="onFieldsChange"
-                              item-value="value">
-                    </v-select>
-                    <v-select v-model="selectedTags"
-                              label="Tags (delimiter: tab)"
-                              chips
-                              tags
-                              @@input="onFieldsChange"
+                              :items="cats"
+                              item-value="value"
+                              box
+                              dense
+                              @@input="onFieldsChange"></v-select>
+                    <v-select label="Tags"
+                              v-model="selectedTags"
                               :items="tags"
-                              class="input-group--focused"></v-select>
-                    <v-text-field name="input-2"
-                                  label="Slug"
+                              box
+                              small-chips
+                              multiple
+                              dense
+                              @@input="onFieldsChange"></v-select>
+                    <v-text-field label="Slug"
+                                  box
                                   v-model="slug"
-                                  @@input="onFieldsChange"
-                                  class="input-group--focused"></v-text-field>
-                    <v-text-field name="input-7-2"
-                                  label="Excerpt"
-                                  v-model="excerpt"
-                                  @@input="onFieldsChange"
-                                  class="input-group--focused"
-                                  multi-line></v-text-field>
+                                  @@input="onFieldsChange"></v-text-field>
+                    <v-textarea label="Excerpt"
+                                box
+                                height="250px"
+                                :value="excerpt"
+                                @@input="onFieldsChange"></v-textarea>
+
+                    <v-card flat
+                             style="margin-bottom:8px">
+                        <v-card-actions>
+                            <v-btn small
+                                   style="width:100%"
+                                   color="grey darken-2"
+                                   
+                                   class="white--text"
+                                   >
+                                <v-icon left dark>delete_forever</v-icon>
+                                Delete post
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+
+                    @*<v-btn color="blue-grey"
+                           class="white--text">Delete post</v-btn>*@
                 </v-list>
             </v-navigation-drawer>
             @* Topbar *@
@@ -91,28 +132,35 @@
                 <v-btn>Preview</v-btn>
                 <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" v-text="saveText" color="orange"></v-btn>
                 <v-spacer></v-spacer>
-                <v-btn @@click="revert" v-if="published">Revert to draft</v-btn>
+                @*<v-btn @@click="revert" v-if="published">Revert to draft</v-btn>*@
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
-            <v-content style="margin: 4px 23px">
-                <v-text-field label="Title" v-model="title"
-                              @@input="onFieldsChange"
-                              @@change="saveDraft"></v-text-field>
-                <div id="editor" style="border:0 solid black"></div>
+            <v-content>
+                <div id="editor-area">
+                    <v-text-field id="post-title"
+                                  label="Title"
+                                  v-model="title"
+                                  placeholder="Title"
+                                  solo
+                                  height="70px"
+                                  multip
+                                  @@input="onFieldsChange"
+                                  @@change="saveDraft"></v-text-field>
+                    <div id="editor"></div>
+                </div>
             </v-content>
         </v-app>
     </div>
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.js"></script>
-        @* hightlightjs must be included before quill *@
+        <script src="https://unpkg.com/vuetify@1.1.1/dist/vuetify.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script src="https://unpkg.com/quill@1.3.6/dist/quill.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.1/dist/vuetify.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script src="https://unpkg.com/quill@1.3.6/dist/quill.min.js"></script>
     </environment>

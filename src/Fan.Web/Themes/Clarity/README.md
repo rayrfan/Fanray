@@ -5,7 +5,9 @@ Clarity theme uses scss, on Windows do the following
 1. run [RubyInstaller](https://rubyinstaller.org/)
 2. run `gem install sass`
 3. cd into `Fan.Web\Themes\Clarity`
-4. `sass --watch scss/style.scss:../../wwwroot/css/style.min.css --style compressed`
+4. run sass, optionally with --watch when developing
+  - style: `sass --watch scss/style.scss:../../wwwroot/themes/Clarity/css/style.min.css --style compressed`
+  - editor: `sass --watch scss/editor.scss:../../wwwroot/themes/Clarity/css/editor.min.css --style compressed`
 
 Syntax
 

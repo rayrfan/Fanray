@@ -20,8 +20,39 @@ $headings-font-size-xs: 0.5; // half the increase in size over root font-size
 $paragraph-margin-bottom: 1rem !default;
 $content-font-size: 1.13rem;
 
+/* 
+   Center title and editor to a fixed width: 800px, regardless of drawer action 
+   https://www.w3schools.com/css/css_align.asp
+*/
+#editor-area {
+    margin: auto;
+    width: 800px;
+    padding: 18px 0;
+
+    #post-title {
+        line-height: 1;
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem;
+        padding-top: 10px;
+        font-weight: 700;
+    }
+}
+
+/* smaller screen */
+@media (max-width: 767px) {
+    #editor-area {
+        width: auto;
+        padding: 18px 0;
+
+        #post-title {
+            font-size: 2rem;
+        }
+    }
+}
+
 #editor {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    border: 0 solid black;
 
     h1, h2, h3, h4, h5, h6 {
         margin-bottom: $headings-margin-bottom;
