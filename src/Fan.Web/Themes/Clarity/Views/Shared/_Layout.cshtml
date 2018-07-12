@@ -117,16 +117,7 @@
             <span class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></span>
         </div>
     </footer>
-    @*<script async src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script>*@
     @RenderSection("Scripts", required: false)
-    @*<script type="text/javascript">
-            $(document).ready(function () {
-                $('.month-list .year').click(function () {
-                    $(this).find('.months').slideToggle();
-                });
-            });
-        </script>*@
     @if (showDisqus)
     {
         <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
