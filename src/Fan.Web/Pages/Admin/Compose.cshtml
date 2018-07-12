@@ -166,7 +166,7 @@
                     <v-card-text>
                         <div>
                             <v-toolbar class="elevation-0">
-                                <v-btn flat >
+                                <v-btn flat @@click="uploadImages">
                                     <v-icon color="primary">cloud_upload</v-icon>
                                     &nbsp;Upload
                                 </v-btn>
@@ -378,28 +378,31 @@
                         })
                         .catch(err => { console.log(err); });
                 },
-                uploadImages(files) {
-                    const formData = new FormData();
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('images', files[i]);
-                    }
+                uploadImages() {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.setAttribute('multiple', null);
+                    input.click();
+                    input.onchange = () => {
+                        const formData = new FormData();
+                        for (let i = 0; i < input.files.length; i++) {
+                            formData.append('images', input.files[i]);
+                        }
 
-                    axios.post('/admin/compose?handler=image', formData, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            var urls = resp.data;
-                            const range = this.quill.getSelection();
-                            for (var i = 0; i < urls.length; i++) {
-                                this.quill.insertEmbed(range.index, 'image', urls[i]);
-                            }
-                        })
-                        .catch(err => { console.log(err); });
+                        axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                this.images = resp.data.images;
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            });
+                    };
                 },
                 getImages() {
                     let url = `/admin/media?handler=images`;
-                    console.log(url);
                     axios.get(url).then(resp => {
                         this.images = resp.data.images;
-                        console.log(this.images);
                     }).catch(err => console.log(err));
                 },
                 insertImage(url) {
