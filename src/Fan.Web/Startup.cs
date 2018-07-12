@@ -9,13 +9,14 @@ using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
-using Fan.Web.Middlewares;
+using Fan.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -116,6 +117,12 @@ namespace Fan.Web
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Mvc and Razor Pages
+
+            // theme
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.ViewLocationExpanders.Add(new ThemeViewLocationExpander());
+            });
 
             // if you update the roles and find the app not working, try logout then login https://stackoverflow.com/a/48177723/32240
             services.AddAuthorization(options =>

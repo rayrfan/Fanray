@@ -3,8 +3,8 @@
 @{
     ViewData["Title"] = "Compose";
     Layout = null;
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 }
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,15 +12,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>@ViewData["Title"] - Fanray</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.1.3/dist/vuetify.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai-sublime.min.css" rel="stylesheet" />
-    <environment include="Development">
-        <link rel="stylesheet" href="~/css/compose.css" />
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="~/css/compose.min.css" />
-    </environment>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/editor.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/admin/css/composer.min.css" asp-append-version="true" />
+    <style>
+        .gallery img {
+            object-fit: cover;
+            width: 200px;
+            height: 200px;
+            margin: 10px 0 0 10px;
+        }
+
+        @@media (max-width: 767px) {
+            .gallery img {
+                width: 168px;
+                height: 168px;
+                margin: 8px 0 0 8px;
+            }
+        }
+    </style>
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -31,52 +43,93 @@
             <v-navigation-drawer fixed
                                  :clipped="$vuetify.breakpoint.mdAndUp"
                                  app
-                                 v-model="drawer"
-                                 style="padding: 0 8px">
+                                 v-model="drawer">
                 <v-list dense>
+                    <v-card v-if="published"
+                            color="grey lighten-4" style="margin-bottom:8px">
+                        <v-container fill-height
+                                     fluid
+                                     pa-2>
+                            <v-layout fill-height>
+                                <v-flex xs12 align-end flexbox>
+                                    <div class="caption" style="color:#666">Status</div>
+                                    <div style="text-align:center;font-size:inherit">
+                                        <span style="color:teal;padding-right: 5px;font-weight:bold">Published</span><span>on 2018-09-06</span>
+                                    </div>
+                                </v-flex>
+                            </v-layout>
+                        </v-container>
+                        <v-card-actions>
+                            <v-btn small
+                                   style="width:100%"
+                                   color="grey darken-2"
+                                   class="white--text"
+                                   @@click="revert">
+                                <v-icon left dark>undo</v-icon>
+                                Revert to draft
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+
                     <v-menu ref="menuDate"
-                            lazy
                             :close-on-content-click="false"
                             v-model="menuDate"
+                            :return-value.sync="date"
+                            lazy
                             transition="scale-transition"
                             offset-y
                             full-width
-                            :nudge-right="40"
-                            min-width="290px"
-                            @@input="onFieldsChange"
-                            :return-value.sync="date">
-                        <v-text-field slot="activator"
-                                      label="Date"
+                            @@input="onFieldsChange">
+                        <v-text-field label="Date"
+                                      box
+                                      slot="activator"
                                       v-model="date"
-                                      class="input-group--focused"
                                       readonly></v-text-field>
-                        <v-date-picker v-model="date" @@input="$refs.menuDate.save(date)"></v-date-picker>
+                        <v-date-picker v-model="date"
+                                       no-title
+                                       scrollable
+                                       @@input="$refs.menuDate.save(date)"></v-date-picker>
                     </v-menu>
-                    <v-select :items="cats"
+                    <v-select label="Category"
                               v-model="selectedCatId"
-                              label="Categories"
-                              class="input-group--focused"
-                              @@input="onFieldsChange"
-                              item-value="value">
-                    </v-select>
-                    <v-select v-model="selectedTags"
-                              label="Tags (delimiter: tab)"
-                              chips
-                              tags
-                              @@input="onFieldsChange"
+                              :items="cats"
+                              item-value="value"
+                              box
+                              dense
+                              @@input="onFieldsChange"></v-select>
+                    <v-select label="Tags"
+                              v-model="selectedTags"
                               :items="tags"
-                              class="input-group--focused"></v-select>
-                    <v-text-field name="input-2"
-                                  label="Slug"
+                              box
+                              small-chips
+                              multiple
+                              dense
+                              @@input="onFieldsChange"></v-select>
+                    <v-text-field label="Slug"
+                                  box
                                   v-model="slug"
-                                  @@input="onFieldsChange"
-                                  class="input-group--focused"></v-text-field>
-                    <v-text-field name="input-7-2"
-                                  label="Excerpt"
-                                  v-model="excerpt"
-                                  @@input="onFieldsChange"
-                                  class="input-group--focused"
-                                  multi-line></v-text-field>
+                                  @@input="onFieldsChange"></v-text-field>
+                    <v-textarea label="Excerpt"
+                                box
+                                height="250px"
+                                :value="excerpt"
+                                @@input="onFieldsChange"></v-textarea>
+
+                    <v-card flat
+                            style="margin-bottom:8px">
+                        <v-card-actions>
+                            <v-btn small
+                                   style="width:100%"
+                                   color="grey darken-2"
+                                   class="white--text">
+                                <v-icon left dark>delete_forever</v-icon>
+                                Delete post
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+
+                    @*<v-btn color="blue-grey"
+                class="white--text">Delete post</v-btn>*@
                 </v-list>
             </v-navigation-drawer>
             @* Topbar *@
@@ -90,34 +143,66 @@
                 <v-btn>Preview</v-btn>
                 <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" v-text="saveText" color="orange"></v-btn>
                 <v-spacer></v-spacer>
-                <v-btn @@click="revert" v-if="published">Revert to draft</v-btn>
+                @*<v-btn @@click="revert" v-if="published">Revert to draft</v-btn>*@
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
-            <v-content style="margin: 4px 23px">
-                <v-text-field label="Title" v-model="title"
-                              @@input="onFieldsChange"
-                              @@change="saveDraft"></v-text-field>
-                <div id="editor" style="border:0 solid black"></div>
+            <v-content>
+                <div id="editor-area">
+                    <v-text-field id="post-title"
+                                  label="Title"
+                                  v-model="title"
+                                  placeholder="Title"
+                                  solo
+                                  height="70px"
+                                  multip
+                                  @@input="onFieldsChange"
+                                  @@change="saveDraft"></v-text-field>
+                    <div id="editor"></div>
+                </div>
             </v-content>
+            <v-dialog v-model="showMediaDialog" lazy max-width="80%">
+                <v-card>
+                    <v-card-text>
+                        <div>
+                            <v-toolbar class="elevation-0">
+                                <v-btn flat @@click="uploadImages">
+                                    <v-icon color="primary">cloud_upload</v-icon>
+                                    &nbsp;Upload
+                                </v-btn>
+                            </v-toolbar>
+                            <v-divider></v-divider>
+                            <div class="gallery">
+                                <a v-for="image in images" :key="image.id" @@click="insertImage(image.url)">
+                                    <img :src="image.url" :alt="image.fileName">
+                                </a>
+                            </div>
+                        </div>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-btn color="primary" flat @@click.stop="showMediaDialog=false">Close</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-app>
     </div>
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.js"></script>
-        @* hightlightjs must be included before quill *@
+        <script src="https://unpkg.com/vuetify@1.1.3/dist/vuetify.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script src="https://unpkg.com/quill@1.3.6/dist/quill.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.3/dist/vuetify.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script src="https://unpkg.com/quill@1.3.6/dist/quill.min.js"></script>
     </environment>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/lib/quill-image-resize-module/image-resize.min.js"></script>
     <script>
+        let Delta = Quill.import('delta');
+
         var app = new Vue({
             el: '#app',
             data: () => ({
@@ -152,8 +237,24 @@
                     [{ 'color': [] }, { 'background': [] }],
                     ['clean'],
                 ],
+                mediaDialogVisible: false,
+                images: [],
+                change: null,
             }),
             computed: {
+                showMediaDialog: {
+                    get: function () {
+                        if (this.mediaDialogVisible) {
+                            this.getImages();
+                        }
+                        return this.mediaDialogVisible
+                    },
+                    set: function (value) {
+                        if (!value) {
+                            this.mediaDialogVisible = false;
+                        }
+                    }
+                },
                 disablePubButton() {
                     return this.title.trim().length <= 0 || this.pubClicked;
                 },
@@ -180,7 +281,7 @@
                 this.initHighlight();
                 this.initEditor();
             },
-            methods: {
+            methods: {                
                 initEditor() {
                     this.quill = new Quill('#editor', {
                         modules: {
@@ -204,38 +305,32 @@
                         this.cats = resp.data.allCats;
                         this.tags = resp.data.allTags;
                         this.pubText = this.published ? 'Update' : 'Publish';
+                        this.change = new Delta();
 
-                        // auto save, detect change after data comes back
-                        let Delta = Quill.import('delta');
-                        let change = new Delta();
+                        // auto save
+                        let typingTimer;
+                        let doneTypingInterval = 5000;  
                         this.quill.on('text-change', (delta) => {
-                            change = change.compose(delta);
-                        });
-                        setInterval(() => {
-                            if (change.length() > 0 && !this.published) {
-                                this.saveDraft();
-                                change = new Delta();
+                            this.change = this.change.compose(delta);
+                            clearTimeout(typingTimer);
+                            if (this.change.length() > 0 && !this.published) {
+                                this.showSave = true;
+                                this.disableSave = false;
+                                this.saveText = 'Save';
+
+                                typingTimer = setTimeout(this.saveDraft, doneTypingInterval);
                             }
-                        }, 5000);
+                        });
                         window.onbeforeunload = () => {
-                            if ( (change.length() > 0 || this.fieldChanged) && this.closing) {
+                            if ((this.change.length() > 0 || this.fieldChanged) && this.closing) {
                                 return 'There are unsaved changes. Are you sure you want to leave?';
                             }
                         }
                     });
 
-                    // img upload
+                    // media
                     let toolbar = this.quill.getModule('toolbar');
-                    toolbar.addHandler('image', function () {
-                        const input = document.createElement('input');
-                        input.setAttribute('type', 'file');
-                        input.setAttribute('accept', 'image/*');
-                        input.setAttribute('multiple', null);
-                        input.click();
-                        input.onchange = () => {
-                            app.uploadImages(input.files);
-                        };
-                    });                   
+                    toolbar.addHandler('image', () => this.mediaDialogVisible = true );    
                 },
                 initHighlight() {
                     hljs.configure({
@@ -245,46 +340,32 @@
                 onFieldsChange() {
                     this.fieldChanged = true;
                     if (this.published) return;
-                    if (!this.showSave) this.showSave = true;
+                    this.showSave = true;
                     this.disableSave = false;
                     this.saveText = 'Save';
                 },
                 saveDraft() {
-                    if (!this.showSave) this.showSave = true;
+                    this.showSave = true;
                     this.disableSave = true;
                     this.saveText = 'Saving...';
 
-                    console.log(this.payload);
                     axios.post('/admin/compose?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                         .then(resp => {
                             this.id = resp.data.id;
                             this.slug = resp.data.slug;
+                            if (window.location.href.endsWith('/compose'))
+                                history.replaceState({}, null, window.location.href + `/${this.id}`);
                         })
                         .catch(err => { console.log(err); });
 
+                    this.change = new Delta();
                     this.saveText = 'Saved';
                 },
                 revert() {
                     this.published = false;
                     this.pubText = this.published ? 'Update' : 'Publish';
                     this.saveDraft();
-                },
-                uploadImages(files) {
-                    const formData = new FormData();
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('images', files[i]);
-                    }
-
-                    axios.post('/admin/compose?handler=image', formData, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            var urls = resp.data;
-                            const range = this.quill.getSelection();
-                            for (var i = 0; i < urls.length; i++) {
-                                this.quill.insertEmbed(range.index, 'image', urls[i]);
-                            }
-                        })
-                        .catch(err => { console.log(err); });
-                },
+                },              
                 pub() {
                     this.closing = false;
                     this.pubClicked = true;
@@ -296,6 +377,38 @@
                             window.location.replace(resp.data);
                         })
                         .catch(err => { console.log(err); });
+                },
+                uploadImages() {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.setAttribute('multiple', null);
+                    input.click();
+                    input.onchange = () => {
+                        const formData = new FormData();
+                        for (let i = 0; i < input.files.length; i++) {
+                            formData.append('images', input.files[i]);
+                        }
+
+                        axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                this.images = resp.data.images;
+                            })
+                            .catch(err => {
+                                console.log(err);
+                            });
+                    };
+                },
+                getImages() {
+                    let url = `/admin/media?handler=images`;
+                    axios.get(url).then(resp => {
+                        this.images = resp.data.images;
+                    }).catch(err => console.log(err));
+                },
+                insertImage(url) {
+                    const range = this.quill.getSelection();
+                    this.quill.insertEmbed(range.index, 'image', url);
+                    this.mediaDialogVisible = false;
                 },
             },
         });

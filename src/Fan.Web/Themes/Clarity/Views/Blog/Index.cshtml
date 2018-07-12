@@ -1,0 +1,44 @@
+﻿@model BlogPostListViewModel
+@{
+    var postListDisplay = Model.PostListDisplay;
+    var blogPostViewModels = Model.BlogPostViewModels;
+}
+
+@foreach (var postVM in blogPostViewModels)
+{
+    var blogPost = postVM;
+<article>
+    <header>
+        <h1>
+            <a href="@blogPost.RelativeLink">@blogPost.Title</a>
+        </h1>
+        @await Html.PartialAsync("_PostInfo", postVM)
+    </header>
+    <div class="post-body">
+        @if (postListDisplay == EPostListDisplay.Excerpt)
+        {
+            @Html.Raw(blogPost.Excerpt) <span style="padding-left:5px"><a href="@blogPost.RelativeLink">Read More</a></span>
+        }
+        else if (postListDisplay == EPostListDisplay.FullBody)
+        {
+            @Html.Raw(blogPost.Body)
+        }
+    </div>
+</article>
+}
+
+@if (Model.ShowNewer)
+{
+    if (Model.NewerPageIndex <= 1)
+    {
+        <a class="btn btn-default" href="/" role="button">Newer posts</a>
+    }
+    else
+    {
+        <a class="btn btn-default" href="?page=@Model.NewerPageIndex" role="button">Newer posts</a>
+    }
+}
+@if (Model.ShowOlder)
+{
+    <a class="btn btn-default" href="?page=@Model.OlderPageIndex" role="button">Older posts</a>
+}

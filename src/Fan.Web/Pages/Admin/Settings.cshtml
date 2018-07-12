@@ -1,0 +1,19 @@
+﻿@page
+@model Fan.Web.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+
+<blog-settings inline-template>
+    <div></div>
+</blog-settings>
+
+@section ComponentScripts {
+    <script>
+        Vue.component('blog-settings', {
+            data: () => ({
+            }),
+        });
+    </script>
+}

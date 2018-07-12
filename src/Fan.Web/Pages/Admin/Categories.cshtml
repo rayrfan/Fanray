@@ -1,0 +1,48 @@
+﻿@page
+@model Fan.Web.Pages.Admin.CategoriesModel
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+
+<blog-categories inline-template>
+    <v-container>
+        <v-tabs class="elevation-1">
+            <v-tab>
+                Categories <v-chip small>{{ categoryCount }}</v-chip>
+            </v-tab>
+        </v-tabs>
+        <v-dialog v-model="categoryDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <h3>Add New Category</h3>
+                    <v-spacer></v-spacer>
+
+                </v-card-title>
+                <v-card-actions>
+                    <v-btn color="primary" flat @@click.stop="categoryDialog=false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-btn fab
+               bottom
+               right
+               color="pink"
+               dark
+               fixed
+               @@click.stop="categoryDialog = true">
+            <v-icon>add</v-icon>
+        </v-btn>
+    </v-container>
+</blog-categories>
+
+@section ComponentScripts {
+    <script>
+        Vue.component('blog-categories', {
+            data: () => ({
+                categoryCount: 1,
+                categoryDialog: false,
+            }),
+        });
+    </script>
+}

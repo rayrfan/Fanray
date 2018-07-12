@@ -3,31 +3,9 @@
   "name": "fanray",
   "private": true,
   "scripts": {
-    "copy": "npm-run-all copy:*",
-    "copy:bootstrap": "cpx node_modules/bootstrap/dist/** wwwroot/lib/bootstrap/dist",
-    "copy:material": "cpx node_modules/material-components-web/dist/** wwwroot/lib/material-components-web",
-    "copy:jquery": "cpx node_modules/jquery/dist/* wwwroot/lib/jquery/dist",
-    "copy:jquery-val": "cpx node_modules/jquery-validation/dist/* wwwroot/lib/jquery-validation/dist",
-    "copy:jquery-val-unob": "cpx node_modules/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js wwwroot/lib/jquery-validation-unobtrusive",
-    "copy:js": "cpx client/js/*.js wwwroot/js",
-    "copy:images": "cpx client/images wwwroot/images",
-    "copy:fontcss": "cpx node_modules/font-awesome/css/** wwwroot/lib/font-awesome/css",
-    "copy:fontfonts": "cpx node_modules/font-awesome/fonts/** wwwroot/lib/font-awesome/fonts",
-    "scss": "node-sass --include-path scss client/scss/site.scss wwwroot/css/site.css",
-    "scss:watch": "node-sass -w --include-path scss client/scss/site.scss wwwroot/css/site.css",
-    "postscss": "minify wwwroot/css/site.css"
   },
   "dependencies": {
-    "bootstrap": "3.3.7",
-    "font-awesome": "4.7.0",
-    "material-components-web": "0.34.1",
-    "jquery": "3.2.1",
-    "jquery-validation-unobtrusive": "3.2.6"
   },
   "devDependencies": {
-    "cpx": "1.5.0",
-    "minifier": "0.8.1",
-    "node-sass": "4.5.3",
-    "npm-run-all": "4.1.1"
   }
 }

@@ -1,0 +1,206 @@
+﻿/* Typography for editor based on
+    https://github.com/twbs/bootstrap/blob/1870b871d0b6ad7c842aab780dbd5541d84f3428/scss/_type.scss
+    https://github.com/twbs/bootstrap/blob/1870b871d0b6ad7c842aab780dbd5541d84f3428/scss/_reboot.scss
+*/
+$color-primary: #39f;
+$spacer: 1rem !default;
+$font-size-base: 1rem !default; // Assumes the browser default, typically `16px`
+$h1-font-size: $font-size-base * 2.25 !default; /*2.5*/
+$h2-font-size: $font-size-base * 2 !default;
+$h3-font-size: $font-size-base * 1.75 !default;
+$h4-font-size: $font-size-base * 1.5 !default;
+$h5-font-size: $font-size-base * 1.25 !default;
+$h6-font-size: $font-size-base !default;
+$headings-margin-bottom: ($spacer / 2) !default;
+$headings-font-family: inherit !default;
+$headings-font-weight: 500 !default;
+$headings-line-height: 1.2 !default;
+$headings-color: inherit !default;
+$headings-font-size-xs: 0.5; // half the increase in size over root font-size
+$paragraph-margin-bottom: 1rem !default;
+$content-font-size: 1.13rem;
+
+/* 
+   Center title and editor to a fixed width: 800px, regardless of drawer action 
+   https://www.w3schools.com/css/css_align.asp
+*/
+#editor-area {
+    margin: auto;
+    width: 800px;
+    padding: 18px 0;
+
+    #post-title {
+        line-height: 1;
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem;
+        padding-top: 10px;
+        font-weight: 700;
+    }
+}
+
+/* smaller screen */
+@media (max-width: 767px) {
+    #editor-area {
+        width: auto;
+        padding: 18px 0;
+
+        #post-title {
+            font-size: 2rem;
+        }
+    }
+}
+
+#editor {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    border: 0 solid black;
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-bottom: $headings-margin-bottom;
+        font-family: $headings-font-family;
+        font-weight: $headings-font-weight;
+        line-height: $headings-line-height;
+        color: $headings-color;
+    }
+
+    h1 {
+        font-size: $h1-font-size;
+    }
+
+    h2 {
+        font-size: $h2-font-size;
+    }
+
+    h3 {
+        font-size: $h3-font-size;
+    }
+
+    h4 {
+        font-size: $h4-font-size;
+    }
+
+    h5 {
+        font-size: $h5-font-size;
+    }
+
+    h6 {
+        font-size: $h6-font-size;
+    }
+
+    @media (max-width: 767px) {
+        h1 {
+            font-size: 1 + (($h1-font-size - 1) * $headings-font-size-xs); // 1.75rem
+        }
+
+        h2 {
+            font-size: 1 + (($h2-font-size - 1) * $headings-font-size-xs); // 1.5rem
+        }
+
+        h3 {
+            font-size: 1 + (($h3-font-size - 1) * $headings-font-size-xs); // 1.5rem
+        }
+
+        h4 {
+            font-size: 1 + (($h4-font-size - 1) * $headings-font-size-xs); // 1.5rem
+        }
+
+        h5 {
+            font-size: 1 + (($h5-font-size - 1) * $headings-font-size-xs); // 1.5rem
+        }
+
+        h6 {
+            font-size: 1 + (($h6-font-size - 1) * $headings-font-size-xs); // 1.5rem
+        }
+    }
+
+    p {
+        font-size: $content-font-size;
+        margin-top: 0;
+        margin-bottom: $paragraph-margin-bottom;
+    }
+
+    hr {
+        border: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        height: 0;
+    }
+
+    b,
+    strong {
+        font-weight: bolder; // Add the correct font weight in Chrome, Edge, and Safari
+    }
+
+    sub,
+    sup {
+        position: relative;
+        font-size: 75%;
+        line-height: 0;
+        vertical-align: baseline;
+    }
+
+    sub {
+        bottom: -.25em;
+    }
+
+    sup {
+        top: -.5em;
+    }
+
+    a {
+        color: $color-primary;
+        text-decoration: none;
+
+        &:hover, &:active, &:visited {
+            color: #111;
+            text-decoration: underline;
+        }
+    }
+
+    img {
+        /* scale image to fit page https://www.w3schools.com/css/css_rwd_images.asp */
+        max-width: 100%;
+        height: auto;
+    }
+
+    pre {
+        border: 1px dashed #e0e0e0;
+        border-radius: 0;
+        padding: 5px;
+        color: black;
+    }
+
+    blockquote {
+        margin: 0 0 1rem;
+        border-left: 2px gray solid;
+        padding: 16px;
+        background: #eee;
+    }
+
+    video {
+        display: block;
+        width: 100%
+    }
+}
+
+.ql-editor {
+    ol, ul {
+        padding-left: 1em;
+        font-size: $content-font-size;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    ul li:not(.ql-direction-rtl) {
+        /* couldn't get editor show square */
+        padding-left: 0;
+    }
+
+    ol li:not(.ql-direction-rtl) {
+        padding-left: 0;
+    }
+}
+
+.ql-snow .ql-editor pre.ql-syntax {
+    background-color: white;
+    overflow: visible;
+}

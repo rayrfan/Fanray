@@ -1,0 +1,135 @@
+﻿@inject SignInManager<User> SignInManager
+
+@{
+    var cats = (await blogService.GetCategoriesAsync()).Where(c => c.Count > 0).ToList();
+    var tags = (await blogService.GetTagsAsync()).Where(t => t.Count > 0).ToList();
+    var years = await blogService.GetArchivesAsync();
+
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+    var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
+
+    var title = ViewData["Title"] == null ? coreSettings.Title : $"{ViewData["Title"]} - {coreSettings.Title}";
+    string description = ViewData["Description"] == null ? coreSettings.Tagline : ViewData["Description"] as string;
+    var domain = Context.Request.Host;
+    var showDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@title - Clarity Theme</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:domain" content="@domain" />
+    <meta name="twitter:title" property="og:title" itemprop="title name" content="@title" />
+    @if (!string.IsNullOrEmpty(description))
+    {
+        <meta name="description" content="@description" />
+        <meta name="twitter:description" property="og:description" itemprop="description" content="@description" />
+    }
+    @RenderSection("Canonical", required: false)
+    <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
+    <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" />
+    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/style.min.css" asp-append-version="true" />
+    @await Html.PartialAsync("_Analytics")
+</head>
+<body>
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+        <h5 class="my-0 mr-md-auto font-weight-normal">
+            <a class="brand" href="/">@coreSettings.Title</a>
+        </h5>
+        <nav class="my-2 my-md-0 mr-md-3">
+            <a class="p-2 text-dark" href="/">Home</a>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a class="p-2 text-dark" href="/admin">Admin</a>
+            }
+            else
+            {
+                <a class="p-2 text-dark" href="/login">Login</a>
+            }
+        </nav>
+    </div>
+    <partial name="_CookieConsentPartial" />
+    <main role="main" class="container">
+        <div class="row">
+            <div class="col-md-9 blog-main">
+                @RenderBody()
+            </div>
+            <aside class="col-md-3">
+                <div class="widgets">
+                    <div class="widget">
+                        <h4 class="widget-header">Categories</h4>
+                        <div class="widget-content">
+                            <ul class="widget-categories">
+                                @foreach (var t in cats)
+                                {
+                                    <li>
+                                        <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Tags</h4>
+                        <div class="widget-content">
+                            <ul class="widget-tags">
+                                @foreach (var t in tags)
+                                {
+                                    <li>
+                                        <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
+                                        <span class="tag-multiplier">× @t.Count</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Archives</h4>
+                        <div class="widget-content">
+                            <ul class="month-list">
+                                @foreach (var year in years)
+                                {
+                                    <li class="year">
+                                        @year.Key
+                                        <ul class="months">
+                                            @foreach (var item in year.Value)
+                                            {
+                                                <li>
+                                                    <a href="@item.Url">@item.Title</a> (@item.Count)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted pull-left">&copy; @DateTime.Now.Year - @coreSettings.Title</span>
+            <span class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></span>
+        </div>
+    </footer>
+    @*<script async src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>*@
+    @RenderSection("Scripts", required: false)
+    @*<script type="text/javascript">
+            $(document).ready(function () {
+                $('.month-list .year').click(function () {
+                    $(this).find('.months').slideToggle();
+                });
+            });
+        </script>*@
+    @if (showDisqus)
+    {
+        <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
+    }
+</body>
+</html>

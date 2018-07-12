@@ -9,19 +9,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Fanray Admin Console</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.1.3/dist/vuetify.min.css" rel="stylesheet">
     <environment include="Development">
-        <link rel="stylesheet" href="~/css/admin.css" />
+        <link rel="stylesheet" href="~/admin/css/admin.css" />
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" href="~/css/admin.min.css" />
+        <link rel="stylesheet" href="~/admin/css/admin.min.css" />
     </environment>
     @RenderSection("Styles", required: false)
 </head>
 <body>
     @Html.AntiForgeryToken()
 
-    <div id="app" v-cloak data-app>
+    <div id="app" v-cloak>
         <v-app light>
             @* Drawer *@
             <v-navigation-drawer :clipped="$vuetify.breakpoint.lgAndUp"
@@ -53,22 +53,28 @@
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-toolbar-title class="hidden-sm-and-down">@coreSettings.Title</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-menu offset-x offset-y z-index="2">
-                    <v-btn icon slot="activator">
+                <v-menu offset-y origin="center center" :nudge-bottom="6" transition="scale-transition">
+                    <v-btn icon large flat slot="activator">
                         <v-avatar size="32px">
-                            <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName"/>
+                            <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" />
                         </v-avatar>
                     </v-btn>
                     <v-list>
                         <v-list-tile @@click="">
-                            <v-list-tile-title>
-                                <v-icon>person</v-icon> Profile
-                            </v-list-tile-title>
+                            <v-list-tile-action>
+                                <v-icon>account_circle</v-icon>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title>Profile</v-list-tile-title>
+                            </v-list-tile-content>
                         </v-list-tile>
                         <v-list-tile @@click="logout">
-                            <v-list-tile-title>
-                                <v-icon>power_settings_new</v-icon> Logout
-                            </v-list-tile-title>
+                            <v-list-tile-action>
+                                <v-icon>power_settings_new</v-icon>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title>Logout</v-list-tile-title>
+                            </v-list-tile-content>
                         </v-list-tile>
                     </v-list>
                 </v-menu>
@@ -80,15 +86,25 @@
             <v-content>
                 @RenderBody()
             </v-content>
+            <v-snackbar :timeout="3000"
+                        bottom
+                        right
+                        :color="snackbar.color"
+                        v-model="snackbar.show">
+                {{ snackbar.text }}
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
         </v-app>
     </div>
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.3/dist/vuetify.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.18/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.1/dist/vuetify.min.js"></script>
     </environment>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     @RenderSection("ComponentScripts", required: false)
@@ -96,7 +112,6 @@
         var app = new Vue({
             el: '#app',
             data: () => ({
-                dialog: false,
                 drawer: null,
                 active: true,
                 items: [
@@ -107,7 +122,12 @@
                     //{ icon: 'widgets', text: 'Widgets', url: '/admin/widgets', active: false },
                     { icon: 'supervisor_account', text: 'Users', url: '/admin/users', active: false },
                     { icon: 'settings', text: 'Settings', url: '/admin/settings', active: false },
-                ],
+                ],                  
+                snackbar: {
+                    show: false,
+                    text: '',
+                    color: '',
+                },
             }),
             computed: {
                 tok: function () {

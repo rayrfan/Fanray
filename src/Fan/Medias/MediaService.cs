@@ -23,8 +23,8 @@ namespace Fan.Medias
         /// <summary>
         /// Images with a width or height longer than this value will be optimized.
         /// </summary>
-        public const int IMAGE_OPTIMIZED_SIZE = 690;
-        //public const int IMAGE_OPTIMIZED_SIZE_HEIGHT = 500;
+        public const int IMAGE_OPTIMIZED_SIZE = 800;
+        //public const int IMAGE_OPTIMIZED_SIZE_HEIGHT = 600;
 
         /// <summary>
         /// If image file size exceeds 5MB then use a lower quality.
@@ -164,7 +164,8 @@ namespace Fan.Medias
         // -------------------------------------------------------------------- private
 
         /// <summary>
-        /// Returns absolute, original, image handler enabled URL to the image.
+        /// Returns absolute, image handler enabled URL to the optimized image if optimization 
+        /// happened else to the original image.
         /// </summary>
         /// <param name="media"></param>
         /// <param name="uploadFrom"></param>
@@ -178,7 +179,9 @@ namespace Fan.Medias
             var userId = media.UserId;
             var request = _httpContextAccessor.HttpContext.Request;
 
-            return $"{request.Scheme}://{request.Host}{request.PathBase}{IMAGE_HANDLER_PATH}/{appName}/original/{userId}/{year}/{month}/{fileName}";
+            var quality = media.Optimized ? "optimized" : "original";
+
+            return $"{request.Scheme}://{request.Host}{request.PathBase}{IMAGE_HANDLER_PATH}/{appName}/{quality}/{userId}/{year}/{month}/{fileName}";
         }
 
         /// <summary>
