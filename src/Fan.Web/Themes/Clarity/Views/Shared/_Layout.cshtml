@@ -1,4 +1,6 @@
-﻿@{
+﻿@inject SignInManager<User> SignInManager
+
+@{
     var cats = (await blogService.GetCategoriesAsync()).Where(c => c.Count > 0).ToList();
     var tags = (await blogService.GetTagsAsync()).Where(t => t.Count > 0).ToList();
     var years = await blogService.GetArchivesAsync();
@@ -39,67 +41,74 @@
         </h5>
         <nav class="my-2 my-md-0 mr-md-3">
             <a class="p-2 text-dark" href="/">Home</a>
-            <a class="p-2 text-dark" href="/login">Login</a>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a class="p-2 text-dark" href="/admin">Admin</a>
+            }
+            else
+            {
+                <a class="p-2 text-dark" href="/login">Login</a>
+            }
         </nav>
     </div>
     <partial name="_CookieConsentPartial" />
     <main role="main" class="container">
         <div class="row">
-                <div class="col-md-9 blog-main">
-                    @RenderBody()
-                </div>
-                <aside class="col-md-3">
-                    <div class="widgets">
-                        <div class="widget">
-                            <h4 class="widget-header">Categories</h4>
-                            <div class="widget-content">
-                                <ul class="widget-categories">
-                                    @foreach (var t in cats)
-                                    {
-                                        <li>
-                                            <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="widget">
-                            <h4 class="widget-header">Tags</h4>
-                            <div class="widget-content">
-                                <ul class="widget-tags">
-                                    @foreach (var t in tags)
-                                    {
-                                        <li>
-                                            <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
-                                            <span class="tag-multiplier">× @t.Count</span>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="widget">
-                            <h4 class="widget-header">Archives</h4>
-                            <div class="widget-content">
-                                <ul class="month-list">
-                                    @foreach (var year in years)
-                                    {
-                                        <li class="year">
-                                            @year.Key
-                                            <ul class="months">
-                                                @foreach (var item in year.Value)
-                                                {
-                                                    <li>
-                                                        <a href="@item.Url">@item.Title</a> (@item.Count)
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
+            <div class="col-md-9 blog-main">
+                @RenderBody()
+            </div>
+            <aside class="col-md-3">
+                <div class="widgets">
+                    <div class="widget">
+                        <h4 class="widget-header">Categories</h4>
+                        <div class="widget-content">
+                            <ul class="widget-categories">
+                                @foreach (var t in cats)
+                                {
+                                    <li>
+                                        <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
+                                    </li>
+                                }
+                            </ul>
                         </div>
                     </div>
-                </aside>
+                    <div class="widget">
+                        <h4 class="widget-header">Tags</h4>
+                        <div class="widget-content">
+                            <ul class="widget-tags">
+                                @foreach (var t in tags)
+                                {
+                                    <li>
+                                        <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
+                                        <span class="tag-multiplier">× @t.Count</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Archives</h4>
+                        <div class="widget-content">
+                            <ul class="month-list">
+                                @foreach (var year in years)
+                                {
+                                    <li class="year">
+                                        @year.Key
+                                        <ul class="months">
+                                            @foreach (var item in year.Value)
+                                            {
+                                                <li>
+                                                    <a href="@item.Url">@item.Title</a> (@item.Count)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
     </main>
     <footer class="footer">
@@ -109,15 +118,15 @@
         </div>
     </footer>
     @*<script async src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>*@
+        <script>hljs.initHighlightingOnLoad();</script>*@
     @RenderSection("Scripts", required: false)
     @*<script type="text/javascript">
-        $(document).ready(function () {
-            $('.month-list .year').click(function () {
-                $(this).find('.months').slideToggle();
+            $(document).ready(function () {
+                $('.month-list .year').click(function () {
+                    $(this).find('.months').slideToggle();
+                });
             });
-        });
-    </script>*@
+        </script>*@
     @if (showDisqus)
     {
         <script id="dsq-count-scr" src="@string.Format("//{0}.disqus.com/count.js", blogSettings.DisqusShortname)" async></script>
