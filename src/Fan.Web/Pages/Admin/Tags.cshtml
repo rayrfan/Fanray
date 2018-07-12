@@ -1,0 +1,48 @@
+﻿@page
+@model Fan.Web.Pages.Admin.TagsModel
+@{
+    ViewData["Title"] = "Tags";
+    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+
+<blog-tags inline-template>
+    <v-container>
+        <v-tabs class="elevation-1">
+            <v-tab>
+                Tags <v-chip small>{{ tagCount }}</v-chip>
+            </v-tab>
+        </v-tabs>
+        <v-dialog v-model="tagDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <h3>Add New Tag</h3>
+                    <v-spacer></v-spacer>
+
+                </v-card-title>
+                <v-card-actions>
+                    <v-btn color="primary" flat @@click.stop="tagDialog=false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-btn fab
+               bottom
+               right
+               color="pink"
+               dark
+               fixed
+               @@click.stop="tagDialog = true">
+            <v-icon>add</v-icon>
+        </v-btn>
+    </v-container>
+</blog-tags>
+
+@section ComponentScripts {
+    <script>
+        Vue.component('blog-tags', {
+            data: () => ({
+                tagCount: 1,
+                tagDialog: false,
+            }),
+        });
+    </script>
+}
