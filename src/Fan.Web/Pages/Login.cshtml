@@ -10,21 +10,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>Login - Fanray</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.0.19/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.1.4/dist/vuetify.min.css" rel="stylesheet">
     <style>
         [v-cloak] {
             display: none
         }
     </style>
-    <environment include="Development">
-        <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.19/dist/vuetify.js"></script>
-    </environment>
-    <environment exclude="Development">
-        <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.0.19/dist/vuetify.min.js"></script>
-    </environment>
-    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -61,10 +52,15 @@
         </v-app>
     </div>
     <environment include="Development">
+        <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.4/dist/vuetify.js"></script>
         <script src="~/js/login.js"></script>
     </environment>
     <environment exclude="Development">
+        <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.1.4/dist/vuetify.min.js"></script>
         <script src="~/js/login.min.js?v=1.1"></script>
     </environment>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
 </body>
 </html>
