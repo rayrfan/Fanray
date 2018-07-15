@@ -127,9 +127,6 @@
                             </v-btn>
                         </v-card-actions>
                     </v-card>
-
-                    @*<v-btn color="blue-grey"
-                class="white--text">Delete post</v-btn>*@
                 </v-list>
             </v-navigation-drawer>
             @* Topbar *@
@@ -141,9 +138,8 @@
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
                 <v-btn>Preview</v-btn>
-                <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" v-text="saveText" color="orange"></v-btn>
+                <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" color="orange">{{ saveText }}</v-btn>
                 <v-spacer></v-spacer>
-                @*<v-btn @@click="revert" v-if="published">Revert to draft</v-btn>*@
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
@@ -189,15 +185,13 @@
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
         <script src="https://unpkg.com/vuetify@1.1.4/dist/vuetify.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script src="https://unpkg.com/quill@1.3.6/dist/quill.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
         <script src="https://unpkg.com/vuetify@1.1.4/dist/vuetify.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script src="https://unpkg.com/quill@1.3.6/dist/quill.min.js"></script>
     </environment>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="https://unpkg.com/quill@1.3.6/dist/quill.min.js"></script>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/lib/quill-image-resize-module/image-resize.min.js"></script>
     <script>
@@ -281,7 +275,7 @@
                 this.initHighlight();
                 this.initEditor();
             },
-            methods: {                
+            methods: {
                 initEditor() {
                     this.quill = new Quill('#editor', {
                         modules: {
@@ -309,7 +303,7 @@
 
                         // auto save
                         let typingTimer;
-                        let doneTypingInterval = 5000;  
+                        let doneTypingInterval = 5000;
                         this.quill.on('text-change', (delta) => {
                             this.change = this.change.compose(delta);
                             clearTimeout(typingTimer);
@@ -330,7 +324,7 @@
 
                     // media
                     let toolbar = this.quill.getModule('toolbar');
-                    toolbar.addHandler('image', () => this.mediaDialogVisible = true );    
+                    toolbar.addHandler('image', () => this.mediaDialogVisible = true);
                 },
                 initHighlight() {
                     hljs.configure({
@@ -365,7 +359,7 @@
                     this.published = false;
                     this.pubText = this.published ? 'Update' : 'Publish';
                     this.saveDraft();
-                },              
+                },
                 pub() {
                     this.closing = false;
                     this.pubClicked = true;
