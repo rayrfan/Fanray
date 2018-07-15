@@ -44,12 +44,11 @@
                                  :clipped="$vuetify.breakpoint.mdAndUp"
                                  app
                                  v-model="drawer">
-                <v-list dense>
-                    <v-card v-if="published"
-                            color="grey lighten-4" style="margin-bottom:8px">
+                <div style="padding: 5px">
+                    <v-card v-if="published" style="margin-bottom:8px">
                         <v-container fill-height
                                      fluid
-                                     pa-2>
+                                     pa-0>
                             <v-layout fill-height>
                                 <v-flex xs12 align-end flexbox>
                                     <div class="caption" style="color:#666">Status</div>
@@ -81,7 +80,6 @@
                             full-width
                             @@input="onFieldsChange">
                         <v-text-field label="Date"
-                                      box
                                       slot="activator"
                                       v-model="date"
                                       readonly></v-text-field>
@@ -90,29 +88,32 @@
                                        scrollable
                                        @@input="$refs.menuDate.save(date)"></v-date-picker>
                     </v-menu>
+
                     <v-select label="Category"
                               v-model="selectedCatId"
                               :items="cats"
                               item-value="value"
-                              box
                               dense
                               @@input="onFieldsChange"></v-select>
-                    <v-select label="Tags"
-                              v-model="selectedTags"
-                              :items="tags"
-                              box
-                              small-chips
-                              multiple
-                              dense
-                              @@input="onFieldsChange"></v-select>
+
+                    <v-combobox label="Tags"
+                                hint="When you type in a new tag use tab to delimit."
+                                v-model="selectedTags"
+                                :items="tags"
+                                dense
+                                multiple
+                                small-chips
+                                deletable-chips
+                                @@input="onFieldsChange"
+                                ></v-combobox>
+
                     <v-text-field label="Slug"
-                                  box
                                   v-model="slug"
                                   @@input="onFieldsChange"></v-text-field>
+
                     <v-textarea label="Excerpt"
-                                box
-                                height="250px"
                                 :value="excerpt"
+                                auto-grow
                                 @@input="onFieldsChange"></v-textarea>
 
                     <v-card flat
@@ -127,7 +128,7 @@
                             </v-btn>
                         </v-card-actions>
                     </v-card>
-                </v-list>
+                </div>
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
