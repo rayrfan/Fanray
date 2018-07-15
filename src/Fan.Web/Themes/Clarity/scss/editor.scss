@@ -149,11 +149,6 @@ $content-font-size: 1.13rem;
     a {
         color: $color-primary;
         text-decoration: none;
-
-        &:hover, &:active, &:visited {
-            color: #111;
-            text-decoration: underline;
-        }
     }
 
     img {
