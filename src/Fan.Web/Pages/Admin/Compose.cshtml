@@ -197,6 +197,24 @@
     <script src="~/lib/quill-image-resize-module/image-resize.min.js"></script>
     <script>
         let Delta = Quill.import('delta');
+        const Clipboard = Quill.import('modules/clipboard');
+        class PlainClipboard extends Clipboard {
+            onPaste(e) {
+                e.preventDefault()
+                const range = this.quill.getSelection()
+                const text = e.clipboardData.getData('text/plain')
+                const delta = new Delta()
+                    .retain(range.index)
+                    .delete(range.length)
+                    .insert(text)
+                const index = text.length + range.index
+                const length = 0
+                this.quill.updateContents(delta, 'silent')
+                this.quill.setSelection(index, length, 'silent')
+                this.quill.scrollIntoView()
+            }
+        }
+        Quill.register('modules/clipboard', PlainClipboard, true);
 
         var app = new Vue({
             el: '#app',
