@@ -22,3 +22,17 @@
     }
 }
 
+.gallery img {
+    object-fit: cover;
+    width: 200px;
+    height: 200px;
+    margin: 10px 0 0 10px;
+}
+
+@media (max-width: 767px) {
+    .gallery img {
+        width: 168px;
+        height: 168px;
+        margin: 8px 0 0 8px;
+    }
+}

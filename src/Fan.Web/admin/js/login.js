@@ -1,5 +1,5 @@
 ﻿/**
- * v1.1 @see Login.cshtml
+ * @see Login.cshtml
  */
 new Vue({
     el: '#app',
