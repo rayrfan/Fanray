@@ -212,6 +212,15 @@
                 this.quill.updateContents(delta, 'silent')
                 this.quill.setSelection(index, length, 'silent')
                 this.quill.scrollIntoView()
+
+                clearTimeout(this.typingTimer);
+                if (!app.published) {
+                    app.showSave = true;
+                    app.disableSave = false;
+                    app.saveText = 'Save';
+
+                    this.typingTimer = setTimeout(app.saveDraft, app.doneTypingInterval);
+                }
             }
         }
         Quill.register('modules/clipboard', PlainClipboard, true);
@@ -253,6 +262,7 @@
                 mediaDialogVisible: false,
                 images: [],
                 change: null,
+                doneTypingInterval: 5000,
             }),
             computed: {
                 showMediaDialog: {
@@ -322,7 +332,6 @@
 
                         // auto save
                         let typingTimer;
-                        let doneTypingInterval = 5000;
                         this.quill.on('text-change', (delta) => {
                             this.change = this.change.compose(delta);
                             clearTimeout(typingTimer);
@@ -331,7 +340,7 @@
                                 this.disableSave = false;
                                 this.saveText = 'Save';
 
-                                typingTimer = setTimeout(this.saveDraft, doneTypingInterval);
+                                typingTimer = setTimeout(this.saveDraft, this.doneTypingInterval);
                             }
                         });
                         window.onbeforeunload = () => {
