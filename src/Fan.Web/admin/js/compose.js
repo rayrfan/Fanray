@@ -186,6 +186,7 @@ var app = new Vue({
                 .catch(err => { console.log(err); });
 
             this.change = new Delta();
+            this.fieldChanged = false;
             this.saveText = 'Saved';
         },
         revert() {
