@@ -16,7 +16,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>@title - Clarity Theme</title>
+    <title>@title</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta property="og:type" content="website" />
@@ -60,16 +60,16 @@
             <aside class="col-md-3">
                 <div class="widgets">
                     <div class="widget">
-                        <h4 class="widget-header">Categories</h4>
+                        <h4 class="widget-header">Follow me</h4>
                         <div class="widget-content">
-                            <ul class="widget-categories">
-                                @foreach (var t in cats)
-                                {
-                                    <li>
-                                        <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
-                                    </li>
-                                }
-                            </ul>
+                            <div class="social-icons">
+                                <a href="/feed" style="font-size:28px">
+                                    <i class="icon-rss" aria-hidden="true" style="color:orange"></i>
+                                </a>
+                                <a href="https://github.com/FanrayMedia" style="font-size:30px">
+                                    <i class="icon-github" aria-hidden="true" style="color:black"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="widget">
@@ -81,6 +81,19 @@
                                     <li>
                                         <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
                                         <span class="tag-multiplier">× @t.Count</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h4 class="widget-header">Categories</h4>
+                        <div class="widget-content">
+                            <ul class="widget-categories">
+                                @foreach (var t in cats)
+                                {
+                                    <li>
+                                        <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
                                     </li>
                                 }
                             </ul>
@@ -117,6 +130,7 @@
             <span class="text-muted pull-right">Powered by <a href="https://github.com/FanrayMedia/Fanray"><strong>Fanray</strong></a></span>
         </div>
     </footer>
+    <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/FanrayMedia/Fanray" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
     @RenderSection("Scripts", required: false)
     @if (showDisqus)
     {

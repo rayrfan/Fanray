@@ -27,7 +27,13 @@
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem 1.5rem;
         font-size: .875rem;
-        color: rgba(255, 255, 255, 0.6)
+        color: rgba(255, 255, 255, 0.6);
+
+        .social-icons {
+            a {
+                text-decoration: none;
+            }
+        }
     }
 
     ul {
@@ -63,7 +69,7 @@
 
 .widget-tags {
     .tag {
-        padding: 4px 12px;
+        padding: 3px 12px 5px 12px;
         text-decoration: none;
         line-height: 2;
         white-space: nowrap;

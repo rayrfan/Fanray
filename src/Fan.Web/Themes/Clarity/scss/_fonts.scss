@@ -1,7 +1,7 @@
 ﻿@font-face {
     font-family: 'icomoon';
-    src: url('fonts/icomoon.eot?1gmekt');
-    src: url('fonts/icomoon.eot?1gmekt#iefix') format('embedded-opentype'), url('fonts/icomoon.ttf?1gmekt') format('truetype'), url('fonts/icomoon.woff?1gmekt') format('woff'), url('fonts/icomoon.svg?1gmekt#icomoon') format('svg');
+    src: url('fonts/icomoon.eot?2almua');
+    src: url('fonts/icomoon.eot?2almua#iefix') format('embedded-opentype'), url('fonts/icomoon.ttf?2almua') format('truetype'), url('fonts/icomoon.woff?2almua') format('woff'), url('fonts/icomoon.svg?2almua#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -20,6 +20,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-heart:before {
+    content: "\f004";
+}
+
 .icon-user:before {
     content: "\f007";
 }
@@ -36,6 +40,10 @@
     content: "\f02c";
 }
 
+.icon-eye:before {
+    content: "\f06e";
+}
+
 .icon-calendar:before {
     content: "\f073";
 }
@@ -46,6 +54,14 @@
 
 .icon-folder:before {
     content: "\f07b";
+}
+
+.icon-heart-o:before {
+    content: "\f08a";
+}
+
+.icon-sign-in:before {
+    content: "\f090";
 }
 
 .icon-twitter:before {
@@ -60,12 +76,40 @@
     content: "\f09a";
 }
 
+.icon-github:before {
+    content: "\f09b";
+}
+
+.icon-feed:before {
+    content: "\f09e";
+}
+
+.icon-rss:before {
+    content: "\f09e";
+}
+
 .icon-google-plus:before {
     content: "\f0d5";
 }
 
 .icon-linkedin:before {
     content: "\f0e1";
+}
+
+.icon-github-alt:before {
+    content: "\f113";
+}
+
+.icon-youtube-play:before {
+    content: "\f16a";
+}
+
+.icon-stack-overflow:before {
+    content: "\f16c";
+}
+
+.icon-instagram:before {
+    content: "\f16d";
 }
 
 .icon-share-alt:before {
