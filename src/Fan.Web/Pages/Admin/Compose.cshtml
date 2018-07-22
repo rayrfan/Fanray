@@ -27,90 +27,100 @@
                                  :clipped="$vuetify.breakpoint.mdAndUp"
                                  app
                                  v-model="drawer">
-                <div style="padding: 5px">
-                    <v-card v-if="published" style="margin-bottom:8px">
-                        <v-container fill-height
-                                     fluid
-                                     pa-0>
-                            <v-layout fill-height>
-                                <v-flex xs12 align-end flexbox>
-                                    <div class="caption" style="color:#666">Status</div>
-                                    <div style="text-align:center;font-size:inherit">
-                                        <span style="color:teal;padding-right: 5px;font-weight:bold">Published</span><span>on 2018-09-06</span>
-                                    </div>
-                                </v-flex>
-                            </v-layout>
-                        </v-container>
-                        <v-card-actions>
-                            <v-btn small
-                                   style="width:100%"
-                                   color="grey darken-2"
-                                   class="white--text"
-                                   @@click="revert">
-                                <v-icon left dark>undo</v-icon>
-                                Revert to draft
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
+                <v-expansion-panel v-model="panel" expand>
+                    <v-expansion-panel-content>
+                        <div slot="header">Status</div>
+                        <v-card v-if="published" style="margin-bottom:8px">
+                            <v-container fill-height fluid pa-0>
+                                <v-layout fill-height>
+                                    <v-flex xs12 align-end flexbox>
+                                        <div style="text-align:center;font-size:inherit">
+                                            <span style="color:teal;padding-right: 5px;font-weight:bold">Published</span><span>on 2018-09-06</span>
+                                        </div>
+                                    </v-flex>
+                                </v-layout>
+                            </v-container>
+                            <v-card-actions>
+                                <v-btn small
+                                       style="width:100%;color:#4FC3F7"
+                                       color="gray"
+                                       @@click="revert">
+                                    <v-icon left dark>undo</v-icon>
+                                    Revert to draft
+                                </v-btn>
+                            </v-card-actions>
+                            <div style="padding:0 12px">
+                                <v-menu ref="menuDate"
+                                        :close-on-content-click="false"
+                                        v-model="menuDate"
+                                        :return-value.sync="date"
+                                        lazy
+                                        transition="scale-transition"
+                                        offset-y
+                                        full-width
+                                        @@input="onFieldsChange">
+                                    <v-text-field label="Post Date"
+                                                  slot="activator"
+                                                  v-model="date"
+                                                  readonly></v-text-field>
+                                    <v-date-picker v-model="date"
+                                                   no-title
+                                                   scrollable
+                                                   @@input="$refs.menuDate.save(date)"></v-date-picker>
+                                </v-menu>
+                            </div>
+                        </v-card>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <div slot="header">Category & Tags</div>
+                        <v-card>
+                            <v-card-text>
+                                <v-select label="Category"
+                                          v-model="selectedCatId"
+                                          :items="cats"
+                                          item-value="value"
+                                          dense
+                                          @@input="onFieldsChange"></v-select>
+                                <v-combobox label="Tags"
+                                            hint="When you type in a new tag use tab to delimit."
+                                            v-model="selectedTags"
+                                            :items="tags"
+                                            dense
+                                            multiple
+                                            small-chips
+                                            deletable-chips
+                                            @@input="onFieldsChange"></v-combobox>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <div slot="header">Slug & Excerpt</div>
+                        <v-card>
+                            <v-card-text>
+                                <v-text-field label="Slug"
+                                              v-model="slug"
+                                              @@input="onFieldsChange"></v-text-field>
+                                <v-textarea label="Excerpt"
+                                            v-model="excerpt"
+                                            auto-grow
+                                            @@input="onFieldsChange"></v-textarea>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
 
-                    <v-menu ref="menuDate"
-                            :close-on-content-click="false"
-                            v-model="menuDate"
-                            :return-value.sync="date"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            @@input="onFieldsChange">
-                        <v-text-field label="Date"
-                                      slot="activator"
-                                      v-model="date"
-                                      readonly></v-text-field>
-                        <v-date-picker v-model="date"
-                                       no-title
-                                       scrollable
-                                       @@input="$refs.menuDate.save(date)"></v-date-picker>
-                    </v-menu>
-
-                    <v-select label="Category"
-                              v-model="selectedCatId"
-                              :items="cats"
-                              item-value="value"
-                              dense
-                              @@input="onFieldsChange"></v-select>
-
-                    <v-combobox label="Tags"
-                                hint="When you type in a new tag use tab to delimit."
-                                v-model="selectedTags"
-                                :items="tags"
-                                dense
-                                multiple
-                                small-chips
-                                deletable-chips
-                                @@input="onFieldsChange"></v-combobox>
-
-                    <v-text-field label="Slug"
-                                  v-model="slug"
-                                  @@input="onFieldsChange"></v-text-field>
-
-                    <v-textarea label="Excerpt"
-                                v-model="excerpt"
-                                auto-grow
-                                @@input="onFieldsChange"></v-textarea>
-
-                    <v-card flat
-                            style="margin-bottom:8px">
-                        <v-card-actions>
-                            <v-btn small
-                                   style="width:100%"
-                                   color="grey darken-2"
-                                   class="white--text">
-                                <v-icon left dark>delete_forever</v-icon>
-                                Delete post
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </div>
+                <v-card flat
+                        style="margin-bottom:8px">
+                    <v-card-actions>
+                        <v-btn small
+                               style="width:100%"
+                               color="grey darken-2"
+                               class="white--text">
+                            <v-icon left dark>delete_forever</v-icon>
+                            Delete post
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
@@ -193,6 +203,7 @@
                 closing: true,
                 fieldChanged: false,
                 drawer: null,
+                panel: [true, true, true],
                 menuDate: false,
                 date: '',
                 selectedCatId: 1,
