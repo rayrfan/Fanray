@@ -30,11 +30,13 @@ $content-font-size: 1.13rem;
     padding: 18px 0;
 
     #post-title {
-        line-height: 1;
-        font-size: 2.5rem;
-        margin: 0 0 0.5rem;
-        padding-top: 10px;
-        font-weight: 700;
+        resize: none;
+        word-wrap: break-word;
+        font-family: "Noto Serif",Georgia,"Times New Roman",Times,serif;
+        font-size: 28px;
+        color: #2e4453;
+        font-weight: 600;
+        line-height: normal;
     }
 }
 
@@ -45,7 +47,7 @@ $content-font-size: 1.13rem;
         padding: 18px 0;
 
         #post-title {
-            font-size: 2rem;
+            font-size: 24px;
         }
     }
 }

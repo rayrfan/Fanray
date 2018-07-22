@@ -121,22 +121,24 @@
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
                 <v-btn>Preview</v-btn>
-                <v-btn @@click="saveDraft" flat small v-if="showSave" :disabled="disableSave" color="orange">{{ saveText }}</v-btn>
+                <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
             <v-content>
                 <div id="content-area">
-                    <v-text-field id="post-title"
-                                  label="Title"
-                                  v-model="title"
-                                  placeholder="Title"
-                                  solo
-                                  height="70px"
-                                  multip
-                                  @@input="onFieldsChange"
-                                  @@change="saveDraft"></v-text-field>
+                    <v-textarea tabindex="1"
+                                id="post-title"
+                                label=""
+                                auto-grow
+                                placeholder="Title"
+                                aria-label="Edit title"
+                                rows="1"
+                                @@input="onFieldsChange"
+                                @@keyup.enter="titleEnter"
+                                v-model="title"></v-textarea>
+
                     <textarea name="content" id="editor">{{ content }}</textarea>
                 </div>
             </v-content>
@@ -185,8 +187,8 @@
                 published: false,
                 pubClicked: false,
                 pubText: '',
-                showSave: false,
-                disableSave: false,
+                saveVisible: false,
+                saveDisabled: false,
                 saveText: 'Save',
                 closing: true,
                 fieldChanged: false,
@@ -267,8 +269,8 @@
                                     clearTimeout(typingTimer);
                                     if (!app.published) {
                                         console.log('here');
-                                        app.showSave = true;
-                                        app.disableSave = false;
+                                        app.saveVisible = true;
+                                        app.saveDisabled = false;
                                         app.saveText = 'Save';
                                         typingTimer = setTimeout(app.saveDraft, doneTypingInterval);
                                     }
@@ -292,14 +294,14 @@
                 onFieldsChange() {
                     this.fieldChanged = true;
                     if (this.published) return;
-                    this.showSave = true;
-                    this.disableSave = false;
+                    this.saveVisible = true;
+                    this.saveDisabled = false;
                     this.saveText = 'Save';
                 },
                 saveDraft() {
                     console.log('save draft');
-                    this.showSave = true;
-                    this.disableSave = true;
+                    this.saveVisible = true;
+                    this.saveDisabled = true;
                     this.saveText = 'Saving...';
 
                     console.log(this.payload);
@@ -368,6 +370,9 @@
                     this.editor.model.insertContent(modelFragment, this.editor.model.document.selection);
                     //this.mediaDialogVisible = false;
                 },
+                titleEnter() {
+                    this.title = this.title.replace(/\n/g, ' ');
+                }
             },
         });
     </script>
