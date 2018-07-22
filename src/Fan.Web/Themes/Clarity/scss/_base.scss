@@ -37,8 +37,17 @@ h1 {
     }
 }
 p {
-    /* default is too small */
-    font-size: 1.13rem;
+    /* default is too small, interestingly 1.1 here looks identical to 1.13 shown in editor 
+    */
+    font-size: 1.1rem;
+    /* inline code */
+    code {
+        background: rgba(202,205,207,0.3);
+        padding: .2em .6em;
+        border-radius: 3px;
+        color: inherit;
+        font-size: smaller;
+    }
 }
 img {
     /* scale image to fit page https://www.w3schools.com/css/css_rwd_images.asp */
@@ -60,8 +69,18 @@ pre {
 blockquote {
     margin: 0 0 1rem;
     border-left: 2px gray solid;
-    padding: 16px;
+    padding: 13px;
     background: #eee;
+    font-style:italic;
+
+    p {
+        margin-bottom: 0;
+    }
+}
+/* image caption */
+figcaption {
+    font-size: smaller;
+    text-align: center;
 }
 
 /* the shadow under the topbar */

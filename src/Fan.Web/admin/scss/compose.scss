@@ -1,25 +1,12 @@
-﻿[v-cloak] {
+﻿// styles for Compose.cshtml
+
+[v-cloak] {
     display: none
 }
 
 .drawer {
     padding: 0 8px;
     background-color: blue
-}
-
-/* make quill bar sticky when scroll */
-.ql-toolbar.ql-snow {
-    position: sticky;
-    z-index: 2; /* so ql toolbar won't be on top of drawer */
-    background: white;
-    top: 64px; /* height of the topbar */
-}
-
-/* smaller screen */
-@media (max-width: 767px) {
-    .ql-toolbar.ql-snow {
-        top: 56px;
-    }
 }
 
 .gallery img {

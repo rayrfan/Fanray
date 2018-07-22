@@ -24,9 +24,9 @@ $content-font-size: 1.13rem;
    Center title and editor to a fixed width: 800px, regardless of drawer action 
    https://www.w3schools.com/css/css_align.asp
 */
-#editor-area {
+#content-area {
     margin: auto;
-    width: 800px;
+    width: 818px;
     padding: 18px 0;
 
     #post-title {
@@ -40,7 +40,7 @@ $content-font-size: 1.13rem;
 
 /* smaller screen */
 @media (max-width: 767px) {
-    #editor-area {
+    #content-area {
         width: auto;
         padding: 18px 0;
 
@@ -49,8 +49,10 @@ $content-font-size: 1.13rem;
         }
     }
 }
-
-#editor {
+/*
+    https://docs.ckeditor.com/ckeditor5/latest/builds/guides/faq.html#what-happened-to-the-contentscss-file-how-do-i-style-the-content-of-the-editor
+*/
+.ck-content {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     border: 0 solid black;
 
@@ -116,6 +118,15 @@ $content-font-size: 1.13rem;
         font-size: $content-font-size;
         margin-top: 0;
         margin-bottom: $paragraph-margin-bottom;
+        /* inline code */
+        code {
+            background: rgba(202,205,207,0.3);
+            padding: .1em .2em;
+            border-radius: 3px;
+            color: inherit;
+            font-weight: normal;
+            box-shadow: none;
+        }
     }
 
     hr {
@@ -167,17 +178,20 @@ $content-font-size: 1.13rem;
     blockquote {
         margin: 0 0 1rem;
         border-left: 2px gray solid;
-        padding: 16px;
+        padding: 13px;
         background: #eee;
+        font-style: italic;
+
+        p {
+            margin-bottom: 0;
+        }
     }
 
     video {
         display: block;
         width: 100%
     }
-}
 
-.ql-editor {
     ol, ul {
         padding-left: 1em;
         font-size: $content-font-size;
@@ -185,15 +199,16 @@ $content-font-size: 1.13rem;
         margin-bottom: 1rem;
     }
 
-    ul li:not(.ql-direction-rtl) {
-        /* couldn't get editor show square */
+    ul li {
         padding-left: 0;
+        list-style: square;
     }
 
     ol li:not(.ql-direction-rtl) {
         padding-left: 0;
     }
 }
+
 
 .ql-snow .ql-editor pre.ql-syntax {
     background-color: white;
