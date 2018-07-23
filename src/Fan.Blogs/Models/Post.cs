@@ -125,6 +125,9 @@ namespace Fan.Blogs.Models
         /// <summary>
         /// When user last updated a draft, when the post is published this value is null.
         /// </summary>
+        /// <remarks>
+        /// TODO: This actually should be called DraftSavedOn
+        /// </remarks>
         public DateTimeOffset? UpdatedOn { get; set; }
 
         /// <summary>

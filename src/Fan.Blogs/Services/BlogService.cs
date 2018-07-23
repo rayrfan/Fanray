@@ -426,7 +426,7 @@ namespace Fan.Blogs.Services
         {
             var post = await QueryPostAsync(id, EPostType.BlogPost);
             if (post == null) throw new FanException("Blog post not found.");
-            return await GetBlogPostAsync(post);
+            return await GetBlogPostAsync(post, parseShortcode: false);
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace Fan.Blogs.Services
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
             if (post == null) throw new FanException("Blog post not found.");
-            return await GetBlogPostAsync(post);
+            return await GetBlogPostAsync(post, parseShortcode: true);
         }
 
         /// <summary>
@@ -643,7 +643,7 @@ namespace Fan.Blogs.Services
             };
             foreach (var post in posts)
             {
-                blogPostList.Posts.Add(await GetBlogPostAsync(post));
+                blogPostList.Posts.Add(await GetBlogPostAsync(post, parseShortcode: true));
             }
 
             return blogPostList;
@@ -729,8 +729,8 @@ namespace Fan.Blogs.Services
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
             }
 
-            // UpdatedOn
-            //if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = post.CreatedOn;
+            // UpdatedOn (DraftSavedOn)
+            // when saving a draft this should be utc now, when publishing it becomes null
             if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = DateTimeOffset.UtcNow;
             else post.UpdatedOn = null;
 
@@ -832,11 +832,12 @@ namespace Fan.Blogs.Services
         /// Gets a <see cref="BlogPost"/> for display to client from a <see cref="Post"/>.
         /// </summary>
         /// <param name="post"></param>
+        /// <param name="parseShortcode">True will parse shortcode into html, false otherwise.</param>
         /// <returns></returns>
         /// <remarks>
         /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
-        private async Task<BlogPost> GetBlogPostAsync(Post post)
+        private async Task<BlogPost> GetBlogPostAsync(Post post, bool parseShortcode)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
@@ -871,7 +872,7 @@ namespace Fan.Blogs.Services
             }
 
             // Shortcodes
-            blogPost.Body = _shortcodeSvc.Parse(post.Body);
+            blogPost.Body = parseShortcode ? _shortcodeSvc.Parse(post.Body) : post.Body;
 
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
