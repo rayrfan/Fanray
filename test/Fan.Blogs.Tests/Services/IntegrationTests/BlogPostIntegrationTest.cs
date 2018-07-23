@@ -209,7 +209,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
 
             // CreatedOn & UpdatedOn
             Assert.True(result.CreatedOn > wasCreatedOn);
-            Assert.True(result.UpdatedOn == result.CreatedOn);
+            Assert.True(result.UpdatedOn.HasValue);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Fan.Blogs.Tests.Services.IntegrationTests
             var postNow = await _blogSvc.CreatePostAsync(blogPost);
 
             // Assert
-            Assert.Equal("now", postNow.CreatedOnFriendly);
+            Assert.Equal("now", postNow.CreatedOnDisplay);
         }
 
         /// <summary>

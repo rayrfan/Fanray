@@ -10,8 +10,13 @@
 .blog-main {
     article {
         background: #fff;
-        padding: 2rem 3rem 1rem 3rem;
+        /* controls how wide your article is */
+        padding: 2rem 1rem 1rem 1rem;
         width: 100%;
+        /*so we could have a img aligned to side*/
+        position: relative;
+        overflow: hidden;
+        clear: both;
 
         header {
             margin-bottom: 0.8rem;
@@ -34,7 +39,7 @@
 
             @media (max-width: 767px) {
                 h1 {
-                    font-size:2.25rem;
+                    font-size: 2.25rem;
                 }
             }
         }
@@ -94,5 +99,24 @@
     .category-title, .tag-title {
         font-weight: bold;
         padding: 2rem 3rem 0 3rem;
+    }
+    // https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-styles
+    .image-style-align-left {
+        float: left;
+        margin-right: 0.5em;
+    }
+
+    .image-style-align-right {
+        float: right;
+        margin-left: 0.5em;
+    }
+
+    .image-style-align-left, .image-style-align-right {
+        max-width: 50%;
+    }
+
+    .image-style-align-left, .image-style-align-right, .image {
+        border: 1px solid #ccc;
+        padding: 3px;
     }
 }

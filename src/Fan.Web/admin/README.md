@@ -1,6 +1,7 @@
 ﻿# Admin client
 
 This folder contains javascript and scss for the Admin Console, open this folder in VS Code is recommended.
+Change directory to `Fan.Web/admin`, then perform the following.
 
 ## JavaScript
 

@@ -26,6 +26,8 @@ namespace Fan.Web.Pages.Admin
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
 
+        private const string DATE_FORMAT = "MM/dd/yyyy";
+
         // -------------------------------------------------------------------- constructor
 
         public ComposeModel(
@@ -48,7 +50,6 @@ namespace Fan.Web.Pages.Admin
         public class ComposeVM
         {
             public PostVM Post { get; set; }
-            public bool Published { get; set; }
             public IEnumerable<CatVM> AllCats { get; set; }
             public string[] AllTags { get; set; }
         }
@@ -67,6 +68,9 @@ namespace Fan.Web.Pages.Admin
             public string Excerpt { get; set; }
             public int CategoryId { get; set; }
             public List<string> Tags { get; set; }
+            public bool Published { get; set; }
+            public bool IsDraft { get; set; }
+            public string DraftDate { get; set; }
         }
 
         /// <summary>
@@ -91,7 +95,6 @@ namespace Fan.Web.Pages.Admin
         public async Task<JsonResult> OnGetPostAsync(int postId)
         {
             PostVM postVm;
-            bool published = false;
             if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetPostAsync(postId);
@@ -100,14 +103,15 @@ namespace Fan.Web.Pages.Admin
                     Id = post.Id,
                     Title = post.Title,
                     Body = post.Body,
-                    PostDate = post.CreatedOn.ToString("yyyy-MM-dd"),
+                    PostDate = post.CreatedOn.ToString(DATE_FORMAT),
                     Slug = post.Slug,
                     Excerpt = post.Excerpt,
                     CategoryId = post.CategoryId ?? 1,
                     Tags = post.TagTitles,
+                    Published = post.Status == EPostStatus.Published,
+                    IsDraft = post.Status == EPostStatus.Draft,
+                    DraftDate = post.UpdatedOn.HasValue ? post.UpdatedOn.Value.ToString(DATE_FORMAT) : "",
                 };
-
-                published = post.Status == EPostStatus.Published;
             }
             else // new post
             {
@@ -115,9 +119,11 @@ namespace Fan.Web.Pages.Admin
                 {
                     Title = "",
                     Body = "",
-                    PostDate = DateTimeOffset.Now.ToString("yyyy-MM-dd"),
+                    PostDate = DateTimeOffset.Now.ToString(DATE_FORMAT),
                     CategoryId = 1,
                     Tags = new List<string>(),
+                    Published = false,
+                    IsDraft = false,
                 };
             }
 
@@ -135,7 +141,6 @@ namespace Fan.Web.Pages.Admin
             return new JsonResult(new ComposeVM
             {
                 Post = postVm,
-                Published = published,
                 AllCats = allCats,
                 AllTags = allTags,
             });
@@ -237,7 +242,22 @@ namespace Fan.Web.Pages.Admin
                 blogPost = await _blogSvc.UpdatePostAsync(blogPost);
             }
 
-            return new JsonResult(blogPost);
+            var postVm = new PostVM
+            {
+                Id = blogPost.Id,
+                Title = blogPost.Title,
+                Body = blogPost.Body,
+                PostDate = blogPost.CreatedOn.ToString(DATE_FORMAT),
+                Slug = blogPost.Slug,
+                Excerpt = blogPost.Excerpt,
+                CategoryId = blogPost.CategoryId ?? 1,
+                Tags = blogPost.TagTitles,
+                Published = blogPost.Status == EPostStatus.Published,
+                IsDraft = blogPost.Status == EPostStatus.Draft,
+                DraftDate = blogPost.UpdatedOn.HasValue ? blogPost.UpdatedOnDisplay : "",
+            };
+
+            return new JsonResult(postVm);
         }
 
         /// <summary>

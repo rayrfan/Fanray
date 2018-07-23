@@ -31,7 +31,7 @@
     @RenderSection("Canonical", required: false)
     <link rel="EditURI" type="application/rsd+xml" title="RSD" href="~/rsd" />
     <link rel="wlwmanifest" type="application/wlwmanifest+xml" href="~/wlwmanifest.xml" />
-    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/style.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/style.css" asp-append-version="true" />
     @await Html.PartialAsync("_Analytics")
 </head>
 <body>
@@ -131,6 +131,7 @@
         </div>
     </footer>
     <a class="github-fork-ribbon right-bottom fixed" href="https://github.com/FanrayMedia/Fanray" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+    <script src="~/themes/@coreSettings.Theme/js/syntaxhighlighter.min.js"></script>
     @RenderSection("Scripts", required: false)
     @if (showDisqus)
     {
