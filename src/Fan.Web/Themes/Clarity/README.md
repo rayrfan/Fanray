@@ -35,4 +35,5 @@ The fonts are stored in `Clarity/scss/fonts`, they are referenced in `_font.scss
 
 ### Syntax
 
-Based on default style of [hightlightjs](https://github.com/isagalaev/highlight.js)
+Due to current editor does not support `pre` tag, I'm using shortcode to post code which is
+based on [syntaxhighlighter](https://github.com/syntaxhighlighter/syntaxhighlighter).
