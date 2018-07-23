@@ -54,16 +54,25 @@ namespace Fan.Blogs.Models
         /// - This time is saved in Utc time.
         /// - When a published post is saved as draft, this maintains the post's CreatedOn.
         ///   When draft is published, unless user sets a new datetime, it maintains the original value.
-        /// - When post is display to a user, we show the humanized version <see cref="CreatedOnFriendly"/>
+        /// - When post is display to a user, we show the humanized version <see cref="CreatedOnDisplay"/>
         ///   or a date time string converted to the <see cref="CoreSettings.TimeZoneId"/>.
         /// </remarks>
         public DateTimeOffset CreatedOn { get; set; }
 
         /// <summary>
-        /// User friendly time display, such as "yesterday".
+        /// CreatedOn used for time display, such as "yesterday".
         /// </summary>
         [NotMapped]
-        public string CreatedOnFriendly { get; set; }
+        public string CreatedOnDisplay { get; set; }
+
+        /// <summary>
+        /// UpdatedOn used for display.
+        /// </summary>
+        /// <remarks>
+        /// This is used in the admin console to show the last updated date in user's local timezone.
+        /// </remarks>
+        [NotMapped]
+        public string UpdatedOnDisplay { get; set; }
 
         /// <summary>
         /// The post excerpt.

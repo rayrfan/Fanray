@@ -30,26 +30,39 @@
                 <v-expansion-panel v-model="panel" expand>
                     <v-expansion-panel-content>
                         <div slot="header">Status</div>
-                        <v-card v-if="published" style="margin-bottom:8px">
-                            <v-container fill-height fluid pa-0>
-                                <v-layout fill-height>
-                                    <v-flex xs12 align-end flexbox>
-                                        <div style="text-align:center;font-size:inherit">
-                                            <span style="color:teal;padding-right: 5px;font-weight:bold">Published</span><span>on 2018-09-06</span>
-                                        </div>
-                                    </v-flex>
-                                </v-layout>
-                            </v-container>
-                            <v-card-actions>
-                                <v-btn small
-                                       style="width:100%;color:#4FC3F7"
-                                       color="gray"
-                                       @@click="revert">
-                                    <v-icon left dark>undo</v-icon>
-                                    Revert to draft
-                                </v-btn>
-                            </v-card-actions>
-                            <div style="padding:0 12px">
+                        <v-card>
+                            <div v-if="published">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>on {{ date }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                                <v-card-actions>
+                                    <v-btn small
+                                           style="width:100%;color:#29B6F6"
+                                           color="gray"
+                                           @@click="revert">
+                                        <v-icon left dark>undo</v-icon>
+                                        Revert to draft
+                                    </v-btn>
+                                </v-card-actions>
+                            </div>
+                            <div v-if="isDraft">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span><span>saved on {{ draftDate }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                            </div>
+                            <v-card-text>
                                 <v-menu ref="menuDate"
                                         :close-on-content-click="false"
                                         v-model="menuDate"
@@ -68,7 +81,7 @@
                                                    scrollable
                                                    @@input="$refs.menuDate.save(date)"></v-date-picker>
                                 </v-menu>
-                            </div>
+                            </v-card-text>
                         </v-card>
                     </v-expansion-panel-content>
                     <v-expansion-panel-content>
@@ -195,6 +208,7 @@
             data: () => ({
                 id: 0,
                 published: false,
+                isDraft: false,
                 pubClicked: false,
                 pubText: '',
                 saveVisible: false,
@@ -206,6 +220,7 @@
                 panel: [true, true, true],
                 menuDate: false,
                 date: '',
+                draftDate: '',
                 selectedCatId: 1,
                 cats: [],
                 selectedTags: [],
@@ -266,7 +281,9 @@
                         this.excerpt = resp.data.post.excerpt;
                         this.title = resp.data.post.title;
                         this.content = resp.data.post.body;
-                        this.published = resp.data.published;
+                        this.published = resp.data.post.published;
+                        this.isDraft = resp.data.post.isDraft;
+                        this.draftDate = resp.data.post.draftDate;
                         this.cats = resp.data.allCats;
                         this.tags = resp.data.allTags;
                         this.pubText = this.published ? 'Update' : 'Publish';                      
@@ -320,6 +337,8 @@
                         .then(resp => {
                             this.id = resp.data.id;
                             this.slug = resp.data.slug;
+                            this.draftDate = resp.data.draftDate;
+                            this.isDraft = true;
                             if (window.location.href.endsWith('/compose'))
                                 history.replaceState({}, null, window.location.href + `/${this.id}`);
                         })

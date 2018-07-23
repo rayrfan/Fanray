@@ -25,7 +25,7 @@ namespace Fan.Blogs.ViewModels
             Excerpt = blogPost.Excerpt;
             Author = blogPost.User.DisplayName;
             CreatedOn = blogPost.CreatedOn;
-            CreatedOnFriendly = blogPost.CreatedOnFriendly;
+            CreatedOnDisplay = blogPost.CreatedOnDisplay;
             Tags = blogPost.Tags.OrderBy(t => t.Title).ToList();
             Category = blogPost.Category;
 
@@ -81,9 +81,9 @@ namespace Fan.Blogs.ViewModels
         /// </summary>
         public DateTimeOffset CreatedOn { get; }
         /// <summary>
-        /// CreatedOnFriendly used by displaying blog post.
+        /// CreatedOn used by displaying blog post.
         /// </summary>
-        public string CreatedOnFriendly { get; }
+        public string CreatedOnDisplay { get; }
         public List<Tag> Tags { get; }
         public Category Category { get; }
 

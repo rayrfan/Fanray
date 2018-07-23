@@ -4,7 +4,7 @@
 }
 <div class="post-info clearfix">
     <i class="icon-user" aria-hidden="true"></i><span class="post-author">@post.Author</span>
-    <i class="icon-calendar" aria-hidden="true"></i><span class="post-date">@post.CreatedOnFriendly</span>
+    <i class="icon-calendar" aria-hidden="true"></i><span class="post-date">@post.CreatedOnDisplay</span>
     <i class="icon-folder" aria-hidden="true"></i><span class="post-category"><a href="@post.Category.RelativeLink">@post.Category.Title</a></span>
 @if (post.ShowDisqus)
 {

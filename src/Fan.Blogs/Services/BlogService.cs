@@ -730,7 +730,8 @@ namespace Fan.Blogs.Services
             }
 
             // UpdatedOn
-            if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = post.CreatedOn;
+            //if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = post.CreatedOn;
+            if (blogPost.Status == EPostStatus.Draft) post.UpdatedOn = DateTimeOffset.UtcNow;
             else post.UpdatedOn = null;
 
             // Slug 
@@ -833,7 +834,7 @@ namespace Fan.Blogs.Services
         /// <param name="post"></param>
         /// <returns></returns>
         /// <remarks>
-        /// It readies CreatedOnFriendly, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
+        /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
         private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
@@ -843,9 +844,15 @@ namespace Fan.Blogs.Services
 
             // Friendly post time if the post was published within 2 days
             // else show the actual date time in setting's timezone
-            blogPost.CreatedOnFriendly = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ? 
+            blogPost.CreatedOnDisplay = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ?
                 Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
                 blogPost.CreatedOn.Humanize();
+
+            if (blogPost.UpdatedOn.HasValue)
+            {
+                blogPost.UpdatedOnDisplay =
+                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy"); 
+            }
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
