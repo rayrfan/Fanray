@@ -26,7 +26,7 @@ namespace Fan.Web.Pages.Admin
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
 
-        private const string DATE_FORMAT = "MM/dd/yyyy";
+        private const string DATE_FORMAT = "yyyy-MM-dd";
 
         // -------------------------------------------------------------------- constructor
 
