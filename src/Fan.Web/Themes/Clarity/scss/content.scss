@@ -209,10 +209,10 @@ $content-font-size: 1.13rem;
     ol li:not(.ql-direction-rtl) {
         padding-left: 0;
     }
-}
-
-
-.ql-snow .ql-editor pre.ql-syntax {
-    background-color: white;
-    overflow: visible;
+    // Add image border to match style.css @see _blog.scss
+    // https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-styles
+    .image-style-align-left, .image-style-align-right, figure.image img {
+        border: 1px solid #ccc;
+        padding: 3px;
+    }
 }
