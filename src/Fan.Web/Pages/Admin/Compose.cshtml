@@ -142,7 +142,7 @@
                        fixed>
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
-                <v-btn>Preview</v-btn>
+                @*<v-btn>Preview</v-btn>*@
                 <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn href="/admin">Close</v-btn>
