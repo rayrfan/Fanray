@@ -66,7 +66,7 @@ namespace Fan.Medias
         /// </summary>
         /// <remarks>
         /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
+        /// "{container}/{app}/{size}/{userId}/{year}/{month}/{file}".
         /// </remarks>
         /// <param name="source">The stream of the file.</param>
         /// <param name="appId">Which app uploaded file.</param>
@@ -108,7 +108,7 @@ namespace Fan.Medias
             var root = _hostingEnvironment.WebRootPath;
             var container = _appSettings.MediaContainerName;
             var appName = appId.ToString().ToLowerInvariant();
-            var qualityStr = size.ToString().ToLowerInvariant();
+            var sizeStr = size.ToString().ToLowerInvariant();
             var year = uploadedOn.Year.ToString();
             var month = uploadedOn.Month.ToString("d2");
 
@@ -116,7 +116,7 @@ namespace Fan.Medias
                 root,
                 container,
                 appName,
-                qualityStr,
+                sizeStr,
                 userId,
                 year,
                 month);

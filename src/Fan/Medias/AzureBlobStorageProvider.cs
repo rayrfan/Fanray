@@ -58,7 +58,7 @@ namespace Fan.Medias
         /// </summary>
         /// <remarks>
         /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
+        /// "{container}/{app}/{size}/{userId}/{year}/{month}/{file}".
         /// </remarks>
         /// <param name="source">The bytes of the file.</param>
         /// <param name="appId">Which app uploaded file.</param>
@@ -111,12 +111,12 @@ namespace Fan.Medias
         {
             // blobName "blog/optimized/1/2018/05/filename.ext", container is "media"
             string appName = appId.ToString().ToLowerInvariant();
-            string qualityStr = size.ToString().ToLowerInvariant();
+            string sizeStr = size.ToString().ToLowerInvariant();
             var year = uploadedOn.Year.ToString();
             var month = uploadedOn.Month.ToString("d2");
             string blobName = string.Format("{0}/{1}/{2}/{3}/{4}/{5}",
                 appName,
-                qualityStr,
+                sizeStr,
                 userId,
                 year,
                 month,

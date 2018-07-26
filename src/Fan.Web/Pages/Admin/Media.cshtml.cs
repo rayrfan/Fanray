@@ -81,8 +81,7 @@ namespace Fan.Web.Pages.Admin
                               {
                                   Id = m.Id,
                                   FileName = m.FileName,
-                                  Url = m.Optimized ? $"{MediaService.IMAGE_HANDLER_PATH}/{appName}/optimized/{user.Id}/{m.UploadedOn.Year}/{m.UploadedOn.Month.ToString("d2")}/{m.FileName}" :
-                                  $"{MediaService.IMAGE_HANDLER_PATH}/{appName}/original/{user.Id}/{m.UploadedOn.Year}/{m.UploadedOn.Month.ToString("d2")}/{m.FileName}",
+                                  Url = _mediaSvc.GetImageUrl(m),
                               };
 
             return new ImageListVM

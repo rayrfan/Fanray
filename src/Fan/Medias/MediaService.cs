@@ -1,7 +1,9 @@
 ﻿using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Settings;
 using ImageMagick;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,17 +26,11 @@ namespace Fan.Medias
         /// Images with a width or height longer than this value will be optimized.
         /// </summary>
         public const int IMAGE_OPTIMIZED_SIZE = 800;
-        //public const int IMAGE_OPTIMIZED_SIZE_HEIGHT = 600;
 
         /// <summary>
         /// If image file size exceeds 5MB then use a lower quality.
         /// </summary>
         public const long IMAGE_MAX_LEN = 5 * ByteSize.BytesInMegaByte;
-
-        /// <summary>
-        /// This will prefix the image url to trigger <see cref="Image.cshtml"/>.
-        /// </summary>
-        public const string IMAGE_HANDLER_PATH = "/image";
 
         /// <summary>
         /// Max len for a media filename is 128.
@@ -51,18 +47,18 @@ namespace Fan.Medias
         public static readonly string[] Accepted_Image_Types = { ".jpg", ".jpeg", ".gif", ".png" };
 
         private readonly IStorageProvider _storageProvider;
+        private readonly AppSettings _appSettings;
         private readonly IMediaRepository _mediaRepo;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         // -------------------------------------------------------------------- constructor
 
-        public MediaService(IStorageProvider storageProvider, 
-            IMediaRepository mediaRepo,
-            IHttpContextAccessor httpContextAccessor)
+        public MediaService(IStorageProvider storageProvider,
+            IServiceProvider serviceProvider,
+            IMediaRepository mediaRepo)
         {
             _storageProvider = storageProvider;
+            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
             _mediaRepo = mediaRepo;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         // -------------------------------------------------------------------- public methods
@@ -99,7 +95,7 @@ namespace Fan.Medias
             var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.LongLength, uploadedOn, uploadFrom,
                 EMediaType.Image, width, height, optimized);
 
-            return GetImageUrl(media, uploadFrom);
+            return GetImageUrl(media);
         }
 
         /// <summary>
@@ -134,7 +130,7 @@ namespace Fan.Medias
             var media = await CreateMediaAsync(userId, appType, uniqueFileName, titleAttri, source.Length, uploadedOn, uploadFrom,
                 EMediaType.Image, width, height, optimized);
 
-            return GetImageUrl(media, uploadFrom);
+            return GetImageUrl(media);
         }
 
         public async Task<Media> UpdateMediaAsync(int id, string title, string description)
@@ -161,28 +157,27 @@ namespace Fan.Medias
             return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
         }
 
-        // -------------------------------------------------------------------- private
-
         /// <summary>
         /// Returns absolute, image handler enabled URL to the optimized image if optimization 
         /// happened else to the original image.
         /// </summary>
         /// <param name="media"></param>
-        /// <param name="uploadFrom"></param>
         /// <returns></returns>
-        private string GetImageUrl(Media media, EUploadedFrom uploadFrom)
+        public string GetImageUrl(Media media)
         {
+            var endpoint = _storageProvider.StorageEndpoint;
+            var container = endpoint.EndsWith('/') ? _appSettings.MediaContainerName : $"/{_appSettings.MediaContainerName}";
+            var size = media.Optimized ? "optimized" : "original";
+            var userId = media.UserId;
             var appName = media.AppType.ToString().ToLowerInvariant();
             var year = media.UploadedOn.Year.ToString();
             var month = media.UploadedOn.Month.ToString("d2");
             var fileName = media.FileName;
-            var userId = media.UserId;
-            var request = _httpContextAccessor.HttpContext.Request;
 
-            var quality = media.Optimized ? "optimized" : "original";
-
-            return $"{request.Scheme}://{request.Host}{request.PathBase}{IMAGE_HANDLER_PATH}/{appName}/{quality}/{userId}/{year}/{month}/{fileName}";
+            return $"{endpoint}{container}/{appName}/{size}/{userId}/{year}/{month}/{fileName}";
         }
+
+        // -------------------------------------------------------------------- private
 
         /// <summary>
         /// Takes the original filename user is uploading and returns a slugged filename and title attribute.
