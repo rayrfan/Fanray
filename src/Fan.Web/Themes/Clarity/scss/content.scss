@@ -211,7 +211,7 @@ $content-font-size: 1.13rem;
     }
     // Add image border to match style.css @see _blog.scss
     // https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-styles
-    .image-style-align-left, .image-style-align-right, figure.image img {
+    figure.image img {
         border: 1px solid #ccc;
         padding: 3px;
     }
