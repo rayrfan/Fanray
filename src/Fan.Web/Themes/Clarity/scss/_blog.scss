@@ -115,7 +115,14 @@
         max-width: 50%;
     }
 
-    .image-style-align-left, .image-style-align-right, figure.image img {
+    figure.image {
+        /* makes image centered, without it's align left, it does not affect float left or right image;
+           this will also help match the editor behavior
+        */
+        text-align: center;
+    }
+
+    figure.image img {
         border: 1px solid #ccc;
         padding: 3px;
     }

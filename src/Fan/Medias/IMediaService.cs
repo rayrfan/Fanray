@@ -58,5 +58,12 @@ namespace Fan.Medias
         /// <param name="pageSize"></param>
         /// <returns></returns>
         Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Returns the absolute URL to an image.
+        /// </summary>
+        /// <param name="media"></param>
+        /// <returns></returns>
+        string GetImageUrl(Media media);
     }
 }
