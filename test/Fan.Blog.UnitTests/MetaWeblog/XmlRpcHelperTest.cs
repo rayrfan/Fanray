@@ -881,13 +881,15 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildFaultOutput_With_Exception()
         {
             // Arrange
+            var expected = RESP_FAULT.Replace("\r", "").Replace("\n", "");
             var ex = new MetaWeblogException(EMetaWeblogCode.InvalidRequest, "Invalid request.");
 
             // Act
             var output = _helper.BuildFaultOutput(ex);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_FAULT, output);
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -897,6 +899,8 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildOutput_newPost()
         {
             // Arrange
+            var expected = RESP_NEWPOST.Replace("\r", "").Replace("\n", "");
+
             var resp = new XmlRpcResponse
             {
                 PostId = "2"
@@ -904,9 +908,10 @@ namespace Fan.Blog.UnitTests.MetaWeblog
 
             // Act
             var output = _helper.BuildOutput("metaWeblog.newPost", resp);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_NEWPOST, output);
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -916,6 +921,8 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildOutput_getPost()
         {
             // Arrange
+            var expected = RESP_GETPOST.Replace("\r", "").Replace("\n", "");
+
             var resp = new XmlRpcResponse
             {
                 Post = new MetaPost
@@ -933,9 +940,10 @@ namespace Fan.Blog.UnitTests.MetaWeblog
 
             // Act
             var output = _helper.BuildOutput("metaWeblog.getPost", resp);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_GETPOST, output);
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -945,6 +953,8 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildOutput_getCategories()
         {
             // Arrange
+            var expected = RESP_GETCATEGORIES.Replace("\r", "").Replace("\n", "");
+
             var resp = new XmlRpcResponse();
             resp.Categories.Add(new MetaCategory
             {
@@ -965,9 +975,10 @@ namespace Fan.Blog.UnitTests.MetaWeblog
 
             // Act
             var output = _helper.BuildOutput("metaWeblog.getCategories", resp);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_GETCATEGORIES, output);
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -977,15 +988,18 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildOutput_getTags()
         {
             // Arrange
+            var expected = RESP_GETTAGS.Replace("\r", "").Replace("\n", "");
+
             var resp = new XmlRpcResponse();
             resp.Keywords.Add("C#");
             resp.Keywords.Add("Asp.net");
 
             // Act
             var output = _helper.BuildOutput("wp.getTags", resp);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_GETTAGS, output);
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>
@@ -995,6 +1009,8 @@ namespace Fan.Blog.UnitTests.MetaWeblog
         public void BuildOutput_newMediaObject()
         {
             // Arrange
+            var expected = RESP_NEWMEDIA.Replace("\r", "").Replace("\n", "");
+
             var resp = new XmlRpcResponse
             {
                 MediaInfo = new MetaMediaInfo
@@ -1005,9 +1021,10 @@ namespace Fan.Blog.UnitTests.MetaWeblog
 
             // Act
             var output = _helper.BuildOutput("metaWeblog.newMediaObject", resp);
+            var actual = output.Replace("\r", "").Replace("\n", "");
 
             // Assert
-            Assert.Equal(RESP_NEWMEDIA, output);
+            Assert.Equal(expected, actual);
         }
     }
 }
