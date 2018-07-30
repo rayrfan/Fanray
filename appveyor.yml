@@ -5,4 +5,8 @@ before_build:
 build_script:
  - dotnet build /verbosity:quiet "Fanray.sln"
 test_script:
- - dotnet test
+ - dotnet test -c Release --no-build .\test\Fan.UnitTests\Fan.UnitTests.csproj
+ - dotnet test -c Release --no-build .\test\Fan.IntegrationTests\Fan.IntegrationTests.csproj
+ - dotnet test -c Release --no-build .\test\Fan.Blog.UnitTests\Fan.Blog.UnitTests.csproj
+ - dotnet test -c Release --no-build .\test\Fan.Blog.IntegrationTests\Fan.Blog.IntegrationTests.csproj
+ - dotnet test -c Release --no-build .\test\Fan.Web.Tests\Fan.Web.Tests.csproj
