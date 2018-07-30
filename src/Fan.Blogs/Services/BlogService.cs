@@ -22,7 +22,8 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Fan.Blogs.Tests")]
+[assembly: InternalsVisibleTo("Fan.Blog.IntegrationTests")]
+[assembly: InternalsVisibleTo("Fan.Blog.UnitTests")]
 
 namespace Fan.Blogs.Services
 {

@@ -40,9 +40,6 @@ namespace Fan.Blogs.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index(int? page)
         {
-            if (!await _settingSvc.SettingsExist())
-                return RedirectToAction("Setup", "Home");
-
             if (!page.HasValue || page <= 0) page = BlogService.DEFAULT_PAGE_INDEX;
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PostPerPage);
