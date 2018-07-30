@@ -1,4 +1,8 @@
+version: 1.1.{build}
+image: Visual Studio 2017
 before_build:
  - dotnet restore
 build_script:
  - dotnet build /verbosity:quiet "Fanray.sln"
+test_script:
+ - dotnet test

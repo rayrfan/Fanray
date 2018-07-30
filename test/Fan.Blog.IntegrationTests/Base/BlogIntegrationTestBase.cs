@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blogs.Enums;
 using Fan.Blogs.Models;
+using Fan.IntegrationTests.Base;
 using System;
 using System.Collections.Generic;
 
