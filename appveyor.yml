@@ -1,4 +1,4 @@
 before_build:
- - nuget restore
+ - dotnet restore
 build_script:
- - msbuild /verbosity:quiet "Fanray.sln"
+ - dotnet build /verbosity:quiet "Fanray.sln"
