@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Fan.Blogs.Data;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.MetaWeblog;
-using Fan.Blogs.Services;
+using Fan.Blog.Data;
+using Fan.Blog.Helpers;
+using Fan.Blog.MetaWeblog;
+using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Emails;
 using Fan.Medias;
