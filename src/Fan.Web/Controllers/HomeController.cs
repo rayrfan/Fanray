@@ -1,8 +1,8 @@
-﻿using Fan.Blogs.Controllers;
-using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Models;
-using Fan.Blogs.Services;
+﻿using Fan.Blog.Controllers;
+using Fan.Blog.Enums;
+using Fan.Blog.Helpers;
+using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Exceptions;
 using Fan.Models;
 using Fan.Settings;

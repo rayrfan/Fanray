@@ -1,5 +1,5 @@
-﻿using Fan.Blogs.MetaWeblog;
-using Fan.Blogs.MetaWeblog.Models;
+﻿using Fan.Blog.MetaWeblog;
+using Fan.Blog.MetaWeblog.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;

@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.UnitTests.Base;
-using Fan.Blogs.Models;
-using Fan.Blogs.Services;
+using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Exceptions;
 using Moq;

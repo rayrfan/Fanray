@@ -1,4 +1,4 @@
-﻿using Fan.Blogs.Helpers;
+﻿using Fan.Blog.Helpers;
 using System.Collections.Generic;
 using Xunit;
 

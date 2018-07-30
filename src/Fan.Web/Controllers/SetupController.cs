@@ -1,4 +1,4 @@
-﻿using Fan.Blogs.Services;
+﻿using Fan.Blog.Services;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Web.Models;

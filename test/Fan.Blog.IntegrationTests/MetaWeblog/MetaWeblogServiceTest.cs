@@ -1,5 +1,5 @@
-﻿using Fan.Blogs.Helpers;
-using Fan.Blogs.MetaWeblog;
+﻿using Fan.Blog.Helpers;
+using Fan.Blog.MetaWeblog;
 using Fan.Blog.IntegrationTests.Fakes;
 using Fan.Blog.IntegrationTests.Helpers;
 using Microsoft.AspNetCore.Http;

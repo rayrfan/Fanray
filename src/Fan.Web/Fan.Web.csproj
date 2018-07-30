@@ -19,8 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fan.Blogs\Fan.Blogs.csproj" />
-    <ProjectReference Include="..\Fan\Fan.csproj" />
+    <ProjectReference Include="..\Fan.Blog\Fan.Blog.csproj" />
   </ItemGroup>
 
   <ItemGroup>

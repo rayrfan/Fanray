@@ -1,6 +1,6 @@
-﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Services;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Helpers;
+using Fan.Blog.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;

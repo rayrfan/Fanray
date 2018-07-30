@@ -1,5 +1,5 @@
-﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Models;
 using Fan.Blog.IntegrationTests.Helpers;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using Fan.Blog.IntegrationTests.Base;
 namespace Fan.Blog.IntegrationTests.Services
 {
     /// <summary>
-    /// Integration tests for <see cref="Fan.Blogs.Services.BlogService"/> the different scenarios an author posts.
+    /// Integration tests for <see cref="Fan.Blog.Services.BlogService"/> the different scenarios an author posts.
     /// </summary>
     public class BlogPostTest : BlogServiceIntegrationTestBase
     {

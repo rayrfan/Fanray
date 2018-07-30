@@ -1,8 +1,8 @@
 ﻿using Fan.Blog.IntegrationTests.Base;
-using Fan.Blogs.Data;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Models;
-using Fan.Blogs.Services;
+using Fan.Blog.Data;
+using Fan.Blog.Helpers;
+using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;

@@ -1,8 +1,8 @@
 ﻿using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;
-using Fan.Blogs.Data;
-using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
+using Fan.Blog.Data;
+using Fan.Blog.Enums;
+using Fan.Blog.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -1,11 +1,11 @@
-﻿using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
-using Fan.Blogs.Validators;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Models;
+using Fan.Blog.Validators;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blogs.UnitTests.Validators
+namespace Fan.Blog.UnitTests.Validators
 {
     /// <summary>
     /// Unit tests for <see cref="TaxonomyValidator"/>.

@@ -1,10 +1,10 @@
 ﻿using Fan.Blog.UnitTests.Helpers;
-using Fan.Blogs.Models;
-using Fan.Blogs.Validators;
+using Fan.Blog.Models;
+using Fan.Blog.Validators;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blogs.UnitTests.Validators
+namespace Fan.Blog.UnitTests.Validators
 {
     public class PostValidatorTest
     {

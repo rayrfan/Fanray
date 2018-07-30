@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Fan.Blogs.Data;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Services;
+using Fan.Blog.Data;
+using Fan.Blog.Helpers;
+using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;

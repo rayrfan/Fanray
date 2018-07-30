@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.UnitTests.Base;
-using Fan.Blogs.Enums;
-using Fan.Blogs.Models;
+using Fan.Blog.Enums;
+using Fan.Blog.Models;
 using Moq;
 using System;
 using System.Threading.Tasks;
