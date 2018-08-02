@@ -1,0 +1,25 @@
+@model BlogPostViewModel
+@{
+    var post = Model;
+    ViewData["Title"] = post.Title;
+    ViewData["Description"] = post.Excerpt;
+}
+
+<article>
+    <header>
+        <h1>
+            @post.Title
+        </h1>
+        @await Html.PartialAsync("_PostInfo", Model)
+    </header>
+    <div class="post-body">
+        @Html.Raw(post.Body)
+    </div>
+</article>
+
+@await Html.PartialAsync("_Comments", Model)
+
+@section Canonical {
+    <meta property="og:url" content="@Model.CanonicalUrl" />
+    <link rel="canonical" href="@Model.CanonicalUrl" />
+}

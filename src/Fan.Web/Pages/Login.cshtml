@@ -1,0 +1,60 @@
+﻿@page
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Login - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.1.8/dist/vuetify.min.css" rel="stylesheet">
+    <style>
+        [v-cloak] {
+            display: none
+        }
+    </style>
+</head>
+<body>
+    @Html.AntiForgeryToken()
+
+    <div id="app" v-cloak>
+        <v-app id="inspire">
+            <v-content>
+                <v-container fluid fill-height>
+                    <v-layout align-center justify-center>
+                        <v-flex xs12 sm8 md4>
+                            <v-card class="elevation-12">
+                                <v-toolbar dark color="primary">
+                                    <v-toolbar-title>Login</v-toolbar-title>
+                                </v-toolbar>
+                                <v-card-text>
+                                    <v-form v-model="valid">
+                                        <v-alert :value="errMsg.length" type="error">{{ errMsg }}</v-alert>
+                                        <v-text-field v-model="userName" required :rules="nameRules"
+                                                      prepend-icon="person" name="userName" label="Email or username" type="text"></v-text-field>
+                                        <v-text-field v-model="password" required :rules="passwordRules"
+                                                      id="password" prepend-icon="lock" name="password" label="Password" type="password"></v-text-field>
+                                        <v-checkbox v-model="rememberMe" label="Remember me?"></v-checkbox>
+                                    </v-form>
+                                </v-card-text>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="primary" @@click="login" :disabled="!valid">Login</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+            </v-content>
+        </v-app>
+    </div>
+    <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
+    <script src="https://unpkg.com/vuetify@1.1.8/dist/vuetify.min.js"></script>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="~/admin/js/login.js" asp-append-version="true"></script>
+</body>
+</html>
