@@ -65,10 +65,11 @@ namespace Fan.Web
             services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 4;
+                options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
+                options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<FanDbContext>()
             .AddDefaultTokenProviders();
@@ -138,7 +139,8 @@ namespace Fan.Web
                 })
                 .AddRazorPagesOptions(options =>
                 {
-                    options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminRoles");
+                    options.Conventions.AuthorizeAreaFolder("Identity", "/");
                 });
 
             // https://stackoverflow.com/q/50472962/32240
@@ -194,7 +196,7 @@ namespace Fan.Web
             routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
 
             BlogRoutes.RegisterRoutes(routes);
-
+          
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
     }
