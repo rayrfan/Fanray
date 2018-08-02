@@ -1,0 +1,14 @@
+{
+  "name": "fanray-admin",
+  "version": "1.1.0",
+  "scripts": {
+    "build": "babel js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console",
+    "build:w": "babel js --out-dir ../../wwwroot/admin/js --source-maps --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "babel-preset-minify": "^0.4.3"
+  }
+}

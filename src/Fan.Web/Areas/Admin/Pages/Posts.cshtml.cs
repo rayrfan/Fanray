@@ -1,31 +1,57 @@
-﻿using Fan.Blog.Enums;
-using Fan.Blog.Helpers;
+﻿using Fan.Blog.Helpers;
 using Fan.Blog.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Pages.Admin
+namespace Fan.Web.Areas.Admin.Pages
 {
-    public class IndexModel : PageModel
+    public class PostsModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        // -------------------------------------------------------------------- Constructor
 
-        public IndexModel(IBlogService blogService)
+        private readonly IBlogService _blogSvc;
+        public PostsModel(IBlogService blogService)
         {
             _blogSvc = blogService;
         }
+
+        // -------------------------------------------------------------------- Consts & Properties
+
+        /// <summary>
+        /// For post data table footer pagination.
+        /// </summary>
+        public const string DEFAULT_ROW_PER_PAGE_ITEMS = "[25, 50]";
+
+        /// <summary>
+        /// The json data to initially bootstrap page.
+        /// </summary>
+        public PostListVM Data { get; set; }
+
+        /// <summary>
+        /// Used for vuetify for active tab.
+        /// </summary>
+        /// <remarks>
+        /// Note vuetify tab counts tab key 0, 1, 2... by their physical location, in my case
+        /// Draft has value of 0 but is put after Published which has value of 1, so I manually
+        /// reversed them, this does not affect anything else.
+        /// </remarks>
+        public string ActiveStatus { get; set; }
+
+        // -------------------------------------------------------------------- Helper Classes
 
         public class PostListVM
         {
             public IEnumerable<PostVM> Posts {get;set;}
             public int TotalPosts { get; set; }
-            public IEnumerable<StatusVM> Statuses { get; set; }
             public int PublishedCount { get; set; }
             public int DraftCount { get; set; }
+
+            public string JsonPosts => Posts == null ? "" : JsonConvert.SerializeObject(Posts);
         }
 
         public class PostVM
@@ -38,14 +64,15 @@ namespace Fan.Web.Pages.Admin
             public string PostLink { get; set; }
         }
 
-        public class StatusVM
+        // -------------------------------------------------------------------- Public Methods
+
+        /// <summary>
+        /// GET initial page.
+        /// </summary>
+        public async Task OnGetAsync(string status = "published")
         {
-            /// <summary>
-            /// When using Vuetify Tabs, the property to bind its key must be named "id".
-            /// </summary>
-            public int Id { get; set; }
-            public string Text { get; set; }
-            public int Count { get; set; }
+            Data = await GetPostListVmAsync(status, pageNumber: 1, pageSize: 25);
+            ActiveStatus = status;
         }
 
         /// <summary>
@@ -75,11 +102,13 @@ namespace Fan.Web.Pages.Admin
             return new JsonResult(list);
         }
 
+        // -------------------------------------------------------------------- Private Methods
+
         /// <summary>
         /// Returns posts, total posts and post statuses.
         /// </summary>
         /// <param name="status">The post status <see cref="EPostStatus"/></param>
-        /// <param name="pageNumber">Which page</param>
+        /// <param name="pageNumber">Which page, 1-based.</param>
         /// <param name="pageSize">How many rows per page</param>
         /// <returns></returns>
         /// <remarks>
@@ -87,10 +116,9 @@ namespace Fan.Web.Pages.Admin
         /// </remarks>
         private async Task<PostListVM> GetPostListVmAsync(string status, int pageNumber, int pageSize)
         {
-            // posts and totalPosts
             var postList = status.Equals("published", StringComparison.InvariantCultureIgnoreCase) ?
                 await _blogSvc.GetPostsAsync(pageNumber, pageSize) :
-                await _blogSvc.GetPostsForDraftsAsync();
+                await _blogSvc.GetPostsForDraftsAsync(); // TODO drafts need pagination too
 
             var postVms = from p in postList.Posts
                           select new PostVM
@@ -104,20 +132,13 @@ namespace Fan.Web.Pages.Admin
                               string.Format(BlogRoutes.POST_RELATIVE_URL_TEMPLATE, p.CreatedOn.Year, p.CreatedOn.Month, p.CreatedOn.Day, p.Slug),
                           };
 
-            // statuses
             var postCount = await _blogSvc.GetPostCountAsync();
-            var statusVMs = new List<StatusVM>
-            {
-                new StatusVM { Text = "Published", Id = (int)EPostStatus.Published, Count = postCount.Published },
-                new StatusVM { Text = "Drafts", Id = (int)EPostStatus.Draft, Count = postCount.Draft },
-            };
 
             // prep vm
             return new PostListVM
             {
                 Posts = postVms,
                 TotalPosts = postList.PostCount,
-                Statuses = statusVMs,
                 PublishedCount = postCount.Published,
                 DraftCount = postCount.Draft,
             };
