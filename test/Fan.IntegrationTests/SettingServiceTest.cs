@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Fan.IntegrationTests.Settings
+namespace Fan.IntegrationTests
 {
     /// <summary>
     /// A settings class help test <see cref="SettingService"/>.

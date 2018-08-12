@@ -53,92 +53,28 @@ namespace Fan.Medias
             });
         }
 
-        /// <summary>
-        /// Returns unqiue file name after saveing file byte array to storage.
-        /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "{container}/{app}/{size}/{userId}/{year}/{month}/{file}".
-        /// </remarks>
-        /// <param name="source">The bytes of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize quality)
-        {
-            var (blob, blobName) = await GetBlobAsync(appId, userId, uploadedOn, fileName, quality);
-
-            // create blob with contents
-            await blob.UploadFromByteArrayAsync(source, 0, source.Length);
-
-            // get the filename part
-            var start = blobName.LastIndexOf('/') + 1;
-            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
-
-            return uniqueFileName;
-        }
+        // -------------------------------------------------------------------- public method
 
         /// <summary>
-        /// Returns unqiue file name after saveing file stream to storage.
+        /// Saves the file to Azure Blob Storage.
         /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
-        /// </remarks>
-        /// <param name="source">The stream of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize quality)
+        /// <param name="source"></param>
+        /// <param name="info"></param>
+        /// <param name="fileNameUnique"></param>
+        /// <returns></returns>
+        public async Task SaveFileAsync(Stream source, ImageResizeInfo info, string fileNameUnique)
         {
-            var (blob, blobName) = await GetBlobAsync(appId, userId, uploadedOn, fileName, quality);
-
-            await blob.UploadFromStreamAsync(source);
-
-            // get the filename part
-            var start = blobName.LastIndexOf('/') + 1;
-            var uniqueFileName = blobName.Substring(start, blobName.Length - start);
-
-            return uniqueFileName;
-        }
-
-        private async Task<(CloudBlockBlob blob, string blobName)> GetBlobAsync(EAppType appId, int userId, 
-            DateTimeOffset uploadedOn, string fileName, EImageSize size)
-        {
-            // blobName "blog/optimized/1/2018/05/filename.ext", container is "media"
-            string appName = appId.ToString().ToLowerInvariant();
-            string sizeStr = size.ToString().ToLowerInvariant();
-            var year = uploadedOn.Year.ToString();
-            var month = uploadedOn.Month.ToString("d2");
-            string blobName = string.Format("{0}/{1}/{2}/{3}/{4}/{5}",
-                appName,
-                sizeStr,
-                userId,
-                year,
-                month,
-                fileName);
+            var imgPath = info.Path.Replace(info.PathSeparator, '/');  // azure blob uses '/'
+            var blobName = $"{imgPath}/{fileNameUnique}";
 
             // get a ref to blob which does not call server
             var blob = _container.GetBlockBlobReference(blobName);
 
-            // make sure blob is unique
-            int i = 1;
-            while (await blob.ExistsAsync())
-            {
-                blobName = blobName.Insert(blobName.LastIndexOf('.'), $"-{i}");
-                blob = _container.GetBlockBlobReference(blobName);
-                i++;
-            }
-
             // set blob properties
-            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
+            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileNameUnique));
             blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
 
-            return (blob: blob, blobName: blobName);
+            await blob.UploadFromStreamAsync(source);
         }
     }
 }

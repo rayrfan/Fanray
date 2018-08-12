@@ -21,123 +21,49 @@ namespace Fan.Medias
         private readonly AppSettings _appSettings;
         private readonly HttpRequest _request;
 
-        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider, IHttpContextAccessor httpContextAccessor)
+        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider, 
+            IHttpContextAccessor httpContextAccessor)
         {
             _hostingEnvironment = env;
             _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
             _request = httpContextAccessor.HttpContext.Request;
         }
 
+        // -------------------------------------------------------------------- public property
+
         /// <summary>
         /// The absolute URI endpoint to file, e.g. "https://localhost:44381" or "https://www.fanray.com".
         /// </summary>
         public string StorageEndpoint => $"{_request.Scheme}://{_request.Host}{_request.PathBase}";
 
-        /// <summary>
-        /// Returns unqiue file name after saveing file byte array to storage.
-        /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
-        /// </remarks>
-        /// <param name="source">The bytes of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId,
-                        DateTimeOffset uploadedOn, string fileName, EImageSize size)
-        {
-            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, uploadedOn, fileName, size);
-
-            // save source to file sys
-            using (var targetStream = File.Create(filePath))
-            using (var stream = new MemoryStream(source))
-            {
-                await stream.CopyToAsync(targetStream);
-            }
-
-            return fileNameUnique;
-        }
+        // -------------------------------------------------------------------- public method
 
         /// <summary>
-        /// Returns unqiue file name after saveing file stream to storage.
+        /// Saves the file to server file system.
         /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "{container}/{app}/{size}/{userId}/{year}/{month}/{file}".
-        /// </remarks>
-        /// <param name="source">The stream of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        public async Task<string> SaveFileAsync(Stream source, EAppType appId, int userId,
-                        DateTimeOffset uploadedOn, string fileName, EImageSize size)
-        {
-            var (fileNameUnique, filePath) = GetFileInfo(appId, userId, uploadedOn, fileName, size);
-
-            // save source to file sys
-            using (var fileStream = File.Create(filePath))
-            {
-                await source.CopyToAsync(fileStream);
-            }
-
-            return fileNameUnique;
-        }
-
-        /// <summary>
-        /// Returns unique file name and file path.
-        /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="userId"></param>
-        /// <param name="year"></param>
-        /// <param name="month"></param>
-        /// <param name="fileName">Slugged filename with ext.</param>
+        /// <param name="source"></param>
+        /// <param name="info"></param>
+        /// <param name="fileNameUnique"></param>
         /// <returns></returns>
-        /// <remarks>
-        /// If file with incoming filename already exists, this method appends a number to the filename,
-        /// the number starts at 1.
-        /// </remarks>
-        private (string fileNameUnique, string filePath) GetFileInfo(EAppType appId, int userId, 
-            DateTimeOffset uploadedOn, string fileName, EImageSize size)
+        public async Task SaveFileAsync(Stream source, ImageResizeInfo info, string fileNameUnique)
         {
-            // dir to save this file in e.g. "wwwroot\media\blog\optimized\1\2018\05"
             var root = _hostingEnvironment.WebRootPath;
             var container = _appSettings.MediaContainerName;
-            var appName = appId.ToString().ToLowerInvariant();
-            var sizeStr = size.ToString().ToLowerInvariant();
-            var year = uploadedOn.Year.ToString();
-            var month = uploadedOn.Month.ToString("d2");
-
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}\\{5}\\{6}",
-                root,
-                container,
-                appName,
-                sizeStr,
-                userId,
-                year,
-                month);
+            var imgPath = info.Path.Replace(info.PathSeparator, Path.DirectorySeparatorChar);
+            var dirPath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}";
 
             // make sure dir exists
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);
 
             // combine dir and filename
-            var filePath = Path.Combine(dirPath, fileName);
+            var filePath = Path.Combine(dirPath, fileNameUnique);
 
-            // make sure file is unique
-            int i = 1;
-            while (File.Exists(filePath))
+            // save source to file sys
+            using (var fileStream = File.Create(filePath))
             {
-                fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
-                filePath = Path.Combine(dirPath, fileName);
-                i++;
+                await source.CopyToAsync(fileStream);
             }
-
-            return (fileNameUnique: fileName, filePath: filePath);
         }
     }
 }

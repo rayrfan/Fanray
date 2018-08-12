@@ -4,6 +4,7 @@ using Fan.Blog.Models;
 using Fan.IntegrationTests.Base;
 using System;
 using System.Collections.Generic;
+using Fan.Medias;
 
 namespace Fan.Blog.IntegrationTests.Base
 {
@@ -64,6 +65,31 @@ namespace Fan.Blog.IntegrationTests.Base
             _db.Set<Post>().AddRange(GetPosts(numOfPosts));
             _db.SaveChanges();
         }
+
+        /// <summary>
+        /// Seeds images in Media table.
+        /// </summary>
+        /// <param name="filenameSlugged">The filename saved to media table, it's slugged with ext.</param>
+        protected void SeedImages(string filenameSlugged)
+        {
+            _db.Users.Add(Actor.User);
+            _db.Set<Media>().Add(new Media {
+                Id = 1,
+                AppType = EAppType.Blog,
+                FileName = filenameSlugged,
+                ContentType = "png",
+                Height = 40,
+                Length = 1000,
+                MediaType = EMediaType.Image,
+                UploadedFrom = EUploadedFrom.Browser,
+                UploadedOn = DateTimeOffset.UtcNow,
+                UserId = Actor.AUTHOR_ID,
+                Width = 40,
+            });
+            _db.SaveChanges();
+        }
+
+        // -------------------------------------------------------------------- private methods
 
         /// <summary>
         /// Returns a post associated with 1 category and 2 tags.

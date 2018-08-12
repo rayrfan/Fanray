@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Xunit;
 
-namespace Fan.IntegrationTests.Data
+namespace Fan.IntegrationTests
 {
     /// <summary>
     /// Tests for <see cref="SqlMetaRepository"/> class.

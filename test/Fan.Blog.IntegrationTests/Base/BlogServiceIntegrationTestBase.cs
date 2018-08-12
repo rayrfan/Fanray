@@ -1,5 +1,4 @@
-﻿using Fan.Blog.IntegrationTests.Base;
-using Fan.Blog.Data;
+﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
@@ -13,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Blog.IntegrationTests.Base
@@ -22,45 +22,76 @@ namespace Fan.Blog.IntegrationTests.Base
     /// </summary>
     public class BlogServiceIntegrationTestBase : BlogIntegrationTestBase
     {
-        protected BlogService _blogSvc;
+        protected IBlogService _blogSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
         protected ILoggerFactory _loggerFactory;
+        private readonly IMediaService _mediaSvc;
+        protected Mock<IStorageProvider> _storageProviderMock;
+
+        protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
 
         public BlogServiceIntegrationTestBase()
         {
-            // repos
+            // ---------------------------------------------------------------- repos
+
             var catRepo = new SqlCategoryRepository(_db);
             var tagRepo = new SqlTagRepository(_db);
             var postRepo = new SqlPostRepository(_db);
 
-            // SettingService mock
+            // ---------------------------------------------------------------- mock SettingService 
+
             _settingSvcMock = new Mock<ISettingService>();
             _settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
             _settingSvcMock.Setup(svc => svc.GetSettingsAsync<BlogSettings>()).Returns(Task.FromResult(new BlogSettings()));
 
-            // MediaService mock
-            _mediaSvcMock = new Mock<IMediaService>();
+            // ---------------------------------------------------------------- mock AppSettings
 
-            // Cache
+            var appSettingsMock = new Mock<IOptionsSnapshot<AppSettings>>();
+            appSettingsMock.Setup(o => o.Value).Returns(new AppSettings());
+
+            // ---------------------------------------------------------------- mock IStorageProvider
+
+            _storageProviderMock = new Mock<IStorageProvider>();
+            _storageProviderMock.Setup(pro => pro.StorageEndpoint).Returns(STORAGE_ENDPOINT);
+
+            // ---------------------------------------------------------------- MediaService
+
+            var mediaRepo = new SqlMediaRepository(_db);
+            _mediaSvc = new MediaService(_storageProviderMock.Object, appSettingsMock.Object, mediaRepo);
+
+            // ---------------------------------------------------------------- Cache
+
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
             var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
             var cache = new MemoryDistributedCache(memCacheOptions);
 
-            // LoggerFactory
+            // ---------------------------------------------------------------- LoggerFactory
+
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-
-            // Mapper
-            var mapper = BlogUtil.Mapper;
-
-            // Shortcode
-            var shortcodeSvc = new Mock<IShortcodeService>();
-
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+
+            // ---------------------------------------------------------------- Mapper, Shortcode, Mediator
+
+            var mapper = BlogUtil.Mapper;
+            var shortcodeSvc = new Mock<IShortcodeService>();
             var mediatorMock = new Mock<IMediator>();
 
-            _blogSvc = new BlogService(_settingSvcMock.Object, catRepo, postRepo, tagRepo, cache, 
-                loggerBlogSvc, mapper, shortcodeSvc.Object, mediatorMock.Object);
+            // the blog service
+            _blogSvc = new BlogService(
+                _settingSvcMock.Object, 
+                catRepo, 
+                postRepo, 
+                tagRepo,
+                mediaRepo,
+                _mediaSvc,
+                _storageProviderMock.Object, 
+                appSettingsMock.Object, 
+                cache, 
+                loggerBlogSvc, 
+                mapper, 
+                shortcodeSvc.Object, 
+                mediatorMock.Object);
         }
     }
 }

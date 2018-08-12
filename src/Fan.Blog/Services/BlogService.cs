@@ -7,6 +7,7 @@ using Fan.Blog.Models;
 using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -15,8 +16,10 @@ using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -27,23 +30,31 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
-    public class BlogService : IBlogService
+    public partial class BlogService : IBlogService
     {
         private readonly ISettingService _settingSvc;
         private readonly ICategoryRepository _catRepo;
         private readonly IPostRepository _postRepo;
         private readonly ITagRepository _tagRepo;
+        private readonly IMediaRepository _mediaRepo;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
         private readonly IShortcodeService _shortcodeSvc;
         private readonly IMediator _mediator;
+        private readonly IMediaService _mediaSvc;
+        private readonly IStorageProvider _storageProvider;
+        private readonly AppSettings _appSettings;
 
         public BlogService(
             ISettingService settingService,
             ICategoryRepository catRepo,
             IPostRepository postRepo,
             ITagRepository tagRepo,
+            IMediaRepository mediaRepo,
+            IMediaService mediaSvc,
+            IStorageProvider storageProvider,
+            IOptionsSnapshot<AppSettings> appSettings,
             IDistributedCache cache,
             ILogger<BlogService> logger,
             IMapper mapper,
@@ -54,6 +65,10 @@ namespace Fan.Blog.Services
             _catRepo = catRepo;
             _postRepo = postRepo;
             _tagRepo = tagRepo;
+            _mediaRepo = mediaRepo;
+            _mediaSvc = mediaSvc;
+            _storageProvider = storageProvider;
+            _appSettings = appSettings.Value;
             _cache = cache;
             _mapper = mapper;
             _logger = logger;
@@ -61,30 +76,7 @@ namespace Fan.Blog.Services
             _mediator = mediator;
         }
 
-        // -------------------------------------------------------------------- Const
-
-        /// <summary>
-        /// How many words to extract into excerpt from body. Default 55.
-        /// </summary>
-        public const int EXCERPT_WORD_LIMIT = 55;
-
         // -------------------------------------------------------------------- Cache
-
-        /// <summary>
-        /// By default show 10 posts per page.
-        /// </summary>
-        public const int DEFAULT_PAGE_SIZE = 10;
-        public const int DEFAULT_PAGE_INDEX = 1;
-        public const string CACHE_KEY_ALL_CATS = "BlogCategories";
-        public const string CACHE_KEY_ALL_TAGS = "BlogTags";
-        public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
-        public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
-        public const string CACHE_KEY_POST_COUNT = "BlogPostCount";
-        public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_PostCount = new TimeSpan(0, 10, 0);
 
         private async Task InvalidateAllBlogCache()
         {
@@ -345,6 +337,138 @@ namespace Fan.Blog.Services
 
                 return years;
             });
+        }
+
+        // -------------------------------------------------------------------- Images
+
+        /// <summary>
+        /// Returns absolute url to an image.
+        /// </summary>
+        /// <remarks>
+        /// Based on the resize count, the url returned could be original or one of the resized image.
+        /// </remarks>
+        /// <param name="media">The media record representing the image.</param>
+        /// <param name="size">The image size.</param>
+        /// <returns></returns>
+        public string GetImageUrl(Media media, EImageSize size)
+        {
+            var endpoint = _storageProvider.StorageEndpoint;
+            var container = endpoint.EndsWith('/') ? _appSettings.MediaContainerName : $"/{_appSettings.MediaContainerName}";
+
+            if ((size == EImageSize.Original || media.ResizeCount <= 0) ||
+                (media.ResizeCount == 1 && size != EImageSize.Small) ||
+                (media.ResizeCount == 2 && size == EImageSize.Large))
+            {
+                size = EImageSize.Original;
+            }
+
+            var imagePath = GetImagePath(media.UploadedOn, size);
+            var fileName = media.FileName;
+
+            return $"{endpoint}{container}/{imagePath}/{fileName}";
+        }
+
+        /// <summary>
+        /// Uploads image.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="userId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="contentType">e.g. "image/jpeg"</param>
+        /// <param name="uploadFrom"></param>
+        /// <returns></returns>
+        public async Task<Media> UploadImageAsync(Stream source, int userId, string fileName, string contentType,
+            EUploadedFrom uploadFrom)
+        {
+            // check if file type is supported
+            var ext = Path.GetExtension(fileName).ToLower();
+            var ctype = "." + contentType.Substring(contentType.LastIndexOf("/") + 1).ToLower();
+            if (ext.IsNullOrEmpty() || !Accepted_Image_Types.Contains(ext) || !Accepted_Image_Types.Contains(ctype))
+            {
+                throw new FanException("Upload file type is not supported.");
+            }
+
+            // uploadedOn 
+            var uploadedOn = DateTimeOffset.UtcNow;
+
+            // get the slugged filename and title from original filename
+            var (fileNameSlugged, title) = ProcessFileName(fileName, uploadFrom);
+
+            // get unique filename
+            var uniqueFileName = await GetUniqueFileNameAsync(fileNameSlugged, uploadedOn);
+
+            // get image resizes
+            var resizes = GetImageResizeList(uploadedOn);
+
+            return await _mediaSvc.UploadImageAsync(source, resizes, uniqueFileName, contentType, title,
+                uploadedOn, EAppType.Blog, userId, uploadFrom);
+        }
+
+        /// <summary>
+        /// Takes the original filename and returns a slugged filename and title attribute.
+        /// </summary>
+        /// <remarks>
+        /// If the filename is too long it shorten it. Then it generates a slugged filename which 
+        /// is hyphen separeated value for english original filenames, a random string value for 
+        /// non-english filenames.  The title attribute is original filename html-encoded for safe
+        /// display.
+        /// </remarks>
+        /// <param name="fileNameOrig">Original filename user is uploading.</param>
+        /// <param name="uploadFrom">This is used solely because of olw quirks I have to handle.</param>
+        /// <returns></returns>
+        private (string fileNameSlugged, string title) ProcessFileName(string fileNameOrig, EUploadedFrom uploadFrom)
+        {
+            // extra filename without ext, note this will also remove the extra path info from OLW
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileNameOrig);
+
+            // make sure file name is not too long
+            if (fileNameWithoutExt.Length > MediaService.MEDIA_FILENAME_MAXLEN)
+            {
+                fileNameWithoutExt = fileNameWithoutExt.Substring(0, MediaService.MEDIA_FILENAME_MAXLEN);
+            }
+
+            // there is a quirk file uploaded from olw had "_2" suffixed to the name
+            if (uploadFrom == EUploadedFrom.MetaWeblog && fileNameWithoutExt.EndsWith("_2"))
+            {
+                fileNameWithoutExt = fileNameWithoutExt.Remove(fileNameWithoutExt.Length - 2);
+            }
+
+            // slug file name
+            var slug = Util.FormatSlug(fileNameWithoutExt);
+            if (slug.IsNullOrEmpty()) // slug may end up empty
+            {
+                slug = Util.RandomString(6);
+            }
+            else if (uploadFrom == EUploadedFrom.MetaWeblog && slug == "thumb") // or may end up with only "thumb" for olw
+            {
+                slug = string.Concat(Util.RandomString(6), "_thumb");
+            }
+
+            var ext = Path.GetExtension(fileNameOrig).ToLower();
+            var fileNameSlugged = $"{slug}{ext}";
+            var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
+
+            return (fileNameSlugged: fileNameSlugged, title: fileNameEncoded);
+        }
+
+        /// <summary>
+        /// Returns a unique filename after checking datasource to see if the filename exists already.
+        /// </summary>
+        /// <param name="uploadedOn"></param>
+        /// <param name="fileNameSlugged"></param>
+        /// <returns></returns>
+        private async Task<string> GetUniqueFileNameAsync(string fileNameSlugged, DateTimeOffset uploadedOn)
+        {
+            int i = 1;
+            while ((await _mediaRepo.FindAsync(m => m.AppType == EAppType.Blog &&
+                                                    m.UploadedOn.Year == uploadedOn.Year &&
+                                                    m.UploadedOn.Month == uploadedOn.Month &&
+                                                    m.FileName.Equals(fileNameSlugged))).Count() > 0)
+            {
+                fileNameSlugged = fileNameSlugged.Insert(fileNameSlugged.LastIndexOf('.'), $"-{i}");
+            }
+
+            return fileNameSlugged;
         }
 
         // -------------------------------------------------------------------- BlogPosts 

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.IntegrationTests.Fakes
+namespace Fan.Blog.IntegrationTests.Helpers
 {
     public class FakeSignInManager : SignInManager<User>
     {

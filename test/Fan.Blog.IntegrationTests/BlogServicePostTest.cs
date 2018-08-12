@@ -7,12 +7,12 @@ using System.Linq;
 using Xunit;
 using Fan.Blog.IntegrationTests.Base;
 
-namespace Fan.Blog.IntegrationTests.Services
+namespace Fan.Blog.IntegrationTests
 {
     /// <summary>
     /// Integration tests for <see cref="Fan.Blog.Services.BlogService"/> the different scenarios an author posts.
     /// </summary>
-    public class BlogPostTest : BlogServiceIntegrationTestBase
+    public class BlogServicePostTest : BlogServiceIntegrationTestBase
     {
         /// <summary>
         /// When an author publishes a blog post from OLW.

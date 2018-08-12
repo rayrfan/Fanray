@@ -4,7 +4,7 @@ using Fan.Blog.Models;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests.Data
+namespace Fan.Blog.IntegrationTests
 {
     /// <summary>
     /// Tests for <see cref="SqlPostRepository"/> class.
