@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
@@ -16,9 +10,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fan.Web.Pages.Admin
 {
+    /// <summary>
+    /// Model to Compose.cshtml.
+    /// </summary>
+    /// <remarks>
+    /// This handles get, publish, update and save draft for a post.
+    /// For image upload it calls the endpoint in Media.cshtml.cs.
+    /// </remarks>
     public class ComposeModel : PageModel
     {
         private readonly IBlogService _blogSvc;
@@ -258,35 +264,6 @@ namespace Fan.Web.Pages.Admin
             };
 
             return new JsonResult(postVm);
-        }
-
-        /// <summary>
-        /// Ajax POST to upload images.
-        /// </summary>
-        /// <returns>
-        /// A list of urls to original sized images.
-        /// </returns>
-        /// <param name="images">
-        /// The name of this parameter must match <code>formData.append('images', files[i]); </code>
-        /// in the uploadImages method in javascript.
-        /// </param>
-        public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
-        {
-            var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
-
-            var urls = new List<string>();
-            foreach (var image in images)
-            {
-                using (Stream stream = image.OpenReadStream())
-                {
-                    var url = await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId, 
-                        image.FileName, EUploadedFrom.Browser);
-
-                    urls.Add(url);
-                }
-            }
-
-            return new JsonResult(urls);
         }
 
         // -------------------------------------------------------------------- private methods
