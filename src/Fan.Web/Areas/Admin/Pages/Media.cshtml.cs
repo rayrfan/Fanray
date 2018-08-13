@@ -38,8 +38,14 @@ namespace Fan.Web.Pages.Admin
 
         public class ImageVM : Media
         {
-            public string Url { get; set; }
+            public string FileType { get; set; }
+            public string UploadDate { get; set; }
+            public string UrlSmall { get; set; }
+            public string UrlLarge { get; set; }
+            public string UrlOriginal { get; set; }
         }
+
+        // -------------------------------------------------------------------- Public Methods
 
         public async Task<JsonResult> OnGetImagesAsync()
         {
@@ -97,7 +103,13 @@ namespace Fan.Web.Pages.Admin
                                   Title = m.Title,
                                   Caption = m.Caption,
                                   Alt = m.Alt,
-                                  Url = _blogSvc.GetImageUrl(m, EImageSize.Small), // gallery uses small
+                                  FileType = m.ContentType,
+                                  UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
+                                  Width = m.Width,
+                                  Height = m.Height,
+                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small), // gallery uses small
+                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), // gallery img preview uses large
+                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), // gallery img sidebar shows original url
                               };
 
             return new ImageListVM
