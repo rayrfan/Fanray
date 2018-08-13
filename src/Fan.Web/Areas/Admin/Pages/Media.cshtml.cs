@@ -40,8 +40,21 @@ namespace Fan.Web.Pages.Admin
         {
             public string FileType { get; set; }
             public string UploadDate { get; set; }
+            /// <summary>
+            /// The gallery image dialog shows small image as thumbs.
+            /// </summary>
             public string UrlSmall { get; set; }
+            /// <summary>
+            /// The composer inserts medium image.
+            /// </summary>
+            public string UrlMedium { get; set; }
+            /// <summary>
+            /// The gallery image dialog preview shows the large image.
+            /// </summary>
             public string UrlLarge { get; set; }
+            /// <summary>
+            /// The gallery image dialog sidebar shows the original url.
+            /// </summary>
             public string UrlOriginal { get; set; }
         }
 
@@ -107,9 +120,10 @@ namespace Fan.Web.Pages.Admin
                                   UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
                                   Width = m.Width,
                                   Height = m.Height,
-                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small), // gallery uses small
-                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), // gallery img preview uses large
-                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), // gallery img sidebar shows original url
+                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
+                                  UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
+                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), 
+                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), 
                               };
 
             return new ImageListVM

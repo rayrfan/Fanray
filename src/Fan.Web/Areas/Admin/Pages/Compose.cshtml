@@ -16,6 +16,28 @@
     <link href="https://unpkg.com/vuetify@1.1.10/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/content.css" asp-append-version="true" />
+    <style>
+        .square {
+            float: left;
+            position: relative;
+            width: 10%;
+            padding-bottom: 10%; /* = width for a 1:1 aspect ratio */
+            margin: 0.5%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain; /* "cover" crops squares; "contain" no cropping */
+        }
+
+            .square:hover {
+                cursor: pointer;
+            }
+
+        .dialog {
+            max-width: 71%;
+            background-color: white;
+        }
+
+    </style>
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -166,28 +188,28 @@
                 </div>
             </v-content>
             @* Image Dialog *@
-            <v-dialog v-model="showMediaDialog" lazy max-width="80%">
-                <v-card>
-                    <v-card-text>
-                        <div>
-                            <v-toolbar class="elevation-0">
-                                <v-btn flat @@click="uploadImages">
-                                    <v-icon color="primary">cloud_upload</v-icon>
-                                    &nbsp;Upload
-                                </v-btn>
-                            </v-toolbar>
-                            <v-divider></v-divider>
-                            <div class="gallery">
-                                <a v-for="image in images" :key="image.id" @@click="insertImage(image.url)">
-                                    <img :src="image.url" :alt="image.fileName">
-                                </a>
-                            </div>
-                        </div>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-btn color="primary" flat @@click.stop="showMediaDialog=false">Close</v-btn>
-                    </v-card-actions>
-                </v-card>
+            <v-dialog v-model="showMediaDialog" lazy
+                      @@keydown.esc="showMediaDialog = false"
+                      content-class="dialog">
+                <v-toolbar class="elevation-0">
+                    <v-btn flat @@click="uploadImages">
+                        <v-icon color="primary">cloud_upload</v-icon>
+                        &nbsp;Upload
+                    </v-btn>
+                    <v-progress-circular v-if="progressVisible"
+                                         indeterminate
+                                         color="primary"></v-progress-circular>
+                </v-toolbar>
+                <v-divider></v-divider>
+
+                <div class="gallery">
+                    <div v-for="image in images"
+                         :key="image.id"
+                         @@click="insertImage(image)"
+                         class="square"
+                         :title="image.title"
+                         :style="{ backgroundImage: 'url(' + image.urlSmall + ')' }"></div>
+                </div>
             </v-dialog>
         </v-app>
     </div>
@@ -229,6 +251,7 @@
                 title: '',
                 mediaDialogVisible: false,
                 images: [],
+                progressVisible: false,
                 editor: null,
                 content: '',
             }),
@@ -370,6 +393,7 @@
                     input.setAttribute('multiple', null);
                     input.click();
                     input.onchange = () => {
+                        this.progressVisible = true;
                         const formData = new FormData();
                         for (let i = 0; i < input.files.length; i++) {
                             formData.append('images', input.files[i]);
@@ -377,6 +401,7 @@
 
                         axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
                             .then(resp => {
+                                this.progressVisible = false;
                                 this.images = resp.data.images;
                             })
                             .catch(err => {
@@ -390,10 +415,11 @@
                         this.images = resp.data.images;
                     }).catch(err => console.log(err));
                 },
-                insertImage(url) {
+                insertImage(image) {
                     // https://docs.ckeditor.com/ckeditor5/latest/builds/guides/faq.html#where-are-the-editorinserthtml-and-editorinserttext-methods-how-to-insert-some-content
                     // https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-captions
-                    const imgHtml = `<figure class="image"><img src="${url}" alt=""><figcaption></figcaption></figure>`;
+                    // I added an extra p with space so when I insert another image it doesn't replace the one before it
+                    const imgHtml = `<figure class="image"><img src="${image.urlMedium}" alt="${image.alt}" title="${image.title}"><figcaption>${image.caption}</figcaption></figure><p>&nbsp;</p>`;
                     const viewFragment = this.editor.data.processor.toView(imgHtml);
                     const modelFragment = this.editor.data.toModel(viewFragment);
                     this.editor.model.insertContent(modelFragment, this.editor.model.document.selection);
