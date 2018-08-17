@@ -36,7 +36,6 @@ namespace Fan.Blog.Services
         private readonly ICategoryRepository _catRepo;
         private readonly IPostRepository _postRepo;
         private readonly ITagRepository _tagRepo;
-        private readonly IMediaRepository _mediaRepo;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
@@ -51,7 +50,6 @@ namespace Fan.Blog.Services
             ICategoryRepository catRepo,
             IPostRepository postRepo,
             ITagRepository tagRepo,
-            IMediaRepository mediaRepo,
             IMediaService mediaSvc,
             IStorageProvider storageProvider,
             IOptionsSnapshot<AppSettings> appSettings,
@@ -65,7 +63,6 @@ namespace Fan.Blog.Services
             _catRepo = catRepo;
             _postRepo = postRepo;
             _tagRepo = tagRepo;
-            _mediaRepo = mediaRepo;
             _mediaSvc = mediaSvc;
             _storageProvider = storageProvider;
             _appSettings = appSettings.Value;
@@ -74,17 +71,6 @@ namespace Fan.Blog.Services
             _logger = logger;
             _shortcodeSvc = shortcodeService;
             _mediator = mediator;
-        }
-
-        // -------------------------------------------------------------------- Cache
-
-        private async Task InvalidateAllBlogCache()
-        {
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
-            await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
         }
 
         // -------------------------------------------------------------------- Categories
@@ -298,48 +284,91 @@ namespace Fan.Blog.Services
             return tag;
         }
 
-        // -------------------------------------------------------------------- Archives
-
         /// <summary>
-        /// Returns archive information.
+        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
         /// </summary>
+        /// <param name="tax">A category or tag.</param>
+        /// <param name="createOrUpdate"></param>
         /// <returns></returns>
-        public async Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync()
+        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
         {
-            return await _cache.GetAsync(CACHE_KEY_ALL_ARCHIVES, CacheTime_Archives, async () =>
+            // get existing titles and slugs
+            IEnumerable<string> existingTitles = null;
+            IEnumerable<string> existingSlugs = null;
+            ETaxonomyType type = ETaxonomyType.Category;
+            if (tax is Category)
             {
-                var months = new Dictionary<DateTime, int>();
-                var years = new Dictionary<int, List<MonthItem>>();
+                var allCats = await GetCategoriesAsync();
+                existingTitles = allCats.Select(c => c.Title);
+                existingSlugs = allCats.Select(c => c.Slug);
+            }
+            else
+            {
+                var allTags = await GetTagsAsync();
+                existingTitles = allTags.Select(c => c.Title);
+                existingSlugs = allTags.Select(c => c.Slug);
+                type = ETaxonomyType.Tag;
+            }
 
-                var dates = await _postRepo.GetPostDateTimesAsync();
-                foreach (var month in dates)
-                {
-                    months.TryGetValue(month, out int count);
-                    ++count;
-                    months[month] = count;
-                }
+            // validator
+            var validator = new TaxonomyValidator(existingTitles, type);
+            ValidationResult result = await validator.ValidateAsync(tax);
+            if (!result.IsValid)
+            {
+                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
+            }
 
-                foreach (var month in months)
-                {
-                    int year = month.Key.Year;
-                    if (!years.Keys.Contains(year))
-                    {
-                        years.Add(year, new List<MonthItem>());
-                    }
+            // Slug: user can create / update slug, we format the slug if it's available else we 
+            // use title to get the slug.
+            tax.Slug = BlogUtil.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
 
-                    years[year].Add(new MonthItem
-                    {
-                        Title = month.Key.ToString("MMMM"),
-                        Url = string.Format("/" + BlogRoutes.ARCHIVE_URL_TEMPLATE, year, month.Key.Month.ToString("00")),
-                        Count = month.Value,
-                    });
-                }
+            // html encode title
+            tax.Title = WebUtility.HtmlEncode(tax.Title);
 
-                return years;
-            });
+            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
+            return tax;
         }
 
         // -------------------------------------------------------------------- Images
+
+        /// <summary>
+        /// Deletes an image from data source and storage.
+        /// </summary>
+        /// <param name="mediaId"></param>
+        /// <returns></returns>
+        public async Task DeleteImageAsync(int mediaId)
+        {
+            var media = await _mediaSvc.GetMediaAsync(mediaId);
+            var resizes = GetImageResizeList(media.UploadedOn);
+            var resizeCount = media.ResizeCount; // how many files to delete
+
+            // delete file from storage
+            await DeleteImageFileAsync(media, EImageSize.Original);
+            if (resizeCount == 3)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+                await DeleteImageFileAsync(media, EImageSize.Medium);
+                await DeleteImageFileAsync(media, EImageSize.Large);
+            }
+            else if (resizeCount == 2)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+                await DeleteImageFileAsync(media, EImageSize.Medium);
+            }
+            else if (resizeCount == 1)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+            }
+
+            // delete from db
+            await _mediaSvc.DeleteMediaAsync(mediaId);
+        }
+
+        private async Task DeleteImageFileAsync(Media media, EImageSize size)
+        {
+            var path = GetImagePath(media.UploadedOn, size); 
+            await _storageProvider.DeleteFileAsync(media.FileName, path, IMAGE_PATH_SEPARATOR);
+        }
 
         /// <summary>
         /// Returns absolute url to an image.
@@ -460,15 +489,101 @@ namespace Fan.Blog.Services
         private async Task<string> GetUniqueFileNameAsync(string fileNameSlugged, DateTimeOffset uploadedOn)
         {
             int i = 1;
-            while ((await _mediaRepo.FindAsync(m => m.AppType == EAppType.Blog &&
+            while (await _mediaSvc.ExistsAsync(m => m.AppType == EAppType.Blog &&
                                                     m.UploadedOn.Year == uploadedOn.Year &&
                                                     m.UploadedOn.Month == uploadedOn.Month &&
-                                                    m.FileName.Equals(fileNameSlugged))).Count() > 0)
+                                                    m.FileName.Equals(fileNameSlugged)))
             {
-                fileNameSlugged = fileNameSlugged.Insert(fileNameSlugged.LastIndexOf('.'), $"-{i}");
+                var lookUp = ".";
+                var replace = $"-{i}.";
+                if (i > 1)
+                {
+                    int j = i - 1;
+                    lookUp = $"-{j}.";
+                }
+
+                fileNameSlugged = fileNameSlugged.Replace(lookUp, replace);
+                i++;
             }
 
             return fileNameSlugged;
+        }
+
+        // -------------------------------------------------------------------- Archives
+
+        /// <summary>
+        /// Returns archive information.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync()
+        {
+            return await _cache.GetAsync(CACHE_KEY_ALL_ARCHIVES, CacheTime_Archives, async () =>
+            {
+                var months = new Dictionary<DateTime, int>();
+                var years = new Dictionary<int, List<MonthItem>>();
+
+                var dates = await _postRepo.GetPostDateTimesAsync();
+                foreach (var month in dates)
+                {
+                    months.TryGetValue(month, out int count);
+                    ++count;
+                    months[month] = count;
+                }
+
+                foreach (var month in months)
+                {
+                    int year = month.Key.Year;
+                    if (!years.Keys.Contains(year))
+                    {
+                        years.Add(year, new List<MonthItem>());
+                    }
+
+                    years[year].Add(new MonthItem
+                    {
+                        Title = month.Key.ToString("MMMM"),
+                        Url = string.Format("/" + BlogRoutes.ARCHIVE_URL_TEMPLATE, year, month.Key.Month.ToString("00")),
+                        Count = month.Value,
+                    });
+                }
+
+                return years;
+            });
+        }
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SetupAsync(string disqusShortname)
+        {
+            const string DEFAULT_CATEGORY = "Uncategorized";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray";
+            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
+
+            // create blog settings
+            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            {
+                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
+                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
+            });
+            _logger.LogInformation("BlogSettings created.");
+
+            // create welcome post and default category
+            await CreatePostAsync(new BlogPost
+            {
+                CategoryTitle = DEFAULT_CATEGORY,
+                TagTitles = new List<string> { "announcement", "blogging" },
+                Title = WELCOME_POST_TITLE,
+                Body = WELCOME_POST_BODY,
+                UserId = 1,
+                Status = EPostStatus.Published,
+                CommentStatus = ECommentStatus.AllowComments,
+                CreatedOn = DateTimeOffset.Now,
+            });
+            _logger.LogInformation("Welcome post and default category created.");
+            _logger.LogInformation("Blog Setup completes.");
         }
 
         // -------------------------------------------------------------------- BlogPosts 
@@ -694,44 +809,6 @@ namespace Fan.Blog.Services
             });
         }
 
-        // -------------------------------------------------------------------- Setup
-
-        /// <summary>
-        /// Sets up the blog for the first time on initial launch.
-        /// </summary>
-        /// <returns></returns>
-        public async Task SetupAsync(string disqusShortname)
-        {
-            const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray";
-            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
-
-            // create blog settings
-            await _settingSvc.UpsertSettingsAsync(new BlogSettings
-            {
-                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
-                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
-            });
-            _logger.LogInformation("BlogSettings created.");
-
-            // create welcome post and default category
-            await CreatePostAsync(new BlogPost
-            {
-                CategoryTitle = DEFAULT_CATEGORY,
-                TagTitles = new List<string> { "announcement", "blogging" },
-                Title = WELCOME_POST_TITLE,
-                Body = WELCOME_POST_BODY,
-                UserId = 1,
-                Status = EPostStatus.Published,
-                CommentStatus = ECommentStatus.AllowComments,
-                CreatedOn = DateTimeOffset.Now,
-            });
-            _logger.LogInformation("Welcome post and default category created.");
-            _logger.LogInformation("Blog Setup completes.");
-        }
-
-        // -------------------------------------------------------------------- Private
-
         /// <summary>
         /// Returns a <see cref="Post"/> from data source, throws <see cref="FanException"/> if not found.
         /// </summary>
@@ -772,51 +849,6 @@ namespace Fan.Blog.Services
             }
 
             return blogPostList;
-        }
-
-        /// <summary>
-        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
-        /// </summary>
-        /// <param name="tax">A category or tag.</param>
-        /// <param name="createOrUpdate"></param>
-        /// <returns></returns>
-        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
-        {
-            // get existing titles and slugs
-            IEnumerable<string> existingTitles = null;
-            IEnumerable<string> existingSlugs = null;
-            ETaxonomyType type = ETaxonomyType.Category;
-            if (tax is Category)
-            {
-                var allCats = await GetCategoriesAsync();
-                existingTitles = allCats.Select(c => c.Title);
-                existingSlugs = allCats.Select(c => c.Slug);
-            }
-            else
-            {
-                var allTags = await GetTagsAsync();
-                existingTitles = allTags.Select(c => c.Title);
-                existingSlugs = allTags.Select(c => c.Slug);
-                type = ETaxonomyType.Tag;
-            }
-
-            // validator
-            var validator = new TaxonomyValidator(existingTitles, type);
-            ValidationResult result = await validator.ValidateAsync(tax);
-            if (!result.IsValid)
-            {
-                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
-            }
-
-            // Slug: user can create / update slug, we format the slug if it's available else we 
-            // use title to get the slug.
-            tax.Slug = BlogUtil.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
-
-            // html encode title
-            tax.Title = WebUtility.HtmlEncode(tax.Title);
-
-            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
-            return tax;
         }
 
         /// <summary>

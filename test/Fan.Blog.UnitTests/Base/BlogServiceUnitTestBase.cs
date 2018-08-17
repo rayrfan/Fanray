@@ -24,11 +24,7 @@ namespace Fan.Blog.UnitTests.Base
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
-        protected Mock<IMediaRepository> _mediaRepoMock;
-        //protected Mock<IMediaService> _mediaSvcMock;
         protected BlogService _blogSvc;
-        //protected SettingService _settingSvc;
-        //protected IMapper _mapper;
         protected IDistributedCache _cache;
         protected ILogger<BlogService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
@@ -45,7 +41,6 @@ namespace Fan.Blog.UnitTests.Base
             _metaRepoMock = new Mock<IMetaRepository>();
             _catRepoMock = new Mock<ICategoryRepository>();
             _tagRepoMock = new Mock<ITagRepository>();
-            _mediaRepoMock = new Mock<IMediaRepository>();
 
             // cache
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
@@ -79,7 +74,6 @@ namespace Fan.Blog.UnitTests.Base
                 _catRepoMock.Object, 
                 _postRepoMock.Object, 
                 _tagRepoMock.Object,
-                _mediaRepoMock.Object,
                 mediaSvcMock.Object,
                 storageProviderMock.Object,
                 appSettingsMock.Object,

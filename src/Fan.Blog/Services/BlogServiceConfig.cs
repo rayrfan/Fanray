@@ -2,6 +2,7 @@
 using Fan.Medias;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
@@ -32,6 +33,15 @@ namespace Fan.Blog.Services
         public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
         public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
         public static TimeSpan CacheTime_PostCount = new TimeSpan(0, 10, 0);
+
+        private async Task InvalidateAllBlogCache()
+        {
+            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
+            await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
+        }
 
         // -------------------------------------------------------------------- Posts
 
@@ -107,7 +117,7 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Returns the stored image path.
+        /// Returns the stored image path, "{app}/{year}/{month}" or "{app}/{year}/{month}/{sizePath}".
         /// </summary>
         /// <param name="uploadedOn"></param>
         /// <param name="size"></param>

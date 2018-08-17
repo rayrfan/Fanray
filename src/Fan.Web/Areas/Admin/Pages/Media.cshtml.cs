@@ -40,6 +40,7 @@ namespace Fan.Web.Pages.Admin
         {
             public string FileType { get; set; }
             public string UploadDate { get; set; }
+            public string UploadVia { get; set; }
             /// <summary>
             /// The gallery image dialog shows small image as thumbs.
             /// </summary>
@@ -95,6 +96,28 @@ namespace Fan.Web.Pages.Admin
             return new JsonResult(list);
         }
 
+        /// <summary>
+        /// DELETE an image by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnDeleteAsync(int id)
+        {
+            await _blogSvc.DeleteImageAsync(id);
+
+            // refresh
+            var list = await GetImageListVMAsync();
+            return new JsonResult(list);
+        }
+
+        public async Task<JsonResult> OnPostUpdateAsync([FromBody]ImageVM media)
+        {
+            await _mediaSvc.UpdateMediaAsync(media.Id, media.Title, media.Caption, media.Alt, media.Description);
+            // TODO
+            var list = await GetImageListVMAsync();
+            return new JsonResult(list);
+        }
+
         // -------------------------------------------------------------------- private
 
         /// <summary>
@@ -108,6 +131,7 @@ namespace Fan.Web.Pages.Admin
 
             var appName = EAppType.Blog.ToString().ToLowerInvariant();
 
+            //TODO check each media AppType to decide which GetImageUrl to call
             var imageListVm = from m in list
                               select new ImageVM
                               {
@@ -118,6 +142,7 @@ namespace Fan.Web.Pages.Admin
                                   Alt = m.Alt,
                                   FileType = m.ContentType,
                                   UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
+                                  UploadVia = m.UploadedFrom.ToString(),
                                   Width = m.Width,
                                   Height = m.Height,
                                   UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),

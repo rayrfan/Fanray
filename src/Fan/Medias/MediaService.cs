@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -48,6 +48,46 @@ namespace Fan.Medias
         // -------------------------------------------------------------------- public methods
 
         /// <summary>
+        /// Deletes a media by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task DeleteMediaAsync(int id)
+        {
+            await _mediaRepo.DeleteAsync(id);
+        }
+
+        /// <summary>
+        /// Returns true if media with the search criteria exists, false otherwise.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public async Task<bool> ExistsAsync(Expression<Func<Media, bool>> predicate)
+        {
+            return (await _mediaRepo.FindAsync(predicate)).Count() > 0;
+        }
+
+        /// <summary>
+        /// Returns list of media with the search criteria.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Media>> FindAsync(Expression<Func<Media, bool>> predicate)
+        {
+            return await _mediaRepo.FindAsync(predicate);
+        }
+
+        /// <summary>
+        /// Returns the media by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Media> GetMediaAsync(int id)
+        {
+            return await _mediaRepo.GetAsync(id);
+        }
+
+        /// <summary>
         /// Returns a list of <see cref="Media"/> records based on search critria.
         /// </summary>
         /// <param name="mediaType"></param>
@@ -60,18 +100,26 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// 
+        /// Updates media title and description.
         /// </summary>
         /// <param name="id"></param>
         /// <param name="title"></param>
+        /// <param name="caption"></param>
+        /// <param name="alt"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<Media> UpdateMediaAsync(int id, string title, string description)
+        public async Task<Media> UpdateMediaAsync(int id, 
+            string title,
+            string caption,
+            string alt,
+            string description)
         {
             var media = await _mediaRepo.GetAsync(id);
+
             title = title.IsNullOrEmpty() ? "" : title;
-            media.Title = title.Length > MEDIA_FILENAME_MAXLEN ?
-             title.Substring(0, MEDIA_FILENAME_MAXLEN) : title;
+            media.Title = title.Length > MEDIA_FILENAME_MAXLEN ? title.Substring(0, MEDIA_FILENAME_MAXLEN) : title;
+            media.Caption = caption;
+            media.Alt = alt;
             media.Description = description;
 
             await _mediaRepo.UpdateAsync(media);
@@ -109,39 +157,56 @@ namespace Fan.Medias
             int resizeCount = -1;
             if (contentType.Equals("image/gif"))
             {
+                // Temp: couldn't figure out how to get small file size when resizing gif
+                // I'm only saving original for now
                 using (var imageColl = new MagickImageCollection(source))
                 {
                     widthOrig = imageColl[0].Width;
                     heightOrig = imageColl[0].Height;
-                    imageColl.Coalesce();
-
-                    // resize and store
-                    foreach (var resize in resizes)
+                    var resize = resizes.Single(r => r.Pixel == int.MaxValue);
+                    using (var memStream = new MemoryStream())
                     {
-                        // only resize when either MaxValue which mean original size 
-                        // or image size is greater than what's being asked for
-                        if (resize.Pixel == int.MaxValue || widthOrig > resize.Pixel)
-                        {
-                            resizeCount++;
+                        imageColl.Write(memStream);
+                        memStream.Position = 0;
 
-                            foreach (MagickImage image in imageColl)
-                            {
-                                var (width, height) = GetNewSize(widthOrig, heightOrig, resize.Pixel);
-
-                                //image.Quality = 75;
-                                image.Resize(width, height);
-                            }
-
-                            using (var memStream = new MemoryStream())
-                            {
-                                imageColl.Write(memStream);
-                                memStream.Position = 0;
-
-                                await _storageProvider.SaveFileAsync(memStream, resize, fileName);
-                            }
-                        }
+                        await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
                     }
+                    resizeCount++;
                 }
+
+                //using (var imageColl = new MagickImageCollection(source))
+                //{
+                //    widthOrig = imageColl[0].Width;
+                //    heightOrig = imageColl[0].Height;
+                //    imageColl.Coalesce();
+                //    imageColl.Optimize();
+                //    imageColl.OptimizeTransparency();
+
+                //    // resize and store
+                //    foreach (var resize in resizes)
+                //    {
+                //        // only resize when either MaxValue which mean original size 
+                //        // or image size is greater than what's being asked for
+                //        if (resize.Pixel == int.MaxValue || widthOrig > resize.Pixel)
+                //        {
+                //            resizeCount++;
+
+                //            foreach (MagickImage image in imageColl)
+                //            {
+                //                var (width, height) = GetNewSize(widthOrig, heightOrig, resize.Pixel);
+                //                image.Resize(width, height);
+                //            }
+
+                //            using (var memStream = new MemoryStream())
+                //            {
+                //                imageColl.Write(memStream);
+                //                memStream.Position = 0;
+
+                //                await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
+                //            }
+                //        }
+                //    }
+                //}
             }
             else
             {
@@ -165,11 +230,11 @@ namespace Fan.Medias
                                 var (width, height) = GetNewSize(widthOrig, heightOrig, resize.Pixel);
 
                                 image.Quality = 75;
-                                image.Resize(new MagickGeometry(width, height));
+                                image.Resize(width, height);
                                 image.Write(memStream);
                                 memStream.Position = 0;
 
-                                await _storageProvider.SaveFileAsync(memStream, resize, fileName);
+                                await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
                             }
                         }
                     }

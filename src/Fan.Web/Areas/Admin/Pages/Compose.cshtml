@@ -405,6 +405,7 @@
                                 this.images = resp.data.images;
                             })
                             .catch(err => {
+                                this.progressVisible = false;
                                 console.log(err);
                             });
                     };

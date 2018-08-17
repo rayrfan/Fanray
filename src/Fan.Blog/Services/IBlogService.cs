@@ -112,6 +112,13 @@ namespace Fan.Blog.Services
         // -------------------------------------------------------------------- Images
 
         /// <summary>
+        /// Deletes an image by id.
+        /// </summary>
+        /// <param name="mediaId"></param>
+        /// <returns></returns>
+        Task DeleteImageAsync(int mediaId);
+
+        /// <summary>
         /// Returns absolute URL to an image.
         /// </summary>
         /// <param name="media">The media record representing the image.</param>

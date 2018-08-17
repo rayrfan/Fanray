@@ -68,7 +68,7 @@ namespace Fan.Blog.IntegrationTests
             Assert.Equal("fanray logo", media.Alt);
 
             // and storage provider is called only once since it's a tiny image
-            _storageProviderMock.Verify(s => s.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<ImageResizeInfo>(), It.IsAny<string>()), 
+            _storageProviderMock.Verify(s => s.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<char>()), 
                 Times.Exactly(1));
         }
     }

@@ -62,19 +62,39 @@ namespace Fan.Medias
         /// <param name="info"></param>
         /// <param name="fileNameUnique"></param>
         /// <returns></returns>
-        public async Task SaveFileAsync(Stream source, ImageResizeInfo info, string fileNameUnique)
+        public async Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator)
         {
-            var imgPath = info.Path.Replace(info.PathSeparator, '/');  // azure blob uses '/'
-            var blobName = $"{imgPath}/{fileNameUnique}";
-
-            // get a ref to blob which does not call server
-            var blob = _container.GetBlockBlobReference(blobName);
+            var blob = GetBlob(fileName, path, pathSeparator);
 
             // set blob properties
-            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileNameUnique));
+            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
             blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
 
             await blob.UploadFromStreamAsync(source);
+        }
+
+        /// <summary>
+        /// Deletes a file from blob storage.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="path"></param>
+        /// <param name="pathSeparator"></param>
+        /// <returns></returns>
+        public async Task DeleteFileAsync(string fileName, string path, char pathSeparator)
+        {
+            var blob = GetBlob(fileName, path, pathSeparator);
+            await blob.DeleteIfExistsAsync();
+        }
+
+        // -------------------------------------------------------------------- private method
+
+        private CloudBlockBlob GetBlob(string fileName, string path, char pathSeparator)
+        {
+            var imgPath = path.Replace(pathSeparator, '/');  // azure blob uses '/'
+            var blobName = $"{imgPath}/{fileName}";
+
+            // get a ref to blob which does not call server
+            return _container.GetBlockBlobReference(blobName);
         }
     }
 }

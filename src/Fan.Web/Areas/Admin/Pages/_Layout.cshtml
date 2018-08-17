@@ -96,7 +96,7 @@
                         right
                         :color="snackbar.color"
                         v-model="snackbar.show">
-                {{ snackbar.text }}
+                <span style="font-size:larger">{{ snackbar.text }}</span>
                 <v-btn dark flat @@click.native="snackbar.show = false" icon>
                     <v-icon>close</v-icon>
                 </v-btn>
@@ -155,6 +155,11 @@
                         .catch(function (error) {
                             console.log(error);
                         });
+                },
+                toast(text, color = 'silver') {
+                    this.snackbar.show = true;
+                    this.snackbar.text = text;
+                    this.snackbar.color = color;
                 },
             }
         });

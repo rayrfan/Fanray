@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -15,6 +16,34 @@ namespace Fan.Medias
     public interface IMediaService
     {
         /// <summary>
+        /// Deletes a media by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task DeleteMediaAsync(int id);
+
+        /// <summary>
+        /// Returns true if media with the search criteria exists, false otherwise.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<bool> ExistsAsync(Expression<Func<Media, bool>> predicate);
+
+        /// <summary>
+        /// Returns list of media with the search criteria.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Media>> FindAsync(Expression<Func<Media, bool>> predicate);
+
+        /// <summary>
+        /// Returns the media by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Media> GetMediaAsync(int id);
+
+        /// <summary>
         /// Returns a list of <see cref="Media"/> records based on search critria.
         /// </summary>
         /// <param name="mediaType"></param>
@@ -26,7 +55,17 @@ namespace Fan.Medias
         /// <summary>
         /// Updates media title and description.
         /// </summary>
-        Task<Media> UpdateMediaAsync(int id, string title, string description);
+        /// <param name="id"></param>
+        /// <param name="title"></param>
+        /// <param name="caption"></param>
+        /// <param name="alt"></param>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        Task<Media> UpdateMediaAsync(int id, 
+            string title, 
+            string caption,
+            string alt,
+            string description);
 
         /// <summary>
         /// Uploads an image stream by resizing and storing multiple copies of it.

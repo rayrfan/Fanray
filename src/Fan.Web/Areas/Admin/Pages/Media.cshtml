@@ -69,17 +69,17 @@
                 &nbsp;Upload
             </v-btn>
 
-            <v-progress-circular v-if="progressVisible" 
+            <v-progress-circular v-show="progressVisible"
                                  indeterminate
                                  color="primary"></v-progress-circular>
         </v-toolbar>
         <v-divider></v-divider>
 
         <div class="gallery">
-            <div v-for="image in images" 
+            <div v-for="image in images"
                  :key="image.id"
                  @@click="selectImage(image)"
-                 class="square" 
+                 class="square"
                  :title="image.title"
                  :style="{ backgroundImage: 'url(' + image.urlSmall + ')' }"></div>
         </div>
@@ -92,7 +92,7 @@
             <v-container fill-height style="padding:0; margin:0">
                 <v-layout row wrap>
                     <v-flex xs12 md8 class="img-preview">
-                        <v-container fill-height >
+                        <v-container fill-height>
                             <v-layout justify-center align-center>
                                 <img :src="selectedImage.urlLarge" alt="Alternate Text" />
                             </v-layout>
@@ -102,7 +102,7 @@
                         <v-text-field label="Title" v-model="selectedImage.title"></v-text-field>
                         <v-textarea label="Caption" v-model="selectedImage.caption"></v-textarea>
                         <v-text-field label="Alt text" v-model="selectedImage.alt"></v-text-field>
-                        <v-textarea label="Description" v-model="selectedImage.description"></v-textarea>
+                        @*<v-textarea label="Description" v-model="selectedImage.description"></v-textarea>*@
                         <v-text-field label="URL" readonly v-model="selectedImage.urlOriginal"></v-text-field>
                         <ul>
                             <li>
@@ -117,6 +117,9 @@
                             <li>
                                 <label>Upload Date</label><span>{{ selectedImage.uploadDate }}</span>
                             </li>
+                            <li>
+                                <label>Upload Via</label><span>{{ selectedImage.uploadVia }}</span>
+                            </li>
                         </ul>
                     </v-flex>
                 </v-layout>
@@ -124,10 +127,10 @@
             <div class="img-btnbar">
                 <v-btn color="error" @@click="deleteImage">Delete</v-btn>
                 <v-btn color="primary" @@click.stop="dialogVisible=false">Close</v-btn>
-                <v-btn color="primary">Update</v-btn>
+                <v-btn color="primary" @@click="updateImage">Update</v-btn>
             </div>
 
-        </v-dialog>
+        </v-dialog>       
     </div>
 </blog-media>
 
@@ -139,6 +142,9 @@
                 images: [],
                 progressVisible: false,
                 selectedImage: null,
+                snackbar: false,
+                snackbarText: '',
+                snackbarColor: '',
             }),
             mounted() {
                 this.getImages();
@@ -172,8 +178,11 @@
                             .then(resp => {
                                 this.progressVisible = false;
                                 this.images = resp.data.images;
+                                this.$root.toast('Image uploaded.');
                             })
                             .catch(err => {
+                                this.progressVisible = false;
+                                this.$root.toast('Image upload failed.', 'red');
                                 console.log(err);
                             });
                     };
@@ -181,8 +190,31 @@
                 deleteImage() {
                     if (confirm('Are you sure you want to delete this image? Deleted image will no longer appear anywhere on your website. This cannot be undone!')) {
                         console.log('deleting image: ', this.selectedImage);
-                        let url = ``;
+                        let url = `/admin/media?id=${this.selectedImage.id}`;
+                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                this.dialogVisible = false;
+                                this.images = resp.data.images;
+                                this.$root.toast('Image deleted.');
+                            })
+                            .catch(err => {
+                                this.$root.toast('Image delete failed.', 'red');
+                                console.log(err);
+                            });
                     }
+                },
+                updateImage() {
+                    let url = `/admin/media?handler=update`;
+                    axios.post(url, this.selectedImage, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                        .then(resp => {
+                            this.dialogVisible = false;
+                            this.images = resp.data.images;
+                            this.$root.toast('Image updated.');
+                        })
+                        .catch(err => {
+                            this.$root.toast('Image update failed.', 'red');
+                            console.log(err);
+                        });
                 },
             },
         });

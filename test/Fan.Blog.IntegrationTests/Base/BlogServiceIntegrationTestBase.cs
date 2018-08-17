@@ -83,7 +83,6 @@ namespace Fan.Blog.IntegrationTests.Base
                 catRepo, 
                 postRepo, 
                 tagRepo,
-                mediaRepo,
                 _mediaSvc,
                 _storageProviderMock.Object, 
                 appSettingsMock.Object, 

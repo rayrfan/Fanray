@@ -17,10 +17,15 @@ namespace Fan.Medias
         /// <summary>
         /// Saves file to storage.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="info"></param>
-        /// <param name="fileNameUnique"></param>
+        Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator);
+
+        /// <summary>
+        /// Deletes a file from storage.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="path"></param>
+        /// <param name="pathSeparator"></param>
         /// <returns></returns>
-        Task SaveFileAsync(Stream source, ImageResizeInfo info, string fileNameUnique);     
+        Task DeleteFileAsync(string fileName, string path, char pathSeparator);
     }
 }

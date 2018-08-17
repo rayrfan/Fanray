@@ -35,21 +35,17 @@ namespace Fan.Medias
         /// The absolute URI endpoint to file, e.g. "https://localhost:44381" or "https://www.fanray.com".
         /// </summary>
         public string StorageEndpoint => $"{_request.Scheme}://{_request.Host}{_request.PathBase}";
-
+        
         // -------------------------------------------------------------------- public method
 
         /// <summary>
         /// Saves the file to server file system.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="info"></param>
-        /// <param name="fileNameUnique"></param>
-        /// <returns></returns>
-        public async Task SaveFileAsync(Stream source, ImageResizeInfo info, string fileNameUnique)
+        public async Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator)
         {
             var root = _hostingEnvironment.WebRootPath;
             var container = _appSettings.MediaContainerName;
-            var imgPath = info.Path.Replace(info.PathSeparator, Path.DirectorySeparatorChar);
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
             var dirPath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}";
 
             // make sure dir exists
@@ -57,13 +53,33 @@ namespace Fan.Medias
                 Directory.CreateDirectory(dirPath);
 
             // combine dir and filename
-            var filePath = Path.Combine(dirPath, fileNameUnique);
+            var filePath = Path.Combine(dirPath, fileName);
 
             // save source to file sys
             using (var fileStream = File.Create(filePath))
             {
                 await source.CopyToAsync(fileStream);
             }
+        }
+
+        /// <summary>
+        /// Deletes a file from storage.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public Task DeleteFileAsync(string fileName, string path, char pathSeparator)
+        {
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
+            var filePath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}{Path.DirectorySeparatorChar}{fileName}";
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+
+            return Task.FromResult(0);
         }
     }
 }
