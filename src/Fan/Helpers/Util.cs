@@ -138,7 +138,7 @@ namespace Fan.Helpers
         }
 
         /// <summary>
-        /// Returns a random alphanumeric of a certain length.
+        /// Returns a random lowercase alpha + numeric chars of a certain length.
         /// </summary>
         /// <param name="length"></param>
         /// <remarks>

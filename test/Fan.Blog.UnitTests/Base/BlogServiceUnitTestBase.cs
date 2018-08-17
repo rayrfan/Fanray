@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Fan.Blog.Data;
+﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Services;
 using Fan.Data;
@@ -7,7 +6,6 @@ using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,13 +24,11 @@ namespace Fan.Blog.UnitTests.Base
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
-        protected Mock<IMediaRepository> _mediaRepoMock;
         protected BlogService _blogSvc;
-        protected SettingService _settingSvc;
-        protected IMapper _mapper;
         protected IDistributedCache _cache;
         protected ILogger<BlogService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
+        protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
 
         /// <summary>
         /// Base constructor which will be called first for each test in derived test classes, thus
@@ -45,10 +41,6 @@ namespace Fan.Blog.UnitTests.Base
             _metaRepoMock = new Mock<IMetaRepository>();
             _catRepoMock = new Mock<ICategoryRepository>();
             _tagRepoMock = new Mock<ITagRepository>();
-            _mediaRepoMock = new Mock<IMediaRepository>();
-
-            // env 
-            var envMock = new Mock<IHostingEnvironment>();
 
             // cache
             var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
@@ -60,24 +52,34 @@ namespace Fan.Blog.UnitTests.Base
             _loggerBlogSvc = loggerFactory.CreateLogger<BlogService>();
             _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
-            // mapper
-            _mapper = BlogUtil.Mapper;
+            // services (must be after _cache)
+            var settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
+            var mediaSvcMock = new Mock<IMediaService>();
 
-            // shortcode
+            // appsettings
+            var appSettingsMock = new Mock<IOptionsSnapshot<AppSettings>>();
+            appSettingsMock.Setup(o => o.Value).Returns(new AppSettings());
+
+            // storage
+            var storageProviderMock = new Mock<IStorageProvider>();
+            storageProviderMock.Setup(pro => pro.StorageEndpoint).Returns(STORAGE_ENDPOINT);
+
+            // mapper, shortcode, mediator
+            var mapper = BlogUtil.Mapper;
             var shortcodeSvc = new Mock<IShortcodeService>();
-
-            // svc
             var mediatorMock = new Mock<IMediator>();
 
-            _settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
             _blogSvc = new BlogService(
-                _settingSvc, 
+                settingSvc, 
                 _catRepoMock.Object, 
                 _postRepoMock.Object, 
                 _tagRepoMock.Object,
+                mediaSvcMock.Object,
+                storageProviderMock.Object,
+                appSettingsMock.Object,
                 _cache, 
                 _loggerBlogSvc, 
-                _mapper,
+                mapper,
                 shortcodeSvc.Object,
                 mediatorMock.Object);
         }

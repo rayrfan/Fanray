@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -14,41 +16,32 @@ namespace Fan.Medias
     public interface IMediaService
     {
         /// <summary>
-        /// Uploads image byte[] to storage and returns absolute image URL.
+        /// Deletes a media by id.
         /// </summary>
-        /// <param name="source">File content</param>
-        /// <param name="appType">Which fanray app it uploaded it.</param>
-        /// <param name="userId">Id of the user uploading the media.</param>
-        /// <param name="fileNameOrig">File name with ext.</param>
-        /// <param name="uploadFrom">Which client uploaded it.</param>
-        /// <remarks>
-        /// It resizes image to original and optimzed copies based on conditions.
-        /// </remarks>
-        /// <returns>
-        /// Returns absolute, original, image handler enabled URL to the image.
-        /// </returns>
-        Task<string> UploadImageAsync(byte[] source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task DeleteMediaAsync(int id);
 
         /// <summary>
-        /// Uploads image stream to storage and returns absolute image URL.
+        /// Returns true if media with the search criteria exists, false otherwise.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="appType"></param>
-        /// <param name="userId"></param>
-        /// <param name="fileNameOrig"></param>
-        /// <param name="uploadFrom"></param>
-        /// <remarks>
-        /// It resizes image to original and optimzed copies based on conditions.
-        /// </remarks>
-        /// <returns>
-        /// Returns absolute, original, image handler enabled URL to the image.
-        /// </returns>
-        Task<string> UploadImageAsync(Stream source, EAppType appType, int userId, string fileNameOrig, EUploadedFrom uploadFrom);
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<bool> ExistsAsync(Expression<Func<Media, bool>> predicate);
 
         /// <summary>
-        /// Updates media title and description.
+        /// Returns list of media with the search criteria.
         /// </summary>
-        Task<Media> UpdateMediaAsync(int id, string title, string description);
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Media>> FindAsync(Expression<Func<Media, bool>> predicate);
+
+        /// <summary>
+        /// Returns the media by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Media> GetMediaAsync(int id);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> records based on search critria.
@@ -60,10 +53,40 @@ namespace Fan.Medias
         Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
 
         /// <summary>
-        /// Returns the absolute URL to an image.
+        /// Updates media title and description.
         /// </summary>
-        /// <param name="media"></param>
+        /// <param name="id"></param>
+        /// <param name="title"></param>
+        /// <param name="caption"></param>
+        /// <param name="alt"></param>
+        /// <param name="description"></param>
         /// <returns></returns>
-        string GetImageUrl(Media media);
+        Task<Media> UpdateMediaAsync(int id, 
+            string title, 
+            string caption,
+            string alt,
+            string description);
+
+        /// <summary>
+        /// Uploads an image stream by resizing and storing multiple copies of it.
+        /// </summary>
+        /// <param name="source">The image stream.</param>
+        /// <param name="resizes">Image resizes.</param>
+        /// <param name="fileName">The processed unique filename.</param>
+        /// <param name="contentType">The file content type.</param>
+        /// <param name="uploadedOn">The datetimeoffset the image is uploaed.</param>
+        /// <param name="appType">The app that is uploading it.</param>
+        /// <param name="userId">The user who uploads the image.</param>
+        /// <param name="uploadFrom">The agent that uploads the image.</param>
+        /// <returns></returns>
+        Task<Media> UploadImageAsync(Stream source,
+            List<ImageResizeInfo> resizes,
+            string fileName,
+            string contentType,
+            string title,
+            DateTimeOffset uploadedOn,
+            EAppType appType,
+            int userId,
+            EUploadedFrom uploadFrom = EUploadedFrom.Browser);
     }
 }

@@ -5,20 +5,59 @@
 }
 @section Styles {
     <style>
-        .gallery img {
-            object-fit: cover;
-            width: 200px;
-            height: 200px;
-            margin: 10px 0 0 10px;
+        /*https://jsfiddle.net/webtiki/MpXYr/2/*/
+        .square {
+            float: left;
+            position: relative;
+            width: 10%;
+            padding-bottom: 10%; /* = width for a 1:1 aspect ratio */
+            margin: 0.5%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain; /* "cover" crops squares; "contain" no cropping */
+        }
+        .square:hover{
+            cursor: pointer;
         }
 
-        @@media (max-width: 767px) {
-            .gallery img {
-                width: 168px;
-                height: 168px;
-                margin: 8px 0 0 8px;
-            }
+        /*dialog*/
+        .dialog {
+            max-width: 71%;
+            background-color: white;
         }
+
+            .dialog img {
+                max-width: 100%;
+                height: auto;
+            }
+            .dialog .img-preview {
+                background-color: #f3f6f8;
+            }
+
+            .dialog .img-sidebar {
+                padding: 20px 15px 0 15px;
+            }
+
+                .dialog .img-sidebar ul {
+                    padding-left: 0;
+                    margin-left: 0;
+                    list-style: none;
+                }
+                    .dialog .img-sidebar ul li {
+                        padding-bottom:10px;
+                    }
+                    .dialog .img-sidebar ul li label {
+                        font-weight: bold;
+                        color: gray;
+                        font: larger;
+                        text-transform: uppercase;
+                        padding-right: 10px;
+                    }
+
+            .dialog .img-btnbar {
+                border-top: 1px solid #eee;
+                text-align: right;
+            }
     </style>
 }
 
@@ -29,25 +68,69 @@
                 <v-icon color="primary">cloud_upload</v-icon>
                 &nbsp;Upload
             </v-btn>
+
+            <v-progress-circular v-show="progressVisible"
+                                 indeterminate
+                                 color="primary"></v-progress-circular>
         </v-toolbar>
         <v-divider></v-divider>
-        <div class="gallery">
-            <a v-for="image in images" :key="image.id" @@click.stop="imageDialog = true">
-                <img :src="image.url" :alt="image.fileName">
-            </a>
-        </div>
-        <v-dialog v-model="imageDialog" max-width="500px">
-            <v-card>
-                <v-card-title>
-                    <span>Dialog 3</span>
-                    <v-spacer></v-spacer>
 
-                </v-card-title>
-                <v-card-actions>
-                    <v-btn color="primary" flat @@click.stop="imageDialog=false">Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <div class="gallery">
+            <div v-for="image in images"
+                 :key="image.id"
+                 @@click="selectImage(image)"
+                 class="square"
+                 :title="image.title"
+                 :style="{ backgroundImage: 'url(' + image.urlSmall + ')' }"></div>
+        </div>
+
+        <v-dialog v-if="selectedImage"
+                  v-model="dialogVisible"
+                  @@keydown.esc="dialogVisible = false"
+                  content-class="dialog">
+
+            <v-container fill-height style="padding:0; margin:0">
+                <v-layout row wrap>
+                    <v-flex xs12 md8 class="img-preview">
+                        <v-container fill-height>
+                            <v-layout justify-center align-center>
+                                <img :src="selectedImage.urlLarge" alt="Alternate Text" />
+                            </v-layout>
+                        </v-container>
+                    </v-flex>
+                    <v-flex xs12 md4 class="img-sidebar">
+                        <v-text-field label="Title" v-model="selectedImage.title"></v-text-field>
+                        <v-textarea label="Caption" v-model="selectedImage.caption"></v-textarea>
+                        <v-text-field label="Alt text" v-model="selectedImage.alt"></v-text-field>
+                        @*<v-textarea label="Description" v-model="selectedImage.description"></v-textarea>*@
+                        <v-text-field label="URL" readonly v-model="selectedImage.urlOriginal"></v-text-field>
+                        <ul>
+                            <li>
+                                <label>File Name</label><span>{{ selectedImage.fileName }}</span>
+                            </li>
+                            <li>
+                                <label>File Type</label><span>{{ selectedImage.fileType }}</span>
+                            </li>
+                            <li>
+                                <label>Dimensions</label><span><abbr title="Width in pixels">{{ selectedImage.width }}</abbr> ✕ <abbr title="Height in pixels">{{ selectedImage.height }}</abbr></span>
+                            </li>
+                            <li>
+                                <label>Upload Date</label><span>{{ selectedImage.uploadDate }}</span>
+                            </li>
+                            <li>
+                                <label>Upload Via</label><span>{{ selectedImage.uploadVia }}</span>
+                            </li>
+                        </ul>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+            <div class="img-btnbar">
+                <v-btn color="error" @@click="deleteImage">Delete</v-btn>
+                <v-btn color="primary" @@click.stop="dialogVisible=false">Close</v-btn>
+                <v-btn color="primary" @@click="updateImage">Update</v-btn>
+            </div>
+
+        </v-dialog>       
     </div>
 </blog-media>
 
@@ -55,13 +138,23 @@
     <script>
         Vue.component('blog-media', {
             data: () => ({
-                imageDialog: false,
+                dialogVisible: false,
                 images: [],
+                progressVisible: false,
+                selectedImage: null,
+                snackbar: false,
+                snackbarText: '',
+                snackbarColor: '',
             }),
             mounted() {
                 this.getImages();
             },
             methods: {
+                selectImage(image) {
+                    this.dialogVisible = true;
+                    this.selectedImage = image;
+                    console.log("selecting image: ", image);
+                },
                 getImages() {
                     let url = `/admin/media?handler=images`;
                     axios.get(url).then(resp => {
@@ -75,6 +168,7 @@
                     input.setAttribute('multiple', null);
                     input.click();
                     input.onchange = () => {
+                        this.progressVisible = true;
                         const formData = new FormData();
                         for (let i = 0; i < input.files.length; i++) {
                             formData.append('images', input.files[i]);
@@ -82,18 +176,45 @@
 
                         axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
                             .then(resp => {
+                                this.progressVisible = false;
                                 this.images = resp.data.images;
+                                this.$root.toast('Image uploaded.');
                             })
                             .catch(err => {
+                                this.progressVisible = false;
+                                this.$root.toast('Image upload failed.', 'red');
                                 console.log(err);
                             });
                     };
                 },
-                edit(id) {
-                    console.log('editing image: ' + id);
+                deleteImage() {
+                    if (confirm('Are you sure you want to delete this image? Deleted image will no longer appear anywhere on your website. This cannot be undone!')) {
+                        console.log('deleting image: ', this.selectedImage);
+                        let url = `/admin/media?id=${this.selectedImage.id}`;
+                        axios.delete(url, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                this.dialogVisible = false;
+                                this.images = resp.data.images;
+                                this.$root.toast('Image deleted.');
+                            })
+                            .catch(err => {
+                                this.$root.toast('Image delete failed.', 'red');
+                                console.log(err);
+                            });
+                    }
                 },
-                delete(id) {
-                    console.log('deleting image: ' + id);
+                updateImage() {
+                    let url = `/admin/media?handler=update`;
+                    axios.post(url, this.selectedImage, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                        .then(resp => {
+                            this.dialogVisible = false;
+                            this.images = resp.data.images;
+                            this.$root.toast('Image updated.');
+                        })
+                        .catch(err => {
+                            this.$root.toast('Image update failed.', 'red');
+                            console.log(err);
+                        });
                 },
             },
         });

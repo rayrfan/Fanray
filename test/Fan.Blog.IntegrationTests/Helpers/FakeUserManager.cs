@@ -1,5 +1,4 @@
-﻿using Fan.Blog.IntegrationTests.Helpers;
-using Fan.Models;
+﻿using Fan.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -7,7 +6,7 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.IntegrationTests.Fakes
+namespace Fan.Blog.IntegrationTests.Helpers
 {
     /// <summary>
     /// Fake <see cref="UserManager{TUser}"/> to help create <see cref="FakeSignInManager"/>.

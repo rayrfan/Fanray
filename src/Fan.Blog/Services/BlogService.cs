@@ -7,6 +7,7 @@ using Fan.Blog.Models;
 using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Medias;
 using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -15,8 +16,10 @@ using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -27,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
-    public class BlogService : IBlogService
+    public partial class BlogService : IBlogService
     {
         private readonly ISettingService _settingSvc;
         private readonly ICategoryRepository _catRepo;
@@ -38,12 +41,18 @@ namespace Fan.Blog.Services
         private readonly IMapper _mapper;
         private readonly IShortcodeService _shortcodeSvc;
         private readonly IMediator _mediator;
+        private readonly IMediaService _mediaSvc;
+        private readonly IStorageProvider _storageProvider;
+        private readonly AppSettings _appSettings;
 
         public BlogService(
             ISettingService settingService,
             ICategoryRepository catRepo,
             IPostRepository postRepo,
             ITagRepository tagRepo,
+            IMediaService mediaSvc,
+            IStorageProvider storageProvider,
+            IOptionsSnapshot<AppSettings> appSettings,
             IDistributedCache cache,
             ILogger<BlogService> logger,
             IMapper mapper,
@@ -54,45 +63,14 @@ namespace Fan.Blog.Services
             _catRepo = catRepo;
             _postRepo = postRepo;
             _tagRepo = tagRepo;
+            _mediaSvc = mediaSvc;
+            _storageProvider = storageProvider;
+            _appSettings = appSettings.Value;
             _cache = cache;
             _mapper = mapper;
             _logger = logger;
             _shortcodeSvc = shortcodeService;
             _mediator = mediator;
-        }
-
-        // -------------------------------------------------------------------- Const
-
-        /// <summary>
-        /// How many words to extract into excerpt from body. Default 55.
-        /// </summary>
-        public const int EXCERPT_WORD_LIMIT = 55;
-
-        // -------------------------------------------------------------------- Cache
-
-        /// <summary>
-        /// By default show 10 posts per page.
-        /// </summary>
-        public const int DEFAULT_PAGE_SIZE = 10;
-        public const int DEFAULT_PAGE_INDEX = 1;
-        public const string CACHE_KEY_ALL_CATS = "BlogCategories";
-        public const string CACHE_KEY_ALL_TAGS = "BlogTags";
-        public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
-        public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
-        public const string CACHE_KEY_POST_COUNT = "BlogPostCount";
-        public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_PostCount = new TimeSpan(0, 10, 0);
-
-        private async Task InvalidateAllBlogCache()
-        {
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
-            await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
         }
 
         // -------------------------------------------------------------------- Categories
@@ -306,6 +284,231 @@ namespace Fan.Blog.Services
             return tag;
         }
 
+        /// <summary>
+        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
+        /// </summary>
+        /// <param name="tax">A category or tag.</param>
+        /// <param name="createOrUpdate"></param>
+        /// <returns></returns>
+        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
+        {
+            // get existing titles and slugs
+            IEnumerable<string> existingTitles = null;
+            IEnumerable<string> existingSlugs = null;
+            ETaxonomyType type = ETaxonomyType.Category;
+            if (tax is Category)
+            {
+                var allCats = await GetCategoriesAsync();
+                existingTitles = allCats.Select(c => c.Title);
+                existingSlugs = allCats.Select(c => c.Slug);
+            }
+            else
+            {
+                var allTags = await GetTagsAsync();
+                existingTitles = allTags.Select(c => c.Title);
+                existingSlugs = allTags.Select(c => c.Slug);
+                type = ETaxonomyType.Tag;
+            }
+
+            // validator
+            var validator = new TaxonomyValidator(existingTitles, type);
+            ValidationResult result = await validator.ValidateAsync(tax);
+            if (!result.IsValid)
+            {
+                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
+            }
+
+            // Slug: user can create / update slug, we format the slug if it's available else we 
+            // use title to get the slug.
+            tax.Slug = BlogUtil.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
+
+            // html encode title
+            tax.Title = WebUtility.HtmlEncode(tax.Title);
+
+            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
+            return tax;
+        }
+
+        // -------------------------------------------------------------------- Images
+
+        /// <summary>
+        /// Deletes an image from data source and storage.
+        /// </summary>
+        /// <param name="mediaId"></param>
+        /// <returns></returns>
+        public async Task DeleteImageAsync(int mediaId)
+        {
+            var media = await _mediaSvc.GetMediaAsync(mediaId);
+            var resizes = GetImageResizeList(media.UploadedOn);
+            var resizeCount = media.ResizeCount; // how many files to delete
+
+            // delete file from storage
+            await DeleteImageFileAsync(media, EImageSize.Original);
+            if (resizeCount == 3)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+                await DeleteImageFileAsync(media, EImageSize.Medium);
+                await DeleteImageFileAsync(media, EImageSize.Large);
+            }
+            else if (resizeCount == 2)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+                await DeleteImageFileAsync(media, EImageSize.Medium);
+            }
+            else if (resizeCount == 1)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+            }
+
+            // delete from db
+            await _mediaSvc.DeleteMediaAsync(mediaId);
+        }
+
+        private async Task DeleteImageFileAsync(Media media, EImageSize size)
+        {
+            var path = GetImagePath(media.UploadedOn, size); 
+            await _storageProvider.DeleteFileAsync(media.FileName, path, IMAGE_PATH_SEPARATOR);
+        }
+
+        /// <summary>
+        /// Returns absolute url to an image.
+        /// </summary>
+        /// <remarks>
+        /// Based on the resize count, the url returned could be original or one of the resized image.
+        /// </remarks>
+        /// <param name="media">The media record representing the image.</param>
+        /// <param name="size">The image size.</param>
+        /// <returns></returns>
+        public string GetImageUrl(Media media, EImageSize size)
+        {
+            var endpoint = _storageProvider.StorageEndpoint;
+            var container = endpoint.EndsWith('/') ? _appSettings.MediaContainerName : $"/{_appSettings.MediaContainerName}";
+
+            if ((size == EImageSize.Original || media.ResizeCount <= 0) ||
+                (media.ResizeCount == 1 && size != EImageSize.Small) ||
+                (media.ResizeCount == 2 && size == EImageSize.Large))
+            {
+                size = EImageSize.Original;
+            }
+
+            var imagePath = GetImagePath(media.UploadedOn, size);
+            var fileName = media.FileName;
+
+            return $"{endpoint}{container}/{imagePath}/{fileName}";
+        }
+
+        /// <summary>
+        /// Uploads image.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="userId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="contentType">e.g. "image/jpeg"</param>
+        /// <param name="uploadFrom"></param>
+        /// <returns></returns>
+        public async Task<Media> UploadImageAsync(Stream source, int userId, string fileName, string contentType,
+            EUploadedFrom uploadFrom)
+        {
+            // check if file type is supported
+            var ext = Path.GetExtension(fileName).ToLower();
+            var ctype = "." + contentType.Substring(contentType.LastIndexOf("/") + 1).ToLower();
+            if (ext.IsNullOrEmpty() || !Accepted_Image_Types.Contains(ext) || !Accepted_Image_Types.Contains(ctype))
+            {
+                throw new FanException("Upload file type is not supported.");
+            }
+
+            // uploadedOn 
+            var uploadedOn = DateTimeOffset.UtcNow;
+
+            // get the slugged filename and title from original filename
+            var (fileNameSlugged, title) = ProcessFileName(fileName, uploadFrom);
+
+            // get unique filename
+            var uniqueFileName = await GetUniqueFileNameAsync(fileNameSlugged, uploadedOn);
+
+            // get image resizes
+            var resizes = GetImageResizeList(uploadedOn);
+
+            return await _mediaSvc.UploadImageAsync(source, resizes, uniqueFileName, contentType, title,
+                uploadedOn, EAppType.Blog, userId, uploadFrom);
+        }
+
+        /// <summary>
+        /// Takes the original filename and returns a slugged filename and title attribute.
+        /// </summary>
+        /// <remarks>
+        /// If the filename is too long it shorten it. Then it generates a slugged filename which 
+        /// is hyphen separeated value for english original filenames, a random string value for 
+        /// non-english filenames.  The title attribute is original filename html-encoded for safe
+        /// display.
+        /// </remarks>
+        /// <param name="fileNameOrig">Original filename user is uploading.</param>
+        /// <param name="uploadFrom">This is used solely because of olw quirks I have to handle.</param>
+        /// <returns></returns>
+        private (string fileNameSlugged, string title) ProcessFileName(string fileNameOrig, EUploadedFrom uploadFrom)
+        {
+            // extra filename without ext, note this will also remove the extra path info from OLW
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileNameOrig);
+
+            // make sure file name is not too long
+            if (fileNameWithoutExt.Length > MediaService.MEDIA_FILENAME_MAXLEN)
+            {
+                fileNameWithoutExt = fileNameWithoutExt.Substring(0, MediaService.MEDIA_FILENAME_MAXLEN);
+            }
+
+            // there is a quirk file uploaded from olw had "_2" suffixed to the name
+            if (uploadFrom == EUploadedFrom.MetaWeblog && fileNameWithoutExt.EndsWith("_2"))
+            {
+                fileNameWithoutExt = fileNameWithoutExt.Remove(fileNameWithoutExt.Length - 2);
+            }
+
+            // slug file name
+            var slug = Util.FormatSlug(fileNameWithoutExt);
+            if (slug.IsNullOrEmpty()) // slug may end up empty
+            {
+                slug = Util.RandomString(6);
+            }
+            else if (uploadFrom == EUploadedFrom.MetaWeblog && slug == "thumb") // or may end up with only "thumb" for olw
+            {
+                slug = string.Concat(Util.RandomString(6), "_thumb");
+            }
+
+            var ext = Path.GetExtension(fileNameOrig).ToLower();
+            var fileNameSlugged = $"{slug}{ext}";
+            var fileNameEncoded = WebUtility.HtmlEncode(fileNameWithoutExt);
+
+            return (fileNameSlugged: fileNameSlugged, title: fileNameEncoded);
+        }
+
+        /// <summary>
+        /// Returns a unique filename after checking datasource to see if the filename exists already.
+        /// </summary>
+        /// <param name="uploadedOn"></param>
+        /// <param name="fileNameSlugged"></param>
+        /// <returns></returns>
+        private async Task<string> GetUniqueFileNameAsync(string fileNameSlugged, DateTimeOffset uploadedOn)
+        {
+            int i = 1;
+            while (await _mediaSvc.ExistsAsync(m => m.AppType == EAppType.Blog &&
+                                                    m.UploadedOn.Year == uploadedOn.Year &&
+                                                    m.UploadedOn.Month == uploadedOn.Month &&
+                                                    m.FileName.Equals(fileNameSlugged)))
+            {
+                var lookUp = ".";
+                var replace = $"-{i}.";
+                if (i > 1)
+                {
+                    int j = i - 1;
+                    lookUp = $"-{j}.";
+                }
+
+                fileNameSlugged = fileNameSlugged.Replace(lookUp, replace);
+                i++;
+            }
+
+            return fileNameSlugged;
+        }
+
         // -------------------------------------------------------------------- Archives
 
         /// <summary>
@@ -345,6 +548,42 @@ namespace Fan.Blog.Services
 
                 return years;
             });
+        }
+
+        // -------------------------------------------------------------------- Setup
+
+        /// <summary>
+        /// Sets up the blog for the first time on initial launch.
+        /// </summary>
+        /// <returns></returns>
+        public async Task SetupAsync(string disqusShortname)
+        {
+            const string DEFAULT_CATEGORY = "Uncategorized";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray";
+            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
+
+            // create blog settings
+            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            {
+                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
+                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
+            });
+            _logger.LogInformation("BlogSettings created.");
+
+            // create welcome post and default category
+            await CreatePostAsync(new BlogPost
+            {
+                CategoryTitle = DEFAULT_CATEGORY,
+                TagTitles = new List<string> { "announcement", "blogging" },
+                Title = WELCOME_POST_TITLE,
+                Body = WELCOME_POST_BODY,
+                UserId = 1,
+                Status = EPostStatus.Published,
+                CommentStatus = ECommentStatus.AllowComments,
+                CreatedOn = DateTimeOffset.Now,
+            });
+            _logger.LogInformation("Welcome post and default category created.");
+            _logger.LogInformation("Blog Setup completes.");
         }
 
         // -------------------------------------------------------------------- BlogPosts 
@@ -570,44 +809,6 @@ namespace Fan.Blog.Services
             });
         }
 
-        // -------------------------------------------------------------------- Setup
-
-        /// <summary>
-        /// Sets up the blog for the first time on initial launch.
-        /// </summary>
-        /// <returns></returns>
-        public async Task SetupAsync(string disqusShortname)
-        {
-            const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray";
-            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
-
-            // create blog settings
-            await _settingSvc.UpsertSettingsAsync(new BlogSettings
-            {
-                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
-                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
-            });
-            _logger.LogInformation("BlogSettings created.");
-
-            // create welcome post and default category
-            await CreatePostAsync(new BlogPost
-            {
-                CategoryTitle = DEFAULT_CATEGORY,
-                TagTitles = new List<string> { "announcement", "blogging" },
-                Title = WELCOME_POST_TITLE,
-                Body = WELCOME_POST_BODY,
-                UserId = 1,
-                Status = EPostStatus.Published,
-                CommentStatus = ECommentStatus.AllowComments,
-                CreatedOn = DateTimeOffset.Now,
-            });
-            _logger.LogInformation("Welcome post and default category created.");
-            _logger.LogInformation("Blog Setup completes.");
-        }
-
-        // -------------------------------------------------------------------- Private
-
         /// <summary>
         /// Returns a <see cref="Post"/> from data source, throws <see cref="FanException"/> if not found.
         /// </summary>
@@ -648,51 +849,6 @@ namespace Fan.Blog.Services
             }
 
             return blogPostList;
-        }
-
-        /// <summary>
-        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
-        /// </summary>
-        /// <param name="tax">A category or tag.</param>
-        /// <param name="createOrUpdate"></param>
-        /// <returns></returns>
-        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
-        {
-            // get existing titles and slugs
-            IEnumerable<string> existingTitles = null;
-            IEnumerable<string> existingSlugs = null;
-            ETaxonomyType type = ETaxonomyType.Category;
-            if (tax is Category)
-            {
-                var allCats = await GetCategoriesAsync();
-                existingTitles = allCats.Select(c => c.Title);
-                existingSlugs = allCats.Select(c => c.Slug);
-            }
-            else
-            {
-                var allTags = await GetTagsAsync();
-                existingTitles = allTags.Select(c => c.Title);
-                existingSlugs = allTags.Select(c => c.Slug);
-                type = ETaxonomyType.Tag;
-            }
-
-            // validator
-            var validator = new TaxonomyValidator(existingTitles, type);
-            ValidationResult result = await validator.ValidateAsync(tax);
-            if (!result.IsValid)
-            {
-                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
-            }
-
-            // Slug: user can create / update slug, we format the slug if it's available else we 
-            // use title to get the slug.
-            tax.Slug = BlogUtil.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
-
-            // html encode title
-            tax.Title = WebUtility.HtmlEncode(tax.Title);
-
-            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
-            return tax;
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ GO
 
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV1_1')
 BEGIN
-    ALTER TABLE [Core_Media] ADD [FileType] nvarchar(256) NOT NULL DEFAULT N'';
+    ALTER TABLE [Core_Media] ADD [ContentType] nvarchar(256) NOT NULL DEFAULT N'';
 END;
 
 GO
@@ -48,7 +48,14 @@ GO
 
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV1_1')
 BEGIN
-    ALTER TABLE [Core_Media] ADD [Optimized] bit NOT NULL DEFAULT 0;
+    ALTER TABLE [Core_Media] ADD [Alt] nvarchar(max) NULL;
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV1_1')
+BEGIN
+    ALTER TABLE [Core_Media] ADD [ResizeCount] int NOT NULL DEFAULT 0;
 END;
 
 GO

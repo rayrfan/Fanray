@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Medias
@@ -16,33 +15,17 @@ namespace Fan.Medias
         string StorageEndpoint { get; }
 
         /// <summary>
-        /// Returns unqiue file name after saveing file byte array to storage.
+        /// Saves file to storage.
         /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
-        /// </remarks>
-        /// <param name="source">The bytes of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="uploadedOn">When uploaded.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        /// <param name="size">Optimized or original</param>
-        Task<string> SaveFileAsync(byte[] source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize size);
+        Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator);
 
         /// <summary>
-        /// Returns unqiue file name after saveing file stream to storage.
+        /// Deletes a file from storage.
         /// </summary>
-        /// <remarks>
-        /// The storage type can be configured in appsettings.json. The file is stored like the following
-        /// "container/appName/userId/year/month/fileName.ext".
-        /// </remarks>
-        /// <param name="source">The stream of the file.</param>
-        /// <param name="appId">Which app uploaded file.</param>
-        /// <param name="userId">Who uploaded the file.</param>
-        /// <param name="uploadedOn">Upload year.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        /// <param name="size">Optimized or original</param>
-        Task<string> SaveFileAsync(Stream source, EAppType appId, int userId, DateTimeOffset uploadedOn, string fileName, EImageSize size);
+        /// <param name="fileName"></param>
+        /// <param name="path"></param>
+        /// <param name="pathSeparator"></param>
+        /// <returns></returns>
+        Task DeleteFileAsync(string fileName, string path, char pathSeparator);
     }
 }

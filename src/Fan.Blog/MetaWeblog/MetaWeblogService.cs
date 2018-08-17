@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Blog.MetaWeblog
@@ -20,7 +21,6 @@ namespace Fan.Blog.MetaWeblog
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
         private readonly ISettingService _settingSvc;
-        private readonly IMediaService _mediaSvc;
         private readonly ILogger<MetaWeblogService> _logger;
 
         public MetaWeblogService(
@@ -28,14 +28,12 @@ namespace Fan.Blog.MetaWeblog
             SignInManager<User> signInManager,
             IBlogService blogSvc,
             ISettingService settingService,
-            IMediaService mediaSvc,
             ILogger<MetaWeblogService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
             _settingSvc = settingService;
-            _mediaSvc = mediaSvc;
             _logger = logger;
         }
 
@@ -263,11 +261,12 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var userId = (await _userManager.FindByNameAsync(userName)).Id;
-                var url = await _mediaSvc.UploadImageAsync(mediaObject.Bits, EAppType.Blog, userId, mediaObject.Name, EUploadedFrom.MetaWeblog);
+                var media = await _blogSvc.UploadImageAsync(new MemoryStream(mediaObject.Bits), 
+                    userId, mediaObject.Name, mediaObject.Type, EUploadedFrom.MetaWeblog);
 
                 return new MetaMediaInfo()
                 {
-                    Url = url
+                    Url = _blogSvc.GetImageUrl(media, EImageSize.Original)
                 };
             }
             catch (Exception ex)

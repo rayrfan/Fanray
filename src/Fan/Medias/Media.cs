@@ -24,13 +24,10 @@ namespace Fan.Medias
         public string Description { get; set; }
 
         /// <summary>
-        /// Name of the file with ext. 
+        /// File name.
         /// </summary>
         /// <remarks>
-        /// For iamage, this is the title attribute, when you hover over the image.
-        /// If filename exceeds <see cref="MediaService.MEDIA_FILENAME_MAXLEN"/>, it will be shortened.
-        /// For blog the name part is slug formatted, for example "test pic.jpg" becomes "test-pic.jpg".
-        /// For other apps, it could be a guid value [guid].jpg.
+        /// This is the unique, slugged with ext filename. 
         /// </remarks>
         [Required]
         [StringLength(maximumLength: 256)]
@@ -42,11 +39,10 @@ namespace Fan.Medias
         public long Length { get; set; }
 
         /// <summary>
-        /// Title of the media or alt text for image.
+        /// Title attribute.
         /// </summary>
         /// <remarks>
-        /// For image this is its alt text, since only image has alt attribute I don't dedicate a column for it.
-        /// The <see cref="FileName"/> property will be used as title attribute instead.
+        /// https://stackoverflow.com/q/872389/32240
         /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Title { get; set; }
@@ -89,7 +85,7 @@ namespace Fan.Medias
         /// </remarks>
         [Required]
         [StringLength(maximumLength: 256)]
-        public string FileType { get; set; }
+        public string ContentType { get; set; }
 
         /// <summary>
         /// Width of an image in px.
@@ -102,10 +98,14 @@ namespace Fan.Medias
         public int Height { get; set; }
 
         /// <summary>
-        /// True if the file is an image and the image size is over <see cref="MediaService.IMAGE_OPTIMIZED_SIZE"/>
-        /// then the <see cref="MediaService"/> will resize it.  False otherwise.
+        /// Image alt attribute.
         /// </summary>
-        public bool Optimized { get; set; }
+        public string Alt { get; set; }
+
+        /// <summary>
+        /// Number of resizes for an image.
+        /// </summary>
+        public int ResizeCount { get; set; }
     }
 }
 

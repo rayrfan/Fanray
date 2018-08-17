@@ -181,7 +181,7 @@ namespace Fan.Migrations
                     .IsRequired()
                     .HasMaxLength(256);
 
-                b.Property<string>("FileType")
+                b.Property<string>("ContentType")
                     .IsRequired()
                     .HasMaxLength(256);
 
@@ -191,7 +191,9 @@ namespace Fan.Migrations
 
                 b.Property<byte>("MediaType");
 
-                b.Property<bool>("Optimized");
+                b.Property<string>("Alt");
+
+                b.Property<int>("ResizeCount");
 
                 b.Property<string>("Title")
                     .HasMaxLength(256);

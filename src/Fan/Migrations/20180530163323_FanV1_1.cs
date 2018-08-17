@@ -25,7 +25,7 @@ namespace Fan.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "FileType",
+                name: "ContentType",
                 table: "Core_Media",
                 maxLength: 256,
                 nullable: false,
@@ -43,11 +43,16 @@ namespace Fan.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AddColumn<bool>(
-                name: "Optimized",
+            migrationBuilder.AddColumn<string>(
+                name: "Alt",
+                table: "Core_Media",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ResizeCount",
                 table: "Core_Media",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: 0);
 
             migrationBuilder.AlterColumn<string>(
                 name: "DisplayName",
@@ -85,7 +90,7 @@ namespace Fan.Migrations
                 table: "Core_Media");
 
             migrationBuilder.DropColumn(
-                name: "FileType",
+                name: "ContentType",
                 table: "Core_Media");
 
             migrationBuilder.DropColumn(
@@ -93,7 +98,11 @@ namespace Fan.Migrations
                 table: "Core_Media");
 
             migrationBuilder.DropColumn(
-                name: "Optimized",
+                name: "Alt",
+                table: "Core_Media");
+
+            migrationBuilder.DropColumn(
+                name: "ResizeCount",
                 table: "Core_Media");
 
             migrationBuilder.RenameColumn(

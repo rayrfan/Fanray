@@ -1,4 +1,6 @@
-﻿using Fan.Medias;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Services;
+using Fan.Medias;
 using Fan.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,12 +16,16 @@ namespace Fan.Web.Pages.Admin
 {
     public class MediaModel : PageModel
     {
+        private readonly IBlogService _blogSvc;
         private readonly IMediaService _mediaSvc;
         private readonly UserManager<User> _userManager;
 
-        public MediaModel(IMediaService mediaSvc,
-                          UserManager<User> userManager)
+        public MediaModel(
+            IBlogService blogSvc,
+            IMediaService mediaSvc,
+            UserManager<User> userManager)
         {
+            _blogSvc = blogSvc;
             _mediaSvc = mediaSvc;
             _userManager = userManager;
         }
@@ -30,12 +36,30 @@ namespace Fan.Web.Pages.Admin
             public int TotalImages { get; set; }
         }
 
-        public class ImageVM
+        public class ImageVM : Media
         {
-            public int Id { get; set; }
-            public string FileName { get; set; }
-            public string Url { get; set; }
+            public string FileType { get; set; }
+            public string UploadDate { get; set; }
+            public string UploadVia { get; set; }
+            /// <summary>
+            /// The gallery image dialog shows small image as thumbs.
+            /// </summary>
+            public string UrlSmall { get; set; }
+            /// <summary>
+            /// The composer inserts medium image.
+            /// </summary>
+            public string UrlMedium { get; set; }
+            /// <summary>
+            /// The gallery image dialog preview shows the large image.
+            /// </summary>
+            public string UrlLarge { get; set; }
+            /// <summary>
+            /// The gallery image dialog sidebar shows the original url.
+            /// </summary>
+            public string UrlOriginal { get; set; }
         }
+
+        // -------------------------------------------------------------------- Public Methods
 
         public async Task<JsonResult> OnGetImagesAsync()
         {
@@ -50,25 +74,56 @@ namespace Fan.Web.Pages.Admin
         /// <remarks>
         /// After uploads are done, it calls and return <see cref="GetImageListVMAsync"/>, this will
         /// refresh the grid.
+        /// TODO better way is to return uploaded image urls only, let client append url to grid etc.
         /// </remarks>
         /// <returns><see cref="ImageListVM"/></returns>
         public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
         {
             var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
+            List<string> urls = new List<string>();
 
             foreach (var image in images)
             {
                 using (Stream stream = image.OpenReadStream())
                 {
-                    await _mediaSvc.UploadImageAsync(stream, EAppType.Blog, userId,
-                        image.FileName, EUploadedFrom.Browser);
+                    var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
+                    urls.Add(_blogSvc.GetImageUrl(media, EImageSize.Small));
                 }
             }
 
+            // TODO
             var list = await GetImageListVMAsync();
             return new JsonResult(list);
         }
 
+        /// <summary>
+        /// DELETE an image by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnDeleteAsync(int id)
+        {
+            await _blogSvc.DeleteImageAsync(id);
+
+            // refresh
+            var list = await GetImageListVMAsync();
+            return new JsonResult(list);
+        }
+
+        public async Task<JsonResult> OnPostUpdateAsync([FromBody]ImageVM media)
+        {
+            await _mediaSvc.UpdateMediaAsync(media.Id, media.Title, media.Caption, media.Alt, media.Description);
+            // TODO
+            var list = await GetImageListVMAsync();
+            return new JsonResult(list);
+        }
+
+        // -------------------------------------------------------------------- private
+
+        /// <summary>
+        /// This is shared by get and post images, not ideal.
+        /// </summary>
+        /// <returns></returns>
         private async Task<ImageListVM> GetImageListVMAsync()
         {
             var list = await _mediaSvc.GetMediasAsync(EMediaType.Image, 1, 50);
@@ -76,12 +131,24 @@ namespace Fan.Web.Pages.Admin
 
             var appName = EAppType.Blog.ToString().ToLowerInvariant();
 
+            //TODO check each media AppType to decide which GetImageUrl to call
             var imageListVm = from m in list
                               select new ImageVM
                               {
                                   Id = m.Id,
                                   FileName = m.FileName,
-                                  Url = _mediaSvc.GetImageUrl(m),
+                                  Title = m.Title,
+                                  Caption = m.Caption,
+                                  Alt = m.Alt,
+                                  FileType = m.ContentType,
+                                  UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
+                                  UploadVia = m.UploadedFrom.ToString(),
+                                  Width = m.Width,
+                                  Height = m.Height,
+                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
+                                  UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
+                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), 
+                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), 
                               };
 
             return new ImageListVM
