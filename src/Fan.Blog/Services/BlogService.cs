@@ -80,8 +80,9 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public async Task<Category> CreateCategoryAsync(Category category)
+        public async Task<Category> CreateCategoryAsync(string title, string description = null)
         {
+            Category category = new Category { Title = title, Description = description };
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
 
@@ -167,6 +168,19 @@ namespace Fan.Blog.Services
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
                 return await _catRepo.GetListAsync();
+            });
+        }
+
+        /// <summary>
+        /// Sets the id to default category.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task SetDefaultCategoryAsync(int id)
+        {
+            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            {
+                DefaultCategoryId = id,
             });
         }
 
@@ -293,39 +307,60 @@ namespace Fan.Blog.Services
         private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
         {
             // get existing titles and slugs
-            IEnumerable<string> existingTitles = null;
-            IEnumerable<string> existingSlugs = null;
+            List<string> existingTitles = null;
+            List<string> existingSlugs = null;
             ETaxonomyType type = ETaxonomyType.Category;
-            if (tax is Category)
+            ITaxonomy origTax = tax;
+            if (tax is Category cat)
             {
+                if (cat.Id != 0) origTax = await _catRepo.GetAsync(cat.Id);
                 var allCats = await GetCategoriesAsync();
-                existingTitles = allCats.Select(c => c.Title);
-                existingSlugs = allCats.Select(c => c.Slug);
+                existingTitles = allCats.Select(c => c.Title).ToList();
+                existingSlugs = allCats.Select(c => c.Slug).ToList();
             }
             else
             {
+                var tag = (Tag)tax;
+                if (tag.Id != 0) origTax = await _tagRepo.GetAsync(tag.Id);
                 var allTags = await GetTagsAsync();
-                existingTitles = allTags.Select(c => c.Title);
-                existingSlugs = allTags.Select(c => c.Slug);
+                existingTitles = allTags.Select(c => c.Title).ToList();
+                existingSlugs = allTags.Select(c => c.Slug).ToList();
                 type = ETaxonomyType.Tag;
             }
 
+            // remove self if it is update
+            if (createOrUpdate == ECreateOrUpdate.Update)
+            {
+                existingTitles.Remove(origTax.Title);
+                existingSlugs.Remove(origTax.Slug);
+            }
+
+            // html encode title and description
+            tax.Title = Util.CleanHtml(tax.Title);
+            tax.Description = Util.CleanHtml(tax.Description);
+
             // validator
-            var validator = new TaxonomyValidator(existingTitles, type);
+            var validator = new TaxonomyValidator(existingTitles);
             ValidationResult result = await validator.ValidateAsync(tax);
             if (!result.IsValid)
             {
                 throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
             }
 
-            // Slug: user can create / update slug, we format the slug if it's available else we 
-            // use title to get the slug.
-            tax.Slug = BlogUtil.FormatTaxonomySlug(tax.Slug.IsNullOrEmpty() ? tax.Title : tax.Slug, existingSlugs);
+            // slug always updated according to title
+            origTax.Slug = BlogUtil.FormatTaxonomySlug(tax.Title, existingSlugs);
+            origTax.Title = tax.Title;
+            origTax.Description = tax.Description;
+            origTax.Count = tax.Count;
 
-            // html encode title
-            tax.Title = WebUtility.HtmlEncode(tax.Title);
+            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", origTax);
+            return origTax;
+        }
 
-            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", tax);
+        private ITaxonomy HtmlDecodeTaxonomy(ITaxonomy tax)
+        {
+            tax.Title = WebUtility.HtmlDecode(tax.Title);
+            tax.Description = WebUtility.HtmlDecode(tax.Description);
             return tax;
         }
 
@@ -916,7 +951,7 @@ namespace Fan.Blog.Services
                 var cat = (await GetCategoriesAsync())
                     .SingleOrDefault(c => c.Title.Equals(blogPost.CategoryTitle, StringComparison.CurrentCultureIgnoreCase));
                 if (cat == null)
-                    post.Category = await CreateCategoryAsync(new Category { Title = blogPost.CategoryTitle });
+                    post.Category = await CreateCategoryAsync(blogPost.CategoryTitle);
                 else
                     //post.Category = cat; // todo see if id works
                     post.CategoryId = cat.Id;

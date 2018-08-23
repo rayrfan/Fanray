@@ -201,7 +201,7 @@ namespace Fan.Blog.MetaWeblog
 
             try
             {
-                var cat = await _blogSvc.CreateCategoryAsync(new Category { Title = name });
+                var cat = await _blogSvc.CreateCategoryAsync(name);
 
                 return cat.Id;
             }

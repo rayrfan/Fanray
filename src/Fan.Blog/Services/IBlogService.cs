@@ -16,11 +16,11 @@ namespace Fan.Blog.Services
 
         /// <summary>
         /// Creates a <see cref="Category"/>, throws <see cref="FanException"/> if category title 
-        /// or slug fails validation or exists already.
+        /// fails validation or exists already.
         /// </summary>
         /// <returns>A category with id.</returns>
         /// <exception cref="FanException"></exception>
-        Task<Category> CreateCategoryAsync(Category category);
+        Task<Category> CreateCategoryAsync(string title, string description = null);
         /// <summary>
         /// Deletes a <see cref="Category"/> by id and re-categorize its posts to the default category.
         /// </summary>
@@ -53,6 +53,12 @@ namespace Fan.Blog.Services
         /// Returns all categories.
         /// </summary>
         Task<List<Category>> GetCategoriesAsync();
+        /// <summary>
+        /// Sets the id to default category.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task SetDefaultCategoryAsync(int id);
         /// <summary>
         /// Updates a <see cref="Category"/>, throws <see cref="FanException"/> if category title 
         /// or slug fails validation or exists already.

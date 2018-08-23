@@ -27,7 +27,7 @@ namespace Fan.Blog.IntegrationTests.Base
 
         public const string POST_SLUG = "test-post";
         public const string CAT_TITLE = "Technology";
-        public const string CAT_SLUG = "tech";
+        public const string CAT_SLUG = "technology";
         public const string TAG1_TITLE = "asp.net";
         public const string TAG2_TITLE = "c#";
         public const string TAG1_SLUG = "aspnet";
