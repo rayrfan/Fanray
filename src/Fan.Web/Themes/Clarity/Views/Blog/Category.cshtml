@@ -2,13 +2,20 @@
 
 @{
     var posts = Model.BlogPostViewModels;
-    var categoryTitle = Model.CategoryTitle;
-    ViewData["Title"] = $"Latest '{categoryTitle}' Posts";
+    ViewData["Title"] = $"Latest '{Model.CategoryTitle}' Posts";
 }
 
-<h1 class="category-title">
-    Categeory: @categoryTitle
-</h1>
+<div class="category-title">
+    <h1>
+        Categeory: @Model.CategoryTitle
+    </h1>
+    @if (!Model.Description.IsNullOrEmpty())
+    {
+    <h5>
+        @Model.Description
+    </h5>
+    }
+</div>
 
 @foreach (var post in posts)
 {
