@@ -16,7 +16,7 @@ namespace Fan.Blog.UnitTests.Validators
         public TaxonomyValidatorTest()
         {
             // prep a validator with an existing title
-            _validator = new TaxonomyValidator(new List<string> { "Technology" }, ETaxonomyType.Category);
+            _validator = new TaxonomyValidator(new List<string> { "Technology" });
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Fan.Blog.UnitTests.Validators
 
             // Assert: 1 error
             Assert.Equal(1, result.Errors.Count);
-            Assert.Equal("Category 'technology' is not available, please choose a different one.", result.Errors[0].ErrorMessage);
+            Assert.Equal("'technology' already exists.", result.Errors[0].ErrorMessage);
         }
     }
 }

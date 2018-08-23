@@ -24,13 +24,17 @@ namespace Fan.Blog.Validators
         /// </remarks>
         public const int TAXONOMY_TITLE_SLUG_MAXLEN = 24;
 
-        public TaxonomyValidator(IEnumerable<string> existingTitles, ETaxonomyType type)
+        /// <summary>
+        /// Validates title to be required, length and not among the existing titles.
+        /// </summary>
+        /// <param name="existingTitles"></param>
+        public TaxonomyValidator(IEnumerable<string> existingTitles)
         {
             RuleFor(c => c.Title)
                 .NotEmpty()
                 .Length(1, TAXONOMY_TITLE_SLUG_MAXLEN)
                 .Must(title => !existingTitles.Contains(title, StringComparer.CurrentCultureIgnoreCase)) 
-                .WithMessage(c => $"{type} '{c.Title}' is not available, please choose a different one.");
+                .WithMessage(c => $"'{c.Title}' already exists.");
         }
     }
 }
