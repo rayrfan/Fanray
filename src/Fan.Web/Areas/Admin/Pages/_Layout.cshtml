@@ -138,6 +138,9 @@
                 tok: function () {
                     return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
                 },
+                headers() {
+                    return { headers: { 'XSRF-TOKEN': this.tok } };
+                },
             },
             mounted() {
                 var url = window.location.pathname;
@@ -160,6 +163,11 @@
                     this.snackbar.show = true;
                     this.snackbar.text = text;
                     this.snackbar.color = color;
+                },
+                toastError(text) {
+                    this.snackbar.show = true;
+                    this.snackbar.text = text;
+                    this.snackbar.color = 'red';
                 },
             }
         });
