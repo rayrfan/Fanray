@@ -16,7 +16,7 @@ Clarity theme uses scss, on Windows do the following
 4. run sass
 
   ```bash
-  sass scss:../../wwwroot/themes/Clarity/css --style compressed
+  sass --update scss:../../wwwroot/themes/Clarity/css --style compressed
   ```
 5. optionally run sass with --watch
 
