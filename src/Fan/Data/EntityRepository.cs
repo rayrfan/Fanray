@@ -73,6 +73,13 @@ namespace Fan.Data
             => await _entities.Where(predicate).ToListAsync();
 
         /// <summary>
+        /// Returns an object by id, returns null if not found.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual async Task<T> GetAsync(int id) => await _entities.SingleOrDefaultAsync(e => e.Id == id);
+
+        /// <summary>
         /// Updates an entity.
         /// </summary>
         /// <param name="entity">

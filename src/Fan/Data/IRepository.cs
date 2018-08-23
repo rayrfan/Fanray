@@ -40,6 +40,13 @@ namespace Fan.Data
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
 
         /// <summary>
+        /// Gets an object by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<T> GetAsync(int id);
+
+        /// <summary>
         /// Updates an object in data source.
         /// </summary>
         /// <param name="obj">
