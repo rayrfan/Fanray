@@ -2,25 +2,116 @@
 @model Fan.Web.Pages.Admin.CategoriesModel
 @{
     ViewData["Title"] = "Categories";
-    Layout = "~/Pages/Admin/_Layout.cshtml";
+}
+@section Styles {
+    <style>
+        .action-item-icon {
+            padding-right: 8px;
+        }
+        .tabs-bar {
+            margin-bottom: 18px;
+        }
+        .dialog {
+            max-width: 40vw;
+            background-color: white;
+        }
+    </style>
 }
 
 <blog-categories inline-template>
     <v-container>
-        <v-tabs class="elevation-1">
+        <v-tabs class="elevation-1 tabs-bar">
             <v-tab>
-                Categories <v-chip small>{{ categoryCount }}</v-chip>
+                Categories <v-chip small>{{ categories.length }}</v-chip>
             </v-tab>
         </v-tabs>
-        <v-dialog v-model="categoryDialog" max-width="500px">
+        <v-list class="elevation-1">
+            <template v-for="(cat, index) in categories">
+                <v-list-tile avatar @@click="">
+                    <v-list-tile-avatar>
+                        <v-icon>folder</v-icon>
+                    </v-list-tile-avatar>
+                    <v-list-tile-content>
+                        <v-list-tile-title v-text="cat.title"></v-list-tile-title>
+                    </v-list-tile-content>
+                    <v-list-tile-action>
+                        <v-chip color="secondary" 
+                                text-color="white" 
+                                small 
+                                v-if="cat.id === defaultCategoryId">DEFAULT</v-chip>
+                    </v-list-tile-action>
+                    <v-list-tile-action>
+                        <v-chip small>{{ cat.count }}</v-chip>
+                    </v-list-tile-action>
+                    <v-list-tile-action>
+                        <v-menu bottom left>
+                            <v-btn slot="activator"
+                                   icon>
+                                <v-icon>more_vert</v-icon>
+                            </v-btn>
+
+                            <v-list dense>
+                                <v-list-tile @@click="editCat(cat)">
+                                    <v-icon class="action-item-icon">edit</v-icon>
+                                    <v-list-tile-title>Edit</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile v-if="cat.id !== defaultCategoryId"
+                                             @@click="deleteCat(cat)">
+                                    <v-icon class="action-item-icon">delete</v-icon>
+                                    <v-list-tile-title>Delete</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile v-if="cat.count !== 0"
+                                             @@click="viewPosts(cat.relativeLink)">
+                                    <v-icon class="action-item-icon">visibility</v-icon>
+                                    <v-list-tile-title>View Posts</v-list-tile-title>
+                                </v-list-tile>
+                                <v-divider v-if="cat.id !== defaultCategoryId"></v-divider>
+                                <v-list-tile v-if="cat.id !== defaultCategoryId"
+                                             @@click="setDefault(cat.id)">
+                                    <v-icon class="action-item-icon">check_circle</v-icon>
+                                    <v-list-tile-title>Set as default</v-list-tile-title>
+                                </v-list-tile>
+                            </v-list>
+                        </v-menu>
+                    </v-list-tile-action>
+                </v-list-tile>
+                <v-divider v-if="index + 1 < categories.length"
+                           :key="index"></v-divider>
+            </template>
+        </v-list>
+        <v-dialog lazy
+                  v-model="dialogVisible" 
+                  @@keydown.esc="closeDialog"
+                  content-class="dialog">
             <v-card>
                 <v-card-title>
-                    <h3>Add New Category</h3>
-                    <v-spacer></v-spacer>
-
+                    <span style="font-size:larger;font-weight:bold">{{ upsertText }} Category</span>
                 </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                        <v-alert :value="errMsg.length" type="error">{{ errMsg }}</v-alert>
+                        <v-text-field solo
+                                      v-model="title"
+                                      label="Category"
+                                      placeholder="Title">
+                        </v-text-field>
+                        <v-textarea solo
+                                    v-model="description"
+                                    label="Description">
+                        </v-textarea>
+                </v-card-text>
+                <v-divider></v-divider>
                 <v-card-actions>
-                    <v-btn color="primary" flat @@click.stop="categoryDialog=false">Close</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn @@click="closeDialog">Cancel</v-btn>
+                    <v-btn color="primary"
+                           v-show="!addButtonVisible"
+                           :disabled="disableUpsertButton"
+                           @@click="updateCat">Update</v-btn>
+                    <v-btn color="primary"
+                           v-show="addButtonVisible"
+                           :disabled="disableUpsertButton"
+                           @@click="insertCat">Add</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -30,7 +121,7 @@
                color="pink"
                dark
                fixed
-               @@click.stop="categoryDialog = true">
+               @@click="addCat">
             <v-icon>add</v-icon>
         </v-btn>
     </v-container>
@@ -38,11 +129,142 @@
 
 @section ComponentScripts {
     <script>
+        let categoriesMixin = {
+            data: function () {
+                return {
+                    categories: @Html.Raw(Model.CategoryListJsonStr),
+                    defaultCategoryId: @Model.DefaultCategoryId,
+                };
+            }
+        };
+
         Vue.component('blog-categories', {
+            mixins: [categoriesMixin],
             data: () => ({
-                categoryCount: 1,
-                categoryDialog: false,
+                dialogVisible: false,
+                title: '',
+                description: '',
+                upsertText: 'Add',
+                catEditing: null,
+                errMsg: '',
             }),
+            computed: {
+                disableUpsertButton() {
+                    return this.title.trim().length <= 0;
+                },
+                addButtonVisible() {
+                    return this.upsertText === 'Add';
+                },
+                payload() {
+                    return {
+                        title: this.title,
+                        description: this.description,
+                    }
+                },
+            },
+            methods: {
+                closeDialog() {
+                    this.dialogVisible = false;
+                    this.title = '';
+                    this.description = '';
+                    this.errMsg = '';
+                },
+                // when user clicks on the plus fab to add a new category
+                addCat() {
+                    this.dialogVisible = true;
+                    this.title = '';
+                    this.description = '';
+                    this.upsertText = 'Add';
+                },
+                // when user clicks on the Edit from the dropdown
+                editCat(cat) {
+                    this.dialogVisible = true;
+                    this.catEditing = cat;
+                    this.upsertText = 'Edit';
+                    this.title = cat.title;
+                    this.description = cat.description;
+                },
+                // when user clicks on the Delete from the dropdown
+                deleteCat(cat) {
+                    console.log('cat being deleted: ', cat);
+                    if (confirm(`Are you sure you want to permanently delete '${cat.title}'?`)) {
+                        axios.delete(`/admin/categories?id=${cat.id}`, this.$root.headers)
+                            .then(resp => {
+                                let idx = this.categories.findIndex(c => c.id === cat.id);
+                                let defaultCat = this.categories.find(c => c.id === this.defaultCategoryId);
+                                defaultCat.count += cat.count;
+                                this.categories.splice(idx, 1);
+                                this.$root.toast('Category deleted.');
+                            })
+                            .catch(err => {
+                                this.$root.toastError('Delete category failed.');
+                                console.error(err);
+                            });
+                    }
+                },
+                // when user clicks on the Set as Default from the dropdown
+                setDefault(id) {
+                    axios.post(`/admin/categories?handler=default&id=${id}`, null, this.$root.headers)
+                        .then(resp => {
+                            this.defaultCategoryId = id;
+                        })
+                        .catch(err => {
+                            this.$root.toast('Set default category failed.', 'red');
+                            console.log(err);
+                        });
+                },
+                // when user clicks on the View Posts from the dropdown
+                viewPosts(url) {
+                    window.location.href = url; // relative 
+                },
+                // when user clicks on the Add button on the dialog
+                insertCat() {
+                    axios.post('/admin/categories', this.payload, this.$root.headers)
+                        .then(resp => {
+                            this.closeDialog();
+                            this.categories.push(resp.data);
+                            this.sortCategories();
+                            this.$root.toast('New category added.');
+                        })
+                        .catch(err => {
+                            this.errMsg = err.response.data[0].errorMessage;
+                            this.$root.toast('Add category failed.', 'red');
+                        });
+                },
+                // when user clicks on the Update button on the dialog
+                updateCat() {
+                    this.payload.id = this.catEditing.id;
+                    this.payload.count = this.catEditing.count;
+                    axios.post('/admin/categories?handler=update', this.payload, this.$root.headers)
+                        .then(resp => {
+                            this.closeDialog();
+                            // replace
+                            let idx = this.categories.findIndex(c => c.id === resp.data.id);
+                            this.categories[idx] = resp.data;
+                            // sort
+                            this.sortCategories();
+                            this.$root.toast('Category updated.');
+                        })
+                        .catch(err => {
+                            this.errMsg = err.response.data[0].errorMessage;
+                            this.$root.toast('Update category failed.', 'red');
+                        });
+                },    
+                sortCategories() {
+                    this.categories.sort((a, b) => {
+                        var titleA = a.title.toUpperCase();
+                        var titleB = b.title.toUpperCase();
+                        if (titleA < titleB) {
+                            return -1;
+                        }
+                        if (titleA > titleB) {
+                            return 1;
+                        }
+
+                        return 0; // equal
+                    });                    
+                }
+            }
         });
     </script>
 }

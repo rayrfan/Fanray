@@ -189,6 +189,19 @@ namespace Fan.Helpers
         }
 
         /// <summary>
+        /// Removes all html tags from content.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static string CleanHtml(string content)
+        {
+            if (content.IsNullOrEmpty()) return content;
+            HtmlDocument document = new HtmlDocument();
+            document.LoadHtml(content);
+            return document.DocumentNode.InnerText;
+        }
+
+        /// <summary>
         /// Converts a time from the server to a user's local time with his specified timezone.
         /// </summary>
         /// <param name="serverTime"></param>

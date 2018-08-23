@@ -41,12 +41,14 @@ namespace Fan.Blog.ViewModels
             : this(blogPostList, blogSettings, request)
         {
             CategoryTitle = cat.Title;
+            Description = cat.Description;
         }
 
         public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Tag tag)
            : this(blogPostList, blogSettings, request)
         {
             TagTitle = tag.Title;
+            Description = tag.Description;
         }
 
         /// <summary>
@@ -72,6 +74,10 @@ namespace Fan.Blog.ViewModels
         /// Category title to show on Category.cshtml page.
         /// </summary>
         public string CategoryTitle { get; }
+        /// <summary>
+        /// Category or tag description to show on Category.cshtml page.
+        /// </summary>
+        public string Description { get; }
         /// <summary>
         /// Archive title to show on Archive.cshtml page.
         /// </summary>

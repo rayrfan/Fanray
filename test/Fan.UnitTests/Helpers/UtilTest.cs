@@ -108,5 +108,13 @@ namespace Fan.UnitTests.Helpers
             Assert.Equal("http", uri.Scheme);
             Assert.Equal(2, uri.Segments.Length);
         }
+
+        [Theory]
+        [InlineData("<h1>Hello</h1>", "Hello")]
+        [InlineData("<img src=\"mypic.jpg\">", "")]
+        public void CleanHtml_removes_all_html_tags(string content, string expected)
+        {
+            Assert.Equal(expected, Util.CleanHtml(content));
+        }
     }
 }

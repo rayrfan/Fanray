@@ -65,6 +65,7 @@ namespace Fan.Blog.Data
                         Id = c.Id,
                         Title = c.Title,
                         Slug = c.Slug,
+                        Description = c.Description,
                         Count = _db.Set<Post>().Where(p => p.CategoryId == c.Id && p.Status == EPostStatus.Published).Count(),
                     }).OrderBy(c => c.Title).ToListAsync();
         }

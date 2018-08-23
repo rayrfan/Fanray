@@ -59,13 +59,19 @@ namespace Fan.Web.Controllers
                 isEmail = false;
             }
 
+            // get user
             var user = isEmail ? await _userManager.FindByEmailAsync(loginUser.UserName) :
                 await _userManager.FindByNameAsync(loginUser.UserName);
 
             if (user == null)
                 return BadRequest("Invalid credentials!");
 
-            await _signInManager.SignInAsync(user, loginUser.RememberMe);
+            // sign user in
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUser.Password, 
+                loginUser.RememberMe, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+                return BadRequest("Invalid credentials!");
 
             return Ok();
         }
