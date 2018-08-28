@@ -37,9 +37,9 @@ namespace Fan.Blog.Models
         /// </remarks>
         public bool AllowComments { get; set; } = true;
         /// <summary>
-        /// Which comment system to use. Default Disqus.
+        /// Which comment system to use. Default Fanray.
         /// </summary>
-        public ECommentProvider CommentProvider { get; set; } = ECommentProvider.Disqus;
+        public ECommentProvider CommentProvider { get; set; } = ECommentProvider.Fanray;
         /// <summary>
         /// Disqus shortname. Default is null.
         /// </summary>

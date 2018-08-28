@@ -224,7 +224,6 @@ namespace Fan.Blog.Services
         /// <summary>
         /// Sets up the blog for the first time on initial launch.
         /// </summary>
-        /// <returns></returns>
-        Task SetupAsync(string disqusShortname);        
+        Task SetupAsync();        
     }
 }

@@ -591,24 +591,32 @@ namespace Fan.Blog.Services
         /// Sets up the blog for the first time on initial launch.
         /// </summary>
         /// <returns></returns>
-        public async Task SetupAsync(string disqusShortname)
+        public async Task SetupAsync()
         {
             const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray";
-            const string WELCOME_POST_BODY = @"<p>Thank you for trying out the Fanray project. A blog is like the <a href=""https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"">Hello World</a> program for a real world application, I created Fanray to learn new technologies and share their best practices. I hope this app is useful to you as well on your journey of learning and building!</p><h1>Start posting</h1><p>Fanray 1.0 is pretty bare-boned and to start posting you have to use a client that supports MetaWeblog API, I recommend <a href=""http://openlivewriter.org"" target=""_blank"">Open Live Writer</a>.</p><p>To make the blog more useful, I’ve created two shortcodes for easily posting source code and youtube videos, they are documented on the <a href=""https://github.com/FanrayMedia/Fanray#shortcodes"">project github page</a>.&nbsp; </p><h1>Azure</h1><p>When you are ready to run this app on Azure, I have a few posts that may be of interest to you.</p><ul><li><a href=""https://www.fanray.com/post/3"">Set up Fanray on Azure App Service</a></li><li><a href=""https://www.fanray.com/post/4"">Custom Domain and HTTPS for Azure Web App</a></li><li><a href=""https://www.fanray.com/post/5"">Preferred Domain and URL Redirect</a></li></ul><h1>Contribute</h1><p>Any participation from the community is welcoming, please see the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">contributing guidelines</a>.</p><p>Happy coding :)</p>";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray v1.1";
+            const string WELCOME_POST_BODY = @"<p>Fanray v1.0 was a minimal viable blog, I implemented the MetaWeblog API and started posting through Open Live Writer and that was it.</p><p>Fanray v1.1 enhances on the previous version by bringing in a brand new Admin Console built with <a href=""https://vuejs.org"">Vue.js</a>, <a href=""https://vuetifyjs.com"">Vuetify.js</a> and <a href=""https://ckeditor.com/ckeditor-5/"">CKEditor5</a>. The basic blogging experience has been greatly improved, the Admin Console allows you to better manage your posts, images, categories, tags, users and settings.</p><p>Bloggers probably spend most of their time composing a post, therefore I spent a lot of time coming up with a new composer and tried to make it as usable as I could. It's still fairly basic but it does provide the fundamental things I look for in an online editor</p><ul><li>autosaves your drafts so no worries on losing work</li><li>matches CSS styles between the editor content and the published post</li><li>uploads and selects image through gallery</li><li>edits image alt and caption</li><li>floats image left or right</li><li>inserts source code, inline and block</li><li>inserts youtube video</li><li>inserts tables</li><li>automatically comes up with slug from your post title</li></ul><p>To help you be productive on writing posts, I recommend spend a few minutes with the blog composer and get familiarized with posting these various contents and more. Please see the reference doc for more tips.</p><p>Happy coding :)</p>";
 
-            // create blog settings
-            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            // create blog setting and get default category
+            string defaultCategory = DEFAULT_CATEGORY;
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            if (blogSettings == null)
             {
-                CommentProvider = disqusShortname.IsNullOrWhiteSpace() ? ECommentProvider.Fanray : ECommentProvider.Disqus,
-                DisqusShortname = disqusShortname.IsNullOrWhiteSpace() ? null : disqusShortname.Trim(),
-            });
-            _logger.LogInformation("BlogSettings created.");
+                // create blog settings
+                await _settingSvc.UpsertSettingsAsync(new BlogSettings());
+                _logger.LogInformation("BlogSettings created.");
+            }
+            else
+            {
+                // get default category
+                var cat = await GetCategoryAsync(blogSettings.DefaultCategoryId);
+                defaultCategory = cat.Title;
+            }
 
             // create welcome post and default category
             await CreatePostAsync(new BlogPost
             {
-                CategoryTitle = DEFAULT_CATEGORY,
+                CategoryTitle = defaultCategory,
                 TagTitles = new List<string> { "announcement", "blogging" },
                 Title = WELCOME_POST_TITLE,
                 Body = WELCOME_POST_BODY,
