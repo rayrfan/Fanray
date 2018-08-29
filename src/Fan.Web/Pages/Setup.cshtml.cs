@@ -108,9 +108,15 @@ namespace Fan.Web.Pages
                 IdentityResult result = IdentityResult.Success;
 
                 // create user if not found
-                if (await _userManager.FindByEmailAsync(model.Email) == null)
+                var foundUser = await _userManager.FindByEmailAsync(model.Email);
+                if (foundUser == null)
                 {
                     result = await _userManager.CreateAsync(user, model.Password);
+                }
+                // else update username
+                {
+                    foundUser.UserName = model.UserName;
+                    await _userManager.UpdateNormalizedUserNameAsync(foundUser);
                 }
 
                 // create Admin role if not found
