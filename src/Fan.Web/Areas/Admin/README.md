@@ -6,22 +6,34 @@ To build client side artifacts, open bash in this folder then perform the follow
 
 ## JavaScript
 
-### Prerequisite
+First to get ready by `npm install`
 
-`npm install`
+### Develop
 
-### Operation
-
-To develop (watch and won't remove logs)
+Develop an inidividual file, replace the filename.
 
 ```bash
-npm run build:w
+babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --watch
 ```
 
-To release (logs are removed)
+Develop entire folder.
 
 ```bash
-npm run build
+babel js --out-dir ../../wwwroot/admin --source-maps --watch
+```
+
+### Release
+
+Build individual file, replace the filename.
+
+```bash
+babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
+```
+
+Build entire folder.
+
+```bash
+babel js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
 
 ## Scss
