@@ -165,7 +165,8 @@ namespace Fan.Medias
                         // save original without resizing, currently I couldn't dec original file size by resizing with ImageMagick
                         if (resize.TargetSize == int.MaxValue)
                         {
-                            await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
+                            source.Position = 0;
+                            await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
                         }
                         else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
                         {
