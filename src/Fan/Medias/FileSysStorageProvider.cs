@@ -38,6 +38,28 @@ namespace Fan.Medias
         
         // -------------------------------------------------------------------- public method
 
+        public async Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator)
+        {
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
+            var dirPath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}";
+
+            // make sure dir exists
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+
+            // combine dir and filename
+            var filePath = Path.Combine(dirPath, fileName);
+
+            // save source to file sys
+            using (var fileStream = File.Create(filePath))
+            using (var memStream = new MemoryStream(source))
+            {
+                await memStream.CopyToAsync(fileStream);
+            }
+        }
+
         /// <summary>
         /// Saves the file to server file system.
         /// </summary>

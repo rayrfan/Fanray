@@ -138,10 +138,6 @@ namespace Fan.Medias
         /// <param name="userId"></param>
         /// <param name="uploadFrom"></param>
         /// <returns></returns>
-        /// <remarks>
-        /// https://github.com/dlemstra/Magick.NET/blob/master/Documentation/ResizeImage.md
-        /// TODO currently resized gif size is bigger than original.
-        /// </remarks>
         public async Task<Media> UploadImageAsync(Stream source,
                                                   List<ImageResizeInfo> resizes,
                                                   string fileName,
@@ -154,88 +150,90 @@ namespace Fan.Medias
         {
             int widthOrig;
             int heightOrig;
-            int resizeCount = -1;
+            int resizeCount = 0;
+
             if (contentType.Equals("image/gif"))
             {
-                // Temp: couldn't figure out how to get small file size when resizing gif
-                // I'm only saving original for now
                 using (var imageColl = new MagickImageCollection(source))
                 {
                     widthOrig = imageColl[0].Width;
                     heightOrig = imageColl[0].Height;
-                    var resize = resizes.Single(r => r.Pixel == int.MaxValue);
-                    using (var memStream = new MemoryStream())
+
+                    // resize and store
+                    foreach (var resize in resizes)
                     {
-                        imageColl.Write(memStream);
-                        memStream.Position = 0;
+                        // save original without resizing, currently I couldn't dec original file size by resizing with ImageMagick
+                        if (resize.TargetSize == int.MaxValue)
+                        {
+                            await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
+                        }
+                        else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
+                        {
+                            resizeCount++;
+                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
 
-                        await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
+                            imageColl.Coalesce();
+                            foreach (var image in imageColl)
+                            {
+                                var colors = image.TotalColors;
+                                image.Resize(width, height); // resize will make # of colors higher
+                                image.Quantize(new QuantizeSettings
+                                {
+                                    Colors = colors, // set it back to the smaller original colors
+                                    DitherMethod = DitherMethod.No
+                                });
+                            }
+
+                            imageColl.Optimize();
+                            await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
+                        }
                     }
-                    resizeCount++;
                 }
-
-                //using (var imageColl = new MagickImageCollection(source))
-                //{
-                //    widthOrig = imageColl[0].Width;
-                //    heightOrig = imageColl[0].Height;
-                //    imageColl.Coalesce();
-                //    imageColl.Optimize();
-                //    imageColl.OptimizeTransparency();
-
-                //    // resize and store
-                //    foreach (var resize in resizes)
-                //    {
-                //        // only resize when either MaxValue which mean original size 
-                //        // or image size is greater than what's being asked for
-                //        if (resize.Pixel == int.MaxValue || widthOrig > resize.Pixel)
-                //        {
-                //            resizeCount++;
-
-                //            foreach (MagickImage image in imageColl)
-                //            {
-                //                var (width, height) = GetNewSize(widthOrig, heightOrig, resize.Pixel);
-                //                image.Resize(width, height);
-                //            }
-
-                //            using (var memStream = new MemoryStream())
-                //            {
-                //                imageColl.Write(memStream);
-                //                memStream.Position = 0;
-
-                //                await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
-                //            }
-                //        }
-                //    }
-                //}
             }
-            else
+            else if (contentType.Equals("image/png"))
             {
                 using (var image = new MagickImage(source))
                 {
                     widthOrig = image.Width;
                     heightOrig = image.Height;
-                    //int resizeCount = -1;
 
-                    // resize and store
                     foreach (var resize in resizes)
                     {
-                        // only resize when either MaxValue which mean original size 
-                        // or image size is greater than what's being asked for
-                        if (resize.Pixel == int.MaxValue || widthOrig > resize.Pixel)
+                        // save original without resizing for png
+                        if (resize.TargetSize == int.MaxValue)
+                        {
+                            source.Position = 0;
+                            await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
+                        }
+                        else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
                         {
                             resizeCount++;
+                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
+                            //image.Quality = 75; // does not seem to affect output file size, so commented out
+                            image.Resize(width, height);
 
-                            using (var memStream = new MemoryStream())
-                            {
-                                var (width, height) = GetNewSize(widthOrig, heightOrig, resize.Pixel);
+                            await _storageProvider.SaveFileAsync(image.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
+                        }
+                    }
+                }
+            }
+            else // jpg
+            {
+                using (var image = new MagickImage(source))
+                {
+                    widthOrig = image.Width;
+                    heightOrig = image.Height;
 
-                                image.Quality = 75;
-                                image.Resize(width, height);
-                                image.Write(memStream);
-                                memStream.Position = 0;
+                    foreach (var resize in resizes)
+                    {
+                        if (resize.TargetSize == int.MaxValue || Math.Max(widthOrig, heightOrig) > resize.TargetSize)
+                        {
+                            if (resize.TargetSize != int.MaxValue) resizeCount++;
+                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
+                            image.Quality = 75; // though 75 is default, having it here does make a difference on making output file size smaller!
+                            image.Resize(width, height);
 
-                                await _storageProvider.SaveFileAsync(memStream, fileName, resize.Path, resize.PathSeparator);
-                            }
+                            await _storageProvider.SaveFileAsync(image.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
                         }
                     }
                 }
@@ -269,48 +267,33 @@ namespace Fan.Medias
         // -------------------------------------------------------------------- private
 
         /// <summary>
-        /// Return new width and height to be resized to given the original image width and height and size pixel.
+        /// Returns new width and height to be resized while keeping aspect ratio.
         /// </summary>
-        /// <param name="imageWidth"></param>
-        /// <param name="imageHeight"></param>
-        /// <param name="pixel"></param>
+        /// <param name="origWidth">The original image width.</param>
+        /// <param name="origHeight">The original image height.</param>
+        /// <param name="targetSize">The target image size.</param>
         /// <returns></returns>
-        private (int width, int height) GetNewSize(int imageWidth, int imageHeight, int pixel)
+        /// <remarks>
+        /// Currently it calculates based on the longest side of either width or height.
+        /// I may want to do based on width or height.
+        /// </remarks>
+        private (int width, int height) GetNewSize(int origWidth, int origHeight, int targetSize)
         {
+            if (targetSize <= 0 || targetSize == int.MaxValue)
+                return (origWidth, origHeight);
+
             int width = 0;
             int height = 0;
 
-            if (imageWidth == imageHeight) // square
+            if (origHeight > origWidth) // portrait
             {
-                width = height = imageWidth;
+                width = origWidth * (targetSize / origHeight);
+                height = targetSize;
             }
-            else if (imageWidth > imageHeight) // horizontal 
-            {
-                var ratio = imageWidth / imageHeight;
-                if (imageWidth <= pixel) // actual image is smaller, no need to change width and height
-                {
-                    width = imageWidth;
-                    height = imageHeight;
-                }
-                else
-                {
-                    width = pixel;
-                    height = width * ratio;
-                }
-            }
-            else // vertial
-            {
-                var ratio = imageHeight / imageWidth;
-                if (imageHeight <= pixel) // actual image is smaller, no need to change width and height
-                {
-                    width = imageWidth;
-                    height = imageHeight;
-                }
-                else
-                {
-                    height = pixel;
-                    width = height * ratio;
-                }
+            else // square or landscape
+            {                
+                width = targetSize;
+                height = origHeight * (targetSize / origWidth);
             }
 
             return (width, height);

@@ -55,6 +55,18 @@ namespace Fan.Medias
 
         // -------------------------------------------------------------------- public method
 
+        public async Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator)
+        {
+            var blob = GetBlob(fileName, path, pathSeparator);
+
+            // set blob properties
+            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
+            blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
+
+            //await blob.UploadFromStreamAsync(source);
+            await blob.UploadFromByteArrayAsync(source, 0, source.Length);
+        }
+
         /// <summary>
         /// Saves the file to Azure Blob Storage.
         /// </summary>
