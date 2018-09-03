@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,11 +31,7 @@ namespace Fan.Web.Pages.Admin
             _userManager = userManager;
         }
 
-        public class ImageListVM
-        {
-            public IEnumerable<ImageVM> Images { get; set; }
-            public int TotalImages { get; set; }
-        }
+        // -------------------------------------------------------------------- Helper Classes
 
         public class ImageVM : Media
         {
@@ -59,12 +56,45 @@ namespace Fan.Web.Pages.Admin
             public string UrlOriginal { get; set; }
         }
 
-        // -------------------------------------------------------------------- Public Methods
+        // -------------------------------------------------------------------- consts & properties
 
-        public async Task<JsonResult> OnGetImagesAsync()
+        /// <summary>
+        /// Display 100 images at a time.
+        /// </summary>
+        public const int PAGE_SIZE = 100;
+
+        /// <summary>
+        /// Total number of images.
+        /// </summary>
+        public int ImageCount { get; set; }
+
+        /// <summary>
+        /// The json data to bootstrap page initially.
+        /// </summary>
+        public string Data { get; private set; }
+
+        // -------------------------------------------------------------------- public methods
+
+        /// <summary>
+        /// GET bootstrap initial page with json data.
+        /// </summary>
+        /// <returns></returns>
+        public async Task OnGetAsync()
         {
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var (medias, count) = await GetImageVMsAsync(1);
+            ImageCount = count;
+            Data = JsonConvert.SerializeObject(medias);
+        }
+
+        /// <summary>
+        /// Ajax GET
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnGetImagesAsync(int pageNumber = 1)
+        {
+            var (medias, count) = await GetImageVMsAsync(pageNumber);
+            return new JsonResult(medias);
         }
 
         /// <summary>
@@ -92,8 +122,8 @@ namespace Fan.Web.Pages.Admin
             }
 
             // TODO
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var (medias, count) = await GetImageVMsAsync(1);
+            return new JsonResult(medias);
         }
 
         /// <summary>
@@ -106,33 +136,33 @@ namespace Fan.Web.Pages.Admin
             await _blogSvc.DeleteImageAsync(id);
 
             // refresh
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var (medias, count) = await GetImageVMsAsync(1);
+            return new JsonResult(medias);
         }
 
         public async Task<JsonResult> OnPostUpdateAsync([FromBody]ImageVM media)
         {
             await _mediaSvc.UpdateMediaAsync(media.Id, media.Title, media.Caption, media.Alt, media.Description);
             // TODO
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var (medias, count) = await GetImageVMsAsync(1);
+            return new JsonResult(medias);
         }
 
         // -------------------------------------------------------------------- private
 
         /// <summary>
-        /// This is shared by get and post images, not ideal.
+        /// Returns 
         /// </summary>
-        /// <returns></returns>
-        private async Task<ImageListVM> GetImageListVMAsync()
+        /// <remarks>
+        /// TODO check each media AppType to decide which GetImageUrl to call
+        /// </remarks>
+        private async Task<(IEnumerable<ImageVM> medias, int count)> GetImageVMsAsync(int pageNumber)
         {
-            var list = await _mediaSvc.GetMediasAsync(EMediaType.Image, 1, 50);
+            var (medias, count) = await _mediaSvc.GetMediasAsync(EMediaType.Image, pageNumber, PAGE_SIZE);
             var user = await _userManager.GetUserAsync(HttpContext.User);
-
             var appName = EAppType.Blog.ToString().ToLowerInvariant();
-
-            //TODO check each media AppType to decide which GetImageUrl to call
-            var imageListVm = from m in list
+           
+            var imageListVm = from m in medias
                               select new ImageVM
                               {
                                   Id = m.Id,
@@ -151,10 +181,7 @@ namespace Fan.Web.Pages.Admin
                                   UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), 
                               };
 
-            return new ImageListVM
-            {
-                Images = imageListVm,
-            };
+            return (medias: imageListVm, count: count);
         }
     }
 }

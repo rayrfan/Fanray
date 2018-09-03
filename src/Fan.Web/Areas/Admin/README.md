@@ -13,6 +13,7 @@ First to get ready by `npm install`
 Develop an inidividual file, replace the filename.
 
 ```bash
+babel js/blog-media.js --out-dir ../../wwwroot/admin --source-maps --watch
 babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --watch
 ```
 
@@ -27,6 +28,7 @@ babel js --out-dir ../../wwwroot/admin --source-maps --watch
 Build individual file, replace the filename.
 
 ```bash
+babel js/blog-media.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
 
