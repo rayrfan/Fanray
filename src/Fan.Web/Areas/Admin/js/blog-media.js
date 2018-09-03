@@ -5,16 +5,12 @@ Vue.component('blog-media', {
     mixins: [blogMediaMixin],
     data: () => ({
         dialogVisible: false,
-        //images: [],
-        progressVisible: false,
         selectedImage: null,
         snackbar: false,
         snackbarText: '',
         snackbarColor: '',
+        progressDialog: false,
     }),
-    //mounted() {
-    //    this.getImages();
-    //},
     methods: {
         selectImage(image) {
             this.dialogVisible = true;
@@ -34,7 +30,7 @@ Vue.component('blog-media', {
             input.setAttribute('multiple', null);
             input.click();
             input.onchange = () => {
-                this.progressVisible = true;
+                this.progressDialog = true;
                 const formData = new FormData();
                 for (let i = 0; i < input.files.length; i++) {
                     formData.append('images', input.files[i]);
@@ -42,12 +38,12 @@ Vue.component('blog-media', {
 
                 axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
                     .then(resp => {
-                        this.progressVisible = false;
                         this.images = resp.data;
+                        this.progressDialog = false;
                         this.$root.toast('Image uploaded.');
                     })
                     .catch(err => {
-                        this.progressVisible = false;
+                        this.progressDialog = false;
                         this.$root.toast('Image upload failed.', 'red');
                         console.log(err);
                     });

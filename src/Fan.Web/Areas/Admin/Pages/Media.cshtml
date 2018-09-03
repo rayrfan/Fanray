@@ -72,10 +72,6 @@
                 <v-icon color="primary">cloud_upload</v-icon>
                 &nbsp;Upload
             </v-btn>
-
-            <v-progress-circular v-show="progressVisible"
-                                 indeterminate
-                                 color="primary"></v-progress-circular>
         </v-toolbar>
         <v-divider></v-divider>
 
@@ -134,6 +130,19 @@
                 <v-btn color="primary" @@click="updateImage">Update</v-btn>
             </div>
 
+        </v-dialog>
+
+        <v-dialog v-model="progressDialog"
+                  persistent
+                  width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Uploading ...
+                    <v-progress-linear indeterminate
+                                       color="white"
+                                       class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
         </v-dialog>
     </div>
 </blog-media>
