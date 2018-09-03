@@ -30,21 +30,19 @@ namespace Fan.Medias
                         m.UploadedOn.Month == uploadedOn.Month);
         }
 
-        public async Task<Media> GetAsync(int mediaId)
-        {
-            return await _entities.SingleAsync(m => m.Id == mediaId);
-        }
-
-        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
+        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
         {
             int skip = (pageNumber - 1) * pageSize;
             int take = pageSize;
 
-            return await _entities.Where(m=>m.MediaType == mediaType)
-                                  .OrderByDescending(m => m.UploadedOn)
-                                  .Skip(skip)
-                                  .Take(take)
-                                  .ToListAsync();
+            var q = _entities.Where(m => m.MediaType == mediaType);
+            var medias = await q.OrderByDescending(m => m.UploadedOn)
+                                .Skip(skip)
+                                .Take(take)
+                                .ToListAsync();
+            var count = await q.CountAsync();
+
+            return (medias: medias, count: count);
         }
     }
 }

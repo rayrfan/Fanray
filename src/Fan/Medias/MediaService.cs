@@ -88,13 +88,14 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns a list of <see cref="Media"/> records based on search critria.
+        /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
+        /// or empty list if no records found; and total count of medias for this media type.
         /// </summary>
         /// <param name="mediaType"></param>
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public async Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
+        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
         {
             return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
         }
