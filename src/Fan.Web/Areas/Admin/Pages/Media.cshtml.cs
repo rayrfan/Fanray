@@ -56,6 +56,17 @@ namespace Fan.Web.Pages.Admin
             public string UrlOriginal { get; set; }
         }
 
+        public class ImageData
+        {
+            public IEnumerable<ImageVM> Images { get; set; }
+
+            public string ErrorMessage { get; set; }
+          
+            public string ImagesJson => 
+                (Images == null || Images.Count() <=0) ? "" : 
+                JsonConvert.SerializeObject(Images);
+        }
+
         // -------------------------------------------------------------------- consts & properties
 
         /// <summary>
@@ -71,23 +82,26 @@ namespace Fan.Web.Pages.Admin
         /// <summary>
         /// The json data to bootstrap page initially.
         /// </summary>
-        public string Data { get; private set; }
+        public ImageData Data { get; private set; }
 
         // -------------------------------------------------------------------- public methods
 
         /// <summary>
-        /// GET bootstrap initial page with json data.
+        /// GET bootstrap page with json data.
         /// </summary>
         /// <returns></returns>
         public async Task OnGetAsync()
         {
             var (medias, count) = await GetImageVMsAsync(1);
+            Data = new ImageData
+            {
+                Images = medias,
+            };
             ImageCount = count;
-            Data = JsonConvert.SerializeObject(medias);
         }
 
         /// <summary>
-        /// Ajax GET
+        /// Ajax GET the medias by page number.
         /// </summary>
         /// <param name="pageNumber"></param>
         /// <returns></returns>
@@ -101,29 +115,35 @@ namespace Fan.Web.Pages.Admin
         /// Uploads images and returns urls to optimized or original if optimized is not available.
         /// </summary>
         /// <param name="images"></param>
-        /// <remarks>
-        /// After uploads are done, it calls and return <see cref="GetImageListVMAsync"/>, this will
-        /// refresh the grid.
-        /// TODO better way is to return uploaded image urls only, let client append url to grid etc.
-        /// </remarks>
-        /// <returns><see cref="ImageListVM"/></returns>
         public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
         {
             var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
-            List<string> urls = new List<string>();
+            List<ImageVM> imageVMs = new List<ImageVM>();
 
+            int failCount = 0;
             foreach (var image in images)
             {
-                using (Stream stream = image.OpenReadStream())
+                try
                 {
-                    var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
-                    urls.Add(_blogSvc.GetImageUrl(media, EImageSize.Small));
+                    using (Stream stream = image.OpenReadStream())
+                    {
+                        var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
+                        imageVMs.Add(await MapImageVMAsync(media));
+                    }
+                }
+                catch (NotSupportedException ex)
+                {
+                    failCount++;
                 }
             }
 
-            // TODO
-            var (medias, count) = await GetImageVMsAsync(1);
-            return new JsonResult(medias);
+            var imageData = new ImageData {
+                Images = imageVMs,
+                ErrorMessage = failCount <= 0 ? null :
+                                $"Only .jpg, .jpeg, .png and .gif are supported, {failCount} file(s) could not be uploaded.",
+            };
+
+            return new JsonResult(imageData);
         }
 
         /// <summary>
@@ -150,6 +170,29 @@ namespace Fan.Web.Pages.Admin
 
         // -------------------------------------------------------------------- private
 
+        private async Task<ImageVM> MapImageVMAsync(Media m)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var appName = EAppType.Blog.ToString().ToLowerInvariant();
+            return new ImageVM
+            {
+                Id = m.Id,
+                FileName = m.FileName,
+                Title = m.Title,
+                Caption = m.Caption,
+                Alt = m.Alt,
+                FileType = m.ContentType,
+                UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
+                UploadVia = m.UploadedFrom.ToString(),
+                Width = m.Width,
+                Height = m.Height,
+                UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
+                UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
+                UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large),
+                UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original),
+            };
+        }
+
         /// <summary>
         /// Returns 
         /// </summary>
@@ -159,29 +202,13 @@ namespace Fan.Web.Pages.Admin
         private async Task<(IEnumerable<ImageVM> medias, int count)> GetImageVMsAsync(int pageNumber)
         {
             var (medias, count) = await _mediaSvc.GetMediasAsync(EMediaType.Image, pageNumber, PAGE_SIZE);
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-            var appName = EAppType.Blog.ToString().ToLowerInvariant();
-           
-            var imageListVm = from m in medias
-                              select new ImageVM
-                              {
-                                  Id = m.Id,
-                                  FileName = m.FileName,
-                                  Title = m.Title,
-                                  Caption = m.Caption,
-                                  Alt = m.Alt,
-                                  FileType = m.ContentType,
-                                  UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
-                                  UploadVia = m.UploadedFrom.ToString(),
-                                  Width = m.Width,
-                                  Height = m.Height,
-                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
-                                  UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
-                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), 
-                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), 
-                              };
+            List<ImageVM> imageVMs = new List<ImageVM>();
+            foreach (var media in medias)
+            {
+                imageVMs.Add(await MapImageVMAsync(media));
+            }
 
-            return (medias: imageListVm, count: count);
+            return (medias: imageVMs, count: count);
         }
     }
 }
