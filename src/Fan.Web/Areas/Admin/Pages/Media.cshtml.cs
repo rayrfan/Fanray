@@ -70,9 +70,9 @@ namespace Fan.Web.Pages.Admin
         // -------------------------------------------------------------------- consts & properties
 
         /// <summary>
-        /// Display 100 images at a time.
+        /// Display 96 images at a time.
         /// </summary>
-        public const int PAGE_SIZE = 100;
+        public const int PAGE_SIZE = 96;
 
         /// <summary>
         /// Total number of images.
@@ -101,11 +101,11 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// Ajax GET the medias by page number.
+        /// Ajax GET when clicks on Show More button to get more medias by page number.
         /// </summary>
         /// <param name="pageNumber"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnGetImagesAsync(int pageNumber = 1)
+        public async Task<JsonResult> OnGetMoreAsync(int pageNumber = 1)
         {
             var (medias, count) = await GetImageVMsAsync(pageNumber);
             return new JsonResult(medias);

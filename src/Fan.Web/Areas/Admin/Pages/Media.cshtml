@@ -49,6 +49,10 @@
             </v-layout>
         </v-container>
 
+        <v-btn v-show="this.count > this.images.length"
+               @@click="showMore"
+               color="info">Show more images</v-btn>
+
         <v-dialog v-if="selectedImage"
                   v-model="dialogVisible"
                   @@keydown.esc="dialogVisible = false"

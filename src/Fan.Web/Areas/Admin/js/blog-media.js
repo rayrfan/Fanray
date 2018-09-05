@@ -6,10 +6,8 @@ Vue.component('blog-media', {
     data: () => ({
         dialogVisible: false,
         selectedImage: null,
-        snackbar: false,
-        snackbarText: '',
-        snackbarColor: '',
         progressDialog: false,
+        pageNumber: 1, // pagination
         errMsg: '',
     }),
     mounted() {
@@ -88,12 +86,16 @@ Vue.component('blog-media', {
         sendImages(formData) {
             axios.post('/admin/media?handler=image', formData, this.$root.headers)
                 .then(resp => {
-
-                    console.log(resp.data);
                     if (resp.data.images.length > 0) {
                         for (var i = 0; i < resp.data.images.length; i++) {
                             this.images.unshift(resp.data.images[i]);
                         }
+
+                        // inc total number of image by the number of added images
+                        console.log(this.count);
+                        this.count += resp.data.images.length;
+                        console.log(this.count);
+
                         this.$root.toast('Image uploaded.');
                     }
                     if (resp.data.errorMessage) this.errMsg = resp.data.errorMessage;
@@ -110,10 +112,23 @@ Vue.component('blog-media', {
             this.selectedImage = image;
             console.log("selecting image: ", image);
         },
-        getImages() {
-            let url = `/admin/media?handler=images`;
+        /**
+         * Clicks show more button to return next page of images.
+         */
+        showMore() {
+            this.pageNumber++;
+            let url = `/admin/media?handler=more&pageNumber=${this.pageNumber}`;
             axios.get(url).then(resp => {
-                this.images = resp.data;
+                // returned data is the list of images
+                for (var i = 0; i < resp.data.length; i++) {
+                    // first make sure returned item is not already on the page
+                    var found = this.images.some(function (img) {
+                        return img.id === resp.data[i].id;
+                    });
+                    console.log("found: ", found);
+
+                    if (!found) this.images.push(resp.data[i]);
+                }
             }).catch(err => console.log(err));
         },
         deleteImage() {
