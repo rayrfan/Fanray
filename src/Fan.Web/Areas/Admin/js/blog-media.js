@@ -12,23 +12,59 @@ Vue.component('blog-media', {
         progressDialog: false,
         errMsg: '',
     }),
+    mounted() {
+        this.initWindowDnd();
+    },
     methods: {
-        selectImage(image) {
-            this.dialogVisible = true;
-            this.selectedImage = image;
-            console.log("selecting image: ", image);
-        },
-        getImages() {
-            let url = `/admin/media?handler=images`;
-            axios.get(url).then(resp => {
-                this.images = resp.data;
-            }).catch(err => console.log(err));
+        /**
+         * Initialize window drag drop events.
+         */
+        initWindowDnd() {
+            window.addEventListener("dragenter", function (e) {
+                document.querySelector("#dropzone").style.visibility = "";
+                document.querySelector("#dropzone").style.opacity = 1;
+            });
+
+            window.addEventListener("dragleave", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "hidden";
+                document.querySelector("#dropzone").style.opacity = 0;
+            });
+
+            window.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "";
+                document.querySelector("#dropzone").style.opacity = 1;
+            });
+
+            let self = this;
+            window.addEventListener("drop", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "hidden";
+                document.querySelector("#dropzone").style.opacity = 0;
+                self.dragFilesUpload(e.dataTransfer.files);
+            });
         },
         /**
-         * api returns ImageData with a list of media just uploaded and errormsg if 
-         * there is any media not able to be uploaded.
+         * Drag files to drop over browser to upload.
+         * @param {any} files
          */
-        uploadImages() {
+        dragFilesUpload(files) {
+            this.progressDialog = true;
+
+            const formData = new FormData();
+            if (!files.length) return;
+            Array.from(Array(files.length).keys())
+                 .map(x => {
+                     formData.append('images', files[x]);
+                 });
+
+            this.sendImages(formData);
+        },
+        /**
+         * Click Upload button to choose files to upload.
+         */
+        chooseFilesUpload() {
             const input = document.createElement('input');
             input.setAttribute('type', 'file');
             input.setAttribute('accept', 'image/*');
@@ -41,22 +77,44 @@ Vue.component('blog-media', {
                     formData.append('images', input.files[i]);
                 }
 
-                axios.post('/admin/media?handler=image', formData, this.$root.headers)
-                    .then(resp => {
-                        console.log(resp.data);
-                        if (resp.data.images.length > 0) {
-                            this.images.unshift(resp.data.images);
-                            this.$root.toast('Image uploaded.');
-                        }
-                        if (resp.data.errorMessage) this.errMsg = resp.data.errorMessage;
-                        this.progressDialog = false;
-                    })
-                    .catch(err => {
-                        this.progressDialog = false;
-                        this.$root.toast('Image upload failed.', 'red');
-                        console.log(err);
-                    });
+                this.sendImages(formData);
             };
+        },
+        /**
+         * Send files to server. The API returns ImageData with a list of media just uploaded and errormsg if
+         * there is any media not able to be uploaded.
+         * @param {any} formData
+         */
+        sendImages(formData) {
+            axios.post('/admin/media?handler=image', formData, this.$root.headers)
+                .then(resp => {
+
+                    console.log(resp.data);
+                    if (resp.data.images.length > 0) {
+                        for (var i = 0; i < resp.data.images.length; i++) {
+                            this.images.unshift(resp.data.images[i]);
+                        }
+                        this.$root.toast('Image uploaded.');
+                    }
+                    if (resp.data.errorMessage) this.errMsg = resp.data.errorMessage;
+                    this.progressDialog = false;
+                })
+                .catch(err => {
+                    this.progressDialog = false;
+                    this.$root.toast('Image upload failed.', 'red');
+                    console.log(err);
+                });
+        },
+        selectImage(image) {
+            this.dialogVisible = true;
+            this.selectedImage = image;
+            console.log("selecting image: ", image);
+        },
+        getImages() {
+            let url = `/admin/media?handler=images`;
+            axios.get(url).then(resp => {
+                this.images = resp.data;
+            }).catch(err => console.log(err));
         },
         deleteImage() {
             if (confirm('Are you sure you want to delete this image? Deleted image will no longer appear anywhere on your website. This cannot be undone!')) {
