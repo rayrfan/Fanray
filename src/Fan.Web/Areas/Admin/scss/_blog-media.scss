@@ -1,19 +1,14 @@
-﻿/*https://jsfiddle.net/webtiki/MpXYr/2/*/
-.square {
-    float: left;
-    position: relative;
-    width: 10%;
-    padding-bottom: 10%; /* = width for a 1:1 aspect ratio */
-    margin: 0.5%;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain; /* "cover" crops squares; "contain" no cropping */
+﻿.img-caption--reveal {
+    align-items: center;
+    bottom: 0;
+    justify-content: center;
+    opacity: .5;
+    position: absolute;
+    width: 100%;
 }
-
-.square:hover {
+.img-square:hover {
     cursor: pointer;
 }
-
 /*dialog*/
 .dialog {
     max-width: 71%;

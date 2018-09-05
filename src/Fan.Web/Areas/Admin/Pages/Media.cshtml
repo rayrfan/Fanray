@@ -19,14 +19,35 @@
         <v-divider></v-divider>
         <v-alert :value="errMsg.length" type="error" dismissible>{{ errMsg }}</v-alert>
 
-        <div class="gallery">
-            <div v-for="image in images"
-                 :key="image.id"
-                 @@click="selectImage(image)"
-                 class="square"
-                 :title="image.title"
-                 :style="{ backgroundImage: 'url(' + image.urlSmall + ')' }"></div>
-        </div>
+        <v-container grid-list-md fluid>
+            <v-layout row wrap>
+                <v-flex v-for="image in images"
+                        :key="image.id"
+                        xs1
+                        d-flex>
+                    <v-hover>
+                        <v-img :src="image.urlSmall"
+                               @@click="selectImage(image)"
+                               aspect-ratio="1"
+                               class="img-square grey lighten-2"
+                               slot-scope="{ hover }">
+                            <v-expand-transition>
+                                <div v-if="hover" class="white img-caption--reveal">
+                                    {{ image.caption }}
+                                </div>
+                            </v-expand-transition>
+                            <v-layout slot="placeholder"
+                                      fill-height
+                                      align-center
+                                      justify-center
+                                      ma-0>
+                                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+                            </v-layout>
+                        </v-img>
+                    </v-hover>
+                </v-flex>
+            </v-layout>
+        </v-container>
 
         <v-dialog v-if="selectedImage"
                   v-model="dialogVisible"
