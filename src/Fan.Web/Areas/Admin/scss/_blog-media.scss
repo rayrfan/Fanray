@@ -1,4 +1,11 @@
-﻿.img-caption--reveal {
+﻿// make the toolbar sticky
+.media-toolbar {
+    position: sticky;
+    z-index: 2;
+    top: 48px
+}
+// put a checkmark on selected image
+.img-selected {
     align-items: center;
     bottom: 0;
     justify-content: center;
@@ -6,10 +13,20 @@
     position: absolute;
     width: 100%;
 }
+// show caption when hover over image
+.img-caption--reveal {
+    align-items: center;
+    bottom: 0;
+    justify-content: center;
+    opacity: .5;
+    position: absolute;
+    width: 100%;
+}
+// make cursor a pointer when hover over image
 .img-square:hover {
     cursor: pointer;
 }
-/*dialog*/
+// image edit dialog
 .dialog {
     max-width: 71%;
     background-color: white;
@@ -50,7 +67,7 @@
     border-top: 1px solid #eee;
     text-align: right;
 }
-
+// drop zone and text to show when drag files over browser
 #dropzone {
     position: fixed;
     top: 0;

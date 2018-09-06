@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Pages.Admin
+namespace Fan.Web.Areas.Admin.Pages
 {
     public class MediaModel : PageModel
     {
@@ -54,6 +54,8 @@ namespace Fan.Web.Pages.Admin
             /// The gallery image dialog sidebar shows the original url.
             /// </summary>
             public string UrlOriginal { get; set; }
+
+            public bool Selected { get; set; }
         }
 
         public class ImageData
@@ -147,29 +149,55 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// DELETE an image by id.
+        /// POST to delete images by their ids.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnDeleteAsync(int id)
+        public async Task<JsonResult> OnPostDeleteAsync([FromBody]int[] ids)
         {
-            await _blogSvc.DeleteImageAsync(id);
-
-            // refresh
-            var (medias, count) = await GetImageVMsAsync(1);
-            return new JsonResult(medias);
+            for (int i = 0; i < ids.Length; i++)
+            {
+                await _blogSvc.DeleteImageAsync(ids[i]);
+            }
+            return new JsonResult(true);
         }
 
+        /// <summary>
+        /// POST to update an image.
+        /// </summary>
+        /// <param name="media"></param>
+        /// <returns></returns>
         public async Task<JsonResult> OnPostUpdateAsync([FromBody]ImageVM media)
         {
             await _mediaSvc.UpdateMediaAsync(media.Id, media.Title, media.Caption, media.Alt, media.Description);
-            // TODO
-            var (medias, count) = await GetImageVMsAsync(1);
-            return new JsonResult(medias);
+            return new JsonResult(true);
         }
 
         // -------------------------------------------------------------------- private
 
+        /// <summary>
+        /// Returns 
+        /// </summary>
+        /// <remarks>
+        /// TODO check each media AppType to decide which GetImageUrl to call
+        /// </remarks>
+        private async Task<(IEnumerable<ImageVM> medias, int count)> GetImageVMsAsync(int pageNumber)
+        {
+            var (medias, count) = await _mediaSvc.GetMediasAsync(EMediaType.Image, pageNumber, PAGE_SIZE);
+            List<ImageVM> imageVMs = new List<ImageVM>();
+            foreach (var media in medias)
+            {
+                imageVMs.Add(await MapImageVMAsync(media));
+            }
+
+            return (medias: imageVMs, count: count);
+        }
+
+        /// <summary>
+        /// Maps an Media object to ImageVM.
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
         private async Task<ImageVM> MapImageVMAsync(Media m)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
@@ -191,24 +219,6 @@ namespace Fan.Web.Pages.Admin
                 UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large),
                 UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original),
             };
-        }
-
-        /// <summary>
-        /// Returns 
-        /// </summary>
-        /// <remarks>
-        /// TODO check each media AppType to decide which GetImageUrl to call
-        /// </remarks>
-        private async Task<(IEnumerable<ImageVM> medias, int count)> GetImageVMsAsync(int pageNumber)
-        {
-            var (medias, count) = await _mediaSvc.GetMediasAsync(EMediaType.Image, pageNumber, PAGE_SIZE);
-            List<ImageVM> imageVMs = new List<ImageVM>();
-            foreach (var media in medias)
-            {
-                imageVMs.Add(await MapImageVMAsync(media));
-            }
-
-            return (medias: imageVMs, count: count);
         }
     }
 }

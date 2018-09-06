@@ -4,14 +4,26 @@
 Vue.component('blog-media', {
     mixins: [blogMediaMixin],
     data: () => ({
-        dialogVisible: false,
-        selectedImage: null,
+        dialogVisible: false, 
         progressDialog: false,
-        pageNumber: 1, // pagination
+        pageNumber: 1,         
+        selectedImages: [],     
+        selectedImageIdx: 0,   
         errMsg: '',
     }),
     mounted() {
         this.initWindowDnd();
+    },
+    computed: {
+        showMoreVisible: function () {
+            return this.count > this.images.length;
+        },
+        leftArrowVisible: function () {
+            return this.selectedImages.length > 1 && this.selectedImageIdx > 0;
+        },
+        rightArrowVisible: function () {
+            return this.selectedImages.length > 1 && this.selectedImageIdx < this.selectedImages.length-1;
+        },
     },
     methods: {
         /**
@@ -79,7 +91,7 @@ Vue.component('blog-media', {
             };
         },
         /**
-         * Send files to server. The API returns ImageData with a list of media just uploaded and errormsg if
+         * Send files to server. The API returns ImageData with a list of media just uploaded and errorMessage if
          * there is any media not able to be uploaded.
          * @param {any} formData
          */
@@ -107,16 +119,42 @@ Vue.component('blog-media', {
                     console.log(err);
                 });
         },
+        /**
+         * Clicks on an image to select it.
+         * @param {any} image
+         */
         selectImage(image) {
-            this.dialogVisible = true;
-            this.selectedImage = image;
-            console.log("selecting image: ", image);
+            let idx = this.selectedImages.findIndex(img => img.id === image.id);
+
+            if (idx !== -1) {
+                image.selected = false;
+                this.selectedImages.splice(idx, 1);
+                console.log("de-selected image: ", image);
+            }
+            else {
+                image.selected = true;
+                this.selectedImages.push(image);
+                console.log("selected image: ", image);
+            }
+        },
+        /**
+         * When you select and edit multiple images, you can click arrows to traverse among them.
+         */
+        leftArrow() {
+            this.selectedImageIdx--;
+            console.log('leftArrow selectedImageIdx: ', this.selectedImageIdx)
+        },
+        rightArrow() {
+            this.selectedImageIdx++;
+            console.log('rightArrow selectedImageIdx: ', this.selectedImageIdx)
         },
         /**
          * Clicks show more button to return next page of images.
          */
         showMore() {
-            this.pageNumber++;
+            this.pageNumber++; 
+            // if user deletes an image, this will ensure to re-get current page before moving to next page
+            if (this.images.length < this.pageSize) this.pageNumber--; 
             let url = `/admin/media?handler=more&pageNumber=${this.pageNumber}`;
             axios.get(url).then(resp => {
                 // returned data is the list of images
@@ -125,38 +163,66 @@ Vue.component('blog-media', {
                     var found = this.images.some(function (img) {
                         return img.id === resp.data[i].id;
                     });
-                    console.log("found: ", found);
 
-                    if (!found) this.images.push(resp.data[i]);
+                    if (!found) 
+                        this.images.push(resp.data[i]); // only append to images if not found
                 }
             }).catch(err => console.log(err));
         },
-        deleteImage() {
-            if (confirm('Are you sure you want to delete this image? Deleted image will no longer appear anywhere on your website. This cannot be undone!')) {
+        /**
+         * When user selects one or more images and clicks on edit button.
+         */
+        editImages() {
+            this.dialogVisible = true;
+        },
+        deleteImages() {
+            if (confirm('Are you sure you want to delete the image(s)? They will no longer appear anywhere on your website. This cannot be undone!')) {
                 console.log('deleting image: ', this.selectedImage);
-                let url = `/admin/media?id=${this.selectedImage.id}`;
-                axios.delete(url, this.$root.headers)
+
+                const selectedCount = this.selectedImages.length;
+                let ids = [];
+                for (var i = 0; i < selectedCount; i++) {
+                    ids.push(this.selectedImages[i].id);
+                }
+                console.log(ids);
+
+                let url = `/admin/media?handler=delete`;
+                axios.post(url, ids, this.$root.headers)
                     .then(resp => {
-                        this.dialogVisible = false;
-                        this.images = resp.data;
+                        console.log("before delete images length: ",this.images.length);
+                        // remove selected images from images since they are deleted
+                        for (var i = 0; i < selectedCount; i++) {
+                            let idx = this.images.findIndex(img => img.id === this.selectedImages[i].id);
+                            this.images.splice(idx, 1);
+                        }
+                        // set selectedImages to empty
+                        this.selectedImages = [];
+
+                        // dec total number of images
+                        console.log("after delete images length: ",this.images.length);
+                        console.log("total count before delete: ", this.count);
+                        this.count -= selectedCount;
+                        console.log("total count after delete: ", this.count);
+
                         this.$root.toast('Image deleted.');
                     })
                     .catch(err => {
-                        this.$root.toast('Image delete failed.', 'red');
+                        this.$root.toastError('Image delete failed.');
                         console.log(err);
                     });
             }
         },
+        /**
+         * Updates an image info, it does not close the dialog.
+         */
         updateImage() {
             let url = `/admin/media?handler=update`;
-            axios.post(url, this.selectedImage, this.$root.headers)
+            axios.post(url, this.selectedImages[this.selectedImageIdx], this.$root.headers)
                 .then(resp => {
-                    this.dialogVisible = false;
-                    this.images = resp.data;
                     this.$root.toast('Image updated.');
                 })
                 .catch(err => {
-                    this.$root.toast('Image update failed.', 'red');
+                    this.$root.toastError('Image update failed.');
                     console.log(err);
                 });
         },
