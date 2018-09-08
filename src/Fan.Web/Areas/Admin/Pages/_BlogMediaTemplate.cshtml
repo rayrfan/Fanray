@@ -63,8 +63,8 @@
         </div>
 
         <v-dialog v-if="selectedImages.length > 0"
-                  v-model="dialogVisible"
-                  @@keydown.esc="dialogVisible = false"
+                  v-model="editDialogVisible"
+                  @@keydown.esc="closeEditDialog"
                   content-class="dialog">
 
             <v-container fill-height style="padding:0; margin:0">
@@ -112,7 +112,7 @@
             </v-container>
             <div class="img-btnbar">
                 @*<v-btn color="error" @@click="deleteImages">Delete</v-btn>*@
-                <v-btn color="primary" @@click.stop="dialogVisible=false">Close</v-btn>
+                <v-btn color="primary" @@click.stop="closeEditDialog">Close</v-btn>
                 <v-btn color="primary" @@click="updateImage">Update</v-btn>
             </div>
 

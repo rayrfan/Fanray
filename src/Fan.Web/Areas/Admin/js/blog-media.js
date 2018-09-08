@@ -5,11 +5,11 @@ Vue.component('blog-media', {
     template: '#blog-media-template',
     mixins: [blogMediaMixin],
     data: () => ({
-        dialogVisible: false, 
+        editDialogVisible: false,
         progressDialog: false,
-        pageNumber: 1,         
-        selectedImages: [],     
-        selectedImageIdx: 0,   
+        pageNumber: 1,
+        selectedImages: [],
+        selectedImageIdx: 0,
         errMsg: '',
     }),
     mounted() {
@@ -130,11 +130,13 @@ Vue.component('blog-media', {
             if (idx !== -1) {
                 image.selected = false;
                 this.selectedImages.splice(idx, 1);
+                console.log("selectedImageIdx: ", this.selectedImageIdx);
                 console.log("de-selected image: ", image);
             }
             else {
                 image.selected = true;
                 this.selectedImages.push(image);
+                console.log("selectedImageIdx: ", this.selectedImageIdx);
                 console.log("selected image: ", image);
             }
         },
@@ -174,7 +176,7 @@ Vue.component('blog-media', {
          * When user selects one or more images and clicks on edit button.
          */
         editImages() {
-            this.dialogVisible = true;
+            this.editDialogVisible = true;
         },
         deleteImages() {
             if (confirm('Are you sure you want to delete the image(s)? They will no longer appear anywhere on your website. This cannot be undone!')) {
@@ -226,6 +228,13 @@ Vue.component('blog-media', {
                     this.$root.toastError('Image update failed.');
                     console.log(err);
                 });
+        },
+        /**
+         * When user closes the edit dialog by hitting esc or close.
+         */
+        closeEditDialog() {
+            this.selectedImageIdx = 0;
+            this.editDialogVisible = false;
         },
     },
 });
