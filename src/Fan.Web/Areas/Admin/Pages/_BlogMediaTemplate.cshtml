@@ -1,0 +1,134 @@
+﻿<script type="text/x-template" id="blog-media-template">
+    <div>
+        <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
+            <span id="droptext">Drop files to upload</span>
+        </div>
+
+        <v-toolbar class="elevation-1 media-toolbar">
+            <v-btn color="info" @@click="chooseFilesUpload">
+                <v-icon color="white">cloud_upload</v-icon>
+                &nbsp;Upload
+            </v-btn>
+            <v-btn @@click="editImages"
+                   color="info"
+                   v-show="this.selectedImages.length > 0">
+                Edit
+            </v-btn>
+            <v-btn @@click="deleteImages"
+                   color="error"
+                   v-show="this.selectedImages.length > 0">
+                <v-icon>delete</v-icon>
+            </v-btn>
+        </v-toolbar>
+
+        <v-alert :value="errMsg.length" type="error" dismissible>{{ errMsg }}</v-alert>
+
+        <v-container grid-list-md fluid>
+            <v-layout row wrap>
+                <v-flex v-for="image in images"
+                        :key="image.id"
+                        xs1
+                        d-flex>
+                    <v-hover>
+                        <v-img :src="image.urlSmall"
+                               @@click="selectImage(image)"
+                               aspect-ratio="1"
+                               class="img-square grey lighten-2"
+                               slot-scope="{ hover }">
+                            <v-expand-transition>
+                                <div v-show="hover" class="white img-caption--reveal">
+                                    {{ image.caption }}
+                                </div>
+                            </v-expand-transition>
+                            <div v-show="image.selected">
+                                <v-icon color="info">check_circle</v-icon>
+                            </div>
+                            <v-layout slot="placeholder"
+                                      fill-height
+                                      align-center
+                                      justify-center
+                                      ma-0>
+                                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+                            </v-layout>
+                        </v-img>
+                    </v-hover>
+                </v-flex>
+            </v-layout>
+        </v-container>
+
+        <div class="text-xs-center">
+            <v-btn v-show="showMoreVisible"
+                   @@click="showMore"
+                   color="info">Show more images</v-btn>
+        </div>
+
+        <v-dialog v-if="selectedImages.length > 0"
+                  v-model="dialogVisible"
+                  @@keydown.esc="dialogVisible = false"
+                  content-class="dialog">
+
+            <v-container fill-height style="padding:0; margin:0">
+                <v-layout row wrap>
+                    <v-flex xs12 md8 class="img-preview">
+                        <v-container fill-height>
+                            <v-layout justify-center align-center>
+                                <v-btn @@click="leftArrow"
+                                       v-show="leftArrowVisible"
+                                       fab dark small color="primary"><v-icon>keyboard_arrow_left</v-icon></v-btn>
+                                <v-spacer></v-spacer>
+                                <img :src="selectedImages[selectedImageIdx].urlLarge" alt="Alternate Text" />
+                                <v-spacer></v-spacer>
+                                <v-btn @@click="rightArrow"
+                                       v-show="rightArrowVisible"
+                                       fab dark small color="primary"><v-icon>keyboard_arrow_right</v-icon></v-btn>
+                            </v-layout>
+                        </v-container>
+                    </v-flex>
+                    <v-flex xs12 md4 class="img-sidebar">
+                        <v-text-field label="Title" v-model="selectedImages[selectedImageIdx].title"></v-text-field>
+                        <v-textarea label="Caption" v-model="selectedImages[selectedImageIdx].caption"></v-textarea>
+                        <v-text-field label="Alt text" v-model="selectedImages[selectedImageIdx].alt"></v-text-field>
+                        @*<v-textarea label="Description" v-model="selectedImage.description"></v-textarea>*@
+                        <v-text-field label="URL" readonly v-model="selectedImages[selectedImageIdx].urlOriginal"></v-text-field>
+                        <ul>
+                            <li>
+                                <label>File Name</label><span>{{ selectedImages[selectedImageIdx].fileName }}</span>
+                            </li>
+                            <li>
+                                <label>File Type</label><span>{{ selectedImages[selectedImageIdx].fileType }}</span>
+                            </li>
+                            <li>
+                                <label>Dimensions</label><span><abbr title="Width in pixels">{{ selectedImages[selectedImageIdx].width }}</abbr> ✕ <abbr title="Height in pixels">{{ selectedImages[selectedImageIdx].height }}</abbr></span>
+                            </li>
+                            <li>
+                                <label>Upload Date</label><span>{{ selectedImages[selectedImageIdx].uploadDate }}</span>
+                            </li>
+                            <li>
+                                <label>Upload Via</label><span>{{ selectedImages[selectedImageIdx].uploadVia }}</span>
+                            </li>
+                        </ul>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+            <div class="img-btnbar">
+                @*<v-btn color="error" @@click="deleteImages">Delete</v-btn>*@
+                <v-btn color="primary" @@click.stop="dialogVisible=false">Close</v-btn>
+                <v-btn color="primary" @@click="updateImage">Update</v-btn>
+            </div>
+
+        </v-dialog>
+
+        <v-dialog v-model="progressDialog"
+                  persistent
+                  width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Uploading ...
+                    <v-progress-linear indeterminate
+                                       color="white"
+                                       class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </div>
+</script>

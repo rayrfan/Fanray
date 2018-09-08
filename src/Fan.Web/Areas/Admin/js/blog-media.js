@@ -2,6 +2,7 @@
  * The component for Admin/Pages/Media.cshtml
  */
 Vue.component('blog-media', {
+    template: '#blog-media-template',
     mixins: [blogMediaMixin],
     data: () => ({
         dialogVisible: false, 
