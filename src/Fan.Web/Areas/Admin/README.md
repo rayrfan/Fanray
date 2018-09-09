@@ -13,6 +13,7 @@ First to get ready by `npm install`
 Develop an inidividual file, replace the filename.
 
 ```bash
+npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 npx babel js/setup.js --out-dir ../../wwwroot/admin/js --source-maps --watch
