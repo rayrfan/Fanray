@@ -3,7 +3,6 @@
     mixins: [adminMixin],
     data: () => ({
         drawer: null,
-        active: true,
         snackbar: {
             show: false,
             text: '',
@@ -19,12 +18,18 @@
         },
     },
     mounted() {
-        var url = window.location.pathname;
-        this.adminNavs.forEach(function (nav) {
-            nav.active = nav.url === url;
-        });
+        this.initActiveNav();
     },
     methods: {
+        /**
+         * Make the current admin side nav active.
+         */
+        initActiveNav() {
+            var url = window.location.pathname;
+            this.adminNavs.forEach(function (nav) {
+                nav.active = url.startsWith(nav.url);
+            });
+        },
         logout: function () {
             console.log('logout');
             axios.post('/account/logout', null, this.headers)
