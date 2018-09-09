@@ -103,6 +103,16 @@ namespace Fan.Web.Areas.Admin.Pages
         }
 
         /// <summary>
+        /// Ajax GET to return first page of images in editor mode.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<JsonResult> OnGetImagesAsync()
+        {
+            var (medias, count) = await GetImageVMsAsync(1);
+            return new JsonResult(new { medias, count });
+        }
+
+        /// <summary>
         /// Ajax GET when clicks on Show More button to get more medias by page number.
         /// </summary>
         /// <param name="pageNumber"></param>

@@ -4,6 +4,7 @@
 Vue.component('blog-media', {
     template: '#blog-media-template',
     mixins: [blogMediaMixin],
+    props: ['mode'],
     data: () => ({
         editDialogVisible: false,
         progressDialog: false,
@@ -11,9 +12,16 @@ Vue.component('blog-media', {
         selectedImages: [],
         selectedImageIdx: 0,
         errMsg: '',
+        isEditor: false,
     }),
     mounted() {
         this.initWindowDnd();
+         
+        if (this.mode === 'editor') {
+            this.isEditor = true;
+            console.log("media gallery in editor mode.");
+            this.initImages();
+        }
     },
     computed: {
         showMoreVisible: function () {
@@ -119,6 +127,17 @@ Vue.component('blog-media', {
                     this.$root.toast('Image upload failed.', 'red');
                     console.log(err);
                 });
+        },
+        /**
+         * Retrieve first page of images in editor mode.
+         */
+        initImages() {
+            let url = `/admin/media?handler=images`;
+            axios.get(url).then(resp => {
+                console.log("resp.data", resp.data);
+                this.images = resp.data.medias;
+                this.count = resp.data.count;
+            }).catch(err => console.log(err));
         },
         /**
          * Clicks on an image to select it.

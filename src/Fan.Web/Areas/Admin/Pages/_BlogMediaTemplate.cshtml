@@ -1,10 +1,14 @@
-﻿<script type="text/x-template" id="blog-media-template">
+﻿@* 
+    The media component template used by Admin Media and Compose pages.
+    See blog-media.js, Media.cshtml, Compose.cshtml, and blog-compose.js.
+*@
+<script type="text/x-template" id="blog-media-template">
     <div>
         <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
             <span id="droptext">Drop files to upload</span>
         </div>
 
-        <v-toolbar class="elevation-1 media-toolbar">
+        <v-toolbar class="elevation-1 media-toolbar" v-bind:style="[isEditor ? {'top' : '0'} : {'top' : '48px'}]">
             <v-btn color="info" @@click="chooseFilesUpload">
                 <v-icon color="white">cloud_upload</v-icon>
                 &nbsp;Upload
@@ -18,6 +22,17 @@
                    color="error"
                    v-show="this.selectedImages.length > 0">
                 <v-icon>delete</v-icon>
+            </v-btn>
+            <v-btn @@click="$root.insertImages(selectedImages)"
+                   color="info"
+                   v-show="this.selectedImages.length > 0 && this.isEditor">
+                Insert
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn @@click.stop="$root.mediaDialogVisible = false"
+                   color="info"
+                   v-show="this.isEditor">
+                Close
             </v-btn>
         </v-toolbar>
 

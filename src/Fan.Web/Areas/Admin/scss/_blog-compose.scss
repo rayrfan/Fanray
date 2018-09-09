@@ -1,0 +1,15 @@
+﻿// styles for Compose.cshtml
+
+[v-cloak] {
+    display: none
+}
+
+.drawer {
+    padding: 0 8px;
+    background-color: blue
+}
+
+/* drawer expansion panel headers */
+.v-expansion-panel__header {
+    padding: 4px 12px;
+}
