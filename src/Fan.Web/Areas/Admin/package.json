@@ -4,7 +4,8 @@
   "scripts": {},
   "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.26.0",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-minify": "^0.4.3"
   }

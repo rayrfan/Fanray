@@ -94,22 +94,22 @@ namespace Fan.Blog.Services
         {
            return new List<ImageResizeInfo> {
                 new ImageResizeInfo {
-                    Pixel = int.MaxValue,
+                    TargetSize = int.MaxValue,
                     Path = GetImagePath(uploadedOn, EImageSize.Original),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
                 new ImageResizeInfo {
-                    Pixel = LARGE_IMG_SIZE,
+                    TargetSize = LARGE_IMG_SIZE,
                     Path = GetImagePath(uploadedOn, EImageSize.Large),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
                 new ImageResizeInfo {
-                    Pixel = MEDIUM_IMG_SIZE,
+                    TargetSize = MEDIUM_IMG_SIZE,
                     Path = GetImagePath(uploadedOn, EImageSize.Medium),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
                 new ImageResizeInfo {
-                    Pixel = SMALL_IMG_SIZE,
+                    TargetSize = SMALL_IMG_SIZE,
                     Path = GetImagePath(uploadedOn, EImageSize.Small),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },

@@ -44,13 +44,14 @@ namespace Fan.Medias
         Task<Media> GetMediaAsync(int id);
 
         /// <summary>
-        /// Returns a list of <see cref="Media"/> records based on search critria.
+        /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
+        /// or empty list if no records found; and total count of medias for this media type.
         /// </summary>
         /// <param name="mediaType"></param>
-        /// <param name="pageNumber"></param>
+        /// <param name="pageNumber">1-based page number.</param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
+        Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
 
         /// <summary>
         /// Updates media title and description.

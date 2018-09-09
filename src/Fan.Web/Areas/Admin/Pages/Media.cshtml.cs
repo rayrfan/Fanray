@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Pages.Admin
+namespace Fan.Web.Areas.Admin.Pages
 {
     public class MediaModel : PageModel
     {
@@ -30,11 +31,7 @@ namespace Fan.Web.Pages.Admin
             _userManager = userManager;
         }
 
-        public class ImageListVM
-        {
-            public IEnumerable<ImageVM> Images { get; set; }
-            public int TotalImages { get; set; }
-        }
+        // -------------------------------------------------------------------- Helper Classes
 
         public class ImageVM : Media
         {
@@ -57,103 +54,180 @@ namespace Fan.Web.Pages.Admin
             /// The gallery image dialog sidebar shows the original url.
             /// </summary>
             public string UrlOriginal { get; set; }
+
+            public bool Selected { get; set; }
         }
 
-        // -------------------------------------------------------------------- Public Methods
+        public class ImageData
+        {
+            public IEnumerable<ImageVM> Images { get; set; }
 
+            public string ErrorMessage { get; set; }
+          
+            public string ImagesJson => 
+                (Images == null || Images.Count() <=0) ? "" : 
+                JsonConvert.SerializeObject(Images);
+        }
+
+        // -------------------------------------------------------------------- consts & properties
+
+        /// <summary>
+        /// Display 96 images at a time.
+        /// </summary>
+        public const int PAGE_SIZE = 96;
+
+        /// <summary>
+        /// Total number of images.
+        /// </summary>
+        public int ImageCount { get; set; }
+
+        /// <summary>
+        /// The json data to bootstrap page initially.
+        /// </summary>
+        public ImageData Data { get; private set; }
+
+        // -------------------------------------------------------------------- public methods
+
+        /// <summary>
+        /// GET bootstrap page with json data.
+        /// </summary>
+        /// <returns></returns>
+        public async Task OnGetAsync()
+        {
+            var (medias, count) = await GetImageVMsAsync(1);
+            Data = new ImageData
+            {
+                Images = medias,
+            };
+            ImageCount = count;
+        }
+
+        /// <summary>
+        /// Ajax GET to return first page of images in editor mode.
+        /// </summary>
+        /// <returns></returns>
         public async Task<JsonResult> OnGetImagesAsync()
         {
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var (medias, count) = await GetImageVMsAsync(1);
+            return new JsonResult(new { medias, count });
+        }
+
+        /// <summary>
+        /// Ajax GET when clicks on Show More button to get more medias by page number.
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnGetMoreAsync(int pageNumber = 1)
+        {
+            var (medias, count) = await GetImageVMsAsync(pageNumber);
+            return new JsonResult(medias);
         }
 
         /// <summary>
         /// Uploads images and returns urls to optimized or original if optimized is not available.
         /// </summary>
         /// <param name="images"></param>
-        /// <remarks>
-        /// After uploads are done, it calls and return <see cref="GetImageListVMAsync"/>, this will
-        /// refresh the grid.
-        /// TODO better way is to return uploaded image urls only, let client append url to grid etc.
-        /// </remarks>
-        /// <returns><see cref="ImageListVM"/></returns>
         public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
         {
             var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
-            List<string> urls = new List<string>();
+            List<ImageVM> imageVMs = new List<ImageVM>();
 
+            int failCount = 0;
             foreach (var image in images)
             {
-                using (Stream stream = image.OpenReadStream())
+                try
                 {
-                    var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
-                    urls.Add(_blogSvc.GetImageUrl(media, EImageSize.Small));
+                    using (Stream stream = image.OpenReadStream())
+                    {
+                        var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
+                        imageVMs.Add(await MapImageVMAsync(media));
+                    }
+                }
+                catch (NotSupportedException ex)
+                {
+                    failCount++;
                 }
             }
 
-            // TODO
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            var imageData = new ImageData {
+                Images = imageVMs,
+                ErrorMessage = failCount <= 0 ? null :
+                                $"Only .jpg, .jpeg, .png and .gif are supported, {failCount} file(s) could not be uploaded.",
+            };
+
+            return new JsonResult(imageData);
         }
 
         /// <summary>
-        /// DELETE an image by id.
+        /// POST to delete images by their ids.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnDeleteAsync(int id)
+        public async Task<JsonResult> OnPostDeleteAsync([FromBody]int[] ids)
         {
-            await _blogSvc.DeleteImageAsync(id);
-
-            // refresh
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            for (int i = 0; i < ids.Length; i++)
+            {
+                await _blogSvc.DeleteImageAsync(ids[i]);
+            }
+            return new JsonResult(true);
         }
 
+        /// <summary>
+        /// POST to update an image.
+        /// </summary>
+        /// <param name="media"></param>
+        /// <returns></returns>
         public async Task<JsonResult> OnPostUpdateAsync([FromBody]ImageVM media)
         {
             await _mediaSvc.UpdateMediaAsync(media.Id, media.Title, media.Caption, media.Alt, media.Description);
-            // TODO
-            var list = await GetImageListVMAsync();
-            return new JsonResult(list);
+            return new JsonResult(true);
         }
 
         // -------------------------------------------------------------------- private
 
         /// <summary>
-        /// This is shared by get and post images, not ideal.
+        /// Returns 
         /// </summary>
-        /// <returns></returns>
-        private async Task<ImageListVM> GetImageListVMAsync()
+        /// <remarks>
+        /// TODO check each media AppType to decide which GetImageUrl to call
+        /// </remarks>
+        private async Task<(IEnumerable<ImageVM> medias, int count)> GetImageVMsAsync(int pageNumber)
         {
-            var list = await _mediaSvc.GetMediasAsync(EMediaType.Image, 1, 50);
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-
-            var appName = EAppType.Blog.ToString().ToLowerInvariant();
-
-            //TODO check each media AppType to decide which GetImageUrl to call
-            var imageListVm = from m in list
-                              select new ImageVM
-                              {
-                                  Id = m.Id,
-                                  FileName = m.FileName,
-                                  Title = m.Title,
-                                  Caption = m.Caption,
-                                  Alt = m.Alt,
-                                  FileType = m.ContentType,
-                                  UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
-                                  UploadVia = m.UploadedFrom.ToString(),
-                                  Width = m.Width,
-                                  Height = m.Height,
-                                  UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
-                                  UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
-                                  UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large), 
-                                  UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original), 
-                              };
-
-            return new ImageListVM
+            var (medias, count) = await _mediaSvc.GetMediasAsync(EMediaType.Image, pageNumber, PAGE_SIZE);
+            List<ImageVM> imageVMs = new List<ImageVM>();
+            foreach (var media in medias)
             {
-                Images = imageListVm,
+                imageVMs.Add(await MapImageVMAsync(media));
+            }
+
+            return (medias: imageVMs, count: count);
+        }
+
+        /// <summary>
+        /// Maps an Media object to ImageVM.
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        private async Task<ImageVM> MapImageVMAsync(Media m)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var appName = EAppType.Blog.ToString().ToLowerInvariant();
+            return new ImageVM
+            {
+                Id = m.Id,
+                FileName = m.FileName,
+                Title = m.Title,
+                Caption = m.Caption,
+                Alt = m.Alt,
+                FileType = m.ContentType,
+                UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
+                UploadVia = m.UploadedFrom.ToString(),
+                Width = m.Width,
+                Height = m.Height,
+                UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
+                UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
+                UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large),
+                UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original),
             };
         }
     }

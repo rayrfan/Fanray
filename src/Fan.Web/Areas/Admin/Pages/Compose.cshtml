@@ -1,5 +1,5 @@
 ﻿@page "{postId:int?}"
-@model Fan.Web.Pages.Admin.ComposeModel
+@model ComposeModel
 @{
     ViewData["Title"] = "Compose";
     Layout = null;
@@ -13,31 +13,9 @@
     <title>@ViewData["Title"] - Fanray</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.1.14/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.2.2/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/content.css" asp-append-version="true" />
-    <style>
-        .square {
-            float: left;
-            position: relative;
-            width: 10%;
-            padding-bottom: 10%; /* = width for a 1:1 aspect ratio */
-            margin: 0.5%;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: contain; /* "cover" crops squares; "contain" no cropping */
-        }
-
-            .square:hover {
-                cursor: pointer;
-            }
-
-        .dialog {
-            max-width: 71%;
-            background-color: white;
-        }
-
-    </style>
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -188,249 +166,47 @@
                 </div>
             </v-content>
             @* Image Dialog *@
-            <v-dialog v-model="showMediaDialog" lazy
-                      @@keydown.esc="showMediaDialog = false"
+            <v-dialog v-model="mediaDialogVisible" lazy
+                      @@keydown.esc="mediaDialogVisible = false"
                       content-class="dialog">
-                <v-toolbar class="elevation-0">
-                    <v-btn flat @@click="uploadImages">
-                        <v-icon color="primary">cloud_upload</v-icon>
-                        &nbsp;Upload
-                    </v-btn>
-                    <v-progress-circular v-if="progressVisible"
-                                         indeterminate
-                                         color="primary"></v-progress-circular>
-                </v-toolbar>
-                <v-divider></v-divider>
-
-                <div class="gallery">
-                    <div v-for="image in images"
-                         :key="image.id"
-                         @@click="insertImage(image)"
-                         class="square"
-                         :title="image.title"
-                         :style="{ backgroundImage: 'url(' + image.urlSmall + ')' }"></div>
-                </div>
+                <blog-media mode="editor"></blog-media>
             </v-dialog>
+            @* Snackbar *@
+            <v-snackbar :timeout="3000"
+                        bottom
+                        right
+                        :color="snackbar.color"
+                        v-model="snackbar.show">
+                <span style="font-size:larger">{{ snackbar.text }}</span>
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
         </v-app>
     </div>
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.17/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.1.14/dist/vuetify.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.2/dist/vuetify.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.1.14/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.2/dist/vuetify.min.js"></script>
     </environment>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
+    <partial name="_BlogMediaTemplate" />
     <script>
-        var app = new Vue({
-            el: '#app',
-            data: () => ({
-                id: 0,
-                published: false,
-                isDraft: false,
-                pubClicked: false,
-                pubText: '',
-                saveVisible: false,
-                saveDisabled: false,
-                saveText: 'Save',
-                closing: true,
-                fieldChanged: false,
-                drawer: null,
-                panel: [true, true, true],
-                menuDate: false,
-                date: '',
-                draftDate: '',
-                selectedCatId: 1,
-                cats: [],
-                selectedTags: [],
-                tags: [],
-                slug: '',
-                excerpt: '',
-                title: '',
-                mediaDialogVisible: false,
-                images: [],
-                progressVisible: false,
-                editor: null,
-                content: '',
-            }),
-            computed: {
-                showMediaDialog: {
-                    get: function () {
-                        if (this.mediaDialogVisible) {
-                            this.getImages();
-                        }
-                        return this.mediaDialogVisible
-                    },
-                    set: function (value) {
-                        if (!value) {
-                            this.mediaDialogVisible = false;
-                        }
-                    }
-                },
-                disablePubButton() {
-                    return this.title.trim().length <= 0 || this.pubClicked;
-                },
-                tok: function () {
-                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
-                },
-                payload: function () {
-                    return {
-                        id: this.id,
-                        postDate: this.date,
-                        categoryId: this.selectedCatId,
-                        tags: this.selectedTags,
-                        slug: this.slug,
-                        excerpt: this.excerpt,
-                        title: this.title,
-                        body: this.editor.getData(),
-                    }
-                },
-            },
-            mounted() {
-                //this.initHighlight();
-                this.initEditor();
-            },
-            methods: {
-                initEditor() {
-                    this.id = window.location.href.substring(window.location.href.lastIndexOf("/") + 1) | 0;
-                    axios.get(`/admin/compose?handler=post&postId=${this.id}`).then(resp => {
-                        this.date = resp.data.post.postDate;
-                        this.selectedCatId = resp.data.post.categoryId;
-                        this.selectedTags = resp.data.post.tags;
-                        this.slug = resp.data.post.slug;
-                        this.excerpt = resp.data.post.excerpt;
-                        this.title = resp.data.post.title;
-                        this.content = resp.data.post.body;
-                        this.published = resp.data.post.published;
-                        this.isDraft = resp.data.post.isDraft;
-                        this.draftDate = resp.data.post.draftDate;
-                        this.cats = resp.data.allCats;
-                        this.tags = resp.data.allTags;
-                        this.pubText = this.published ? 'Update' : 'Publish';                      
-
-                        let typingTimer;
-                        let doneTypingInterval = 5000;
-
-                        ClassicEditor.create(document.querySelector('#editor'), {
-                            autosave: {
-                                save(editor) {
-                                    clearTimeout(typingTimer);
-                                    if (!app.published) {
-                                        console.log('here');
-                                        app.saveVisible = true;
-                                        app.saveDisabled = false;
-                                        app.saveText = 'Save';
-                                        typingTimer = setTimeout(app.saveDraft, doneTypingInterval);
-                                    }
-                                }
-                            }
-                        })
-                            .then(editor => {
-                                app.editor = editor;
-                                console.log('editor initialized: ', app.editor);
-                            })
-                            .catch(error => {
-                                console.error(error);
-                            });
-                    });                   
-                },
-                //initHighlight() {
-                //    hljs.configure({
-                //        languages: ['cs', 'css', 'java', 'javascript', 'markdown', 'ruby', 'python', 'scss', 'sql', 'typescript', 'xml']
-                //    });
-                //},
-                onFieldsChange() {
-                    this.fieldChanged = true;
-                    if (this.published) return;
-                    this.saveVisible = true;
-                    this.saveDisabled = false;
-                    this.saveText = 'Save';
-                },
-                saveDraft() {
-                    console.log('save draft');
-                    this.saveVisible = true;
-                    this.saveDisabled = true;
-                    this.saveText = 'Saving...';
-
-                    console.log(this.payload);
-                    axios.post('/admin/compose?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            this.id = resp.data.id;
-                            this.slug = resp.data.slug;
-                            this.draftDate = resp.data.draftDate;
-                            this.isDraft = true;
-                            if (window.location.href.endsWith('/compose'))
-                                history.replaceState({}, null, window.location.href + `/${this.id}`);
-                        })
-                        .catch(err => { console.log(err); });
-
-                    this.fieldChanged = false;
-                    this.saveText = 'Saved';
-                },
-                revert() {
-                    this.published = false;
-                    this.pubText = this.published ? 'Update' : 'Publish';
-                    this.saveDraft();
-                },
-                pub() {
-                    this.closing = false;
-                    this.pubClicked = true;
-                    this.pubText = this.published ? 'Updating...' : 'Publishing...';
-
-                    const url = this.published ? '/admin/compose?handler=update' : '/admin/compose?handler=publish';
-                    axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            window.location.replace(resp.data);
-                        })
-                        .catch(err => { console.log(err); });
-                },
-                uploadImages() {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
-                    input.setAttribute('multiple', null);
-                    input.click();
-                    input.onchange = () => {
-                        this.progressVisible = true;
-                        const formData = new FormData();
-                        for (let i = 0; i < input.files.length; i++) {
-                            formData.append('images', input.files[i]);
-                        }
-
-                        axios.post('/admin/media?handler=image', formData, { headers: { 'XSRF-TOKEN': this.$root.tok } })
-                            .then(resp => {
-                                this.progressVisible = false;
-                                this.images = resp.data.images;
-                            })
-                            .catch(err => {
-                                this.progressVisible = false;
-                                console.log(err);
-                            });
-                    };
-                },
-                getImages() {
-                    let url = `/admin/media?handler=images`;
-                    axios.get(url).then(resp => {
-                        this.images = resp.data.images;
-                    }).catch(err => console.log(err));
-                },
-                insertImage(image) {
-                    // https://docs.ckeditor.com/ckeditor5/latest/builds/guides/faq.html#where-are-the-editorinserthtml-and-editorinserttext-methods-how-to-insert-some-content
-                    // https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-captions
-                    // I added an extra p with space so when I insert another image it doesn't replace the one before it
-                    const imgHtml = `<figure class="image"><img src="${image.urlMedium}" alt="${image.alt}" title="${image.title}"><figcaption>${image.caption}</figcaption></figure><p>&nbsp;</p>`;
-                    const viewFragment = this.editor.data.processor.toView(imgHtml);
-                    const modelFragment = this.editor.data.toModel(viewFragment);
-                    this.editor.model.insertContent(modelFragment, this.editor.model.document.selection);
-                    //this.mediaDialogVisible = false;
-                },
-                titleEnter() {
-                    this.title = this.title.replace(/\n/g, ' ');
-                }
-            },
-        });
+        let blogMediaMixin = {
+            data: function () {
+                return {
+                    images: [],
+                    count: 0,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                };
+            }
+        };
     </script>
+    <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
+    <script src="~/admin/js/blog-compose.js" asp-append-version="true"></script>
 </body>
 </html>

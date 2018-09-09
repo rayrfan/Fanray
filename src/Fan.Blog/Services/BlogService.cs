@@ -449,7 +449,7 @@ namespace Fan.Blog.Services
             var ctype = "." + contentType.Substring(contentType.LastIndexOf("/") + 1).ToLower();
             if (ext.IsNullOrEmpty() || !Accepted_Image_Types.Contains(ext) || !Accepted_Image_Types.Contains(ctype))
             {
-                throw new FanException("Upload file type is not supported.");
+                throw new NotSupportedException("Upload file type is not supported.");
             }
 
             // uploadedOn 

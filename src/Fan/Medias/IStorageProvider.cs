@@ -18,6 +18,7 @@ namespace Fan.Medias
         /// Saves file to storage.
         /// </summary>
         Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator);
+        Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator);
 
         /// <summary>
         /// Deletes a file from storage.

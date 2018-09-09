@@ -22,13 +22,6 @@ namespace Fan.Medias
         Task DeleteAsync(int id);
 
         /// <summary>
-        /// Returns <see cref="Media"/> by id.
-        /// </summary>
-        /// <param name="mediaId"></param>
-        /// <returns></returns>
-        Task<Media> GetAsync(int mediaId);
-
-        /// <summary>
         /// Returns <see cref="Media"/> by filename and upload date.
         /// </summary>
         /// <param name="fileName"></param>
@@ -37,12 +30,12 @@ namespace Fan.Medias
         Task<Media> GetAsync(string fileName, DateTimeOffset uploadedOn);
 
         /// <summary>
-        /// Returns a list of <see cref="Media"/> records.
+        /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
+        /// or empty list if no records found; and total count of medias for this media type.
         /// </summary>
         /// <param name="mediaType"></param>
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
-        /// <returns></returns>
-        Task<List<Media>> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
+        Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize);
     }
 }

@@ -105,6 +105,9 @@ namespace Fan.Medias
         /// <summary>
         /// Number of resizes for an image.
         /// </summary>
+        /// <remarks>
+        /// Original does not count as a resize.
+        /// </remarks>
         public int ResizeCount { get; set; }
     }
 }
