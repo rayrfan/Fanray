@@ -26,47 +26,48 @@
 .img-square:hover {
     cursor: pointer;
 }
-// image edit dialog
-.dialog {
+// The image edit dialog shown when an image on the media gallery is being edited
+.media-image-dialog {
     max-width: 71%;
     background-color: white;
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .img-preview {
+        background-color: #f3f6f8;
+    }
+
+    .img-sidebar {
+        padding: 20px 15px 0 15px;
+
+        ul {
+            padding-left: 0;
+            margin-left: 0;
+            list-style: none;
+
+            li {
+                padding-bottom: 10px;
+
+                label {
+                    font-weight: bold;
+                    color: gray;
+                    font: larger;
+                    text-transform: uppercase;
+                    padding-right: 10px;
+                }
+            }
+        }
+    }
+
+    .img-btnbar {
+        border-top: 1px solid #eee;
+        text-align: right;
+    }
 }
 
-.dialog img {
-    max-width: 100%;
-    height: auto;
-}
-
-.dialog .img-preview {
-    background-color: #f3f6f8;
-}
-
-.dialog .img-sidebar {
-    padding: 20px 15px 0 15px;
-}
-
-.dialog .img-sidebar ul {
-    padding-left: 0;
-    margin-left: 0;
-    list-style: none;
-}
-
-.dialog .img-sidebar ul li {
-    padding-bottom: 10px;
-}
-
-.dialog .img-sidebar ul li label {
-    font-weight: bold;
-    color: gray;
-    font: larger;
-    text-transform: uppercase;
-    padding-right: 10px;
-}
-
-.dialog .img-btnbar {
-    border-top: 1px solid #eee;
-    text-align: right;
-}
 // drop zone and text to show when drag files over browser
 #dropzone {
     position: fixed;

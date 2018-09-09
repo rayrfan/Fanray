@@ -3,24 +3,10 @@
 @{
     ViewData["Title"] = "Categories";
 }
-@section Styles {
-    <style>
-        .action-item-icon {
-            padding-right: 8px;
-        }
-        .tabs-bar {
-            margin-bottom: 18px;
-        }
-        .dialog {
-            max-width: 40vw;
-            background-color: white;
-        }
-    </style>
-}
 
 <blog-categories inline-template>
     <v-container>
-        <v-tabs class="elevation-1 tabs-bar">
+        <v-tabs class="elevation-1 cat-tabs-bar">
             <v-tab>
                 Categories <v-chip small>{{ categories.length }}</v-chip>
             </v-tab>
@@ -52,23 +38,23 @@
 
                             <v-list dense>
                                 <v-list-tile @@click="editCat(cat)">
-                                    <v-icon class="action-item-icon">edit</v-icon>
+                                    <v-icon class="cat-action-icon">edit</v-icon>
                                     <v-list-tile-title>Edit</v-list-tile-title>
                                 </v-list-tile>
                                 <v-list-tile v-if="cat.id !== defaultCategoryId"
                                              @@click="deleteCat(cat)">
-                                    <v-icon class="action-item-icon">delete</v-icon>
+                                    <v-icon class="cat-action-icon">delete</v-icon>
                                     <v-list-tile-title>Delete</v-list-tile-title>
                                 </v-list-tile>
                                 <v-list-tile v-if="cat.count !== 0"
                                              @@click="viewPosts(cat.relativeLink)">
-                                    <v-icon class="action-item-icon">visibility</v-icon>
+                                    <v-icon class="cat-action-icon">visibility</v-icon>
                                     <v-list-tile-title>View Posts</v-list-tile-title>
                                 </v-list-tile>
                                 <v-divider v-if="cat.id !== defaultCategoryId"></v-divider>
                                 <v-list-tile v-if="cat.id !== defaultCategoryId"
                                              @@click="setDefault(cat.id)">
-                                    <v-icon class="action-item-icon">check_circle</v-icon>
+                                    <v-icon class="cat-action-icon">check_circle</v-icon>
                                     <v-list-tile-title>Set as default</v-list-tile-title>
                                 </v-list-tile>
                             </v-list>
@@ -82,7 +68,7 @@
         <v-dialog lazy
                   v-model="dialogVisible" 
                   @@keydown.esc="closeDialog"
-                  content-class="dialog">
+                  content-class="cat-dialog">
             <v-card>
                 <v-card-title>
                     <span style="font-size:larger;font-weight:bold">{{ upsertText }} Category</span>
