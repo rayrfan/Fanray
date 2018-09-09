@@ -25,8 +25,12 @@
                       class="elevation-1">
             <template slot="items" slot-scope="props">
                 <td style="padding: 8px 20px">
-                    <h3 v-if="props.item.title" v-html="props.item.title"></h3>
-                    <h3 v-else style="font-style:italic;color:gray">Untitled</h3>
+                    <h3 v-if="props.item.title">
+                        <a class="post-title-link" :href="props.item.editLink">{{ props.item.title }}</a>
+                    </h3>
+                    <h3 v-else style="font-style:italic;color:gray">
+                        <a class="post-title-link" :href="props.item.editLink">Untitled</a>
+                    </h3>
                     <span>{{ props.item.date }} by {{ props.item.author }}</span>
                 </td>
                 <td class="right layout px-0" style="padding: 8px 20px">
@@ -37,15 +41,15 @@
                         </v-btn>
                         <v-list dense>
                             <v-list-tile :href="props.item.editLink">
-                                <v-icon class="cat-action-icon">edit</v-icon>
+                                <v-icon class="menu-action-icon">edit</v-icon>
                                 <v-list-tile-title>Edit</v-list-tile-title>
                             </v-list-tile>
                             <v-list-tile :href="props.item.postLink">
-                                <v-icon class="cat-action-icon">visibility</v-icon>
+                                <v-icon class="menu-action-icon">visibility</v-icon>
                                 <v-list-tile-title>View Post</v-list-tile-title>
                             </v-list-tile>
                             <v-list-tile @@click="deletePost(props.item)">
-                                <v-icon class="cat-action-icon">delete</v-icon>
+                                <v-icon class="menu-action-icon">delete</v-icon>
                                 <v-list-tile-title>Delete</v-list-tile-title>
                             </v-list-tile>
                         </v-list>

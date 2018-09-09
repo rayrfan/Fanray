@@ -1,0 +1,38 @@
+﻿/*
+    styles for admin
+*/
+[v-cloak] {
+    display: none
+}
+
+.admin-active-nav {
+    background-color: #d2eafe;
+    height: 100%;
+}
+
+/**
+    dropdown menu icon used in _Layout, Categories and Tags
+*/
+.menu-action-icon {
+    padding-right: 8px;
+}
+
+.cat-tabs-bar {
+    margin-bottom: 18px;
+}
+
+.cat-dialog {
+    max-width: 40vw;
+    background-color: white;
+}
+
+/*
+    Posts.cshtml post title link
+*/
+.post-title-link {
+    color: #2e4453;
+    display: block;
+    padding-bottom: 2px;
+    padding-right: 8px;
+    text-decoration: none;
+}

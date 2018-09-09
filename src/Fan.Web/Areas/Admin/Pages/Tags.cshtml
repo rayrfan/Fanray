@@ -32,16 +32,16 @@
 
                             <v-list dense>
                                 <v-list-tile @@click="editTag(tag)">
-                                    <v-icon class="cat-action-icon">edit</v-icon>
+                                    <v-icon class="menu-action-icon">edit</v-icon>
                                     <v-list-tile-title>Edit</v-list-tile-title>
                                 </v-list-tile>
                                 <v-list-tile @@click="deleteTag(tag)">
-                                    <v-icon class="cat-action-icon">delete</v-icon>
+                                    <v-icon class="menu-action-icon">delete</v-icon>
                                     <v-list-tile-title>Delete</v-list-tile-title>
                                 </v-list-tile>
                                 <v-list-tile v-if="tag.count !== 0"
                                              @@click="viewPosts(tag.relativeLink)">
-                                    <v-icon class="cat-action-icon">visibility</v-icon>
+                                    <v-icon class="menu-action-icon">visibility</v-icon>
                                     <v-list-tile-title>View Posts</v-list-tile-title>
                                 </v-list-tile>
                             </v-list>
