@@ -13,8 +13,10 @@ First to get ready by `npm install`
 Develop an inidividual file, replace the filename.
 
 ```bash
+npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --watch
+npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/setup.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 ```
 
@@ -29,8 +31,10 @@ npx babel js --out-dir ../../wwwroot/admin/js --source-maps --watch
 Build individual file, replace the filename.
 
 ```bash
+npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
 
@@ -58,5 +62,6 @@ sass --watch scss:../../wwwroot/admin/css
 To release
 
 ```bash
-sass --update scss:../../wwwroot/admin/css --style compressed
+sass scss/admin.scss ../../wwwroot/admin/css/admin.css --style compressed
+sass scss/compose.scss ../../wwwroot/admin/css/compose.css --style compressed
 ```
