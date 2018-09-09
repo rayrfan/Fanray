@@ -29,7 +29,8 @@ npx babel js --out-dir ../../wwwroot/admin/js --source-maps --watch
 Build individual file, replace the filename.
 
 ```bash
-babel js/blog-media.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
+npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
 
