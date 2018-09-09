@@ -13,6 +13,7 @@ First to get ready by `npm install`
 Develop an inidividual file, replace the filename.
 
 ```bash
+npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --watch
@@ -31,6 +32,7 @@ npx babel js --out-dir ../../wwwroot/admin/js --source-maps --watch
 Build individual file, replace the filename.
 
 ```bash
+npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
@@ -56,7 +58,8 @@ babel js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-
 To develop
 
 ```bash
-sass --watch scss:../../wwwroot/admin/css
+sass --watch scss/admin.scss:../../wwwroot/admin/css/admin.css
+sass --watch scss/compose.scss:../../wwwroot/admin/css/compose.css
 ```
 
 To release
