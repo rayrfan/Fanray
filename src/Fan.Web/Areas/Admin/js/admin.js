@@ -7,6 +7,7 @@
             show: false,
             text: '',
             color: '',
+            timeout: 0,
         },
     }),
     computed: {
@@ -40,10 +41,17 @@
                     console.log(error);
                 });
         },
-        toast(text, color = 'silver') {
+        /**
+         * 
+         * @param {any} text
+         * @param {any} timeout  Use 0 to keep open indefinitely.
+         * @param {any} color
+         */
+        toast(text, timeout = 3000, color = 'silver') {
             this.snackbar.show = true;
             this.snackbar.text = text;
             this.snackbar.color = color;
+            this.snackbar.timeout = timeout;
         },
         toastError(text) {
             this.snackbar.show = true;

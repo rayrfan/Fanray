@@ -17,6 +17,7 @@ npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --watch
+npx babel js/blog-settings.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/setup.js --out-dir ../../wwwroot/admin/js --source-maps --watch
 ```
@@ -36,6 +37,7 @@ npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --plugins tran
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+npx babel js/blog-settings.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```

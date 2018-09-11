@@ -53,7 +53,7 @@ namespace Fan.Web.Pages
         /// <summary>
         /// Initializes setup and if setup has been done redirect to blog index page.
         /// </summary>
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
             if (coreSettings.SetupDone)
@@ -74,7 +74,7 @@ namespace Fan.Web.Pages
         }
 
         /// <summary>
-        /// POST to create a new category.
+        /// Setting up site.
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
@@ -143,13 +143,24 @@ namespace Fan.Web.Pages
                 {
                     _logger.LogInformation("{@Role} role assigned to user {@User}.", role, user);
 
-                    // create core settings
-                    await _settingSvc.UpsertSettingsAsync(new CoreSettings
+                    // update or create core settings
+                    var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+                    if (settings != null)
                     {
-                        Title = model.Title,
-                        TimeZoneId = model.TimeZoneId,
-                        SetupDone = true, // setup is done
-                    });
+                        settings.Title = model.Title;
+                        settings.TimeZoneId = model.TimeZoneId;
+                        settings.SetupDone = true;
+                        await _settingSvc.UpsertSettingsAsync(settings);
+                    }
+                    else
+                    {
+                        await _settingSvc.UpsertSettingsAsync(new CoreSettings
+                        {
+                            Title = model.Title,
+                            TimeZoneId = model.TimeZoneId,
+                            SetupDone = true,
+                        });
+                    }
                     _logger.LogInformation("Setup is done, CoreSettings created!");
 
                     // sign-in user
