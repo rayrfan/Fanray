@@ -53,10 +53,11 @@
             this.snackbar.color = color;
             this.snackbar.timeout = timeout;
         },
-        toastError(text) {
+        toastError(text, timeout = 3000) {
             this.snackbar.show = true;
             this.snackbar.text = text;
             this.snackbar.color = 'red';
+            this.snackbar.timeout = timeout;
         },
     }
 });

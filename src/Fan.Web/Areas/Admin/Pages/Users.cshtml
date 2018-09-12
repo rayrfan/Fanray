@@ -4,4 +4,146 @@
     ViewData["Title"] = "Users";
 }
 
-Coming soon!
+<site-users inline-template>
+    <v-container>
+        <v-data-table :headers="headers"
+                      :items="users"
+                      :pagination.sync="pagination"
+                      :total-items="totalUsers"
+                      :loading="loading"
+                      :rows-per-page-items="rowsPerPageItems"
+                      rows-per-page-text=""
+                      class="elevation-1">
+            <template slot="items" slot-scope="props">
+                <td>
+                    <v-avatar size="32px">
+                        <img :src="props.item.avatar" :title="props.item.displayName" />
+                    </v-avatar>
+                </td>
+                <td>{{ props.item.displayName }}</td>
+                <td>{{ props.item.userName }}</td>
+                <td>{{ props.item.joinedOn }}</td>
+                <td>{{ props.item.lockedOut }}</td>
+                <td>
+                    <v-chip label small color="red" text-color="white">{{ props.item.role }}</v-chip>
+                </td>
+                <td>
+                    <v-menu bottom left @@click.native.stop>
+                        <v-btn slot="activator"
+                               icon>
+                            <v-icon>more_vert</v-icon>
+                        </v-btn>
+                        <v-list dense>
+                            <v-list-tile @@click="editUser(props.item)">
+                                <v-icon class="menu-action-icon">edit</v-icon>
+                                <v-list-tile-title>Edit Role</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile @@click="lockUser(props.item)">
+                                <v-icon class="menu-action-icon">lock</v-icon>
+                                <v-list-tile-title>Lock User</v-list-tile-title>
+                            </v-list-tile>
+                        </v-list>
+                    </v-menu>
+                </td>
+            </template>
+            <template slot="no-data">
+                <div>You have no posts.</div>
+            </template>
+        </v-data-table>
+        @* Add User Dialog *@
+        <v-dialog v-model="dialog" max-width="500px">
+            <v-card>
+                <v-toolbar dark color="primary">
+                    <v-toolbar-title>Add User</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <v-alert :value="errMsg.length" type="error">{{ errMsg }}</v-alert>
+                    <v-form ref="form">
+                        <v-text-field label="Email"
+                                      v-model="editedUser.email"
+                                      :rules="rules.emailRules"></v-text-field>
+                        <v-text-field label="Username"
+                                      v-model="editedUser.userName"
+                                      :rules="rules.userNameRules"></v-text-field>
+                        <v-text-field label="Display Name"
+                                      v-model="editedUser.displayName"
+                                      :rules="rules.displayNameRules"></v-text-field>
+                        <v-text-field label="Password"
+                                      v-model="editedUser.password"
+                                      :rules="[rules.passwordRules.required, rules.passwordRules.min]"
+                                      hint="At least 8 characters"
+                                      counter
+                                      persistent-hint
+                                      :append-icon="editedUser.passwordVisible ? 'visibility_off' : 'visibility'"
+                                      @@click:append="editedUser.passwordVisible = !editedUser.passwordVisible"
+                                      :type="editedUser.passwordVisible ? 'text' : 'password'"></v-text-field>
+                    </v-form>
+                    <v-container fluid>
+                        <div style="margin-left:-15px; color:gray; font-size: larger">Roles</div>
+                        <v-radio-group v-model="selectedRole">
+                            <v-radio label="Administrator" value="Administrator"></v-radio>
+                        </v-radio-group>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @@click.native="close">Cancel</v-btn>
+                    <v-btn color="blue darken-1" flat @@click.native="save">Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        @* Edit User Dialog *@
+        <v-dialog v-model="editDialog" max-width="500px">
+            <v-card>
+                <v-toolbar dark color="primary">
+                    <v-toolbar-title>Edit User</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <v-form ref="edit-form">
+                        <v-text-field label="Email" v-model="editedUser.email" disabled></v-text-field>
+                        <v-text-field label="Username" v-model="editedUser.userName" disabled></v-text-field>
+                        <v-text-field label="Display Name" v-model="editedUser.displayName" disabled></v-text-field>
+                    </v-form>
+                    <v-container fluid>
+                        <div style="margin-left:-15px; color:gray; font-size: larger">Roles</div>
+                        <v-radio-group v-model="selectedRole">
+                            <v-radio label="Administrator" value="Administrator"></v-radio>
+                        </v-radio-group>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @@click.native="close">Cancel</v-btn>
+                    <v-btn color="blue darken-1" flat @@click.native="save">Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-btn fab
+               bottom
+               right
+               color="pink"
+               dark
+               fixed
+               v-once
+               @@click="addUser">
+            <v-icon>add</v-icon>
+        </v-btn>
+    </v-container>
+</site-users>
+
+@section ComponentScripts {
+    <script>
+        let siteUsersMixin = {
+            data: function () {
+                return {
+                    selectedRole: 'Administrator',
+                    users: @Html.Raw(Model.UsersJson),
+                    roles: @Html.Raw(Model.RolesJson),
+                    totalUsers: @Model.TotalUsers,
+                    rowsPerPageItems: @UsersModel.DEFAULT_ROW_PER_PAGE_ITEMS,
+                }
+            }
+        }
+    </script>
+    <script src="~/admin/js/site-users.js" asp-append-version="true"></script>
+}
