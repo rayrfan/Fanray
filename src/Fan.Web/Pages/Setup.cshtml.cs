@@ -76,8 +76,10 @@ namespace Fan.Web.Pages
         /// <summary>
         /// Setting up site.
         /// </summary>
-        /// <param name="category"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// It creates the first user, system roles, assign Administrator role to the user, 
+        /// core settings, first blog post and blog settings.
+        /// </remarks>
         public async Task<IActionResult> OnPostAsync([FromBody] SetupModel model)
         {
             try
@@ -91,19 +93,13 @@ namespace Fan.Web.Pages
                     throw new FanException($"Failed to create blog.", valResult.Errors);
                 }
 
-                // user and role
+                // first user
                 var user = new User
                 {
                     UserName = model.UserName,
                     Email = model.Email,
                     DisplayName = model.DisplayName
-                };
-                var role = new Role
-                {
-                    Name = Role.ADMINISTRATOR_ROLE,
-                    IsSystemRole = true,
-                    Description = "An Administrator has full power over the site and can do everything."
-                };
+                };              
 
                 IdentityResult result = IdentityResult.Success;
 
@@ -119,29 +115,27 @@ namespace Fan.Web.Pages
                     await _userManager.UpdateNormalizedUserNameAsync(foundUser);
                 }
 
-                // create Admin role if not found
+                // create system roles
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("{@User} account created.", user);
 
-                    if (!await _roleManager.RoleExistsAsync(Role.ADMINISTRATOR_ROLE))
-                        result = await _roleManager.CreateAsync(role);
+                    result = await CreateSystemRolesAsync();
                 }
 
-                // assign Admin role to user, if not assigned already
+                // assign Administrator role to the user
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("{@Role} role created.", role);
-
                     // get the actual user object before look up IsInRole
                     user = await _userManager.FindByEmailAsync(user.Email);
+
                     if (!await _userManager.IsInRoleAsync(user, Role.ADMINISTRATOR_ROLE))
                         result = await _userManager.AddToRoleAsync(user, Role.ADMINISTRATOR_ROLE);
                 }
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("{@Role} role assigned to user {@User}.", role, user);
+                    _logger.LogInformation($"{Role.ADMINISTRATOR_ROLE} role has been assigned to user {@User}.", user);
 
                     // update or create core settings
                     var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
@@ -184,6 +178,65 @@ namespace Fan.Web.Pages
             {
                 return BadRequest(ex.ValidationFailures);
             }
+        }
+
+        /// <summary>
+        /// Creates pre-defined system roles.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IdentityResult> CreateSystemRolesAsync()
+        {
+            IdentityResult result = IdentityResult.Success;
+
+            // Administrator role
+            if (!await _roleManager.RoleExistsAsync(Role.ADMINISTRATOR_ROLE))
+            {
+                result = await _roleManager.CreateAsync(new Role
+                {
+                    Name = Role.ADMINISTRATOR_ROLE,
+                    IsSystemRole = true,
+                    Description = "Administrator has full power over the site and can do everything."
+                });
+                _logger.LogInformation($"{Role.ADMINISTRATOR_ROLE} role created.");
+            }
+
+            // Editor role
+            if (!await _roleManager.RoleExistsAsync(Role.EDITOR_ROLE))
+            {
+                result = await _roleManager.CreateAsync(new Role
+                {
+                    Name = Role.EDITOR_ROLE,
+                    IsSystemRole = true,
+                    Description = "Editor can only publish and manage posts including the posts of other users."
+                });
+                _logger.LogInformation($"{Role.EDITOR_ROLE} role created.");
+            }
+
+            // Author role
+            if (!await _roleManager.RoleExistsAsync(Role.AUTHOR_ROLE))
+            {
+                result = await _roleManager.CreateAsync(new Role
+                {
+                    Name = Role.AUTHOR_ROLE,
+                    IsSystemRole = true,
+                    Description = "Author can only publish and manage their own posts"
+                });
+                _logger.LogInformation($"{Role.AUTHOR_ROLE} role created.");
+            }
+
+            // Customer role
+            if (!await _roleManager.RoleExistsAsync(Role.CUSTOMER_ROLE))
+            {
+                result = await _roleManager.CreateAsync(new Role
+                {
+                    Name = Role.CUSTOMER_ROLE,
+                    IsSystemRole = true,
+                    Description = "Customer is a registered user who can read and comment on posts."
+                });
+                _logger.LogInformation($"{Role.CUSTOMER_ROLE} role created.");
+            }
+
+            return result;
         }
     }
 

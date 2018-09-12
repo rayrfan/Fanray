@@ -6,6 +6,9 @@ namespace Fan.Models
     public class Role : IdentityRole<int>
     {
         public const string ADMINISTRATOR_ROLE = "Administrator";
+        public const string EDITOR_ROLE = "Editor";
+        public const string AUTHOR_ROLE = "Author";
+        public const string CUSTOMER_ROLE = "Customer";
 
         /// <summary>
         /// A brief description of what the role is about.

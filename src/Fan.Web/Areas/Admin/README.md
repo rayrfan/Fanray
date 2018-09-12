@@ -10,8 +10,7 @@ First to get ready by `npm install`
 
 ### Develop
 
-Develop an inidividual file, replace the filename.
-
+Develop individual file
 ```bash
 npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --watch
@@ -20,18 +19,17 @@ npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --watc
 npx babel js/blog-settings.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --watch
 npx babel js/setup.js --out-dir ../../wwwroot/admin/js --source-maps --watch
+npx babel js/site-users.js --out-dir ../../wwwroot/admin --source-maps --watch
 ```
 
-Develop entire folder.
-
+Develop entire folder
 ```bash
 npx babel js --out-dir ../../wwwroot/admin/js --source-maps --watch
 ```
 
 ### Release
 
-Build individual file, replace the filename.
-
+Release individual file
 ```bash
 npx babel js/admin.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-categories.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
@@ -39,11 +37,11 @@ npx babel js/blog-compose.js --out-dir ../../wwwroot/admin/js --source-maps --pl
 npx babel js/blog-media.js --out-dir ../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 npx babel js/blog-settings.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 npx babel js/blog-tags.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
-babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
+npx babel js/setup.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
+npx babel js/site-users.js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
 
-Build entire folder.
-
+Release entire folder
 ```bash
 babel js --out-dir ../../wwwroot/admin --source-maps --plugins transform-remove-console
 ```
