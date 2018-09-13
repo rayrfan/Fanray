@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Areas.Admin.Pages
+namespace Fan.Web.Pages.Admin
 {
     /// <summary>
     /// Model to Compose.cshtml.

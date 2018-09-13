@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Areas.Admin.Pages
+namespace Fan.Web.Pages.Admin
 {
     public class MediaModel : PageModel
     {

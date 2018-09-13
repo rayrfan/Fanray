@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Areas.Admin.Pages
+namespace Fan.Web.Pages.Admin
 {
     public class SettingsModel : PageModel
     {

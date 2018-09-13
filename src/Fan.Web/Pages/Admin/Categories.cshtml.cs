@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Areas.Admin.Pages
+namespace Fan.Web.Pages.Admin
 {
     public class CategoriesModel : PageModel
     {

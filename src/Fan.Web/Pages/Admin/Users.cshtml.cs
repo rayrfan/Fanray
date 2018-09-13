@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Areas.Admin.Pages
+namespace Fan.Web.Pages.Admin
 {
     public class UsersModel : PageModel
     {
@@ -24,7 +24,7 @@ namespace Fan.Web.Areas.Admin.Pages
             _roleManager = roleManager;
         }
 
-        public class UserVM //: User
+        public class UserVM
         {
             public string Avatar { get; set; }
             public string UserName { get; set; }

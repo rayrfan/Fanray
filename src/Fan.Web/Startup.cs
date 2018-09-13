@@ -139,8 +139,7 @@ namespace Fan.Web
                 })
                 .AddRazorPagesOptions(options =>
                 {
-                    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminRoles");
-                    options.Conventions.AuthorizeAreaFolder("Identity", "/");
+                    options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
                 });
 
             // https://stackoverflow.com/q/50472962/32240
