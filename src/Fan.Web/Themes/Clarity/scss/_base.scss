@@ -106,6 +106,14 @@ a.brand {
         padding-left: 15px;
     }*/
 }
+.footer span:last-child {
+    margin-left: 10px;
+
+    @media (max-width: 767px) {
+        display: none;
+    }
+}
+
 /* avatar on navbar */
 .avatar {
     vertical-align: middle;
