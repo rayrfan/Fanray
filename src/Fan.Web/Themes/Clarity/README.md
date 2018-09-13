@@ -31,7 +31,9 @@ The fonts are stored in `Clarity/scss/fonts`, they are referenced in `_font.scss
 1. go to https://icomoon.io/ and click on `IcoMoon App`
 2. add any icon lib necessary, select exact icons
 3. click on Generate Font to download zip
-4. copy `/fonts` folder to `Themes/Clarity/scss` and content of `style.css` to _fonts.scss
+4. copy files inside `/fonts` folder to `Themes/Clarity/scss/fonts` and `wwwroot/themes/Clarity/css/fonts`
+5. copy the content of `style.css` to _fonts.scss
+6. recompile to produce sytle.css
 
 ### Syntax
 

@@ -50,10 +50,10 @@
                         <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" class="avatar" />
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Profile</a>
+                        <a class="dropdown-item" href="/admin/compose"><i class="icon-pencil-square-o" aria-hidden="true"></i> Write</a>
                         <div class="dropdown-divider"></div>
                         <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
-                            <button type="submit" class="dropdown-item btn btn-link navbar-btn navbar-link">Logout</button>
+                            <button type="submit" class="dropdown-item btn btn-link navbar-btn navbar-link"><i class="icon-power-off" aria-hidden="true"></i> Logout</button>
                         </form>
                     </div>
                 </div>
