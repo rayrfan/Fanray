@@ -24,7 +24,7 @@
                                  v-model="drawer"
                                  fixed
                                  app>
-                <v-list dense>
+                <v-list dense style="padding-top:10px">
                     <template v-for="nav in adminNavs">
                         <v-list-tile :href="nav.url" :value="nav.active" active-class="admin-active-nav">
                             <v-list-tile-action>
@@ -35,6 +35,9 @@
                                     {{ nav.text }}
                                 </v-list-tile-title>
                             </v-list-tile-content>
+                            <v-list-tile-action v-show="nav.actionIcon">
+                                <a style="text-decoration:none" :href="nav.actionLink"><v-icon>{{ nav.actionIcon }}</v-icon></a>
+                            </v-list-tile-action>
                         </v-list-tile>
                     </template>
                 </v-list>
@@ -101,7 +104,7 @@
             data: function () {
                 return {
                     adminNavs: [
-                        { icon: 'list', text: 'Posts', url: '/admin/posts', active: false },
+                        { icon: 'list', text: 'Posts', url: '/admin/posts', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose' },
                         { icon: 'insert_photo', text: 'Media', url: '/admin/media', active: false },
                         { icon: 'folder', text: 'Categories', url: '/admin/categories', active: false },
                         { icon: 'label', text: 'Tags', url: '/admin/tags', active: false },
