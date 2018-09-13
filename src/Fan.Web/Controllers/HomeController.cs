@@ -1,19 +1,12 @@
 ﻿using Fan.Blog.Controllers;
-using Fan.Blog.Enums;
-using Fan.Blog.Helpers;
-using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Exceptions;
 using Fan.Models;
 using Fan.Settings;
-using Fan.Web.Models;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Fan.Web.Controllers
 {
@@ -43,20 +36,6 @@ namespace Fan.Web.Controllers
         }
 
         public IActionResult Index => RedirectToAction(nameof(BlogController.Index), "Blog");
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
 
         /// <summary>
         /// 404 comes here.
