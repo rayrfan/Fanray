@@ -109,7 +109,7 @@ namespace Fan.Web.Pages
                 {
                     result = await _userManager.CreateAsync(user, model.Password);
                 }
-                // else update username
+                else // update username
                 {
                     foundUser.UserName = model.UserName;
                     await _userManager.UpdateNormalizedUserNameAsync(foundUser);
@@ -167,16 +167,11 @@ namespace Fan.Web.Pages
                     return new JsonResult(true);
                 }
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-
-                return BadRequest(result.Errors);
+                return BadRequest(result.Errors.ToList()[0].Description);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.ValidationFailures[0].ErrorMessage);
             }
         }
 

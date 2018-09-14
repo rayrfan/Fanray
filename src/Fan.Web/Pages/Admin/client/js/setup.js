@@ -62,7 +62,7 @@ new Vue({
                 .catch(err => {
                     this.valid = true;
                     console.log(err);
-                    this.errMsg = err.response.data[0].errorMessage;
+                    this.errMsg = err.response.data;
                 });
         },
     }

@@ -597,26 +597,26 @@ namespace Fan.Blog.Services
             const string WELCOME_POST_TITLE = "Welcome to Fanray v1.1";
             const string WELCOME_POST_BODY = @"<p>Fanray v1.0 was a minimal viable blog, I implemented the MetaWeblog API and started posting through Open Live Writer and that was it.</p><p>Fanray v1.1 enhances on the previous version by bringing in a brand new Admin Console built with <a href=""https://vuejs.org"">Vue.js</a>, <a href=""https://vuetifyjs.com"">Vuetify.js</a> and <a href=""https://ckeditor.com/ckeditor-5/"">CKEditor5</a>. The basic blogging experience has been greatly improved, the Admin Console allows you to better manage your posts, images, categories, tags, users and settings.</p><p>Bloggers probably spend most of their time composing a post, therefore I spent a lot of time coming up with a new composer and tried to make it as usable as I could. It's still fairly basic but it does provide the fundamental things I look for in an online editor</p><ul><li>autosaves your drafts so no worries on losing work</li><li>matches CSS styles between the editor content and the published post</li><li>uploads and selects image through gallery</li><li>edits image alt and caption</li><li>floats image left or right</li><li>inserts source code, inline and block</li><li>inserts youtube video</li><li>inserts tables</li><li>automatically comes up with slug from your post title</li></ul><p>To help you be productive on writing posts, I recommend spend a few minutes with the blog composer and get familiarized with posting these various contents and more. Please see the reference doc for more tips.</p><p>Happy coding :)</p>";
 
-            // create blog setting and get default category
-            string defaultCategory = DEFAULT_CATEGORY;
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            if (blogSettings == null)
+            // create blog setting
+            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>(); // could be initial or an existing blogsettings
+            await _settingSvc.UpsertSettingsAsync(blogSettings);
+
+            // get default cat
+            Category defaultCat = null;
+            try
             {
-                // create blog settings
-                await _settingSvc.UpsertSettingsAsync(new BlogSettings());
-                _logger.LogInformation("BlogSettings created.");
+                defaultCat = await GetCategoryAsync(blogSettings.DefaultCategoryId);            
             }
-            else
+            catch (FanException)
             {
-                // get default category
-                var cat = await GetCategoryAsync(blogSettings.DefaultCategoryId);
-                defaultCategory = cat.Title;
+                defaultCat = await CreateCategoryAsync(DEFAULT_CATEGORY);
             }
 
+            // TODO should I make create welcome post a option on setup
             // create welcome post and default category
             await CreatePostAsync(new BlogPost
             {
-                CategoryTitle = defaultCategory,
+                CategoryTitle = defaultCat.Title,
                 TagTitles = new List<string> { "announcement", "blogging" },
                 Title = WELCOME_POST_TITLE,
                 Body = WELCOME_POST_BODY,
