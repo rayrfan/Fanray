@@ -30,19 +30,18 @@ Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for deta
 | Blog | Infrastructure | Libs / Frameworks
 | --- | --- |  --- | 
 | Autosave draft    | Caching                                   | ASP.NET Core
-| Categories        | Error Handling						    | AutoMapper
+| Categories, Tags  | Error Handling						    | AutoMapper
 | Comments (Disqus) | Image Resizing                            | Bootstrap4
 | Google Analytics  | Logging (File, Seq, ApplicationInsights)  | CKEditor5
 | Media Gallery     | MetaWeblog API                            | Entity Framework Core
-| Open Live Writer  | Preferred Domain                          | FluentValidation
-| Site Setup        | Settings                                  | HtmlAgilityPack
-| RSS               | Storage (File System, Azure Blob Storage) | Magick.NET
-| SEO               | Testing (Unit, Integration)               | Moq
-| Shortcodes		| Validation								| Serilog
-| Tags              |                                           | Vue.js
+| Open Live Writer  | Settings                                  | FluentValidation
+| Preferred Domain  | Storage (File System, Azure Blob Storage) | HtmlAgilityPack
+| RSS               | Testing (Unit, Integration)               | Magick.NET
+| SEO               | Validation								| Moq
+| Shortcodes		|											| Serilog
+| Site Setup        |                                           | Vue.js
 | Users             |											| Vuetify.js
-
-
+ 
 ## Quick Start
 
 Fanray v1.1 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
