@@ -70,12 +70,17 @@ namespace Fan.UnitTests.Helpers
         /// very clear spot in time.
         /// </summary>
         [Fact]
-        public void TimeOffset_Humanize_Test()
+        public void DateTimeOffset_should_be_used_instead_of_DateTime()
         {
-            Assert.Equal("now", DateTimeOffset.UtcNow.Humanize()); // now
-            Assert.Equal("now", DateTimeOffset.Now.Humanize()); // now
-            Assert.Equal("now", DateTime.UtcNow.Humanize()); // now
-            Assert.NotEqual("now", DateTime.Now.Humanize()); // 7 hours ago or wherever you are running
+            Assert.Equal("now", DateTimeOffset.UtcNow.Humanize()); 
+            Assert.Equal("now", DateTimeOffset.Now.Humanize()); 
+
+            // OK
+            Assert.Equal("now", DateTime.UtcNow.Humanize()); 
+            // Ambiguous
+            // Fails on IANA time zone machine it outputs "now" 
+            // but on my local windows it outputs "7 hours ago"
+            // Assert.NotEqual("now", DateTime.Now.Humanize()); 
         }
 
         [Theory]
