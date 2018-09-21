@@ -40,7 +40,7 @@ namespace Fan.UnitTests.Helpers
         }
 
         /// <summary>
-        /// 
+        /// Test for <see cref="Util.ConvertTime(DateTimeOffset, string)"/>.
         /// </summary>
         [Fact]
         public void ConvertTime_Converts_UtcTime_To_A_Specified_Timezone()

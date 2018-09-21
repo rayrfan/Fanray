@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Text;
+using TimeZoneConverter;
 
 namespace Fan.Helpers
 {
@@ -214,7 +215,7 @@ namespace Fan.Helpers
         /// </remarks>
         public static DateTimeOffset ConvertTime(DateTimeOffset serverTime, string timeZoneId)
         {
-            var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var userTimeZone = TZConvert.GetTimeZoneInfo(timeZoneId);
             return TimeZoneInfo.ConvertTime(serverTime, userTimeZone);
         }
     }
