@@ -2,8 +2,10 @@
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Helpers;
 using Fan.Medias;
 using Fan.Models;
+using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +30,7 @@ namespace Fan.Web.Pages.Admin
     public class ComposeModel : PageModel
     {
         private readonly IBlogService _blogSvc;
-        private readonly ILogger<ComposeModel> _logger;
+        private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
 
@@ -40,12 +42,12 @@ namespace Fan.Web.Pages.Admin
             UserManager<User> userManager,
             IBlogService blogService,
             IMediaService mediaSvc,
-            ILogger<ComposeModel> logger)
+            ISettingService settingService)
         {
             _userManager = userManager;
             _blogSvc = blogService;
             _mediaSvc = mediaSvc;
-            _logger = logger;
+            _settingSvc = settingService;
         }
 
         // -------------------------------------------------------------------- inner classes
@@ -121,11 +123,14 @@ namespace Fan.Web.Pages.Admin
             }
             else // new post
             {
+                var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+                var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+
                 postVm = new PostVM
                 {
                     Title = "",
                     Body = "",
-                    PostDate = DateTimeOffset.Now.ToString(DATE_FORMAT),
+                    PostDate = date,
                     CategoryId = 1,
                     Tags = new List<string>(),
                     Published = false,
