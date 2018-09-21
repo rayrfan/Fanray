@@ -65,7 +65,7 @@ namespace Fan.Web.Pages.Admin
             public string ErrorMessage { get; set; }
           
             public string ImagesJson => 
-                (Images == null || Images.Count() <=0) ? "" : 
+                (Images == null || Images.Count() <=0) ? "[]" : 
                 JsonConvert.SerializeObject(Images);
         }
 
