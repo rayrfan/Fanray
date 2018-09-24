@@ -99,6 +99,7 @@ namespace Fan.Web
             services.AddScoped<ITagRepository, SqlTagRepository>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IMediaService, MediaService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
