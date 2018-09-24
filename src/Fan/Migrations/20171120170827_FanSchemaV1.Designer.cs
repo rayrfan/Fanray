@@ -196,7 +196,7 @@ namespace Fan.Migrations
                     b.ToTable("Core_Media");
                 });
 
-            modelBuilder.Entity("Fan.Models.Role", b =>
+            modelBuilder.Entity("Fan.Membership.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -224,7 +224,7 @@ namespace Fan.Migrations
                     b.ToTable("Core_Role");
                 });
 
-            modelBuilder.Entity("Fan.Models.User", b =>
+            modelBuilder.Entity("Fan.Membership.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -368,7 +368,7 @@ namespace Fan.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
-                    b.HasOne("Fan.Models.User", "User")
+                    b.HasOne("Fan.Membership.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -389,7 +389,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Fan.Medias.Media", b =>
                 {
-                    b.HasOne("Fan.Models.User", "User")
+                    b.HasOne("Fan.Membership.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -397,7 +397,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Fan.Models.Role")
+                    b.HasOne("Fan.Membership.Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -405,7 +405,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -413,7 +413,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -421,12 +421,12 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Fan.Models.Role")
+                    b.HasOne("Fan.Membership.Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -434,7 +434,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
