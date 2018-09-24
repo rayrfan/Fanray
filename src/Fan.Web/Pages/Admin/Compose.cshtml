@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Compose";
     Layout = null;
-    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 }
 <!DOCTYPE html>
 <html>
@@ -13,9 +12,9 @@
     <title>@ViewData["Title"] - Fanray</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.2.2/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.2.4/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/themes/@coreSettings.Theme/css/content.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/themes/@Model.Theme/css/content.css" asp-append-version="true" />
 </head>
 <body>
     @Html.AntiForgeryToken()
@@ -31,12 +30,12 @@
                     <v-expansion-panel-content>
                         <div slot="header">Status</div>
                         <v-card>
-                            <div v-if="published">
+                            <div v-if="post.published">
                                 <v-container fill-height fluid pa-0>
                                     <v-layout fill-height>
                                         <v-flex xs12 align-end flexbox>
                                             <div style="text-align:center;font-size:inherit">
-                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>on {{ date }}</span>
+                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>on {{ post.postDate }}</span>
                                             </div>
                                         </v-flex>
                                     </v-layout>
@@ -51,12 +50,12 @@
                                     </v-btn>
                                 </v-card-actions>
                             </div>
-                            <div v-if="isDraft">
+                            <div v-if="post.isDraft">
                                 <v-container fill-height fluid pa-0>
                                     <v-layout fill-height>
                                         <v-flex xs12 align-end flexbox>
                                             <div style="text-align:center;font-size:inherit">
-                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span><span>saved on {{ draftDate }}</span>
+                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span><span>saved on {{ post.draftDate }}</span>
                                             </div>
                                         </v-flex>
                                     </v-layout>
@@ -66,7 +65,7 @@
                                 <v-menu ref="menuDate"
                                         :close-on-content-click="false"
                                         v-model="menuDate"
-                                        :return-value.sync="date"
+                                        :return-value.sync="post.postDate"
                                         lazy
                                         transition="scale-transition"
                                         offset-y
@@ -74,12 +73,12 @@
                                         @@input="onFieldsChange">
                                     <v-text-field label="Post Date"
                                                   slot="activator"
-                                                  v-model="date"
+                                                  v-model="post.postDate"
                                                   readonly></v-text-field>
-                                    <v-date-picker v-model="date"
+                                    <v-date-picker v-model="post.postDate"
                                                    no-title
                                                    scrollable
-                                                   @@input="$refs.menuDate.save(date)"></v-date-picker>
+                                                   @@input="$refs.menuDate.save(post.postDate)"></v-date-picker>
                                 </v-menu>
                             </v-card-text>
                         </v-card>
@@ -89,14 +88,14 @@
                         <v-card>
                             <v-card-text>
                                 <v-select label="Category"
-                                          v-model="selectedCatId"
+                                          v-model="post.categoryId"
                                           :items="cats"
                                           item-value="value"
                                           dense
                                           @@input="onFieldsChange"></v-select>
                                 <v-combobox label="Tags"
                                             hint="When you type in a new tag use tab to delimit."
-                                            v-model="selectedTags"
+                                            v-model="post.tags"
                                             :items="tags"
                                             dense
                                             multiple
@@ -111,10 +110,10 @@
                         <v-card>
                             <v-card-text>
                                 <v-text-field label="Slug"
-                                              v-model="slug"
+                                              v-model="post.slug"
                                               @@input="onFieldsChange"></v-text-field>
                                 <v-textarea label="Excerpt"
-                                            v-model="excerpt"
+                                            v-model="post.excerpt"
                                             auto-grow
                                             @@input="onFieldsChange"></v-textarea>
                             </v-card-text>
@@ -122,12 +121,12 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
                 @*<v-footer class="pa-3" absolute style="height:auto">
-                    <v-layout justify-center>
-                        <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
-                            <v-icon large color="info">help_outline</v-icon>
-                        </a>
-                    </v-layout>
-                </v-footer>*@
+                        <v-layout justify-center>
+                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                                <v-icon large color="info">help_outline</v-icon>
+                            </a>
+                        </v-layout>
+                    </v-footer>*@
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
@@ -154,9 +153,9 @@
                                 rows="1"
                                 @@input="onFieldsChange"
                                 @@keyup.enter="titleEnter"
-                                v-model="title"></v-textarea>
+                                v-model="post.title"></v-textarea>
 
-                    <textarea name="content" id="editor">{{ content }}</textarea>
+                    <textarea name="content" id="editor">{{ post.body }}</textarea>
                 </div>
             </v-content>
             @* Image Dialog *@
@@ -180,11 +179,11 @@
     </div>
     <environment include="Development">
         <script src="https://unpkg.com/vue@2.5.17/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.2.2/dist/vuetify.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.4/dist/vuetify.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.2.2/dist/vuetify.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.4/dist/vuetify.min.js"></script>
     </environment>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
@@ -197,6 +196,16 @@
                     count: 0,
                     pageSize: @MediaModel.PAGE_SIZE,
                 };
+            }
+        };
+        let blogComposeMixin = {
+            data: function () {
+                return {
+                    post: @Html.Raw(Model.PostJson),
+                    cats: @Html.Raw(Model.CatsJson),
+                    tags: @Html.Raw(Model.TagsJson),
+                    autosaveInterval: @(ComposeModel.AUTOSAVE_INTERVAL * 1000),
+                }
             }
         };
     </script>
