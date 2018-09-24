@@ -6,7 +6,7 @@ using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Emails;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using Fan.Shortcodes;
 using Fan.Web.Infrastructure;

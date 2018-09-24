@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;

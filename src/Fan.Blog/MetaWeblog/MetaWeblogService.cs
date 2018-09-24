@@ -3,7 +3,7 @@ using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

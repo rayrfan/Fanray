@@ -1,6 +1,5 @@
 ﻿using Fan.Blog.Models;
 using Fan.Data;
-using Fan.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

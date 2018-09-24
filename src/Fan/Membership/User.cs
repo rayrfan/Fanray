@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Models
+namespace Fan.Membership
 {
     public class User : IdentityUser<int>
     {

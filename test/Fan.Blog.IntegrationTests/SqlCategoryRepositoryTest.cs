@@ -1,8 +1,6 @@
-using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.Data;
+using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.Models;
-using Fan.Data;
-using Fan.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Xunit;

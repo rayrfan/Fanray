@@ -1,7 +1,7 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Services;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

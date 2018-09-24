@@ -1,4 +1,4 @@
-﻿using Fan.Models;
+﻿using Fan.Membership;
 using Fan.Web.Models.AuthViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

@@ -1,7 +1,7 @@
 ﻿using Fan.Blog.Controllers;
 using Fan.Blog.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;

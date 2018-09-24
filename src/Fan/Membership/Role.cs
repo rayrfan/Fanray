@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Models
+namespace Fan.Membership
 {
     public class Role : IdentityRole<int>
     {
