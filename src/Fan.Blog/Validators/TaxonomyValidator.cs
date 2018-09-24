@@ -1,5 +1,4 @@
-﻿using Fan.Blog.Enums;
-using Fan.Models;
+﻿using Fan.Blog.Models;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

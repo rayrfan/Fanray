@@ -8,7 +8,6 @@ using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Medias;
-using Fan.Models;
 using Fan.Settings;
 using Fan.Shortcodes;
 using FluentValidation.Results;

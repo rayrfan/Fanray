@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Fan.Models
+namespace Fan.Blog.Models
 {
     public interface IHierarchical<T> where T : IHierarchical<T>
     {
