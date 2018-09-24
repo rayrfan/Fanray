@@ -17,20 +17,20 @@ namespace Fan.Blog.MetaWeblog
 {
     public class MetaWeblogService : IMetaWeblogService
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
 
         public MetaWeblogService(
-            UserManager<User> userManager,
+            IUserService userService,
             SignInManager<User> signInManager,
             IBlogService blogSvc,
             ISettingService settingService,
             ILogger<MetaWeblogService> logger)
         {
-            _userManager = userManager;
+            _userSvc = userService;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
             _settingSvc = settingService;
@@ -41,13 +41,13 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<string> NewPostAsync(string blogid, string userName, string password, MetaPost post, bool publish)
         {
-            await EnsureValidUserAsync(userName, password);
+            var user = await ValidUserAsync(userName, password);
 
             try
             {
                 var blogPost = new BlogPost
                 {
-                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
+                    UserId = user.Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -71,14 +71,14 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<bool> EditPostAsync(string postId, string userName, string password, MetaPost post, bool publish)
         {
-            await EnsureValidUserAsync(userName, password);
+            var user = await ValidUserAsync(userName, password);
 
             try
             {
                 var blogPost = new BlogPost
                 {
                     Id = Convert.ToInt32(postId),
-                    UserId = (await _userManager.FindByNameAsync(userName)).Id,
+                    UserId = user.Id,
                     Title = post.Title,
                     Slug = post.Slug,
                     Body = post.Description,
@@ -102,7 +102,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<bool> DeletePostAsync(string appKey, string postId, string userName, string password)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -119,7 +119,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<MetaPost> GetPostAsync(string postId, string userName, string password, string rootUrl)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -136,7 +136,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<List<MetaPost>> GetRecentPostsAsync(string blogId, string userName, string password, int numberOfPosts, string rootUrl)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -159,7 +159,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<List<MetaCategory>> GetCategoriesAsync(string blogId, string userName, string password, string rootUrl)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -197,7 +197,7 @@ namespace Fan.Blog.MetaWeblog
         /// <returns></returns>
         public async Task<int> CreateCategoryAsync(string name, string userName, string password)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -213,7 +213,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<List<string>> GetKeywordsAsync(string blogId, string userName, string password)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -237,7 +237,7 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<List<MetaBlogInfo>> GetUsersBlogsAsync(string appKey, string userName, string password, string rootUrl)
         {
-            await EnsureValidUserAsync(userName, password);
+            await ValidUserAsync(userName, password);
 
             try
             {
@@ -256,12 +256,12 @@ namespace Fan.Blog.MetaWeblog
 
         public async Task<MetaMediaInfo> NewMediaObjectAsync(string blogId, string userName, string password, MetaMediaObject mediaObject, HttpContext request)
         {
-            await EnsureValidUserAsync(userName, password);
+            var user = await ValidUserAsync(userName, password);
 
             try
             {
-                var userId = (await _userManager.FindByNameAsync(userName)).Id;
-                var media = await _blogSvc.UploadImageAsync(new MemoryStream(mediaObject.Bits), 
+                var userId = user.Id;
+                var media = await _blogSvc.UploadImageAsync(new MemoryStream(mediaObject.Bits),
                     userId, mediaObject.Name, mediaObject.Type, EUploadedFrom.MetaWeblog);
 
                 return new MetaMediaInfo()
@@ -278,17 +278,23 @@ namespace Fan.Blog.MetaWeblog
         // -------------------------------------------------------------------- Private helpers
 
         /// <summary>
-        /// Ensures user is valid by sign in, throws <see cref="MetaWeblogException"/> if sign in fails.
+        /// Returns user if credential is valid, throws <see cref="MetaWeblogException"/> 
+        /// if uer not found or sign in fails.
         /// </summary>
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        private async Task EnsureValidUserAsync(string userName, string password)
+        private async Task<User> ValidUserAsync(string userName, string password)
         {
-            if (!await _signInManager.CanSignInAsync(new User { UserName = userName, PasswordHash = password }))
+            var user = await _userSvc.FindByEmailOrUsernameAsync(userName);
+
+            if (user != null &&
+                await _signInManager.CanSignInAsync(new User { UserName = user.UserName, PasswordHash = password }))
             {
-                throw new MetaWeblogException(EMetaWeblogCode.AuthenticationFailed, "User sign in failed.");
+                return user;
             }
+
+            throw new MetaWeblogException(EMetaWeblogCode.AuthenticationFailed, "User sign in failed.");
         }
 
         private MetaPost ToMetaPost(BlogPost blogPost, string rootUrl)

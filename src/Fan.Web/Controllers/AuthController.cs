@@ -3,8 +3,6 @@ using Fan.Web.Models.AuthViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Fan.Web.Controllers
@@ -20,13 +18,13 @@ namespace Fan.Web.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
 
-        public AuthController(UserManager<User> userManager,
+        public AuthController(IUserService userService,
             SignInManager<User> signInManager)
         {
-            _userManager = userManager;
+            _userSvc = userService;
             _signInManager = signInManager;
         }
 
@@ -48,26 +46,13 @@ namespace Fan.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([FromBody] LoginVM loginUser)
         {
-            bool isEmail;
-            try
-            {
-                new MailAddress(loginUser.UserName);
-                isEmail = true;
-            }
-            catch (FormatException)
-            {
-                isEmail = false;
-            }
-
             // get user
-            var user = isEmail ? await _userManager.FindByEmailAsync(loginUser.UserName) :
-                await _userManager.FindByNameAsync(loginUser.UserName);
-
+            var user = await _userSvc.FindByEmailOrUsernameAsync(loginUser.UserName);
             if (user == null)
                 return BadRequest("Invalid credentials!");
 
             // sign user in
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUser.Password, 
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUser.Password,
                 loginUser.RememberMe, lockoutOnFailure: false);
 
             if (!result.Succeeded)
@@ -75,6 +60,5 @@ namespace Fan.Web.Controllers
 
             return Ok();
         }
-
     }
 }
