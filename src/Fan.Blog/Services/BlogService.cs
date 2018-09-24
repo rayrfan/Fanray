@@ -1047,7 +1047,7 @@ namespace Fan.Blog.Services
             // else show the actual date time in setting's timezone
             blogPost.CreatedOnDisplay = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ?
                 Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
-                blogPost.CreatedOn.Humanize();
+                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).Humanize();
 
             if (blogPost.UpdatedOn.HasValue)
             {
