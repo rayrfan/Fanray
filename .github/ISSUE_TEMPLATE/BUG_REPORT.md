@@ -1,13 +1,10 @@
 ---
-name: 🐛 Bug Report
-about: Create a report to help us improve 🤔.
+name: "\U0001F41B Bug Report"
+about: "Create a report to help us improve \U0001F914."
+
 ---
 
-**Prerequisites**
-
-- [ ] I have written a descriptive issue title
-- [ ] I have searched [open](https://github.com/FanrayMedia/Fanray/issues) and [closed](https://github.com/FanrayMedia/Fanray/issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported
-
+<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
 
 **What is the current behavior?**
 <!--A clear description of what the bug is.-->
