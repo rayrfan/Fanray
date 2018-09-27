@@ -207,30 +207,6 @@ namespace Fan.Web.Pages
                 _logger.LogInformation($"{Role.EDITOR_ROLE} role created.");
             }
 
-            // Author role
-            if (!await _roleManager.RoleExistsAsync(Role.AUTHOR_ROLE))
-            {
-                result = await _roleManager.CreateAsync(new Role
-                {
-                    Name = Role.AUTHOR_ROLE,
-                    IsSystemRole = true,
-                    Description = "Author can only publish and manage their own posts"
-                });
-                _logger.LogInformation($"{Role.AUTHOR_ROLE} role created.");
-            }
-
-            // Customer role
-            if (!await _roleManager.RoleExistsAsync(Role.CUSTOMER_ROLE))
-            {
-                result = await _roleManager.CreateAsync(new Role
-                {
-                    Name = Role.CUSTOMER_ROLE,
-                    IsSystemRole = true,
-                    Description = "Customer is a registered user who can read and comment on posts."
-                });
-                _logger.LogInformation($"{Role.CUSTOMER_ROLE} role created.");
-            }
-
             return result;
         }
     }
