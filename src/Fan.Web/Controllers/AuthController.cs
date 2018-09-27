@@ -1,5 +1,5 @@
 ﻿using Fan.Membership;
-using Fan.Web.Models.AuthViewModels;
+using Fan.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +44,7 @@ namespace Fan.Web.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login([FromBody] LoginVM loginUser)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel loginUser)
         {
             // get user
             var user = await _userSvc.FindByEmailOrUsernameAsync(loginUser.UserName);
