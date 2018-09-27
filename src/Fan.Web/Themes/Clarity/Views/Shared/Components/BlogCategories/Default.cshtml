@@ -1,0 +1,13 @@
+﻿@model IEnumerable<Category>
+
+<ul class="widget-categories">
+    @foreach (var t in Model)
+    {
+        <li>
+            <a href="@t.RssRelativeLink">
+                <i class="icon-rss" aria-hidden="true" style="color:orange"></i>
+            </a>
+            <a title="@t.Description" href="@t.RelativeLink">@t.Title (@t.Count)</a>
+        </li>
+    }
+</ul>
