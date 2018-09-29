@@ -2,6 +2,6 @@
 {
     public class SysVersion
     {
-        public static string CurrentVersion = "1.1.0-preview1";
+        public static string CurrentVersion = "v2.0-a1";
     }
 }
