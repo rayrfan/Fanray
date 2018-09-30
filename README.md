@@ -4,9 +4,10 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A simple and elegant blog.
+    A simple and elegant blog
   </p>
   <p align="center">
+	<a href="#screenshots">Screenshots</a> •
 	<a href="#features">Features</a> •
 	<a href="#quick-start">Quick Start</a> •
 	<a href="#contribute">Contribute</a> •
@@ -23,9 +24,13 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
 	</a>
   </p>
-  <p>
-    <img src="https://user-images.githubusercontent.com/633119/46253549-2650b600-c433-11e8-9d76-d909434502aa.png" title="Fanray Screenshot" />
-  </p>
+</p>
+
+## Screenshots
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/633119/46259907-4369a100-c494-11e8-8680-ca422cccb2f0.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/46259930-8461b580-c494-11e8-848f-dd42fcf5c033.png" title="Clarity theme" />
 </p>
 
 ## Features
@@ -74,7 +79,7 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Please refer to [Contributing Guide](CONTRIBUTING.md).
+Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc.  Let me know of any questions or feedbacks [@fanraymedia](https://twitter.com/FanrayMedia). Please check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
 
 ## License
 
