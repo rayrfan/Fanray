@@ -7,21 +7,23 @@
     A simple and elegant blog.
   </p>
   <p align="center">
-	<a href="#build-status">Build Status</a> •
 	<a href="#features">Features</a> •
 	<a href="#quick-start">Quick Start</a> •
 	<a href="#contribute">Contribute</a> •
 	<a href="#license">License</a>
   </p>
+  <p align="center">
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
+		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
+	</a>
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
+		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
+	</a>
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
+		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
+	</a>
+  </p>
 </p>
-
-## Build Status
-
-| Branch | Status |
-| ------ | ------ |
-| Stable (master) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
-| Weekly (dev) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
-| Nightly (feature) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
 
 ## Features
 
