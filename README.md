@@ -14,14 +14,17 @@
   </p>
   <p align="center">
 	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
-		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
 	</a>
 	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
-		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
 	</a>
 	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
-		<img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
 	</a>
+  </p>
+  <p>
+    <img src="https://user-images.githubusercontent.com/633119/46253549-2650b600-c433-11e8-9d76-d909434502aa.png" title="Fanray Screenshot" />
   </p>
 </p>
 
