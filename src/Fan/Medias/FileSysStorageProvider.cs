@@ -1,5 +1,6 @@
 ﻿using Fan.Settings;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,35 +19,31 @@ namespace Fan.Medias
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly AppSettings _appSettings;
-        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider)
+        private readonly HttpRequest _request;
+
+        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider, 
+            IHttpContextAccessor httpContextAccessor)
         {
             _hostingEnvironment = env;
             _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+            _request = httpContextAccessor.HttpContext.Request;
         }
 
-        /// <summary>
-        /// Returns relative path to a file after saving it on the file system.
-        /// </summary>
-        /// <param name="userId">The id of the user who uploads.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="content">The content of file.</param>
-        /// <param name="appId">Which app it uploaded it.</param>
-        /// <returns></returns>
-        public async Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId)
-        {
-            // app name
-            var appName = appId.ToString().ToLowerInvariant();
+        // -------------------------------------------------------------------- public property
 
-            // dir to save this file in
-            var dirPath = string.Format("{0}\\{1}\\{2}\\{3}\\{4}\\{5}",
-                _hostingEnvironment.WebRootPath,
-                _appSettings.MediaContainerName,
-                appName,
-                userId,
-                year,
-                month);
+        /// <summary>
+        /// The absolute URI endpoint to file, e.g. "https://localhost:44381" or "https://www.fanray.com".
+        /// </summary>
+        public string StorageEndpoint => $"{_request.Scheme}://{_request.Host}{_request.PathBase}";
+        
+        // -------------------------------------------------------------------- public method
+
+        public async Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator)
+        {
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
+            var dirPath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}";
 
             // make sure dir exists
             if (!Directory.Exists(dirPath))
@@ -55,23 +52,56 @@ namespace Fan.Medias
             // combine dir and filename
             var filePath = Path.Combine(dirPath, fileName);
 
-            // make sure file is unique
-            int i = 1;
-            while (File.Exists(filePath))
+            // save source to file sys
+            using (var fileStream = File.Create(filePath))
+            using (var memStream = new MemoryStream(source))
             {
-                fileName = fileName.Insert(fileName.LastIndexOf('.'), $"-{i}");
-                filePath = Path.Combine(dirPath, fileName);
+                await memStream.CopyToAsync(fileStream);
+            }
+        }
+
+        /// <summary>
+        /// Saves the file to server file system.
+        /// </summary>
+        public async Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator)
+        {
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
+            var dirPath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}";
+
+            // make sure dir exists
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+
+            // combine dir and filename
+            var filePath = Path.Combine(dirPath, fileName);
+
+            // save source to file sys
+            using (var fileStream = File.Create(filePath))
+            {
+                await source.CopyToAsync(fileStream);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a file from storage.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public Task DeleteFileAsync(string fileName, string path, char pathSeparator)
+        {
+            var root = _hostingEnvironment.WebRootPath;
+            var container = _appSettings.MediaContainerName;
+            var imgPath = path.Replace(pathSeparator, Path.DirectorySeparatorChar);
+            var filePath = $"{root}{Path.DirectorySeparatorChar}{container}{Path.DirectorySeparatorChar}{imgPath}{Path.DirectorySeparatorChar}{fileName}";
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
             }
 
-            // save file to file sys
-            using (var targetStream = File.Create(filePath))
-            using (MemoryStream stream = new MemoryStream(content))
-            {
-                await stream.CopyToAsync(targetStream);
-            }
-
-            // returns relative path
-            return $"{_appSettings.MediaContainerName}/{appName}/{userId}/{year}/{month}/{fileName}";
+            return Task.FromResult(0);
         }
     }
 }

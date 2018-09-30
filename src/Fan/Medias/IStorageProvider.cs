@@ -1,21 +1,32 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace Fan.Medias
 {
     /// <summary>
-    /// Storage provider contract.
+    /// The storage provider save the incoming file whether its byte[] or stream into the storage.
+    /// It makes sure it gets a unique filename by looking at what is already in storage.
     /// </summary>
     public interface IStorageProvider
     {
         /// <summary>
+        /// The absolute URI endpoint to resource.
+        /// </summary>
+        string StorageEndpoint { get; }
+
+        /// <summary>
         /// Saves file to storage.
         /// </summary>
-        /// <param name="userId">The id of the user who uploads.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="content">The content of file.</param>
-        /// <param name="appId">Which app it uploaded it.</param>
-        Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId);
+        Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator);
+        Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator);
+
+        /// <summary>
+        /// Deletes a file from storage.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="path"></param>
+        /// <param name="pathSeparator"></param>
+        /// <returns></returns>
+        Task DeleteFileAsync(string fileName, string path, char pathSeparator);
     }
 }

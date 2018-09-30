@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Text;
+using TimeZoneConverter;
 
 namespace Fan.Helpers
 {
@@ -138,7 +139,7 @@ namespace Fan.Helpers
         }
 
         /// <summary>
-        /// Returns a random alphanumeric of a certain length.
+        /// Returns a random lowercase alpha + numeric chars of a certain length.
         /// </summary>
         /// <param name="length"></param>
         /// <remarks>
@@ -189,6 +190,19 @@ namespace Fan.Helpers
         }
 
         /// <summary>
+        /// Removes all html tags from content.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static string CleanHtml(string content)
+        {
+            if (content.IsNullOrEmpty()) return content;
+            HtmlDocument document = new HtmlDocument();
+            document.LoadHtml(content);
+            return document.DocumentNode.InnerText;
+        }
+
+        /// <summary>
         /// Converts a time from the server to a user's local time with his specified timezone.
         /// </summary>
         /// <param name="serverTime"></param>
@@ -201,7 +215,7 @@ namespace Fan.Helpers
         /// </remarks>
         public static DateTimeOffset ConvertTime(DateTimeOffset serverTime, string timeZoneId)
         {
-            var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            var userTimeZone = TZConvert.GetTimeZoneInfo(timeZoneId);
             return TimeZoneInfo.ConvertTime(serverTime, userTimeZone);
         }
     }

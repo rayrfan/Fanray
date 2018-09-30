@@ -1,0 +1,23 @@
+﻿@page
+@model MediaModel
+@{
+    ViewData["Title"] = "Media";
+}
+
+<blog-media></blog-media>
+
+@section ComponentScripts {
+    <partial name="_BlogMediaTemplate" />
+    <script>
+        let blogMediaMixin = {
+            data: function () {
+                return {
+                    images: @Html.Raw(Model.Data.ImagesJson),
+                    count: @Model.ImageCount,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                };
+            }
+        };
+    </script>
+    <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
+}

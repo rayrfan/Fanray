@@ -1,5 +1,5 @@
 ﻿using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

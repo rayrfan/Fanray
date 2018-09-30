@@ -1,18 +1,13 @@
-﻿using Fan.Blogs.Controllers;
-using Fan.Blogs.Enums;
-using Fan.Blogs.Helpers;
-using Fan.Blogs.Models;
-using Fan.Blogs.Services;
+﻿using Fan.Blog.Controllers;
+using Fan.Blog.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
-using Fan.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Web.Controllers
@@ -43,106 +38,6 @@ namespace Fan.Web.Controllers
         }
 
         public IActionResult Index => RedirectToAction(nameof(BlogController.Index), "Blog");
-
-        /// <summary>
-        /// Setup the site and blog, if already setup redirect to blog index page.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IActionResult> Setup()
-        {
-            if (await _settingSvc.SettingsExist())
-                return RedirectToAction(nameof(BlogController.Index), "Blog");
-
-            return View(new SetupViewModel());
-        }
-
-        /// <summary>
-        /// Sets up site, blog, creates user, role, settings and default blog category.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Setup(SetupViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                _logger.LogInformation("Fanray Setup Begins");
-
-                // user with email as username
-                var user = new User { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
-                var adminRole = "Administrator";
-                var role = new Role
-                {
-                    Name = adminRole,
-                    IsSystemRole = true,
-                    Description = "An Administrator has full power over the site and can do everything."
-                };
-
-                // create user
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                // create Admin role
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@User} account created with password.", user);
-                    if (!await _roleManager.RoleExistsAsync(adminRole))
-                        result = await _roleManager.CreateAsync(role);
-                }
-
-                // assign Admin role to user
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@Role} created.", role);
-                    result = await _userManager.AddToRoleAsync(user, adminRole);
-                }
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("{@Role} assigned to {@User}.", role, user);
-
-                    // sign-in user
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User has been signed in.");
-
-                    // create core settings
-                    await _settingSvc.UpsertSettingsAsync(new CoreSettings
-                    {
-                        Title = model.Title,
-                        Tagline = model.Tagline,
-                        TimeZoneId = model.TimeZoneId,
-                        GoogleAnalyticsTrackingID = model.GoogleAnalyticsTrackingID.IsNullOrWhiteSpace() ? null : model.GoogleAnalyticsTrackingID.Trim(),
-                    });
-                    _logger.LogInformation("CoreSettings created.");
-
-                    // setup blog
-                    await _blogSvc.SetupAsync(model.DisqusShortname);
-
-                    return RedirectToAction("Index", "Blog");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
-            return View(model);
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
 
         /// <summary>
         /// 404 comes here.
@@ -180,6 +75,16 @@ namespace Fan.Web.Controllers
 
             // 500 or exception other than FanException occurred unhandled
             return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            return RedirectToAction(nameof(BlogController.Index), "Blog");
         }
     }
 }

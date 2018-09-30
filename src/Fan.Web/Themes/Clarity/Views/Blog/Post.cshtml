@@ -1,0 +1,44 @@
+@model BlogPostViewModel
+@{
+    var post = Model;
+    ViewData["Title"] = post.Title;
+    ViewData["Description"] = post.Excerpt;
+}
+
+@section Canonical {
+    <meta property="og:url" content="@Model.CanonicalUrl" />
+    <link rel="canonical" href="@Model.CanonicalUrl" />
+}
+
+<article>
+    <header>
+        <h1>
+            @post.Title
+        </h1>
+        @await Html.PartialAsync("_PostInfo", Model)
+    </header>
+    <div class="post-body">
+        @Html.Raw(post.Body)
+    </div>
+</article>
+
+@if (post.ShowDisqus)
+{
+    <div id="disqus_thread" style="padding:0 50px"></div>
+    <script>
+        /**
+        *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+        *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        var disqus_config = function () {
+        this.page.url = '@post.Permalink';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = '@post.DisqusPageIdentifier'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document, s = d.createElement('script');
+        s.src = '@string.Format("https://{0}.disqus.com/embed.js", post.DisqusShortname)';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+}

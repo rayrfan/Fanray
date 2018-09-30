@@ -1,27 +1,47 @@
 ﻿# Fan
 
-This class library provides the infrastructure to all the other libraries, such caching, data access etc.
+This class library provides the infrastructure to all the other libraries, such caching, data access, media service etc.
 
 ## Migrations
 
-The Migrations folder contains EF migrations, I try to keep one migration for each release.  Follow these steps to get started.
+The Migrations folder contains EF migrations.  
 
-1. Open Package Manager Console, select "src\Fan" as the Default project, then run
+### Working with migrations
 
-  `Add-Migration NameOfTheMigration`
+If you make changes to any model class that derives from Entity, for example say you added a property to Post class, do the following
 
-This will add a new folder "Fan/Migrations" with a migration named NameOfTheMigration
+1. Add migration
 
-2. Either run the app ctrl + f5, the site is up running with db automatically created, or run
+Open Package Manager Console, select "src\Fan" as the Default project, run
 
-`Update-Database`
+`Add-Migration UpdatePost`
 
-3. If any of the Entity derived models are updated, for example say by adding a property to Post class, then repeat the process
+This will create a migration named UdpatePost prefixed with timestamp.
 
-`Add-Migration NewMigrationName`
+2. Make sure code compiles
 
-This will add a new migration, ctrl + f5, site is up running with Post table having the new column added automatically in db.
+EF adds some uncessary using statements to your migration and the snapshot class, remove these statements.
 
-## Azure Blob Storage
+3. Hit ctrl + f5 to run the application
 
-Nuget: WindowsAzure.Storage
+The new migration will be applied automatically to your existing database. 
+If you are starting fresh with a new database, all migrations will be applied as well.
+
+### Tips on migrations
+
+- `Remove-Migration` will remove the very last migration you created, however if you already applied migration to db, it won't work.
+
+- If you applied a migration after which you made more changes to the data model, you can redo it by
+  - delete the migration files
+  - roll back the snapshot file with git
+  - point to a new db and run the app
+
+- `Script-Migration` will generate a SQL script from migrations.
+e.g. `Script-Migration -Idempotent -From FanSchemaV1` will generate a script since the `FanSchemaV1` which covers only `FanV1_1`
+
+- `Update-Database` should apply your migration without running the app, but it could error out with a message like this one,
+
+"The index 'IX_Blog_Post_Slug' is dependent on column 'Slug'.
+ALTER TABLE ALTER COLUMN Slug failed because one or more objects access this column."
+
+- If you rename a property as well as add new property, make sure the generated migration gets them correctly as it does not always do.

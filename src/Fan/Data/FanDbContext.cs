@@ -1,8 +1,7 @@
 ﻿using Fan.Helpers;
-using Fan.Models;
+using Fan.Membership;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -13,8 +12,12 @@ namespace Fan.Data
     /// </summary>
     public class FanDbContext : IdentityDbContext<User, Role, int>
     {
-        public FanDbContext(DbContextOptions<FanDbContext> options) : base(options)
+        ILoggerFactory _loggerFactory;
+
+        public FanDbContext(DbContextOptions<FanDbContext> options, ILoggerFactory loggerFactory) 
+            : base(options)
         {
+            _loggerFactory = loggerFactory;
         }
 
         /// <summary>
@@ -28,13 +31,10 @@ namespace Fan.Data
         /// </remarks>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // logger, can't inject through constructor due to AddDbContextPool restriction
-            var serviceProvider = new ServiceCollection().AddLogging().BuildServiceProvider();
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger<FanDbContext>();
+            var logger = _loggerFactory.CreateLogger<FanDbContext>();
 
             // find entities and model builders from app assemblies
-            var typeFinder = new TypeFinder();
+            var typeFinder = new TypeFinder(_loggerFactory);
             var entityTypes = typeFinder.Find<Entity>();
             var modelBuilderTypes = typeFinder.Find<IEntityModelBuilder>();
 
@@ -42,7 +42,7 @@ namespace Fan.Data
             foreach (var type in entityTypes)
             {
                 modelBuilder.Entity(type);
-                logger.LogInformation($"Entity: {type.Name} added to model");
+                logger.LogInformation($"Entity: '{type.Name}' added to model");
             }
 
             // call base
@@ -53,7 +53,7 @@ namespace Fan.Data
             {
                 if (builderType != null && builderType != typeof(IEntityModelBuilder))
                 {
-                    logger.LogInformation($"ModelBuilder {builderType.Name} added to model");
+                    logger.LogInformation($"ModelBuilder '{builderType.Name}' added to model");
                     var builder = (IEntityModelBuilder) Activator.CreateInstance(builderType);
                     builder.CreateModel(modelBuilder);
                 }

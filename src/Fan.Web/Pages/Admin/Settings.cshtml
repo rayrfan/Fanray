@@ -1,0 +1,127 @@
+﻿@page
+@model SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+@section Styles {
+    <style>
+        .toolbar-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        p.form-field-hint {
+            display: block;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: 400;
+            color: #537994;
+            margin-top: -15px;
+        }
+
+        .theme--light.v-label {
+            color: inherit;
+        }
+    </style>
+}
+
+<blog-settings inline-template>
+    <v-container>
+        <v-layout align-center justify-center>
+            <v-flex xs12 sm10 md8 lg6>
+                <v-card class="elevation-1">
+                    <v-toolbar color="white" dense class="elevation-1">
+                        <span class="toolbar-title">Site</span>
+                        <v-spacer></v-spacer>
+                        <v-btn @@click="saveSiteSettings"
+                               :disabled="!siteSettingsValid"
+                               color="info"
+                               small>Save</v-btn>
+                    </v-toolbar>
+                    <v-card-text>
+                        <v-form v-model="siteSettingsValid">
+                            <v-text-field label="Site Name" v-model="title" :rules="titleRules"></v-text-field>
+                            <v-text-field label="Tagline" v-model="tagline"></v-text-field>
+                            <p class="form-field-hint">In a few words, explain what this site is about.</p>
+                            <v-select label="Time Zone"
+                                      v-model="selectedTimeZoneId"
+                                      :items="timezones"
+                                      item-value="value"
+                                      dense></v-select>
+                            <v-text-field label="Google Analytics Tracking ID" v-model="ga"></v-text-field>
+                            <p class="form-field-hint">Put your <a href="https://support.google.com/analytics/answer/1008080?hl=en" target="_blank">Google Analytics Tracking ID</a> here.</p>
+                        </v-form>
+                    </v-card-text>
+                </v-card>
+                <br />
+                <v-card class="elevation-1">
+                    <v-toolbar color="white" dense class="elevation-1">
+                        <span class="toolbar-title">Blog</span>
+                        <v-spacer></v-spacer>
+                        <v-btn @@click="saveBlogSettings"
+                               :disabled="!blogSettingsValid"
+                               color="info"
+                               small>Save</v-btn>
+                    </v-toolbar>
+                    <v-card-text>
+                        <v-form v-model="blogSettingsValid">
+                            <v-text-field label="Number of posts to display per page"
+                                          v-model="postPerPage"
+                                          :rules="postPerPageRules"></v-text-field>
+
+                            <v-layout row wrap style="margin: 5px 0 -12px 0">
+                                <v-flex style="font-size:smaller">Display post in</v-flex>
+                            </v-layout>
+                            <v-layout row wrap style="margin-bottom: -8px">
+                                <v-flex>
+                                    <v-radio-group v-model="selectedPostListDisplay" row>
+                                        <v-radio v-for="(disp, index) in postListDisplays"
+                                                 :key="index"
+                                                 :label="disp"
+                                                 :value="disp"></v-radio>
+                                    </v-radio-group>
+                                </v-flex>
+                            </v-layout>
+                            <v-layout row wrap style="margin: 5px 0 -12px 0">
+                                <v-flex style="font-size:smaller">Allow people to post comments on posts</v-flex>
+                            </v-layout>
+                            <v-layout row wrap style="margin-bottom: -8px">
+                                <v-flex>
+                                    <v-switch v-model="allowComments"></v-switch>
+                                </v-flex>
+                            </v-layout>
+                            <v-text-field label="Disqus Shortname" v-model="disqusShortname"></v-text-field>
+                            <p class="form-field-hint">
+                                Currently only Disqus is supported for comments, put your <a href="https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname" target="_blank">Disqus shortname</a> here.
+                            </p>
+                        </v-form>
+                    </v-card-text>
+                </v-card>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</blog-settings>
+
+@section ComponentScripts {
+    <script>
+        let settingsMixin = {
+            data: function () {
+                return {
+                    title: '@Model.CoreSettings.Title',
+                    tagline: '@Model.CoreSettings.Tagline',
+                    timezones: @Html.Raw(Model.TimeZonesJson),
+                    selectedTimeZoneId: '@Model.CoreSettings.TimeZoneId',
+                    ga: '@Model.CoreSettings.GoogleAnalyticsTrackingID',
+                    disqusShortname: '@Model.BlogSettings.DisqusShortname',
+                    selectedPostListDisplay: '@Model.BlogSettings.PostListDisplay',
+                    postListDisplays: @Html.Raw(Model.PostListDisplaysJson),
+                    allowComments: @Model.BlogSettings.AllowComments.ToString().ToLower(),
+                    postPerPage: @Model.BlogSettings.PostPerPage,
+                }
+            }
+        }
+    </script>
+    <script src="~/admin/js/blog-settings.js" asp-append-version="true"></script>
+}

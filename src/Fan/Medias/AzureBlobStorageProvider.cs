@@ -16,30 +16,36 @@ namespace Fan.Medias
     /// </summary>
     public class AzureBlobStorageProvider : IStorageProvider
     {
-        private static CloudBlobContainer _container;
-        private readonly string _connString;
-        private readonly AppSettings _appSettings;
+        private readonly CloudBlobContainer _container;
+        private readonly CloudStorageAccount _storageAccount;
+
         public AzureBlobStorageProvider(IConfiguration configuration, IServiceProvider serviceProvider)
         {
-            _connString = configuration.GetConnectionString("BlobStorageConnectionString");
-            _appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+            var connString = configuration.GetConnectionString("BlobStorageConnectionString");
+
+            _storageAccount = CloudStorageAccount.Parse(connString);
+            if (_storageAccount == null)
+                throw new Exception("Azure Blob Storage connection string is not valid.");
+
+            var appSettings = serviceProvider.GetService<IOptionsSnapshot<AppSettings>>().Value;
+
+            var blobClient = _storageAccount.CreateCloudBlobClient();
+            // get a ref to container does not call server
+            _container = blobClient.GetContainerReference(appSettings.MediaContainerName);
+
             PrepBlobContainer();
         }
+
+        /// <summary>
+        /// The absolute URI endpoint to blob, e.g. "http://127.0.0.1:10000/devstoreaccount1" in dev.
+        /// </remarks>
+        public string StorageEndpoint => _storageAccount.BlobEndpoint.AbsoluteUri.ToString();
 
         /// <summary>
         /// Prepares blob container.
         /// </summary>
         private async void PrepBlobContainer()
         {
-            var storageAccount = CloudStorageAccount.Parse(_connString);
-            if (storageAccount == null)
-                throw new Exception("Azure Blob Storage connection string is not valid.");
-
-            // get client
-            var blobClient = storageAccount.CreateCloudBlobClient();
-
-            // get a ref to contain which does not call server
-            _container = blobClient.GetContainerReference(_appSettings.MediaContainerName);
             await _container.CreateIfNotExistsAsync();
             await _container.SetPermissionsAsync(new BlobContainerPermissions
             {
@@ -47,44 +53,60 @@ namespace Fan.Medias
             });
         }
 
-        /// <summary>
-        /// Returns full path to a file after saving it to Azure Blob Storage.
-        /// </summary>
-        /// <param name="userId">The id of the user who uploads.</param>
-        /// <param name="fileName">Slugged filename with ext.</param>
-        /// <param name="year">Upload year.</param>
-        /// <param name="month">Upload month.</param>
-        /// <param name="content">The content of file.</param>
-        /// <param name="appId">Which app it uploaded it.</param>
-        /// <returns></returns>
-        public async Task<string> SaveFileAsync(int userId, string fileName, string year, string month, byte[] content, EAppType appId)
+        // -------------------------------------------------------------------- public method
+
+        public async Task SaveFileAsync(byte[] source, string fileName, string path, char pathSeparator)
         {
-            // blobName "blog/1/2017/11/filename", container is "media"
-            string blobName = string.Format("{0}/{1}/{2}/{3}/{4}",
-                appId.ToString().ToLowerInvariant(),
-                userId,
-                year,
-                month, 
-                fileName);
+            var blob = GetBlob(fileName, path, pathSeparator);
+
+            // set blob properties
+            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
+            blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
+
+            //await blob.UploadFromStreamAsync(source);
+            await blob.UploadFromByteArrayAsync(source, 0, source.Length);
+        }
+
+        /// <summary>
+        /// Saves the file to Azure Blob Storage.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="info"></param>
+        /// <param name="fileNameUnique"></param>
+        /// <returns></returns>
+        public async Task SaveFileAsync(Stream source, string fileName, string path, char pathSeparator)
+        {
+            var blob = GetBlob(fileName, path, pathSeparator);
+
+            // set blob properties
+            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
+            blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
+
+            await blob.UploadFromStreamAsync(source);
+        }
+
+        /// <summary>
+        /// Deletes a file from blob storage.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="path"></param>
+        /// <param name="pathSeparator"></param>
+        /// <returns></returns>
+        public async Task DeleteFileAsync(string fileName, string path, char pathSeparator)
+        {
+            var blob = GetBlob(fileName, path, pathSeparator);
+            await blob.DeleteIfExistsAsync();
+        }
+
+        // -------------------------------------------------------------------- private method
+
+        private CloudBlockBlob GetBlob(string fileName, string path, char pathSeparator)
+        {
+            var imgPath = path.Replace(pathSeparator, '/');  // azure blob uses '/'
+            var blobName = $"{imgPath}/{fileName}";
 
             // get a ref to blob which does not call server
-            var blob = _container.GetBlockBlobReference(blobName); 
-
-            // make sure blob is unique
-            int i = 1;
-            while (await blob.ExistsAsync())
-            {
-                blobName = blobName.Insert(blobName.LastIndexOf('.'), $"-{i}");
-                blob = _container.GetBlockBlobReference(blobName);
-            }
-
-            // set content type
-            blob.Properties.ContentType = MimeTypeMap.GetMimeType(Path.GetExtension(fileName));
-
-            // create blob with contents
-            await blob.UploadFromByteArrayAsync(content, 0, content.Length);
-
-            return blob.Uri.ToString();
+            return _container.GetBlockBlobReference(blobName);
         }
     }
 }

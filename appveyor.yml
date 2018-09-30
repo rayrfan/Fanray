@@ -1,4 +1,12 @@
+version: 1.1.{build}
+image: Visual Studio 2017
 before_build:
- - nuget restore
+ - dotnet restore
 build_script:
- - msbuild /verbosity:quiet "Fanray.sln"
+ - dotnet build /verbosity:quiet "Fanray.sln"
+test_script:
+ - dotnet test --no-build .\test\Fan.UnitTests\Fan.UnitTests.csproj
+ - dotnet test --no-build .\test\Fan.IntegrationTests\Fan.IntegrationTests.csproj
+ - dotnet test --no-build .\test\Fan.Blog.UnitTests\Fan.Blog.UnitTests.csproj
+ - dotnet test --no-build .\test\Fan.Blog.IntegrationTests\Fan.Blog.IntegrationTests.csproj
+ - dotnet test --no-build .\test\Fan.Web.Tests\Fan.Web.Tests.csproj

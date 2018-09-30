@@ -1,5 +1,5 @@
 ﻿using Fan.Data;
-using Fan.Models;
+using Fan.Membership;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,35 +9,25 @@ namespace Fan.Medias
     /// Represents a file user uploads.
     /// </summary>
     /// <remarks>
-    /// When user insert a media into a post by uploading, the values are hardcoded in the post body
-    /// as in the case of an img. 
-    /// 
-    /// For image settings ref https://en.support.wordpress.com/images/image-settings/
-    /// 
-    /// When user uploads medias first, then insert them into the post from browser editor, that is
-    /// when properties like Description and Title will be used.
+    /// https://en.support.wordpress.com/images/image-settings/
     /// </remarks>
     public class Media : Entity
     {
         /// <summary>
-        /// The the app that uploaded the media file.
+        /// The app that uploaded the media file.
         /// </summary>
-        public EAppType AppId { get; set; }
+        public EAppType AppType { get; set; }
 
         /// <summary>
         /// Description of the media.
         /// </summary>
-        /// <remarks>
-        /// For image its the alt text.
-        /// </remarks>
         public string Description { get; set; }
 
         /// <summary>
-        /// Name of the file with ext. 
+        /// File name.
         /// </summary>
         /// <remarks>
-        /// For blog the name part is slug formatted, for example "test pic.jpg" becomes "test-pic.jpg".
-        /// For other apps, it could be a guid value [guid].jpg.
+        /// This is the unique, slugged with ext filename. 
         /// </remarks>
         [Required]
         [StringLength(maximumLength: 256)]
@@ -49,21 +39,17 @@ namespace Fan.Medias
         public long Length { get; set; }
 
         /// <summary>
-        /// Title of the media.
+        /// Title attribute.
         /// </summary>
         /// <remarks>
-        /// The original filename; html title attribute shows as tooltip.
-        /// TODO should I have the string length limit on title?
+        /// https://stackoverflow.com/q/872389/32240
         /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Title { get; set; }
 
         /// <summary>
-        /// Image, documents, audio, video.
+        /// Image, documents etc.
         /// </summary>
-        /// <remarks>
-        /// https://en.support.wordpress.com/accepted-filetypes/
-        /// </remarks>
         public EMediaType MediaType { get; set; }
 
         /// <summary>
@@ -85,6 +71,44 @@ namespace Fan.Medias
         /// The id of the user who uploaded this media.
         /// </summary>
         public int UserId { get; set; }
+
+        /// <summary>
+        /// Caption of the media
+        /// </summary>
+        public string Caption { get; set; }
+
+        /// <summary>
+        /// File type of the media, e.g. jpg, png.
+        /// </summary>
+        /// <remarks>
+        /// https://en.support.wordpress.com/accepted-filetypes/
+        /// </remarks>
+        [Required]
+        [StringLength(maximumLength: 256)]
+        public string ContentType { get; set; }
+
+        /// <summary>
+        /// Width of an image in px.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// Height of an image in px.
+        /// </summary>
+        public int Height { get; set; }
+
+        /// <summary>
+        /// Image alt attribute.
+        /// </summary>
+        public string Alt { get; set; }
+
+        /// <summary>
+        /// Number of resizes for an image.
+        /// </summary>
+        /// <remarks>
+        /// Original does not count as a resize.
+        /// </remarks>
+        public int ResizeCount { get; set; }
     }
 }
 

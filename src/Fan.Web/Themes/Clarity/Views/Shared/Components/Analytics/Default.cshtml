@@ -1,0 +1,16 @@
+﻿@model AnalyticsViewModel
+
+@if (!Model.GoogleAnalyticsTrackingID.IsNullOrEmpty())
+{
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="@string.Format("https://www.googletagmanager.com/gtag/js?id={0}", Model.GoogleAnalyticsTrackingID)"></script>
+    <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '@Model.GoogleAnalyticsTrackingID');
+    </script>
+}
+
+@Html.Raw(Model.AppInsightsFullScript)

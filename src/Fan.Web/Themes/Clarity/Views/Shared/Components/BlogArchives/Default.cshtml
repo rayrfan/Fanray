@@ -1,0 +1,18 @@
+﻿@model Dictionary<int, List<MonthItem>>
+
+<ul class="month-list">
+    @foreach (var year in Model)
+    {
+        <li class="year">
+            @year.Key
+            <ul class="months">
+                @foreach (var item in year.Value)
+                {
+                    <li>
+                        <a href="@item.Url">@item.Title</a> (@item.Count)
+                    </li>
+                }
+            </ul>
+        </li>
+    }
+</ul>

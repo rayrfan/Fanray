@@ -1,0 +1,215 @@
+﻿@page "{postId:int?}"
+@model ComposeModel
+@{
+    ViewData["Title"] = "Compose";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
+    <link href="https://unpkg.com/vuetify@1.2.5/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/themes/@Model.Theme/css/content.css" asp-append-version="true" />
+</head>
+<body>
+    @Html.AntiForgeryToken()
+
+    <div id="app" v-cloak>
+        <v-app id="inspire" style="background-color:white">
+            @* Drawer *@
+            <v-navigation-drawer fixed
+                                 :clipped="$vuetify.breakpoint.mdAndUp"
+                                 app
+                                 v-model="drawer">
+                <v-expansion-panel v-model="panel" expand>
+                    <v-expansion-panel-content>
+                        <div slot="header">Status</div>
+                        <v-card>
+                            <div v-if="post.published">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>on {{ post.postDate }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                                <v-card-actions>
+                                    <v-btn small
+                                           style="width:100%;color:#29B6F6"
+                                           color="gray"
+                                           @@click="revert">
+                                        <v-icon left dark>undo</v-icon>
+                                        Revert to draft
+                                    </v-btn>
+                                </v-card-actions>
+                            </div>
+                            <div v-if="post.isDraft">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span><span>saved on {{ post.draftDate }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                            </div>
+                            <v-card-text>
+                                <v-menu ref="menuDate"
+                                        :close-on-content-click="false"
+                                        v-model="menuDate"
+                                        :return-value.sync="post.postDate"
+                                        lazy
+                                        transition="scale-transition"
+                                        offset-y
+                                        full-width
+                                        @@input="onFieldsChange">
+                                    <v-text-field label="Post Date"
+                                                  slot="activator"
+                                                  v-model="post.postDate"
+                                                  readonly></v-text-field>
+                                    <v-date-picker v-model="post.postDate"
+                                                   no-title
+                                                   scrollable
+                                                   @@input="$refs.menuDate.save(post.postDate)"></v-date-picker>
+                                </v-menu>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <div slot="header">Category & Tags</div>
+                        <v-card>
+                            <v-card-text>
+                                <v-select label="Category"
+                                          v-model="post.categoryId"
+                                          :items="cats"
+                                          item-value="value"
+                                          dense
+                                          @@input="onFieldsChange"></v-select>
+                                <v-combobox label="Tags"
+                                            hint="When you type in a new tag use tab to delimit."
+                                            v-model="post.tags"
+                                            :items="tags"
+                                            dense
+                                            multiple
+                                            small-chips
+                                            deletable-chips
+                                            @@input="onFieldsChange"></v-combobox>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <div slot="header">Slug & Excerpt</div>
+                        <v-card>
+                            <v-card-text>
+                                <v-text-field label="Slug"
+                                              v-model="post.slug"
+                                              @@input="onFieldsChange"></v-text-field>
+                                <v-textarea label="Excerpt"
+                                            v-model="post.excerpt"
+                                            auto-grow
+                                            @@input="onFieldsChange"></v-textarea>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+                @*<v-footer class="pa-3" absolute style="height:auto">
+                        <v-layout justify-center>
+                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                                <v-icon large color="info">help_outline</v-icon>
+                            </a>
+                        </v-layout>
+                    </v-footer>*@
+            </v-navigation-drawer>
+            @* Topbar *@
+            <v-toolbar color="blue darken-3"
+                       dark
+                       app
+                       :clipped-left="$vuetify.breakpoint.mdAndUp"
+                       fixed>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
+                @*<v-btn>Preview</v-btn>*@
+                <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
+                <v-spacer></v-spacer>
+                <v-btn href="/admin">Close</v-btn>
+            </v-toolbar>
+            @* Editor *@
+            <v-content>
+                <div id="content-area">
+                    <v-textarea tabindex="1"
+                                id="post-title"
+                                label=""
+                                auto-grow
+                                placeholder="Title"
+                                aria-label="Edit title"
+                                rows="1"
+                                @@input="onFieldsChange"
+                                @@keyup.enter="titleEnter"
+                                v-model="post.title"></v-textarea>
+
+                    <textarea name="content" id="editor">{{ post.body }}</textarea>
+                </div>
+            </v-content>
+            @* Image Dialog *@
+            <v-dialog v-model="mediaDialogVisible" lazy
+                      @@keydown.esc="mediaDialogVisible = false"
+                      content-class="media-dialog">
+                <blog-media mode="editor"></blog-media>
+            </v-dialog>
+            @* Snackbar *@
+            <v-snackbar :timeout="3000"
+                        bottom
+                        right
+                        :color="snackbar.color"
+                        v-model="snackbar.show">
+                <span style="font-size:larger">{{ snackbar.text }}</span>
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
+        </v-app>
+    </div>
+    <environment include="Development">
+        <script src="https://unpkg.com/vue@2.5.17/dist/vue.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.5/dist/vuetify.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
+        <script src="https://unpkg.com/vuetify@1.2.5/dist/vuetify.min.js"></script>
+    </environment>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
+    <partial name="_BlogMediaTemplate" />
+    <script>
+        let blogMediaMixin = {
+            data: function () {
+                return {
+                    images: [],
+                    count: 0,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                };
+            }
+        };
+        let blogComposeMixin = {
+            data: function () {
+                return {
+                    post: @Html.Raw(Model.PostJson),
+                    cats: @Html.Raw(Model.CatsJson),
+                    tags: @Html.Raw(Model.TagsJson),
+                    autosaveInterval: @(ComposeModel.AUTOSAVE_INTERVAL * 1000),
+                }
+            }
+        };
+    </script>
+    <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
+    <script src="~/admin/js/blog-compose.js" asp-append-version="true"></script>
+</body>
+</html>

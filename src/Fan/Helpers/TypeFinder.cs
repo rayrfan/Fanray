@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,9 +14,12 @@ namespace Fan.Helpers
         /// Sln project dlls.
         /// </summary>
         private FileSystemInfo[] _dllInfos;
+        private readonly ILogger<TypeFinder> _logger;
 
-        public TypeFinder()
+        public TypeFinder(ILoggerFactory loggerFactory)
         {
+            _logger = loggerFactory.CreateLogger<TypeFinder>();
+            
             // https://github.com/aspnet/Announcements/issues/237
             // the dir that contains dlls "...\bin\Debug\netcoreapp2.0\"
             var dllDir = new DirectoryInfo(AppContext.BaseDirectory); 
@@ -42,14 +46,25 @@ namespace Fan.Helpers
             var types = new List<Type>();
             foreach (var dll in _dllInfos)
             {
-                Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+                Assembly assembly = null;
+                try
+                {
+                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+                }
+                catch (BadImageFormatException ex)
+                {
+                    _logger.LogCritical($"Unable to load dll {dll.FullName} - {ex.Message}");
+                }
 
-                if (baseType.IsInterface)
-                    types.AddRange(assembly.DefinedTypes.Where(t => 
-                        (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
-                        && !t.IsInterface));
-                else
-                    types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                if (assembly != null)
+                {
+                    if (baseType.IsInterface)
+                        types.AddRange(assembly.DefinedTypes.Where(t =>
+                            (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
+                            && !t.IsInterface));
+                    else
+                        types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                }
             }
 
             return types;
@@ -86,6 +101,5 @@ namespace Fan.Helpers
                 return false;
             }
         }
-
     }
 }

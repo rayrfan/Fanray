@@ -14,13 +14,15 @@ namespace Fan.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Fan.Blogs.Models.Category", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Description");
 
@@ -45,7 +47,8 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Body");
 
@@ -66,7 +69,6 @@ namespace Fan.Migrations
                     b.Property<int?>("RootId");
 
                     b.Property<string>("Slug")
-                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<byte>("Status");
@@ -113,7 +115,8 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Blogs.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Color")
                         .HasMaxLength(32);
@@ -141,7 +144,8 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Data.Meta", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -162,9 +166,12 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Medias.Media", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AppId");
+                    b.Property<int>("AppType");
+
+                    b.Property<string>("Caption");
 
                     b.Property<string>("Description");
 
@@ -172,9 +179,19 @@ namespace Fan.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Height");
+
                     b.Property<long>("Length");
 
                     b.Property<byte>("MediaType");
+
+                    b.Property<string>("Alt");
+
+                    b.Property<int>("ResizeCount");
 
                     b.Property<string>("Title")
                         .HasMaxLength(256);
@@ -185,6 +202,8 @@ namespace Fan.Migrations
 
                     b.Property<int>("UserId");
 
+                    b.Property<int>("Width");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -194,10 +213,11 @@ namespace Fan.Migrations
                     b.ToTable("Core_Media");
                 });
 
-            modelBuilder.Entity("Fan.Models.Role", b =>
+            modelBuilder.Entity("Fan.Membership.Role", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
@@ -222,10 +242,11 @@ namespace Fan.Migrations
                     b.ToTable("Core_Role");
                 });
 
-            modelBuilder.Entity("Fan.Models.User", b =>
+            modelBuilder.Entity("Fan.Membership.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("AccessFailedCount");
 
@@ -235,7 +256,6 @@ namespace Fan.Migrations
                     b.Property<DateTimeOffset>("CreatedOn");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<string>("Email")
@@ -282,7 +302,8 @@ namespace Fan.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType");
 
@@ -300,7 +321,8 @@ namespace Fan.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ClaimType");
 
@@ -366,7 +388,7 @@ namespace Fan.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
-                    b.HasOne("Fan.Models.User", "User")
+                    b.HasOne("Fan.Membership.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -387,7 +409,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Fan.Medias.Media", b =>
                 {
-                    b.HasOne("Fan.Models.User", "User")
+                    b.HasOne("Fan.Membership.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -395,7 +417,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Fan.Models.Role")
+                    b.HasOne("Fan.Membership.Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -403,7 +425,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -411,7 +433,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -419,12 +441,12 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Fan.Models.Role")
+                    b.HasOne("Fan.Membership.Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -432,7 +454,7 @@ namespace Fan.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Fan.Models.User")
+                    b.HasOne("Fan.Membership.User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
