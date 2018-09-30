@@ -1,7 +1,7 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Services;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +65,7 @@ namespace Fan.Web.Pages.Admin
             public string ErrorMessage { get; set; }
           
             public string ImagesJson => 
-                (Images == null || Images.Count() <=0) ? "" : 
+                (Images == null || Images.Count() <=0) ? "[]" : 
                 JsonConvert.SerializeObject(Images);
         }
 

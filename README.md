@@ -7,21 +7,31 @@
     A simple and elegant blog.
   </p>
   <p align="center">
-	<a href="#build-status">Build Status</a> •
+	<a href="#screenshots">Screenshots</a> •
 	<a href="#features">Features</a> •
 	<a href="#quick-start">Quick Start</a> •
 	<a href="#contribute">Contribute</a> •
 	<a href="#license">License</a>
   </p>
+  <p align="center">
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
+	</a>
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
+	</a>
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
+	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
+	</a>
+  </p>
 </p>
 
-## Build Status
+## Screenshots
 
-| Branch | Status |
-| ------ | ------ |
-| Stable (master) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master) |
-| Weekly (dev) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev) |
-| Nightly (feature) | [![Build status](https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true)](https://ci.appveyor.com/project/FanrayMedia/fanray) |
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/633119/46259907-4369a100-c494-11e8-8680-ca422cccb2f0.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/46259930-8461b580-c494-11e8-848f-dd42fcf5c033.png" title="Clarity theme" />
+</p>
 
 ## Features
 
@@ -44,7 +54,7 @@ Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for deta
  
 ## Quick Start
 
-Fanray v1.1 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
+Fanray v2.0 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
 
 Clone the repo then run from either [VS2017](https://www.visualstudio.com/vs/community/) or command line.
 
@@ -69,7 +79,7 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Please refer to [Contributing Guide](CONTRIBUTING.md).
+Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc.  Let me know of any questions or feedbacks [@fanraymedia](https://twitter.com/FanrayMedia). Please check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
 
 ## License
 

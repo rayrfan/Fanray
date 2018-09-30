@@ -6,7 +6,7 @@ using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Emails;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using Fan.Shortcodes;
 using Fan.Web.Infrastructure;
@@ -99,6 +99,7 @@ namespace Fan.Web
             services.AddScoped<ITagRepository, SqlTagRepository>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IMediaService, MediaService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
@@ -191,12 +192,7 @@ namespace Fan.Web
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
             routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
-            routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
-            routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
-            routes.MapRoute("Admin", "admin", new { controller = "Home", action = "Admin" });
-
             BlogRoutes.RegisterRoutes(routes);
-          
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
     }

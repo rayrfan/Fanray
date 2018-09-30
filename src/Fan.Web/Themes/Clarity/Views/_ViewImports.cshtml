@@ -2,18 +2,15 @@
 @using Fan.Blog.Models
 @using Fan.Blog.ViewModels
 @using Fan.Blog.Services
-@using Fan.Models
+@using Fan.Membership
 @using Fan.Helpers
 @using Fan.Settings
 @using Fan.Web
-@using Fan.Web.Models
-@using Fan.Web.Models.AccountViewModels
-@using Fan.Web.Models.ManageViewModels
+@using Fan.Web.ViewComponents
+@using Fan.Web.ViewModels
 @using Microsoft.AspNetCore.Identity
 @using System
 @using System.Linq
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Fan.Web
-@inject IBlogService blogService
 @inject ISettingService settingService
-@inject UserManager<User> userManager

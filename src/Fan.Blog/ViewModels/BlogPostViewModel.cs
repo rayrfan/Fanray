@@ -36,7 +36,7 @@ namespace Fan.Blog.ViewModels
             EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, blogPost.Id);
 
             DisqusPageIdentifier = $"{ECommentTargetType.BlogPost}_{blogPost.Id}";
-            ShowDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus;
+            ShowDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus && !blogSettings.DisqusShortname.IsNullOrEmpty();
             DisqusShortname = blogSettings.DisqusShortname;
 
             var hash = "";
@@ -117,7 +117,7 @@ namespace Fan.Blog.ViewModels
         // -------------------------------------------------------------------- Comments
 
         /// <summary>
-        /// Returns true if blog comments are enabled in blog settings and comment provider is diqus.
+        /// Returns true if blog comments are enabled and comment provider is Disqus and DisqusShortname is present.
         /// </summary>
         public bool ShowDisqus { get; }
 

@@ -33,7 +33,7 @@
         },
         logout: function () {
             console.log('logout');
-            axios.post('/account/logout', null, this.headers)
+            axios.post('/home/logout', null, this.headers)
                 .then(function (response) {
                     window.location = '/';
                 })

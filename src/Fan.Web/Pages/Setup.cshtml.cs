@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -207,30 +207,6 @@ namespace Fan.Web.Pages
                 _logger.LogInformation($"{Role.EDITOR_ROLE} role created.");
             }
 
-            // Author role
-            if (!await _roleManager.RoleExistsAsync(Role.AUTHOR_ROLE))
-            {
-                result = await _roleManager.CreateAsync(new Role
-                {
-                    Name = Role.AUTHOR_ROLE,
-                    IsSystemRole = true,
-                    Description = "Author can only publish and manage their own posts"
-                });
-                _logger.LogInformation($"{Role.AUTHOR_ROLE} role created.");
-            }
-
-            // Customer role
-            if (!await _roleManager.RoleExistsAsync(Role.CUSTOMER_ROLE))
-            {
-                result = await _roleManager.CreateAsync(new Role
-                {
-                    Name = Role.CUSTOMER_ROLE,
-                    IsSystemRole = true,
-                    Description = "Customer is a registered user who can read and comment on posts."
-                });
-                _logger.LogInformation($"{Role.CUSTOMER_ROLE} role created.");
-            }
-
             return result;
         }
     }
@@ -257,24 +233,6 @@ namespace Fan.Web.Pages
         /// UserName can only contain alphanumeric, dash and underscore.
         /// </summary>
         public const string USERNAME_REGEX = @"^[a-zA-Z0-9-_]+$";
-        /// <summary>
-        /// Reserved keywords username cannot use.
-        /// </summary>
-        public static string[] USERNAME_RESERVED = new string[]
-        {
-            "admin", "anonymous", "api", "account", "about",
-            "blog", "blogs",
-            "contact",
-            "home", "help",
-            "login", "logout",
-            "manage",
-            "privacy", "page", "pages",
-            "register",
-            "system",
-            "terms",
-            "user", "users",
-            "signin-google"
-        };
 
         public SetupValidator()
         {
@@ -286,7 +244,6 @@ namespace Fan.Web.Pages
                 .NotEmpty()
                 .Length(NAME_MINLENGTH, USERNAME_MAXLENGTH)
                 .Matches(USERNAME_REGEX)
-                .Must(title => !USERNAME_RESERVED.Contains(title, StringComparer.CurrentCultureIgnoreCase))
                 .WithMessage(s => $"Username '{s.UserName}' is not available.");
 
             // DisplayName

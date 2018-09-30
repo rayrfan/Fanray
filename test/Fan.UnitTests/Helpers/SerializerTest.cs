@@ -1,5 +1,5 @@
 ﻿using Fan.Helpers;
-using Fan.Models;
+using Fan.Membership;
 using System.Collections.Generic;
 using Xunit;
 

@@ -1,5 +1,5 @@
 ﻿using Fan.Helpers;
-using Fan.Models;
+using Fan.Membership;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

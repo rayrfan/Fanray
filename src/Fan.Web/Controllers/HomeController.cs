@@ -1,12 +1,14 @@
 ﻿using Fan.Blog.Controllers;
 using Fan.Blog.Services;
 using Fan.Exceptions;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Fan.Web.Controllers
 {
@@ -73,6 +75,16 @@ namespace Fan.Web.Controllers
 
             // 500 or exception other than FanException occurred unhandled
             return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            return RedirectToAction(nameof(BlogController.Index), "Blog");
         }
     }
 }

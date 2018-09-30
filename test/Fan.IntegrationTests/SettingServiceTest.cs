@@ -1,6 +1,6 @@
 ﻿using Fan.Data;
 using Fan.IntegrationTests.Base;
-using Fan.Models;
+using Fan.Membership;
 using Fan.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;

@@ -1,15 +1,15 @@
 ﻿using Fan.Blog.Helpers;
-using Fan.Blog.MetaWeblog;
+using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;
+using Fan.Blog.MetaWeblog;
+using Fan.Membership;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
-using Xunit;
-using Fan.Blog.IntegrationTests.Base;
 using System.IO;
-using Fan.Medias;
+using Xunit;
 
 namespace Fan.Blog.IntegrationTests
 {
@@ -24,15 +24,19 @@ namespace Fan.Blog.IntegrationTests
             // loggers
             var loggerMetaSvc = _loggerFactory.CreateLogger<MetaWeblogService>();
 
+            // UserService
+            var loggerUserSvc = _loggerFactory.CreateLogger<UserService>();
+            var userSvc = new UserService(new FakeUserManager(), loggerUserSvc);
+
             // metaweblog svc
             var context = new Mock<HttpContext>();
             var contextAccessor = new Mock<IHttpContextAccessor>();
             contextAccessor.Setup(x => x.HttpContext).Returns(context.Object);
             _svc = new MetaWeblogService(
-                new FakeUserManager(), 
-                new FakeSignInManager(contextAccessor.Object), 
-                _blogSvc, 
-                _settingSvcMock.Object, 
+                userSvc,
+                new FakeSignInManager(contextAccessor.Object),
+                _blogSvc,
+                _settingSvcMock.Object,
                 loggerMetaSvc);
         }
 

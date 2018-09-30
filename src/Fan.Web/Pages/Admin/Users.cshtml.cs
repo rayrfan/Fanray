@@ -1,4 +1,4 @@
-﻿using Fan.Models;
+﻿using Fan.Membership;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

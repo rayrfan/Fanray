@@ -1,12 +1,7 @@
-﻿/**
- * The js code for Compose.cshtml.
- */
-var app = new Vue({
+﻿var app = new Vue({
     el: '#app',
+    mixins: [blogComposeMixin],
     data: () => ({
-        id: 0,
-        published: false,
-        isDraft: false,
         pubClicked: false,
         pubText: '',
         saveVisible: false,
@@ -17,19 +12,9 @@ var app = new Vue({
         drawer: null,
         panel: [true, true, true],
         menuDate: false,
-        date: '',
-        draftDate: '',
-        selectedCatId: 1,
-        cats: [],
-        selectedTags: [],
-        tags: [],
-        slug: '',
-        excerpt: '',
-        title: '',
         mediaDialogVisible: false,
         progressVisible: false,
         editor: null,
-        content: '',
         snackbar: {
             show: false,
             text: '',
@@ -38,7 +23,7 @@ var app = new Vue({
     }),
     computed: {
         disablePubButton() {
-            return this.title.trim().length <= 0 || this.pubClicked;
+            return this.post.title.trim().length <= 0 || this.pubClicked;
         },
         tok: function () {
             return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
@@ -48,67 +33,49 @@ var app = new Vue({
         },
         payload: function () {
             return {
-                id: this.id,
-                postDate: this.date,
-                categoryId: this.selectedCatId,
-                tags: this.selectedTags,
-                slug: this.slug,
-                excerpt: this.excerpt,
-                title: this.title,
+                id: this.post.id,
+                postDate: this.post.postDate,
+                categoryId: this.post.categoryId,
+                tags: this.post.tags,
+                slug: this.post.slug,
+                excerpt: this.post.excerpt,
+                title: this.post.title,
                 body: this.editor.getData(),
             }
         },
     },
     mounted() {
+        this.pubText = this.post.published ? 'Update' : 'Publish';
         this.initEditor();
     },
     methods: {
         initEditor() {
-            this.id = window.location.href.substring(window.location.href.lastIndexOf("/") + 1) | 0;
+            let typingTimer;
             let self = this;
-            axios.get(`/admin/compose?handler=post&postId=${this.id}`).then(resp => {
-                this.date = resp.data.post.postDate;
-                this.selectedCatId = resp.data.post.categoryId;
-                this.selectedTags = resp.data.post.tags;
-                this.slug = resp.data.post.slug;
-                this.excerpt = resp.data.post.excerpt;
-                this.title = resp.data.post.title;
-                this.content = resp.data.post.body;
-                this.published = resp.data.post.published;
-                this.isDraft = resp.data.post.isDraft;
-                this.draftDate = resp.data.post.draftDate;
-                this.cats = resp.data.allCats;
-                this.tags = resp.data.allTags;
-                this.pubText = this.published ? 'Update' : 'Publish';
-
-                let typingTimer;
-                let doneTypingInterval = 5000;
-
-                ClassicEditor.create(document.querySelector('#editor'), {
-                    autosave: {
-                        save(editor) {
-                            clearTimeout(typingTimer);
-                            if (!self.published) {
-                                self.saveVisible = true;
-                                self.saveDisabled = false;
-                                self.saveText = 'Save';
-                                typingTimer = setTimeout(self.saveDraft, doneTypingInterval);
-                            }
+            ClassicEditor.create(document.querySelector('#editor'), {
+                autosave: {
+                    save(editor) {
+                        clearTimeout(typingTimer);
+                        if (!self.post.published) {
+                            self.saveVisible = true;
+                            self.saveDisabled = false;
+                            self.saveText = 'Save';
+                            typingTimer = setTimeout(self.saveDraft, self.autosaveInterval);
                         }
                     }
+                }
+            })
+                .then(editor => {
+                    self.editor = editor;
+                    console.log('editor initialized: ', self.editor);
                 })
-                    .then(editor => {
-                        self.editor = editor;
-                        console.log('editor initialized: ', self.editor);
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            });
+                .catch(error => {
+                    console.error(error);
+                });
         },
         onFieldsChange() {
             this.fieldChanged = true;
-            if (this.published) return;
+            if (this.post.published) return;
             this.saveVisible = true;
             this.saveDisabled = false;
             this.saveText = 'Save';
@@ -119,15 +86,15 @@ var app = new Vue({
             this.saveDisabled = true;
             this.saveText = 'Saving...';
 
-            console.log(this.payload);
+            console.log('payload: ', this.payload);
             axios.post('/admin/compose?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
-                    this.id = resp.data.id;
-                    this.slug = resp.data.slug;
-                    this.draftDate = resp.data.draftDate;
-                    this.isDraft = true;
+                    this.post.id = resp.data.id;
+                    this.post.slug = resp.data.slug;
+                    this.post.draftDate = resp.data.draftDate;
+                    this.post.isDraft = true;
                     if (window.location.href.endsWith('/compose'))
-                        history.replaceState({}, null, window.location.href + `/${this.id}`);
+                        history.replaceState({}, null, window.location.href + `/${this.post.id}`);
                 })
                 .catch(err => { console.log(err); });
 
@@ -135,16 +102,16 @@ var app = new Vue({
             this.saveText = 'Saved';
         },
         revert() {
-            this.published = false;
-            this.pubText = this.published ? 'Update' : 'Publish';
+            this.post.published = false;
+            this.pubText = this.post.published ? 'Update' : 'Publish';
             this.saveDraft();
         },
         pub() {
             this.closing = false;
             this.pubClicked = true;
-            this.pubText = this.published ? 'Updating...' : 'Publishing...';
+            this.pubText = this.post.published ? 'Updating...' : 'Publishing...';
 
-            const url = this.published ? '/admin/compose?handler=update' : '/admin/compose?handler=publish';
+            const url = this.post.published ? '/admin/compose?handler=update' : '/admin/compose?handler=publish';
             axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
                     window.location.replace(resp.data);
@@ -168,7 +135,7 @@ var app = new Vue({
             this.mediaDialogVisible = false;
         },
         titleEnter() {
-            this.title = this.title.replace(/\n/g, ' ');
+            this.post.title = this.post.title.replace(/\n/g, ' ');
         },
         toast(text, color = 'silver') {
             this.snackbar.show = true;

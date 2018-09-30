@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Data;
-using Fan.Models;
+using Fan.Membership;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

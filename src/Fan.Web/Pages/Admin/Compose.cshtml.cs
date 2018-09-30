@@ -2,13 +2,14 @@
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Helpers;
 using Fan.Medias;
-using Fan.Models;
+using Fan.Membership;
+using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,11 +29,9 @@ namespace Fan.Web.Pages.Admin
     public class ComposeModel : PageModel
     {
         private readonly IBlogService _blogSvc;
-        private readonly ILogger<ComposeModel> _logger;
+        private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
-
-        private const string DATE_FORMAT = "yyyy-MM-dd";
 
         // -------------------------------------------------------------------- constructor
 
@@ -40,25 +39,15 @@ namespace Fan.Web.Pages.Admin
             UserManager<User> userManager,
             IBlogService blogService,
             IMediaService mediaSvc,
-            ILogger<ComposeModel> logger)
+            ISettingService settingService)
         {
             _userManager = userManager;
             _blogSvc = blogService;
             _mediaSvc = mediaSvc;
-            _logger = logger;
+            _settingSvc = settingService;
         }
 
         // -------------------------------------------------------------------- inner classes
-
-        /// <summary>
-        /// The view model for composer.
-        /// </summary>
-        public class ComposeVM
-        {
-            public PostVM Post { get; set; }
-            public IEnumerable<CatVM> AllCats { get; set; }
-            public string[] AllTags { get; set; }
-        }
 
         /// <summary>
         /// Post view model.
@@ -88,23 +77,46 @@ namespace Fan.Web.Pages.Admin
             public string Text { get; set; }
         }
 
+        // -------------------------------------------------------------------- consts & properties
+
+        /// <summary>
+        /// How many seconds to wait after user stops typing to auto save. Default 10 seconds.
+        /// </summary>
+        public const int AUTOSAVE_INTERVAL = 10;
+        /// <summary>
+        /// Post date display format.
+        /// </summary>
+        /// <remarks>
+        /// Vuetify datepicker works this format by default and it's a lot more work to change this format.
+        /// </remarks>
+        private const string DATE_FORMAT = "yyyy-MM-dd";
+        public string PostJson { get; set; }
+        public string CatsJson { get; set; }
+        public string TagsJson { get; set; }
+        public string Theme { get; set; }
+
         // -------------------------------------------------------------------- public methods
 
         /// <summary>
-        /// Ajax GET to return <see cref="ComposeVM"/> to initialize the page.
+        /// GET to return <see cref="ComposeVM"/> to initialize the page.
         /// </summary>
         /// <remarks>
         /// NOTE: the parameter cannot be named "page".
         /// </remarks>
         /// <param name="postId">0 for a new post or an existing post id</param>
         /// <returns></returns>
-        public async Task<JsonResult> OnGetPostAsync(int postId)
+        public async Task OnGetAsync(int postId)
         {
-            PostVM postVm;
+            // theme
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            Theme = coreSettings.Theme;
+
+            // post
+            PostVM postVM;
             if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetPostAsync(postId);
-                postVm = new PostVM
+                postVM = new PostVM
                 {
                     Id = post.Id,
                     Title = post.Title,
@@ -121,35 +133,36 @@ namespace Fan.Web.Pages.Admin
             }
             else // new post
             {
-                postVm = new PostVM
+                var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+                var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+
+                postVM = new PostVM
                 {
                     Title = "",
                     Body = "",
-                    PostDate = DateTimeOffset.Now.ToString(DATE_FORMAT),
-                    CategoryId = 1,
+                    PostDate = date,
+                    CategoryId = blogSettings.DefaultCategoryId,
                     Tags = new List<string>(),
                     Published = false,
                     IsDraft = false,
                 };
             }
+            PostJson = JsonConvert.SerializeObject(postVM);
 
+            // cats
             var categories = await _blogSvc.GetCategoriesAsync();
             var allCats = from c in categories
-                       select new CatVM
-                       {
-                           Value = c.Id,
-                           Text = c.Title,
-                       };
+                          select new CatVM
+                          {
+                              Value = c.Id,
+                              Text = c.Title,
+                          };
+            CatsJson = JsonConvert.SerializeObject(allCats);
 
+            // tags
             var tags = await _blogSvc.GetTagsAsync();
             var allTags = tags.Select(t => t.Title).ToArray();
-
-            return new JsonResult(new ComposeVM
-            {
-                Post = postVm,
-                AllCats = allCats,
-                AllTags = allTags,
-            });
+            TagsJson = JsonConvert.SerializeObject(allTags);
         }
 
         /// <summary>
@@ -164,7 +177,7 @@ namespace Fan.Web.Pages.Admin
         public async Task<JsonResult> OnPostPublishAsync([FromBody]PostVM post)
         {
             var blogPost = new BlogPost
-            {                
+            {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 CategoryId = post.CategoryId,
                 CreatedOn = GetCreatedOn(post.PostDate),
@@ -248,7 +261,7 @@ namespace Fan.Web.Pages.Admin
                 blogPost = await _blogSvc.UpdatePostAsync(blogPost);
             }
 
-            var postVm = new PostVM
+            var postVM = new PostVM
             {
                 Id = blogPost.Id,
                 Title = blogPost.Title,
@@ -263,7 +276,7 @@ namespace Fan.Web.Pages.Admin
                 DraftDate = blogPost.UpdatedOn.HasValue ? blogPost.UpdatedOnDisplay : "",
             };
 
-            return new JsonResult(postVm);
+            return new JsonResult(postVM);
         }
 
         // -------------------------------------------------------------------- private methods
