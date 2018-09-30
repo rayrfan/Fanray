@@ -4,7 +4,7 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
-    A simple and elegant blog
+    A simple and elegant blog.
   </p>
   <p align="center">
 	<a href="#screenshots">Screenshots</a> •
@@ -54,7 +54,7 @@ Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for deta
  
 ## Quick Start
 
-Fanray v1.1 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
+Fanray v2.0 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
 
 Clone the repo then run from either [VS2017](https://www.visualstudio.com/vs/community/) or command line.
 
