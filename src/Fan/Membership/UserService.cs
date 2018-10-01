@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Fan.Helpers;
 
 namespace Fan.Membership
 {
@@ -10,7 +11,6 @@ namespace Fan.Membership
     {
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserService> _logger;
-
         public UserService(UserManager<User> userManager,
             ILogger<UserService> logger)
         {
@@ -25,17 +25,7 @@ namespace Fan.Membership
         /// <returns></returns>
         public async Task<User> FindByEmailOrUsernameAsync(string emailOrUsername)
         {
-            bool isEmail;
-            try
-            {
-                new MailAddress(emailOrUsername);
-                isEmail = true;
-            }
-            catch (FormatException)
-            {
-                isEmail = false;
-            }
-
+            bool isEmail = emailOrUsername.IsValidEmail();
             // get user
             return isEmail ? await _userManager.FindByEmailAsync(emailOrUsername) :
                 await _userManager.FindByNameAsync(emailOrUsername);
