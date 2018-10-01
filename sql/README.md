@@ -4,6 +4,6 @@ EF Core can automatically upgrade the database when you run Fanray of a new vers
 
 Always backup your existing database before each upgrade, then review and execute the correct .sql script for your installation.
 
-## 1.0-1.1.sql
+## 1.0-2.0.sql
 
-Upgrade Fanray from v1.0 to v1.1.
+Upgrade Fanray from v1.0 to v2.0.

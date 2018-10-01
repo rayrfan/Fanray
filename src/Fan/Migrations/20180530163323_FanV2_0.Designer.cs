@@ -9,8 +9,8 @@ using System;
 namespace Fan.Migrations
 {
     [DbContext(typeof(FanDbContext))]
-    [Migration("20180530163323_FanV1_1")]
-    partial class FanV1_1
+    [Migration("20180530163323_FanV2_0")]
+    partial class FanV2_0
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

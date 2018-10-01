@@ -2,7 +2,7 @@
 
 namespace Fan.Migrations
 {
-    public partial class FanV1_1 : Migration
+    public partial class FanV2_0 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
