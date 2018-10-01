@@ -19,7 +19,6 @@ namespace Fan.UnitTests.Helpers
                                   "j_9@[129.126.118.1]",
                                   "js@proseware.com9", "j.s@server1.proseware.com",
                                    "\"j\\\"s\\\"\"@proseware.com", "js@contoso.中国" };
-            // Arrange: a list of two blog post
             // Act: valid email
             var valid = true;
             foreach (var item in emailAddresses)
@@ -30,17 +29,18 @@ namespace Fan.UnitTests.Helpers
                 //if item is Invalid email address
                     valid = result;
             }
-            Assert.True(valid);
             // Assert
+            Assert.True(valid);
+            
         }
 
         [Fact]
         public void RegexUtilities_InValid_Email_Address()
         {
-            // list valid email addres
+            // list invalid email addres
             string[] emailAddresses = {"j.@server1.proseware.com","j..s@proseware.com","js*@proseware.com","js@proseware..com","username"};
-            // Arrange: a list of two blog post
-            // Act: serialize it to bytes and back
+
+            // Act: valid email
             var valid = true;
             foreach (var item in emailAddresses)
             {
@@ -50,9 +50,10 @@ namespace Fan.UnitTests.Helpers
                 //if item is Invalid email address
                     valid = result;
             }
+            // Assert
             Assert.True(!valid);
 
-            // Assert
+           
         }
     }
 }
