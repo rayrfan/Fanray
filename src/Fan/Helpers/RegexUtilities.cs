@@ -4,12 +4,17 @@ using System.Text.RegularExpressions;
 
 namespace Fan.Helpers
 {
-    public static class RegexUtilities
+    /// <summary>
+    /// A util class that uses regular expression to verify if a string is in valid email format.
+    /// </summary>
+    /// <remarks>
+    /// https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
+    /// </remarks>
+    public class RegexUtilities
     {
-        private static bool _invalid = false;
-        public static bool IsValidEmail(this string strIn)
+        private bool _invalid = false;
+        public bool IsValidEmail(string strIn)
         {
-            
             if (String.IsNullOrEmpty(strIn))
                 return false;
 
@@ -41,7 +46,7 @@ namespace Fan.Helpers
             }
         }
 
-        private static string DomainMapper(Match match)
+        private string DomainMapper(Match match)
         {
             // IdnMapping class with default property values.
             IdnMapping idn = new IdnMapping();

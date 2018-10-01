@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Fan.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Net.Mail;
 using System.Threading.Tasks;
-using Fan.Helpers;
 
 namespace Fan.Membership
 {
@@ -25,8 +23,9 @@ namespace Fan.Membership
         /// <returns></returns>
         public async Task<User> FindByEmailOrUsernameAsync(string emailOrUsername)
         {
-            bool isEmail = emailOrUsername.IsValidEmail();
-            // get user
+            RegexUtilities util = new RegexUtilities();
+            bool isEmail = util.IsValidEmail(emailOrUsername);
+
             return isEmail ? await _userManager.FindByEmailAsync(emailOrUsername) :
                 await _userManager.FindByNameAsync(emailOrUsername);
         }
