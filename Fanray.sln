@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{596A1022-8E0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{36CBCC5A-2BEC-415A-97E2-09A4AC8A0872}"
 	ProjectSection(SolutionItems) = preProject
-		sql\1.0-1.1.sql = sql\1.0-1.1.sql
+		sql\1.0-2.0.sql = sql\1.0-2.0.sql
 		sql\README.md = sql\README.md
 	EndProjectSection
 EndProject
