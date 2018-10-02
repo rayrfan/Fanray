@@ -1,7 +1,6 @@
 using Fan.Helpers;
-using Fan.Membership;
-using System.Collections.Generic;
 using Xunit;
+
 namespace Fan.UnitTests.Helpers
 {
     /// <summary>
@@ -9,51 +8,33 @@ namespace Fan.UnitTests.Helpers
     /// </summary>
     public class RegexUtilitiesTest
     {
-        [Fact]
-        public void RegexUtilities_Valid_Email_Address()
+        /// <summary>
+        /// Test cases for <see cref="RegexUtilities.IsValidEmail(string)"/> method.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="expected"></param>
+        /// <remarks>
+        /// Test data provided by https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format#compiling-the-code
+        /// </remarks>
+        [Theory]
+        [InlineData("david.jones@proseware.com", true)]
+        [InlineData("d.j@server1.proseware.com", true)]
+        [InlineData("jones@ms1.proseware.com", true)]
+        [InlineData("j.@server1.proseware.com", false)]
+        [InlineData("j@proseware.com9", true)]
+        [InlineData("js#internal@proseware.com", true)]
+        [InlineData("j_9@[129.126.118.1]", true)]
+        [InlineData("j..s@proseware.com", false)]
+        [InlineData("js*@proseware.com", false)]
+        [InlineData("js@proseware..com", false)]
+        [InlineData("js@proseware.com9", true)]
+        [InlineData("j.s@server1.proseware.com", true)]
+        [InlineData(@"""j\""s\""""@proseware.com", true)]
+        [InlineData("js@contoso.中国", true)]
+        [InlineData("username", false)]
+        public void IsValidEmail_Test(string email, bool expected)
         {
-            // list valid email addres
-            string[] emailAddresses = { "david.jones@proseware.com", "d.j@server1.proseware.com",
-                                  "jones@ms1.proseware.com",
-                                  "j@proseware.com9", "js#internal@proseware.com",
-                                  "j_9@[129.126.118.1]",
-                                  "js@proseware.com9", "j.s@server1.proseware.com",
-                                   "\"j\\\"s\\\"\"@proseware.com", "js@contoso.中国" };
-            // Act: valid email
-            var valid = true;
-            foreach (var item in emailAddresses)
-            {
-                var result = RegexUtilities.IsValidEmail(item);
-                
-                if(!result)
-                //if item is Invalid email address
-                    valid = result;
-            }
-            // Assert
-            Assert.True(valid);
-            
-        }
-
-        [Fact]
-        public void RegexUtilities_InValid_Email_Address()
-        {
-            // list invalid email addres
-            string[] emailAddresses = {"j.@server1.proseware.com","j..s@proseware.com","js*@proseware.com","js@proseware..com","username"};
-
-            // Act: valid email
-            var valid = true;
-            foreach (var item in emailAddresses)
-            {
-                var result = RegexUtilities.IsValidEmail(item);
-                
-                if(!result)
-                //if item is Invalid email address
-                    valid = result;
-            }
-            // Assert
-            Assert.True(!valid);
-
-           
+            Assert.Equal(expected, RegexUtilities.IsValidEmail(email));
         }
     }
 }

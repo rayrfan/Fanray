@@ -4,12 +4,16 @@ using System.Text.RegularExpressions;
 
 namespace Fan.Helpers
 {
+    /// <summary>
+    /// A util class that uses regular expression to verify if a string is in valid email format.
+    /// </summary>
+    /// <remarks>
+    /// https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format
+    /// </remarks>
     public static class RegexUtilities
     {
-        private static bool _invalid = false;
-        public static bool IsValidEmail(this string strIn)
+        public static bool IsValidEmail(string strIn)
         {
-            
             if (String.IsNullOrEmpty(strIn))
                 return false;
 
@@ -18,15 +22,14 @@ namespace Fan.Helpers
             {
                 strIn = Regex.Replace(strIn, @"(@)(.+)$", DomainMapper,
                                       RegexOptions.None, TimeSpan.FromMilliseconds(200));
+                if(string.IsNullOrEmpty(strIn))
+                    return false;
             }
-            catch (RegexMatchTimeoutException)
+            catch (Exception ex)
             {
-                return false;
+                if(ex is RegexMatchTimeoutException || ex is ArgumentNullException)
+                    return false;
             }
-
-            if (_invalid)
-                return false;
-
             // Return true if strIn is in valid email format.
             try
             {
@@ -53,7 +56,7 @@ namespace Fan.Helpers
             }
             catch (ArgumentException)
             {
-                _invalid = true;
+                return null; 
             }
             return match.Groups[1].Value + domainName;
         }
