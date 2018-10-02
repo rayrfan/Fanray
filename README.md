@@ -24,6 +24,11 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
 	</a>
   </p>
+  <p align="center">
+	<a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="feature branch status">
+	</a>
+  </p>
 </p>
 
 ## Screenshots
