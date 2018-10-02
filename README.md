@@ -58,7 +58,7 @@ Fanray v2.0 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and 
 
 Clone the repo then run from either [VS2017](https://www.visualstudio.com/vs/community/) or command line.
 
-- VS2017: open Fanray.sln, make sure Fan.Web is the startup project, ctrl + F5
+- VS2017: open `Fanray.sln`, make sure `Fan.Web` is the startup project, ctrl + F5
 - Command line: do the following, then go to http://localhost:5001
  ```
 cd <sln folder>
@@ -79,7 +79,9 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc.  Let me know of any questions or feedbacks [@fanraymedia](https://twitter.com/FanrayMedia). Please check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
+Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc.  Let me know of any questions or feedbacks [@fanraymedia](https://twitter.com/FanrayMedia). 
+
+Before contributing please read the [Contributing Guide](CONTRIBUTING.md) carefully and also review the [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
 
 ## License
 
