@@ -23,7 +23,7 @@ namespace Fan.Membership
         /// <returns></returns>
         public async Task<User> FindByEmailOrUsernameAsync(string emailOrUsername)
         {
-            bool isEmail = RegexUtilities.IsValidEmail(emailOrUsername);
+            bool isEmail = Util.IsValidEmail(emailOrUsername);
             return isEmail ? await _userManager.FindByEmailAsync(emailOrUsername) :
                 await _userManager.FindByNameAsync(emailOrUsername);
         }
