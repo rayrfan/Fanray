@@ -12,7 +12,26 @@
 
 ## Pull Request
 
-**Please communicate first!** After forking the repository please create a pull request before embarking on any significant fix. This way we can talk about how the fix will be implemeted. This will greatly increase your chance of your patch getting merged into the code base.
+**Please communicate first!** After forking the repository please create a pull request before embarking on any significant fix. This way we can talk about how the fix will be implemeted. 
+
+**Please following these tips** This will greatly increase your chance of your patch getting merged into the code base.
+
+1. **Branches:** **master** is the latest release, **dev** is the active development branch all other feature branches merge back to, always create a **feature** branch off of **dev** first to work on your particular fix or enhancement
+2. **Commit message** should always reference the issue number, e.g. `This is my commit message #202` this will link your commit to issue 202
+3. **Commit message** should start with prefix, e.g. `fix: Consolidate email valid feature into existing Util class #234`
+```
+feat: A new feature
+fix: A bug fix
+docs: Documentation only changes
+style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+refactor: A code change that neither fixes a bug nor adds a feature
+perf: A code change that improves performance
+test: Adding missing tests or correcting existing tests
+build: Changes that affect the build system, CI configuration or external dependencies (example scopes: gulp, broccoli, npm)
+chore: Other changes that don't modify src or test files
+``` 
+4. **Write code comments** and when you use a snippet of code from the Internet always leave a link to reference
+5. **Provide Unit / Integration tests** where applicable because testing is essential for a strong code base
 
 ## License
 
