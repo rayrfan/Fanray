@@ -52,7 +52,7 @@ namespace Fan.Web.Controllers
                 return BadRequest("Invalid credentials!");
 
             // sign user in
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginUser.Password,
+            var result = await _signInManager.PasswordSignInAsync(user, loginUser.Password,
                 loginUser.RememberMe, lockoutOnFailure: false);
 
             if (!result.Succeeded)
