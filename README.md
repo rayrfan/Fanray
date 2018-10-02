@@ -28,6 +28,8 @@
 
 ## Screenshots
 
+[![Join the chat at https://gitter.im/Fanray-project/Lobby](https://badges.gitter.im/Fanray-project/Lobby.svg)](https://gitter.im/Fanray-project/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/633119/46259907-4369a100-c494-11e8-8680-ca422cccb2f0.png" title="Composer" />
   <img src="https://user-images.githubusercontent.com/633119/46259930-8461b580-c494-11e8-848f-dd42fcf5c033.png" title="Clarity theme" />
