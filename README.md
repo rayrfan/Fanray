@@ -88,6 +88,10 @@ Fanray is in its early stages and requires support to move ahead. You can contri
 
 Before contributing please read the [Contributing Guide](CONTRIBUTING.md) carefully and also review the [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
 
+## Support
+
+<a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
 ## License
 
 [Apache 2.0](LICENSE)
