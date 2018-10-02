@@ -25,10 +25,9 @@ namespace Fan.Helpers
                 if(string.IsNullOrEmpty(strIn))
                     return false;
             }
-            catch (Exception ex)
+            catch (RegexMatchTimeoutException)
             {
-                if(ex is RegexMatchTimeoutException || ex is ArgumentNullException)
-                    return false;
+                return false;
             }
             // Return true if strIn is in valid email format.
             try
