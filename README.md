@@ -25,9 +25,12 @@
 	</a>
   </p>
   <p align="center">
-	<a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+    <a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
 	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="feature branch status">
-	</a>
+    </a>
+    <a href="https://github.com/FanrayMedia/Fanray/contributors/">
+      <img src="https://img.shields.io/github/contributors/FanrayMedia/Fanray.svg" alt="Contributors" />
+    </a>
   </p>
 </p>
 
