@@ -148,7 +148,7 @@ namespace Fan.UnitTests.Helpers
         [InlineData("j.s@server1.proseware.com", true)]
         [InlineData(@"""j\""s\""""@proseware.com", true)]
         [InlineData("js@contoso.中国", true)]
-        [InlineData("username", false)]
+        [InlineData("a@a", false)]
         public void IsValidEmail_Test(string email, bool expected)
         {
             Assert.Equal(expected, Util.IsValidEmail(email));
