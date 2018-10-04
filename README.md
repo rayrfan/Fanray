@@ -24,6 +24,14 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5?svg=true&passingText=feature%20-%20passing&failingText=feature%20-%20failing&pendingText=feature%20-%20pending" alt="feature branch status">
 	</a>
   </p>
+  <p align="center">
+    <a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="feature branch status">
+    </a>
+    <a href="https://github.com/FanrayMedia/Fanray/contributors/">
+      <img src="https://img.shields.io/github/contributors/FanrayMedia/Fanray.svg" alt="Contributors" />
+    </a>
+  </p>
 </p>
 
 ## Screenshots
@@ -47,7 +55,7 @@ Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for deta
 | Open Live Writer  | Settings                                  | FluentValidation
 | Preferred Domain  | Storage (File System, Azure Blob Storage) | HtmlAgilityPack
 | RSS               | Testing (Unit, Integration)               | Magick.NET
-| SEO               | Validation								| Moq
+| SEO-Friendly URLs | Validation								| Moq
 | Shortcodes		|											| Serilog
 | Site Setup        |                                           | Vue.js
 | Users             |											| Vuetify.js
@@ -79,9 +87,11 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc.  Let me know of any questions or feedbacks [@fanraymedia](https://twitter.com/FanrayMedia). 
+Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc. Check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).  Let me know of any questions or feedbacks on twitter [@fanraymedia](https://twitter.com/FanrayMedia) or [gitter](https://gitter.im/Fanray-project/Fanray).
 
-Before contributing please read the [Contributing Guide](CONTRIBUTING.md) carefully and also review the [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).
+## Support
+
+<a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
 ## License
 

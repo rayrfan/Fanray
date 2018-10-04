@@ -127,9 +127,8 @@ namespace Fan.Web.Pages.Admin
                               Title = p.Title,
                               Date = p.CreatedOn.ToString("yyyy-MM-dd"),
                               Author = p.User.DisplayName,
-                              EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, p.Id),
-                              PostLink = $"{Request.Scheme}://{Request.Host}/" +
-                              string.Format(BlogRoutes.POST_RELATIVE_URL_TEMPLATE, p.CreatedOn.Year, p.CreatedOn.Month, p.CreatedOn.Day, p.Slug),
+                              EditLink = BlogRoutes.GetPostEditLink(p.Id),
+                              PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),
                           };
 
             var postCount = await _blogSvc.GetPostCountAsync();

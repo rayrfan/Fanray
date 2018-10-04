@@ -283,9 +283,8 @@ namespace Fan.Web.Pages.Admin
 
         private string GetPostAbsoluteUrl(BlogPost blogPost)
         {
-            var relativeUrl = string.Format(BlogRoutes.POST_RELATIVE_URL_TEMPLATE,
-                blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day, blogPost.Slug);
-            return $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/{relativeUrl}";
+            var relativeUrl = BlogRoutes.GetPostRelativeLink(blogPost.CreatedOn, blogPost.Slug);
+            return $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{relativeUrl}";
         }
 
         /// <summary>

@@ -172,11 +172,11 @@ namespace Fan.Blog.IntegrationTests
 
             // Act
             var metaCatList = await _svc.GetCategoriesAsync(BLOG_ID, USERNAME, PASSWORD, ROOT_URL);
-            var catUrl = string.Format(BlogRoutes.CATEGORY_URL_TEMPLATE, CAT_SLUG);
+            var catUrl = BlogRoutes.GetCategoryRelativeLink(CAT_SLUG);
 
             // Assert
             Assert.Single(metaCatList);
-            Assert.Equal($"{ROOT_URL}/{catUrl}", metaCatList[0].HtmlUrl);
+            Assert.Equal($"{ROOT_URL}{catUrl}", metaCatList[0].HtmlUrl);
         }
 
         [Fact]

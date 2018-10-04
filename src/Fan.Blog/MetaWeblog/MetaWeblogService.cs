@@ -313,7 +313,7 @@ namespace Fan.Blog.MetaWeblog
                 Slug = blogPost.Slug,
                 Tags = blogPost.TagTitles,
                 Title = blogPost.Title,
-                Link = rootUrl + string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, blogPost.CreatedOn.Year, blogPost.CreatedOn.Month, blogPost.CreatedOn.Day, blogPost.Slug),
+                Link = rootUrl + BlogRoutes.GetPostRelativeLink(blogPost.CreatedOn, blogPost.Slug),
             };
         }
 
