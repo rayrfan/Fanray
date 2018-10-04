@@ -29,11 +29,11 @@ namespace Fan.Blog.ViewModels
             Tags = blogPost.Tags.OrderBy(t => t.Title).ToList();
             Category = blogPost.Category;
 
-            RelativeLink = string.Format("/" + BlogRoutes.POST_RELATIVE_URL_TEMPLATE, CreatedOn.Year, CreatedOn.Month, CreatedOn.Day, blogPost.Slug);
-            var permalinkPart = string.Format(BlogRoutes.POST_PERMA_URL_TEMPLATE, blogPost.Id);
-            Permalink = $"{request.Scheme}://{request.Host}/{permalinkPart}";
+            RelativeLink = BlogRoutes.GetPostRelativeLink(CreatedOn, blogPost.Slug);
+            var permalinkPart = BlogRoutes.GetPostPermalink(blogPost.Id);
+            Permalink = $"{request.Scheme}://{request.Host}{permalinkPart}";
             CanonicalUrl = $"{request.Scheme}://{request.Host}{RelativeLink}";
-            EditLink = string.Format("/" + BlogRoutes.POST_EDIT_URL_TEMPLATE, blogPost.Id);
+            EditLink = BlogRoutes.GetPostEditLink(blogPost.Id);
 
             DisqusPageIdentifier = $"{ECommentTargetType.BlogPost}_{blogPost.Id}";
             ShowDisqus = blogSettings.AllowComments && blogSettings.CommentProvider == ECommentProvider.Disqus && !blogSettings.DisqusShortname.IsNullOrEmpty();
@@ -54,7 +54,7 @@ namespace Fan.Blog.ViewModels
 
             var requestHostShort = request.Host.ToString().StartsWith("www.") ? 
                 request.Host.ToString().Remove(0, 4) : request.Host.ToString();
-            var permalinkShort = $"{request.Scheme}://{requestHostShort}/{permalinkPart}";
+            var permalinkShort = $"{request.Scheme}://{requestHostShort}{permalinkPart}";
 
             TwitterShareLink = hash.IsNullOrEmpty() ?
                 $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}" :

@@ -575,7 +575,7 @@ namespace Fan.Blog.Services
                     years[year].Add(new MonthItem
                     {
                         Title = month.Key.ToString("MMMM"),
-                        Url = string.Format("/" + BlogRoutes.ARCHIVE_URL_TEMPLATE, year, month.Key.Month.ToString("00")),
+                        Url = BlogRoutes.GetArchiveRelativeLink(year, month.Key.Month),
                         Count = month.Value,
                     });
                 }

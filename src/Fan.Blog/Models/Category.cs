@@ -36,9 +36,9 @@ namespace Fan.Blog.Models
         public int Count { get; set; }
 
         [NotMapped]
-        public string RelativeLink => string.Format("/" + BlogRoutes.CATEGORY_URL_TEMPLATE, Slug);
+        public string RelativeLink => BlogRoutes.GetCategoryRelativeLink(Slug);
 
         [NotMapped]
-        public string RssRelativeLink => string.Format("/" + BlogRoutes.CATEGORY_RSS_URL_TEMPLATE, Slug);
+        public string RssRelativeLink => BlogRoutes.GetCategoryRssRelativeLink(Slug);
     }
 }

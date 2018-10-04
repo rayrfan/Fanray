@@ -1,18 +1,95 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using System;
 
 namespace Fan.Blog.Helpers
 {
     public static class BlogRoutes
     {
-        public const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
-        public const string POST_PERMA_URL_TEMPLATE = "post/{0}";
-        public const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
-        public const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
-        public const string CATEGORY_RSS_URL_TEMPLATE = "posts/categorized/{0}/feed";
-        public const string TAG_URL_TEMPLATE = "posts/tagged/{0}";
-        public const string ARCHIVE_URL_TEMPLATE = "posts/{0}/{1}";
+        private const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
+        private const string POST_PERMA_URL_TEMPLATE = "post/{0}";
+        private const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
+        private const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
+        private const string CATEGORY_RSS_URL_TEMPLATE = "posts/categorized/{0}/feed";
+        private const string TAG_URL_TEMPLATE = "posts/tagged/{0}";
+        private const string ARCHIVE_URL_TEMPLATE = "posts/{0}/{1}";
 
+        /// <summary>
+        /// Returns a blog post's relative link that starts with "/" and contains 2-digit month and day.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetPostRelativeLink(DateTimeOffset dt, string slug)
+        {
+            return string.Format("/" + POST_RELATIVE_URL_TEMPLATE, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
+        }
+
+        /// <summary>
+        /// Returns a blog post's permalink, the returned string is a relative URL that starts with "/".
+        /// </summary>
+        /// <param name="postId"></param>
+        /// <returns></returns>
+        public static string GetPostPermalink(int postId)
+        {
+            return string.Format("/" + POST_PERMA_URL_TEMPLATE, postId);
+        }
+
+        /// <summary>
+        /// Returns a blog post's edit link, the returned string is a relative URL that starts with "/".
+        /// </summary>
+        /// <param name="postId"></param>
+        /// <returns></returns>
+        public static string GetPostEditLink(int postId)
+        {
+            return string.Format("/" + POST_EDIT_URL_TEMPLATE, postId);
+        }
+
+        /// <summary>
+        /// Returns a blog category's relative link that start with "/".
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetCategoryRelativeLink(string slug)
+        {
+            return string.Format("/" + CATEGORY_URL_TEMPLATE, slug);
+        }
+
+        /// <summary>
+        /// Returns a blog category's RSS link, the returned string is relative URL that starts with "/"
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetCategoryRssRelativeLink(string slug)
+        {
+            return string.Format("/" + CATEGORY_RSS_URL_TEMPLATE, slug);
+        }
+
+        /// <summary>
+        /// Returns a blog tag's relative link that start with "/".
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetTagRelativeLink(string slug)
+        {
+            return string.Format("/" + TAG_URL_TEMPLATE, slug);
+        }
+
+        /// <summary>
+        /// Returns a blog archive's relative link that starts with "/" and contains 2-digit month.
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public static string GetArchiveRelativeLink(int year, int month)
+        {
+            return string.Format("/" + ARCHIVE_URL_TEMPLATE, year, month.ToString("00"));
+        }
+
+        /// <summary>
+        /// Registers the blog app's routes.
+        /// </summary>
+        /// <param name="routes"></param>
         public static void RegisterRoutes(IRouteBuilder routes)
         {
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });

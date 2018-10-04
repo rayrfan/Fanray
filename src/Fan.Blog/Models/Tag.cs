@@ -46,7 +46,7 @@ namespace Fan.Blog.Models
         public string Color { get; set; }
 
         [NotMapped]
-        public string RelativeLink => string.Format("/" + BlogRoutes.TAG_URL_TEMPLATE, Slug);
+        public string RelativeLink => BlogRoutes.GetTagRelativeLink(Slug);
 
         public virtual ICollection<PostTag> PostTags { get; set; }
     }
