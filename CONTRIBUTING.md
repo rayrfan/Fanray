@@ -2,6 +2,8 @@
 
 :warning: Before you [file a new](https://github.com/FanrayMedia/Fanray/issues/new/choose) Bug Report or Feature Request, please first seach both **[Open](https://github.com/FanrayMedia/Fanray/issues)** and **[Closed](https://github.com/FanrayMedia/Fanray/issues?q=is%3Aissue+is%3Aclosed)** issues and PRs to ensure there hasn't been anything similar already filed.
 
+If you are looking for issues to work on, the ones that [not assigned to anyone](https://github.com/FanrayMedia/Fanray/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee) or issues [labeled with help wanted](https://github.com/FanrayMedia/Fanray/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) are a good place to start.  If you are not sure about something always leave a comment, communication is crucial.
+
 ## Bug Report
 
 **Detail is the key!** It's really important for you to provide as much detail as you can, attach screenshots, provide links to online references etc. for people to easily reproduce the bug and examine possible fixes.
