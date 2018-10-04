@@ -2,13 +2,6 @@
 $color-primary: #39f;
 
 // https://github.com/twbs/bootstrap/blob/1870b871d0b6ad7c842aab780dbd5541d84f3428/scss/_variables.scss#L239
-$h1-font-size: $font-size-base * 2.25 !default; /* default was 2.5 */
-$h2-font-size: $font-size-base * 2 !default;
-$h3-font-size: $font-size-base * 1.75 !default;
-$h4-font-size: $font-size-base * 1.5 !default;
-$h5-font-size: $font-size-base * 1.25 !default;
-$h6-font-size: $font-size-base !default;
-
-$headings-font-size-xs: 0.5; // half the increase in size over root font-size
-$headings-font-size-sm: 0.75; // 3/4 the increase in size over root font-size
-$headings-font-size-md: 1; // the regular size
+$h1-font-size: $font-size-base * 1.7 !default;
+$h2-font-size: $font-size-base * 1.42 !default;
+$h3-font-size: $font-size-base * 1.17 !default;

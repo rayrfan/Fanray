@@ -2,40 +2,28 @@
     position: relative;
     min-height: 100%;
 }
+
 body {
     /* Margin bottom by footer height */
     margin-bottom: 60px;
 }
-// h1 by default is 2.5rem
+// headings
 h1 {
     font-size: $h1-font-size;
 }
-// show a smaller heading on smaller screen
-@media (max-width: 767px) {
-    h1 {
-        font-size: 1 + (($h1-font-size - 1) * $headings-font-size-xs); // 1.75rem
-    }
 
-    h2 {
-        font-size: 1 + (($h2-font-size - 1) * $headings-font-size-xs); // 1.5rem
-    }
-
-    h3 {
-        font-size: 1 + (($h3-font-size - 1) * $headings-font-size-xs); // 1.5rem
-    }
-
-    h4 {
-        font-size: 1 + (($h4-font-size - 1) * $headings-font-size-xs); // 1.5rem
-    }
-
-    h5 {
-        font-size: 1 + (($h5-font-size - 1) * $headings-font-size-xs); // 1.5rem
-    }
-
-    h6 {
-        font-size: 1 + (($h6-font-size - 1) * $headings-font-size-xs); // 1.5rem
-    }
+h2 {
+    font-size: $h2-font-size;
 }
+
+h3 {
+    font-size: $h3-font-size;
+}
+
+h4, h5, h6 {
+    font-size: $font-size-base;
+}
+
 p {
     /* default is too small, interestingly 1.1 here looks identical to 1.13 shown in editor 
     */
@@ -49,29 +37,34 @@ p {
         font-size: smaller;
     }
 }
+
 img {
     /* scale image to fit page https://www.w3schools.com/css/css_rwd_images.asp */
     max-width: 100%;
     height: auto;
 }
+
 ul {
     list-style-type: square;
     padding-left: 1em; /* default indents list */
 }
+
 ol {
     padding-left: 1em;
 }
+
 pre {
     border: 1px dashed #e0e0e0;
     border-radius: 0;
     padding: 5px;
 }
+
 blockquote {
     margin: 0 0 1rem;
     border-left: 2px gray solid;
     padding: 13px;
     background: #eee;
-    font-style:italic;
+    font-style: italic;
 
     p {
         margin-bottom: 0;
@@ -106,6 +99,7 @@ a.brand {
         padding-left: 15px;
     }*/
 }
+
 .footer span:last-child {
     margin-left: 10px;
 
