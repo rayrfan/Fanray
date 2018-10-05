@@ -67,7 +67,7 @@ Fanray v2.0 runs on [.NET Core 2.1](https://www.microsoft.com/net/download) and 
 Clone the repo then run from either [VS2017](https://www.visualstudio.com/vs/community/) or command line.
 
 - VS2017: open `Fanray.sln`, make sure `Fan.Web` is the startup project, ctrl + F5
-- Command line: do the following, then go to http://localhost:5001
+- Command line: do the following, then go to https://localhost:5001
  ```
 cd <sln folder>
 dotnet restore
