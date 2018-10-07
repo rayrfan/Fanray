@@ -121,12 +121,12 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
                 @*<v-footer class="pa-3" absolute style="height:auto">
-                        <v-layout justify-center>
-                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
-                                <v-icon large color="info">help_outline</v-icon>
-                            </a>
-                        </v-layout>
-                    </v-footer>*@
+                <v-layout justify-center>
+                    <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                        <v-icon large color="info">help_outline</v-icon>
+                    </a>
+                </v-layout>
+            </v-footer>*@
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
@@ -136,9 +136,9 @@
                        fixed>
                 <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
                 <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
-                @*<v-btn>Preview</v-btn>*@
                 <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
                 <v-spacer></v-spacer>
+                <v-btn @@click="preview">Preview</v-btn>
                 <v-btn href="/admin">Close</v-btn>
             </v-toolbar>
             @* Editor *@
@@ -163,6 +163,30 @@
                       @@keydown.esc="mediaDialogVisible = false"
                       content-class="media-dialog">
                 <blog-media mode="editor"></blog-media>
+            </v-dialog>
+            @* Preview Dialog *@
+            <v-dialog lazy 
+                      fullscreen 
+                      scrollable
+                      v-model="previewDialogVisible"
+                      @@keydown.esc="closePreview"
+                      content-class="preview-dialog">
+                <v-card height="100%">
+                    <v-card-title>
+                        <span class="preview-title">Preview</span>
+                        <v-spacer></v-spacer>
+                        <span class="preview-title-url">{{ postUrl }}</span>
+                        <v-spacer></v-spacer>
+                        <v-btn @@click="closePreview">Close</v-btn>
+                    </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-text class="preview-body">
+                        <iframe class="preview-frame" 
+                                v-if="previewUrl"
+                                :src="previewUrl" 
+                                title="Preview"></iframe>
+                    </v-card-text>
+                </v-card>
             </v-dialog>
             @* Snackbar *@
             <v-snackbar :timeout="3000"

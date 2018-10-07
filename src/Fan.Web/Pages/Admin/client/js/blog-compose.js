@@ -13,6 +13,9 @@
         panel: [true, true, true],
         menuDate: false,
         mediaDialogVisible: false,
+        previewUrl: null,
+        postUrl: null,
+        previewDialogVisible: false,
         progressVisible: false,
         editor: null,
         snackbar: {
@@ -100,6 +103,21 @@
 
             this.fieldChanged = false;
             this.saveText = 'Saved';
+        },
+        preview() {
+            this.previewDialogVisible = true;
+            this.payload.body = this.editor.getData();
+            axios.post('/admin/compose?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                .then(resp => {
+                    this.previewUrl = resp.data;
+                    this.postUrl = this.previewUrl.replace('preview/', '');
+                })
+                .catch(err => { console.log(err); });
+        },
+        closePreview() {
+            this.previewDialogVisible = false;
+            this.previewUrl = null;
+            this.postUrl = null;
         },
         revert() {
             this.post.published = false;
