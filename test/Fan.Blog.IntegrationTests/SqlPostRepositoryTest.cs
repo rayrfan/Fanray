@@ -78,20 +78,6 @@ namespace Fan.Blog.IntegrationTests
         }
 
         /// <summary>
-        /// Test for <see cref="SqlPostRepository.GetAsync(string, EPostType)"/> will return null
-        /// if the specified slug is not found.
-        /// </summary>
-        [Fact]
-        public async void GetPost_By_Slug_Will_Return_Null_If_Not_Found()
-        {
-            // Act: getting a post that is not there
-            var blogPost = await _postRepo.GetAsync("not-found", EPostType.BlogPost);
-
-            // Assert
-            Assert.Null(blogPost);
-        }
-
-        /// <summary>
         /// Test for <see cref="SqlPostRepository.GetAsync(string, int, int, int)"/> will return null
         /// if the specified slug and year, month, day combo is not found.
         /// </summary>

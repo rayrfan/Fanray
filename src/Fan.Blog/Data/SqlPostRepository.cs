@@ -58,28 +58,6 @@ namespace Fan.Blog.Data
         }
 
         /// <summary>
-        /// Returns a <see cref="Post"/> by slug. If it is a BlogPost it'll return together with its 
-        /// <see cref="Category"/> and <see cref="Tag"/>. Returns null if it's not found.
-        /// </summary>
-        /// <param name="slug"></param>
-        /// <param name="type">If it's BlogPost it'll return category and tags with it.</param>
-        /// <returns></returns>
-        public async Task<Post> GetAsync(string slug, EPostType type)
-        {
-            return (type == EPostType.BlogPost) ?
-                await _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
-                                  .SingleOrDefaultAsync(p =>
-                                    p.Type == EPostType.BlogPost &&
-                                    p.Status == EPostStatus.Published &&
-                                    p.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase)) :
-                await _entities.Include(p => p.User)
-                                  .SingleOrDefaultAsync(p =>
-                                    p.Type == type &&
-                                    p.Status == EPostStatus.Published &&
-                                    p.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        /// <summary>
         /// Returns a <see cref="EPostStatus.Published"/> <see cref="Post"/>, returns null if it's not found.
         /// </summary>
         public async Task<Post> GetAsync(string slug, int year, int month, int day)
