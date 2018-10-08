@@ -1,15 +1,46 @@
-﻿/**
- * The component for Admin/Pages/Media.cshtml
- */
+﻿// media store
+let store = new Vuex.Store({
+    strict: true,
+    state: {
+        selectedImages: [],
+    },
+    mutations: {
+        setSelectedImages (state, newSelectedImages) {
+            state.selectedImages = newSelectedImages;
+        },
+        addSelectedImage(state, image) {
+            state.selectedImages.push(image);
+        },
+        removeSelectedImage(state, idx) {
+            state.selectedImages.splice(idx, 1);
+        },
+    },
+    actions: {
+        selectImage: function ({ commit }, image) {
+            commit('addSelectedImage', image);
+        },
+        deselectImage: function ({ commit }, idx) {
+            commit('removeSelectedImage', idx);
+        },
+        emptySelectedImages({ commit, state }) {
+            commit('setSelectedImages', []);
+        },
+    },
+    modules: {
+        all: mediaModule,
+    },
+});
+
+// media component
 Vue.component('blog-media', {
     template: '#blog-media-template',
-    mixins: [blogMediaMixin],
+    mixins: [mediaMixin],
     props: ['mode'],
+    store,
     data: () => ({
         editDialogVisible: false,
         progressDialog: false,
         pageNumber: 1,
-        selectedImages: [],
         selectedImageIdx: 0,
         errMsg: '',
         isEditor: false,
@@ -19,8 +50,8 @@ Vue.component('blog-media', {
          
         if (this.mode === 'editor') {
             this.isEditor = true;
-            console.log("media gallery in editor mode.");
-            this.initImages();
+            console.log("media gallery in editor mode, loading images...");
+            this.$store.dispatch('all/loadImages').catch(err => console.log(err));
         }
     },
     computed: {
@@ -30,8 +61,19 @@ Vue.component('blog-media', {
         leftArrowVisible: function () {
             return this.selectedImages.length > 1 && this.selectedImageIdx > 0;
         },
-        rightArrowVisible: function () {
+        rightArrowVisible () {
             return this.selectedImages.length > 1 && this.selectedImageIdx < this.selectedImages.length-1;
+        },
+        //...mapState({ images: this.$store.state.all.images }),
+        count() {
+            return this.$store.state.all.count;
+        },
+        images() {
+            console.log('computed images in media: ', this.$store.state.all.images);
+            return this.$store.state.all.images;
+        },
+        selectedImages() {
+            return this.$store.state.selectedImages;
         },
     },
     methods: {
@@ -128,35 +170,29 @@ Vue.component('blog-media', {
                     console.log(err);
                 });
         },
-        /**
-         * Retrieve first page of images in editor mode.
-         */
-        initImages() {
-            let url = `/admin/media?handler=images`;
-            axios.get(url).then(resp => {
-                console.log("resp.data", resp.data);
-                this.images = resp.data.medias;
-                this.count = resp.data.count;
-            }).catch(err => console.log(err));
+        insertImages() {
+            $root.insertImages();
         },
         /**
          * Clicks on an image to select it.
          * @param {any} image
          */
-        selectImage(image) {
+        clickImage(image) {
             let idx = this.selectedImages.findIndex(img => img.id === image.id);
 
             if (idx !== -1) {
                 image.selected = false;
-                this.selectedImages.splice(idx, 1);
-                console.log("selectedImageIdx: ", this.selectedImageIdx);
-                console.log("de-selected image: ", image);
+                this.$store.dispatch('deselectImage', idx);
+                //this.selectedImages.splice(idx, 1);
+                //console.log("selectedImageIdx: ", this.selectedImageIdx);
+                //console.log("de-selected image: ", image);
             }
             else {
                 image.selected = true;
-                this.selectedImages.push(image);
-                console.log("selectedImageIdx: ", this.selectedImageIdx);
-                console.log("selected image: ", image);
+                this.$store.dispatch('selectImage', image);           
+                //this.selectedImages.push(image);
+                //console.log("selectedImageIdx: ", this.selectedImageIdx);
+                //console.log("selected image: ", image);
             }
         },
         /**
@@ -254,6 +290,9 @@ Vue.component('blog-media', {
         closeEditDialog() {
             this.selectedImageIdx = 0;
             this.editDialogVisible = false;
+        },
+        closeMediaDialog() {
+            this.$root.closeMediaDialog();
         },
     },
 });

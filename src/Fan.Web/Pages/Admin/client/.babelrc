@@ -2,5 +2,6 @@
 	"comments": false,
     "presets": [
         "minify"
-    ]
+    ],
+	"plugins": ["@babel/plugin-proposal-object-rest-spread"]
 }

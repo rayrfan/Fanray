@@ -1,6 +1,7 @@
 ﻿var app = new Vue({
     el: '#app',
-    mixins: [blogComposeMixin],
+    store,
+    mixins: [composeMixin],
     data: () => ({
         pubClicked: false,
         pubText: '',
@@ -45,6 +46,10 @@
                 title: this.post.title,
                 body: this.editor.getData(),
             }
+        },
+        // selectedImages from store
+        selectedImages() {
+            return this.$store.state.selectedImages;
         },
     },
     mounted() {
@@ -141,16 +146,22 @@
          * https://docs.ckeditor.com/ckeditor5/latest/builds/guides/faq.html#where-are-the-editorinserthtml-and-editorinserttext-methods-how-to-insert-some-content
          * https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-captions
          */
-        insertImages(images) {
-            console.log("selected images to insert: ", images);
+        insertImages() {
             let imgsHtml = '';
-            for (var i = 0; i < images.length; i++) {
-                imgsHtml += `<figure class="image"><img src="${images[i].urlMedium}" alt="${images[i].alt}" title="${images[i].title}"><figcaption>${images[i].caption}</figcaption></figure>`;
-            }
+            this.selectedImages.forEach(img => {
+                imgsHtml += `<figure class="image"><img src="${img.urlMedium}" alt="${img.alt}" title="${img.title}"><figcaption>${img.caption}</figcaption></figure>`;
+                img.selected = false; // remove the checkmark
+            });
+            this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
             const viewFragment = this.editor.data.processor.toView(imgsHtml);
             const modelFragment = this.editor.data.toModel(viewFragment);
             this.editor.model.insertContent(modelFragment, this.editor.model.document.selection);
             this.mediaDialogVisible = false;
+        },
+        closeMediaDialog() {
+            this.mediaDialogVisible = false;
+            this.selectedImages.forEach(img => img.selected = false ); // remove checkmarks
+            this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
         },
         titleEnter() {
             this.post.title = this.post.title.replace(/\n/g, ' ');

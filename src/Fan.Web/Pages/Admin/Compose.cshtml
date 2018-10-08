@@ -121,12 +121,12 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
                 @*<v-footer class="pa-3" absolute style="height:auto">
-                <v-layout justify-center>
-                    <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
-                        <v-icon large color="info">help_outline</v-icon>
-                    </a>
-                </v-layout>
-            </v-footer>*@
+                        <v-layout justify-center>
+                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                                <v-icon large color="info">help_outline</v-icon>
+                            </a>
+                        </v-layout>
+                    </v-footer>*@
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
@@ -160,13 +160,13 @@
             </v-content>
             @* Image Dialog *@
             <v-dialog v-model="mediaDialogVisible" lazy
-                      @@keydown.esc="mediaDialogVisible = false"
+                      @@keydown.esc="closeMediaDialog"
                       content-class="media-dialog">
                 <blog-media mode="editor"></blog-media>
             </v-dialog>
             @* Preview Dialog *@
-            <v-dialog lazy 
-                      fullscreen 
+            <v-dialog lazy
+                      fullscreen
                       scrollable
                       v-model="previewDialogVisible"
                       @@keydown.esc="closePreview"
@@ -181,9 +181,9 @@
                     </v-card-title>
                     <v-divider></v-divider>
                     <v-card-text class="preview-body">
-                        <iframe class="preview-frame" 
+                        <iframe class="preview-frame"
                                 v-if="previewUrl"
-                                :src="previewUrl" 
+                                :src="previewUrl"
                                 title="Preview"></iframe>
                     </v-card-text>
                 </v-card>
@@ -209,20 +209,35 @@
         <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
         <script src="https://unpkg.com/vuetify@1.2.5/dist/vuetify.min.js"></script>
     </environment>
+    <script src="https://unpkg.com/vuex@3.0.1/dist/vuex.min.js"></script>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
     <partial name="_BlogMediaTemplate" />
     <script>
-        let blogMediaMixin = {
-            data: function () {
-                return {
-                    images: [],
-                    count: 0,
-                    pageSize: @MediaModel.PAGE_SIZE,
-                };
-            }
-        };
-        let blogComposeMixin = {
+        const mediaModule = {
+            namespaced: true,
+            state: {
+                images: [],
+                count: 0,
+            },
+            mutations: {
+                setImages: function (state, newImages) { state.images = newImages; },
+                setCount: function (state, newCount) { state.count = newCount; },
+            },
+            actions: {
+                loadImages: function ({ commit }) {
+                    return new Promise(function (resolve, reject) {
+                        axios.get(`/admin/media?handler=images`).then(function (res) {
+                                commit("setImages", res.data.medias);
+                                commit("setCount", res.data.count);
+                                resolve();
+                            }).catch(function () { reject(); });
+                    });
+                },
+            },
+        }
+        let mediaMixin = { data: function () { return { pageSize: @MediaModel.PAGE_SIZE, }; } };
+        let composeMixin = {
             data: function () {
                 return {
                     post: @Html.Raw(Model.PostJson),
