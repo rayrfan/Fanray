@@ -214,29 +214,15 @@
     <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
     <partial name="_BlogMediaTemplate" />
     <script>
-        const mediaModule = {
-            namespaced: true,
-            state: {
-                images: [],
-                count: 0,
-            },
-            mutations: {
-                setImages: function (state, newImages) { state.images = newImages; },
-                setCount: function (state, newCount) { state.count = newCount; },
-            },
-            actions: {
-                loadImages: function ({ commit }) {
-                    return new Promise(function (resolve, reject) {
-                        axios.get(`/admin/media?handler=images`).then(function (res) {
-                                commit("setImages", res.data.medias);
-                                commit("setCount", res.data.count);
-                                resolve();
-                            }).catch(function () { reject(); });
-                    });
-                },
-            },
-        }
-        let mediaMixin = { data: function () { return { pageSize: @MediaModel.PAGE_SIZE, }; } };
+        let mediaMixin = {
+            data: function () {
+                return {
+                    images: [],
+                    count: 0,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                };
+            }
+        };
         let composeMixin = {
             data: function () {
                 return {

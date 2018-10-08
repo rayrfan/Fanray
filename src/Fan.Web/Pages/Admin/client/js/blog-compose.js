@@ -47,8 +47,7 @@
                 body: this.editor.getData(),
             }
         },
-        // selectedImages from store
-        selectedImages() {
+        selectedImages() { // from store
             return this.$store.state.selectedImages;
         },
     },
