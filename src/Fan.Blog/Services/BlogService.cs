@@ -248,11 +248,11 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
-        public async Task<Tag> GetTagAsync(string slug)
+        public async Task<Tag> GetTagBySlugAsync(string slug)
         {
             if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
 
-            var tags = await this.GetTagsAsync();
+            var tags = await GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {

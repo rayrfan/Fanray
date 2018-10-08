@@ -133,7 +133,7 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> Tag(string slug)
         {
-            var tag = await _blogSvc.GetTagAsync(slug);
+            var tag = await _blogSvc.GetTagBySlugAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);

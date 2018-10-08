@@ -152,13 +152,13 @@ namespace Fan.Blog.UnitTests.Services
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.GetTagAsync(string)"/> either by id or by slug throws exception if not found.
+        /// Test <see cref="BlogService.GetTagBySlugAsync(string)"/> either by id or by slug throws exception if not found.
         /// </summary>
         [Fact]
-        public async void GetTag_Throws_FanException_If_Not_Found()
+        public async void GetTagBySlug_Throws_FanException_If_Not_Found()
         {
             await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetTagAsync(100));
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetTagAsync("slug-not-exist"));
+            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetTagBySlugAsync("slug-not-exist"));
         }
 
         ///// <summary>

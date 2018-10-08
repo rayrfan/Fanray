@@ -93,7 +93,7 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
-        Task<Tag> GetTagAsync(string slug);
+        Task<Tag> GetTagBySlugAsync(string slug);
         /// <summary>
         /// Returns all tags, cached after calls to DAL.
         /// </summary>
