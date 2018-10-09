@@ -24,7 +24,7 @@ namespace Fan.Blog.UnitTests.Base
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
-        protected BlogService _blogSvc;
+        protected BlogService _blogSvc; // we have test internal methods, thus not using IBlogService
         protected IDistributedCache _cache;
         protected ILogger<BlogService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
@@ -70,15 +70,15 @@ namespace Fan.Blog.UnitTests.Base
             var mediatorMock = new Mock<IMediator>();
 
             _blogSvc = new BlogService(
-                settingSvc, 
-                _catRepoMock.Object, 
-                _postRepoMock.Object, 
+                settingSvc,
+                _catRepoMock.Object,
+                _postRepoMock.Object,
                 _tagRepoMock.Object,
                 mediaSvcMock.Object,
                 storageProviderMock.Object,
                 appSettingsMock.Object,
-                _cache, 
-                _loggerBlogSvc, 
+                _cache,
+                _loggerBlogSvc,
                 mapper,
                 shortcodeSvc.Object,
                 mediatorMock.Object);
