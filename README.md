@@ -91,6 +91,8 @@ Fanray is in its early stages and requires support to move ahead. You can contri
 
 ## Support
 
+Thank you for your support! Your contribution will help me put more time into the project.
+
 <a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
 ## License
