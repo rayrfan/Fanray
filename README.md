@@ -37,8 +37,8 @@
 ## Screenshots
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/633119/46259907-4369a100-c494-11e8-8680-ca422cccb2f0.png" title="Composer" />
-  <img src="https://user-images.githubusercontent.com/633119/46259930-8461b580-c494-11e8-848f-dd42fcf5c033.png" title="Clarity theme" />
+  <img src="https://user-images.githubusercontent.com/633119/46770572-c9f85c80-cca4-11e8-9e34-165ed3312619.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/46770810-c1545600-cca5-11e8-8745-220a0f32f2a8.png" title="Clarity theme" />
 </p>
 
 ## Features
