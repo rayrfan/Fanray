@@ -232,7 +232,8 @@ namespace Fan.Medias
                         {
                             if (resize.TargetSize != int.MaxValue) resizeCount++;
                             var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
-                            image.Quality = 75; // though 75 is default, having it here does make a difference on making output file size smaller!
+                            // setting the Quality is needed for having it here makes a difference for a smaller output file size!
+                            image.Quality = 85; // 75 is default
                             image.Resize(width, height);
 
                             await _storageProvider.SaveFileAsync(image.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
