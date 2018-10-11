@@ -7,9 +7,10 @@
 <blog-media></blog-media>
 
 @section ComponentScripts {
+    <script src="https://unpkg.com/vuex@3.0.1/dist/vuex.min.js"></script>
     <partial name="_BlogMediaTemplate" />
     <script>
-        let blogMediaMixin = {
+        let mediaMixin = {
             data: function () {
                 return {
                     images: @Html.Raw(Model.Data.ImagesJson),

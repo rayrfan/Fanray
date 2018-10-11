@@ -62,7 +62,7 @@ namespace Fan.Web.Pages.Admin
             public string Slug { get; set; }
             public string Excerpt { get; set; }
             public int CategoryId { get; set; }
-            public List<string> Tags { get; set; }
+            public List<string> Tags { get; set; } // titles, not slugs
             public bool Published { get; set; }
             public bool IsDraft { get; set; }
             public string DraftDate { get; set; }
@@ -277,6 +277,41 @@ namespace Fan.Web.Pages.Admin
             };
 
             return new JsonResult(postVM);
+        }
+
+        /// <summary>
+        /// Preview
+        /// </summary>
+        /// <param name="post"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnPostPreviewAsync([FromBody]PostVM post)
+        {
+            // prep blog post
+            List<Tag> tags = new List<Tag>();
+            foreach (var title in post.Tags) // titles
+            {
+                tags.Add(await _blogSvc.GetTagByTitleAsync(title));
+            }
+
+            var blogPost = new BlogPost
+            {
+                User = await _userManager.GetUserAsync(HttpContext.User),
+                UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
+                Category = await _blogSvc.GetCategoryAsync(post.CategoryId),
+                CreatedOn = GetCreatedOn(post.PostDate),
+                Tags = tags,
+                Slug = post.Slug.IsNullOrEmpty() ? "untitled" : post.Slug,
+                Excerpt = post.Excerpt,
+                Title = post.Title.IsNullOrEmpty() ? "Untitled" : post.Title,
+                Body = post.Body,
+            };
+
+            // prep TempData
+            var prevRelLink = BlogRoutes.GetPostPreviewRelativeLink(blogPost.CreatedOn, blogPost.Slug);
+            TempData.Put(prevRelLink, blogPost);
+
+            // return preview url
+            return new JsonResult($"{Request.Scheme}://{Request.Host}{prevRelLink}");
         }
 
         // -------------------------------------------------------------------- private methods

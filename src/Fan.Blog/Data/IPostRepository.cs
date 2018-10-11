@@ -27,19 +27,10 @@ namespace Fan.Blog.Data
         Task<Post> GetAsync(int id, EPostType type);
 
         /// <summary>
-        /// Returns a <see cref="Post"/> by slug. If it is a BlogPost it'll return together with its 
-        /// <see cref="Category"/> and <see cref="Tag"/>. Returns null if it's not found.
-        /// </summary>
-        /// <param name="slug"></param>
-        /// <param name="type">If it's BlogPost it'll return category and tags with it.</param>
-        /// <returns></returns>
-        Task<Post> GetAsync(string slug, EPostType type);
-
-        /// <summary>
         /// Returns a <see cref="EPostStatus.Published"/> <see cref="Post"/>, returns null if it's not found.
         /// </summary>
         Task<Post> GetAsync(string slug, int year, int month, int day);
-
+        
         /// <summary>
         /// Returns a list of posts and total post count by query or empty list if no posts found.
         /// </summary>

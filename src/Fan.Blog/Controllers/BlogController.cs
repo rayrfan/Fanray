@@ -1,7 +1,10 @@
-﻿using Fan.Blog.Models;
+﻿using Fan.Blog.Helpers;
+using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.ViewModels;
+using Fan.Helpers;
 using Fan.Settings;
+using Fan.Shortcodes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -21,16 +24,19 @@ namespace Fan.Blog.Controllers
         private readonly ISettingService _settingSvc;
         private readonly ILogger<BlogController> _logger;
         private readonly IDistributedCache _cache;
+        private readonly IShortcodeService _shortcodeSvc;
 
         public BlogController(
             IBlogService blogService,
             ISettingService settingService,
             IDistributedCache cache,
+            IShortcodeService shortcodeService,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
             _settingSvc = settingService;
             _cache = cache;
+            _shortcodeSvc = shortcodeService;
             _logger = logger;
         }
 
@@ -77,6 +83,39 @@ namespace Fan.Blog.Controllers
             return View(vm);
         }
 
+        /// <summary>
+        /// Returns previewing of a single post.  
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="day"></param>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Preview(int year, int month, int day, string slug)
+        {
+            try
+            {
+                // Get back blog post from TempData
+                DateTime dt = new DateTime(year, month, day);
+                var link = BlogRoutes.GetPostPreviewRelativeLink(dt, slug);
+                var blogPost = TempData.Get<BlogPost>(link);
+
+                // Prep it
+                blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
+                var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+                var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
+
+                // Show it
+                return View("Post", vm);
+            }
+            catch(Exception)
+            {
+                // when user access the preview link directly or when user clicks on other links 
+                // and navigates away during the preview, hacky need to find a better way.
+                return RedirectToAction("ErrorCode", "Home", new { statusCode = 404 });
+            }
+        }
+
         public async Task<IActionResult> PostPerma(int id)
         {
             var post = await _blogSvc.GetPostAsync(id);
@@ -94,7 +133,7 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> Tag(string slug)
         {
-            var tag = await _blogSvc.GetTagAsync(slug);
+            var tag = await _blogSvc.GetTagBySlugAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);

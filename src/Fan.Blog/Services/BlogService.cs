@@ -56,7 +56,7 @@ namespace Fan.Blog.Services
             ILogger<BlogService> logger,
             IMapper mapper,
             IShortcodeService shortcodeService,
-            IMediator mediator) 
+            IMediator mediator)
         {
             _settingSvc = settingService;
             _catRepo = catRepo;
@@ -85,7 +85,7 @@ namespace Fan.Blog.Services
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
 
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS); 
+            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
 
             return category;
         }
@@ -246,17 +246,36 @@ namespace Fan.Blog.Services
         /// <summary>
         /// Returns tag by slug, throws <see cref="FanException"/> if tag with slug is not found.
         /// </summary>
-        /// <param name="slug"></param>
+        /// <param name="slug">Tag slug.</param>
         /// <returns></returns>
-        public async Task<Tag> GetTagAsync(string slug)
+        public async Task<Tag> GetTagBySlugAsync(string slug)
         {
             if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
 
-            var tags = await this.GetTagsAsync();
+            var tags = await GetTagsAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException($"Tag '{slug}' does not exist.");
+                throw new FanException($"Tag with slug '{slug}' does not exist.");
+            }
+
+            return tag;
+        }
+
+        /// <summary>
+        /// Returns tag by title, throws <see cref="FanException"/> if tag with title is not found.
+        /// </summary>
+        /// <param name="title">Tag title.</param>
+        /// <returns></returns>
+        public async Task<Tag> GetTagByTitleAsync(string title)
+        {
+            if (title.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+
+            var tags = await GetTagsAsync();
+            var tag = tags.SingleOrDefault(c => c.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+            if (tag == null)
+            {
+                throw new FanException($"Tag with title '{title}' does not exist.");
             }
 
             return tag;
@@ -287,6 +306,11 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// Currently when you update a tag with no change, it throws exception saying the tag you 
+        /// are updating exists already. This is really leaving to the caller not to update a tag 
+        /// with no change.
+        /// </remarks>
         public async Task<Tag> UpdateTagAsync(Tag tag)
         {
             tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
@@ -400,7 +424,7 @@ namespace Fan.Blog.Services
 
         private async Task DeleteImageFileAsync(Media media, EImageSize size)
         {
-            var path = GetImagePath(media.UploadedOn, size); 
+            var path = GetImagePath(media.UploadedOn, size);
             await _storageProvider.DeleteFileAsync(media.FileName, path, IMAGE_PATH_SEPARATOR);
         }
 
@@ -604,7 +628,7 @@ namespace Fan.Blog.Services
             Category defaultCat = null;
             try
             {
-                defaultCat = await GetCategoryAsync(blogSettings.DefaultCategoryId);            
+                defaultCat = await GetCategoryAsync(blogSettings.DefaultCategoryId);
             }
             catch (FanException)
             {
@@ -653,7 +677,7 @@ namespace Fan.Blog.Services
             }
 
             // get BlogPost back
-            blogPost =  await GetPostAsync(post.Id);
+            blogPost = await GetPostAsync(post.Id);
 
             // raise event
             await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
@@ -918,7 +942,7 @@ namespace Fan.Blog.Services
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
 
             // CreatedOn
-            if (createOrUpdate == ECreateOrUpdate.Create) 
+            if (createOrUpdate == ECreateOrUpdate.Create)
             {
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
@@ -995,7 +1019,7 @@ namespace Fan.Blog.Services
                         // would fail with SqlServer, though during testing it worked with Sqlite In-Mem!!
                         // The reason is allTags are not tracked, you will receive the following exception
                         // SqlException: Cannot insert explicit value for identity column in table 'Tag' when IDENTITY_INSERT is set to OFF.
-                        
+
                         //post.PostTags.Add(new PostTag { Post = post, Tag = tag });  // does not work with SqlServer
                         post.PostTags.Add(new PostTag { Post = post, TagId = tag.Id });
                     }
@@ -1051,7 +1075,7 @@ namespace Fan.Blog.Services
             if (blogPost.UpdatedOn.HasValue)
             {
                 blogPost.UpdatedOnDisplay =
-                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy"); 
+                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy");
             }
 
             // Title
@@ -1092,7 +1116,7 @@ namespace Fan.Blog.Services
         /// when doing an update on post, then it will alter it accordingly. Please see the test case
         /// on this method.
         /// </remarks>
-        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
+        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId)
         {
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)

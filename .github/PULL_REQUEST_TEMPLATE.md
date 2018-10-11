@@ -1,10 +1,4 @@
-### Prerequisites
-
-- [ ] I have written a descriptive pull-request title
-- [ ] I have verified that there are no overlapping [pull-requests](https://github.com/FanrayMedia/Fanray/pulls) open
-- [ ] I have provided unit/integration tests for my change (where applicable)
-
-### Description
-<!-- A description of the changes proposed in the pull-request -->
-
-<!-- Thanks for contributing to Fanray! -->
+<!-- 1. Make sure there are no overlapping PRs -->
+<!-- 2. Provide a descriptive PR title -->
+<!-- 3. Don't forget unit/integration tests if any for your changes -->
+<!-- 4. Finally give a description of the changes proposed in your PR below -->

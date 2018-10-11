@@ -7,6 +7,7 @@ namespace Fan.Blog.Helpers
     public static class BlogRoutes
     {
         private const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
+        private const string PREVIEW_POST_RELATIVE_URL_TEMPLATE = "preview/post/{0}/{1}/{2}/{3}";
         private const string POST_PERMA_URL_TEMPLATE = "post/{0}";
         private const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
         private const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
@@ -23,6 +24,17 @@ namespace Fan.Blog.Helpers
         public static string GetPostRelativeLink(DateTimeOffset dt, string slug)
         {
             return string.Format("/" + POST_RELATIVE_URL_TEMPLATE, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
+        }
+
+        /// <summary>
+        /// Returns a blog post's preview relative link that starts with "/".
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public static string GetPostPreviewRelativeLink(DateTimeOffset dt, string slug)
+        {
+            return string.Format("/" + PREVIEW_POST_RELATIVE_URL_TEMPLATE, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
         }
 
         /// <summary>
@@ -99,6 +111,10 @@ namespace Fan.Blog.Helpers
 
             routes.MapRoute("BlogPost", string.Format(POST_RELATIVE_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
+                new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
+
+            routes.MapRoute("BlogPreview", string.Format(PREVIEW_POST_RELATIVE_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
+                new { controller = "Blog", action = "Preview", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
             // "posts/categorized/technology" shows posts in technology category
