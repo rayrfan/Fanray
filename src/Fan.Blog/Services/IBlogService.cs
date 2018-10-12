@@ -93,7 +93,13 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
-        Task<Tag> GetTagAsync(string slug);
+        Task<Tag> GetTagBySlugAsync(string slug);
+        /// <summary>
+        /// Returns tag by title, throws <see cref="FanException"/> if tag with title is not found.
+        /// </summary>
+        /// <param name="title">Tag title.</param>
+        /// <returns></returns>
+        Task<Tag> GetTagByTitleAsync(string title);
         /// <summary>
         /// Returns all tags, cached after calls to DAL.
         /// </summary>
@@ -224,6 +230,6 @@ namespace Fan.Blog.Services
         /// <summary>
         /// Sets up the blog for the first time on initial launch.
         /// </summary>
-        Task SetupAsync();        
+        Task SetupAsync();
     }
 }

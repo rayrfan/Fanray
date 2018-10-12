@@ -4,23 +4,20 @@ about: "Create a report to help us improve \U0001F914."
 
 ---
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
+<!-- ⚠️ Make sure to check the open and closed issues before submitting yours! -->
 
-**What is the current behavior?**
-<!--A clear description of what the bug is.-->
+**Current behavior**
 
 
-**Steps to reproduce the problem**
+**Steps to reproduce**
 1.
 2.
 3.
 
-**What is the expected behavior?**
+**Expected behavior**
 
 
 **Screenshots**
-<!--If applicable, add screenshots to help explain your problem.-->
 
 
 **Additional notes**
-<!--Anything else people should be aware of, maybe your environment etc.-->

@@ -24,6 +24,20 @@ namespace Fan.Blog.UnitTests.Helpers
         }
 
         /// <summary>
+        /// Test <see cref="BlogRoutes.GetPostPreviewRelativeLink(DateTimeOffset, string)"/> method.
+        /// </summary>
+        [Fact]
+        public void GetPostPreviewRelativeLink_returns_relative_link_starts_with_slash()
+        {
+            var createdOn = new DateTimeOffset(2018, 9, 9, 0, 0, 0, TimeSpan.Zero);
+            var slug = "my-post";
+            var relativeLink = BlogRoutes.GetPostPreviewRelativeLink(createdOn, slug);
+
+            Assert.StartsWith("/", relativeLink);
+            Assert.Equal("/preview/post/2018/09/09/my-post", relativeLink);
+        }
+
+        /// <summary>
         /// Test <see cref="BlogRoutes.GetPostPermalink(int)"/> method.
         /// </summary>
         [Fact]

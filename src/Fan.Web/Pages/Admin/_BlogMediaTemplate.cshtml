@@ -23,13 +23,13 @@
                    v-show="this.selectedImages.length > 0">
                 <v-icon>delete</v-icon>
             </v-btn>
-            <v-btn @@click="$root.insertImages(selectedImages)"
+            <v-btn @@click="insertImages"
                    color="info"
                    v-show="this.selectedImages.length > 0 && this.isEditor">
                 Insert
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn @@click.stop="$root.mediaDialogVisible = false"
+            <v-btn @@click.stop="closeMediaDialog"
                    color="info"
                    v-show="this.isEditor">
                 Close
@@ -46,7 +46,7 @@
                         d-flex>
                     <v-hover>
                         <v-img :src="image.urlSmall"
-                               @@click="selectImage(image)"
+                               @@click="clickImage(image)"
                                aspect-ratio="1"
                                class="img-square grey lighten-2"
                                slot-scope="{ hover }">

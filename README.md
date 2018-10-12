@@ -37,8 +37,8 @@
 ## Screenshots
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/633119/46259907-4369a100-c494-11e8-8680-ca422cccb2f0.png" title="Composer" />
-  <img src="https://user-images.githubusercontent.com/633119/46259930-8461b580-c494-11e8-848f-dd42fcf5c033.png" title="Clarity theme" />
+  <img src="https://user-images.githubusercontent.com/633119/46770572-c9f85c80-cca4-11e8-9e34-165ed3312619.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/46770810-c1545600-cca5-11e8-8745-220a0f32f2a8.png" title="Clarity theme" />
 </p>
 
 ## Features
@@ -87,9 +87,11 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc. Check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).  Let me know of any questions or feedbacks on twitter [@fanraymedia](https://twitter.com/FanrayMedia) or [gitter](https://gitter.im/Fanray-project/Fanray).
+Fanray is in its early stages and requires support to move ahead. The simplest way to contribute is just to use the app and give feedback.  If you are interested in joining the development please check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).  Let me know what you think on twitter [@fanraymedia](https://twitter.com/fanraymedia) or [gitter](https://gitter.im/Fanray-project/Fanray).
 
 ## Support
+
+Thank you for your support! Your contribution will help me put more time into the project.
 
 <a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 

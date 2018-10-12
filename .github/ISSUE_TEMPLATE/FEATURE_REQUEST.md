@@ -4,4 +4,4 @@ about: "Suggest an idea for this project \U0001F4A1!"
 
 ---
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
+<!-- ⚠️ Make sure to check the open and closed issues before submitting yours! -->
