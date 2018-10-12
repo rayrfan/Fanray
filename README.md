@@ -87,7 +87,7 @@ The blog setup page will show up on initial launch, simply fill the form out and
 
 ## Contribute
 
-Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, tests, docs etc. Check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).  Let me know of any questions or feedbacks on twitter [@fanraymedia](https://twitter.com/FanrayMedia) or [gitter](https://gitter.im/Fanray-project/Fanray).
+Fanray is in its early stages and requires support to move ahead. The simplest way to contribute is just to use the app and give feedback.  If you are interested in joining the development please check out the [Contributing Guide](CONTRIBUTING.md) and [Roadmap](https://github.com/FanrayMedia/Fanray/wiki/Roadmap).  Let me know what you think on twitter [@fanraymedia](https://twitter.com/fanraymedia) or [gitter](https://gitter.im/Fanray-project/Fanray).
 
 ## Support
 
