@@ -9,9 +9,6 @@ namespace Fan.Helpers
     /// </summary>
     public class OembedParser
     {
-        public const string YOUTUBE_URL_SEG_SHORT = "youtu.be/";
-        public const string VIMEO_URL_SEG = "vimeo.com/";
-
         /// <summary>
         /// Given a post body of html, parses any oembeds in it and returns new body with proper embed html.
         /// </summary>
@@ -72,9 +69,7 @@ namespace Fan.Helpers
         /// <returns></returns>
         public static string GetYouTubeEmbed(string url)
         {
-            var key = url.Contains(YOUTUBE_URL_SEG_SHORT) ? 
-                url.Substring(url.LastIndexOf(YOUTUBE_URL_SEG_SHORT) + YOUTUBE_URL_SEG_SHORT.Length) : 
-                url.Substring(url.LastIndexOf("youtube.com/watch?v=") + "youtube.com/watch?v=".Length);
+            var key = GetYouTubeVideoKey(url);
             var urlEmbed = $"https://www.youtube.com/embed/{key}";
 
             var widthSeg = "width=\"800\"";
@@ -113,6 +108,8 @@ namespace Fan.Helpers
         /// <returns></returns>
         public static string GetVimeoEmbed(string url)
         {
+            const string VIMEO_URL_SEG = "vimeo.com/";
+
             var key = url.Substring(url.LastIndexOf(VIMEO_URL_SEG) + VIMEO_URL_SEG.Length);
             var urlEmbed = $"https://player.vimeo.com/video/{key}";
 
@@ -127,11 +124,30 @@ namespace Fan.Helpers
         /// <returns></returns>
         public static EEmbedType GetOembedType(string url)
         {
-            if (url.Contains(YOUTUBE_URL_SEG_SHORT) || url.Contains("youtube.com/")) return EEmbedType.YouTube;
+            if (url.Contains("youtu.be/") || url.Contains("youtube.com/")) return EEmbedType.YouTube;
             if (url.Contains("vimeo.com/")) return EEmbedType.Vimeo;
             //if (url.Contains("twitter.com/")) return EEmbedType.Twitter;
 
             return EEmbedType.Unknown;
+        }
+
+        /// <summary>
+        /// Given a youtube url returns the key of the video.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string GetYouTubeVideoKey(string url)
+        {
+            const string SHORTENED_URL = "youtu.be/";
+            const string NAVIGATION_URL = "youtube.com/watch?v=";
+            const string EMBED_URL = "youtube.com/embed/";
+
+            string segment = "";
+            if (url.Contains(SHORTENED_URL)) segment = SHORTENED_URL;
+            else if (url.Contains(NAVIGATION_URL)) segment = NAVIGATION_URL;
+            else if (url.Contains(EMBED_URL)) segment = EMBED_URL;
+
+            return segment.IsNullOrEmpty() ? "" : url.Substring(url.LastIndexOf(segment) + segment.Length);
         }
     }
 

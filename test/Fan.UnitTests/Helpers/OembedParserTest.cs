@@ -31,6 +31,7 @@ namespace Fan.UnitTests.Helpers
 
         [Theory]
         [InlineData("https://www.youtube.com/watch?v=MNor4dYXa6U")]
+        [InlineData("https://www.youtube.com/embed/MNor4dYXa6U")]
         [InlineData("https://youtu.be/MNor4dYXa6U")]
         public void GetYouTubeEmbed_returns_youtube_embed_html(string url)
         {
