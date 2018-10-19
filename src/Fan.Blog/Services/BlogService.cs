@@ -1097,6 +1097,9 @@ namespace Fan.Blog.Services
             // Shortcodes
             blogPost.Body = parseShortcode ? _shortcodeSvc.Parse(post.Body) : post.Body;
 
+            // Embeds
+            blogPost.Body = parseShortcode ? OembedParser.Parse(blogPost.Body) : blogPost.Body;
+
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
         }

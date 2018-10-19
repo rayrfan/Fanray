@@ -102,6 +102,7 @@ namespace Fan.Blog.Controllers
 
                 // Prep it
                 blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
+                blogPost.Body = OembedParser.Parse(blogPost.Body);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
                 var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
 
