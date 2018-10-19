@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Blog.Tags;
 using Fan.Blog.ViewModels;
 using Fan.Helpers;
 using Fan.Settings;
@@ -21,6 +22,7 @@ namespace Fan.Blog.Controllers
     public class BlogController : Controller
     {
         private readonly IBlogService _blogSvc;
+        private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<BlogController> _logger;
         private readonly IDistributedCache _cache;
@@ -28,12 +30,14 @@ namespace Fan.Blog.Controllers
 
         public BlogController(
             IBlogService blogService,
+            ITagService tagService,
             ISettingService settingService,
             IDistributedCache cache,
             IShortcodeService shortcodeService,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _tagSvc = tagService;
             _settingSvc = settingService;
             _cache = cache;
             _shortcodeSvc = shortcodeService;
@@ -134,7 +138,7 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> Tag(string slug)
         {
-            var tag = await _blogSvc.GetTagBySlugAsync(slug);
+            var tag = await _tagSvc.GetTagBySlugAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);

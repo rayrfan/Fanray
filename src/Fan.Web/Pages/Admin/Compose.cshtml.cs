@@ -2,6 +2,7 @@
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Blog.Tags;
 using Fan.Helpers;
 using Fan.Medias;
 using Fan.Membership;
@@ -29,6 +30,7 @@ namespace Fan.Web.Pages.Admin
     public class ComposeModel : PageModel
     {
         private readonly IBlogService _blogSvc;
+        private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
@@ -38,11 +40,13 @@ namespace Fan.Web.Pages.Admin
         public ComposeModel(
             UserManager<User> userManager,
             IBlogService blogService,
+            ITagService tagService,
             IMediaService mediaSvc,
             ISettingService settingService)
         {
             _userManager = userManager;
             _blogSvc = blogService;
+            _tagSvc = tagService;
             _mediaSvc = mediaSvc;
             _settingSvc = settingService;
         }
@@ -160,7 +164,7 @@ namespace Fan.Web.Pages.Admin
             CatsJson = JsonConvert.SerializeObject(allCats);
 
             // tags
-            var tags = await _blogSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetTagsAsync();
             var allTags = tags.Select(t => t.Title).ToArray();
             TagsJson = JsonConvert.SerializeObject(allTags);
         }
@@ -290,7 +294,7 @@ namespace Fan.Web.Pages.Admin
             List<Tag> tags = new List<Tag>();
             foreach (var title in post.Tags) // titles
             {
-                tags.Add(await _blogSvc.GetTagByTitleAsync(title));
+                tags.Add(await _tagSvc.GetTagByTitleAsync(title));
             }
 
             var blogPost = new BlogPost

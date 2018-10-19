@@ -2,6 +2,7 @@
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Blog.Tags;
 using Fan.Medias;
 using Fan.Membership;
 using Fan.Settings;
@@ -20,6 +21,7 @@ namespace Fan.Blog.MetaWeblog
         private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
+        private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
 
@@ -27,12 +29,14 @@ namespace Fan.Blog.MetaWeblog
             IUserService userService,
             SignInManager<User> signInManager,
             IBlogService blogSvc,
+            ITagService tagService,
             ISettingService settingService,
             ILogger<MetaWeblogService> logger)
         {
             _userSvc = userService;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
+            _tagSvc = tagService;
             _settingSvc = settingService;
             _logger = logger;
         }
@@ -218,7 +222,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var keywords = new List<string>();
-                var tags = await _blogSvc.GetTagsAsync();
+                var tags = await _tagSvc.GetTagsAsync();
                 foreach (var tag in tags)
                 {
                     keywords.Add(tag.Title);

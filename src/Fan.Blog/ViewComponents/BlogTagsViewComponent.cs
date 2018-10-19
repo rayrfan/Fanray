@@ -1,4 +1,5 @@
 ﻿using Fan.Blog.Services;
+using Fan.Blog.Tags;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,10 +11,10 @@ namespace Fan.Blog.ViewComponents
     /// </summary>
     public class BlogTagsViewComponent : ViewComponent
     {
-        private readonly IBlogService _blogSvc;
-        public BlogTagsViewComponent(IBlogService blogService)
+        private readonly ITagService _tagSvc;
+        public BlogTagsViewComponent(ITagService tagService)
         {
-            _blogSvc = blogService;
+            _tagSvc = tagService;
         }
 
         /// <summary>
@@ -22,7 +23,7 @@ namespace Fan.Blog.ViewComponents
         /// <returns></returns>
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var tags = (await _blogSvc.GetTagsAsync()).Where(t => t.Count > 0);
+            var tags = (await _tagSvc.GetTagsAsync()).Where(t => t.Count > 0);
             return View(tags);
         }
     }

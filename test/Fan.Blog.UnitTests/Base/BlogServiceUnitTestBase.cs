@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Services;
+using Fan.Blog.Tags;
 using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
@@ -29,6 +30,9 @@ namespace Fan.Blog.UnitTests.Base
         protected ILogger<BlogService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
         protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
+
+        protected ITagService _tagSvc;
+        protected ILogger<TagService> _loggerTagSvc;
 
         /// <summary>
         /// Base constructor which will be called first for each test in derived test classes, thus
@@ -82,6 +86,10 @@ namespace Fan.Blog.UnitTests.Base
                 mapper,
                 shortcodeSvc.Object,
                 mediatorMock.Object);
+
+            // tag service
+            _loggerTagSvc = loggerFactory.CreateLogger<TagService>();
+            _tagSvc = new TagService(_tagRepoMock.Object, mediatorMock.Object, _cache, _loggerTagSvc);
         }
     }
 }

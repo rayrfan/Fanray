@@ -1,6 +1,7 @@
-﻿using Fan.Blog.UnitTests.Base;
+﻿using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Tags;
+using Fan.Blog.UnitTests.Base;
 using Fan.Data;
 using Fan.Exceptions;
 using Moq;
@@ -11,12 +12,12 @@ using Xunit;
 
 namespace Fan.Blog.UnitTests.Services
 {
-    public class TagTest : BlogServiceUnitTestBase
+    public class TagServiceTest : BlogServiceUnitTestBase
     {
         /// <summary>
         /// Setting up existing tags.
         /// </summary>
-        public TagTest()
+        public TagServiceTest()
         {
             // blog settings
             _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
@@ -29,7 +30,7 @@ namespace Fan.Blog.UnitTests.Services
         }
 
         /// <summary>
-        /// User can only input title and description no slug when create a tag, <see cref="BlogService.CreateTagAsync(Tag)"/>.
+        /// User can only input title and description no slug when create a tag, <see cref="ITagService.CreateTagAsync(Tag)"/>.
         /// </summary>
         /// <param name="title"></param>
         /// <param name="expectSlug"></param>
@@ -43,14 +44,14 @@ namespace Fan.Blog.UnitTests.Services
             _tagRepoMock.Setup(repo => repo.CreateAsync(It.IsAny<Tag>())).Returns(Task.FromResult(tag));
 
             // Act: when we create it
-            tag = await _blogSvc.CreateTagAsync(tag);
+            tag = await _tagSvc.CreateTagAsync(tag);
 
             // Assert: then it has the expected slug
             Assert.Equal(expectSlug, tag.Slug);
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.CreateTagAsync(Tag)"/> throws excpetion if title exists already.
+        /// Test <see cref="ITagService.CreateTagAsync(Tag)"/> throws excpetion if title exists already.
         /// </summary>
         [Fact]
         public async void CreateTag_Throws_FanException_If_Title_Already_Exist()
@@ -59,23 +60,21 @@ namespace Fan.Blog.UnitTests.Services
             var tag = new Tag { Title = "Technology" };
 
             // Act and Assert: when we create it, we get exception
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.CreateTagAsync(tag));
+            await Assert.ThrowsAsync<FanException>(() => _tagSvc.CreateTagAsync(tag));
 
             // Act and Assert: error message
             try
             {
-                await _blogSvc.CreateTagAsync(tag);
+                await _tagSvc.CreateTagAsync(tag);
             }
             catch (FanException ex)
             {
-                Assert.Equal("Failed to create Tag.", ex.Message);
-                Assert.Equal(1, ex.ValidationFailures.Count);
-                Assert.Equal("'Technology' already exists.", ex.ValidationFailures[0].ErrorMessage);
+                Assert.Equal("'Technology' already exists.", ex.Message);
             }
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.CreateTagAsync(Tag)"/> a title in Chinese with no manual slug yields a 6-char random string.
+        /// Test <see cref="ITagService.CreateTagAsync(Tag)"/> a title in Chinese with no manual slug yields a 6-char random string.
         /// </summary>
         /// <remarks>
         /// User can name a category in any language, the algorithm for generating slug will give a 6-char slug.
@@ -88,14 +87,14 @@ namespace Fan.Blog.UnitTests.Services
             _tagRepoMock.Setup(repo => repo.CreateAsync(It.IsAny<Tag>())).Returns(Task.FromResult(tag));
 
             // Act: when we create it
-            tag = await _blogSvc.CreateTagAsync(tag);
+            tag = await _tagSvc.CreateTagAsync(tag);
 
             // Assert: then it has the expected slug length
             Assert.Equal(6, tag.Slug.Length);
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.CreateTagAsync(Tag)"/> would call TagRepository's CreateAsync and invalidates cache for all tags.
+        /// Test <see cref="ITagService.CreateTagAsync(Tag)"/> would call TagRepository's CreateAsync and invalidates cache for all tags.
         /// </summary>
         [Fact]
         public async void CreateTag_Calls_TagRepository_CreateAsync_And_Invalidates_Cache_For_AllTags()
@@ -104,49 +103,49 @@ namespace Fan.Blog.UnitTests.Services
             var tag = new Tag { Title = "Tag1" };
 
             // Act
-            await _blogSvc.CreateTagAsync(tag);
+            await _tagSvc.CreateTagAsync(tag);
 
             // Assert
             _tagRepoMock.Verify(repo => repo.CreateAsync(It.IsAny<Tag>()), Times.Exactly(1));
-            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_TAGS));
+            Assert.Null(await _cache.GetAsync(BlogCache.KEY_ALL_TAGS));
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.DeleteTagAsync(int)"/> calls TagRepository Delete method.
+        /// Test <see cref="ITagService.DeleteTagAsync(int)"/> calls TagRepository Delete method.
         /// </summary>
         [Fact]
         public async void DeleteTag_Calls_TagRepository_DeleteAsync_And_Invalidates_Cache_For_AllTags()
         {
             // Act
-            await _blogSvc.DeleteTagAsync(1);
+            await _tagSvc.DeleteTagAsync(1);
 
             // Assert
             _tagRepoMock.Verify(repo => repo.DeleteAsync(It.IsAny<int>()), Times.Exactly(1));
-            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_TAGS));
+            Assert.Null(await _cache.GetAsync(BlogCache.KEY_ALL_TAGS));
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.GetTagBySlugAsync(string)"/> either by id or by slug throws exception if not found.
+        /// Test <see cref="ITagService.GetTagBySlugAsync(string)"/> either by id or by slug throws exception if not found.
         /// </summary>
         [Fact]
         public async void GetTagBySlug_Throws_FanException_If_Not_Found()
         {
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetTagAsync(100));
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetTagBySlugAsync("slug-not-exist"));
+            await Assert.ThrowsAsync<FanException>(() => _tagSvc.GetTagAsync(100));
+            await Assert.ThrowsAsync<FanException>(() => _tagSvc.GetTagBySlugAsync("slug-not-exist"));
         }
 
         /// <summary>
-        /// Test updating an existing tag with new title, <see cref="BlogService.UpdateTagAsync(Tag)"/>.
+        /// Test updating an existing tag with new title, <see cref="ITagService.UpdateTagAsync(Tag)"/>.
         /// </summary>
         [Fact]
         public async void Update_an_existing_tag_with_new_title()
         {
             // Arrange: get the mocked tag
-            var techTag = await _blogSvc.GetTagAsync(1);
+            var techTag = await _tagSvc.GetTagAsync(1);
 
             // Act: update
             techTag.Title = "Tech";
-            techTag = await _blogSvc.UpdateTagAsync(techTag);
+            techTag = await _tagSvc.UpdateTagAsync(techTag);
 
             // Assert
             Assert.Equal("Tech", techTag.Title);
@@ -154,49 +153,39 @@ namespace Fan.Blog.UnitTests.Services
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.UpdateTagAsync(Tag)"/> throws excpetion if title exists already.
-        /// Currently when you update a tag with no change, it throws exception saying the tag you 
-        /// are updating exists already. This is really leaving to the caller not to update a tag 
-        /// with no change.
+        /// <see cref="ITagService.UpdateTagAsync(Tag)"/> treats tag title insensitively.
         /// </summary>
         [Fact]
-        public async void Update_tag_with_same_title_throws_FanException()
+        public async void Update_tag_with_title_changed_only_in_casing_is_OK()
         {
             // Arrange: get the mocked tag
-            var techTag = await _blogSvc.GetTagAsync(1);
-            techTag.Title = "Technology";
+            var tag = await _tagSvc.GetTagAsync(1);
+            Assert.Equal("technology", tag.Title); // notice title is lowercase
 
-            // Act and Assert: when update it, we get exception
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.UpdateTagAsync(techTag));
+            // Act: here I change technology to Technology
+            tag.Title = "Technology";
 
-            // Act and Assert: error message
-            try
-            {
-                await _blogSvc.UpdateTagAsync(techTag);
-            }
-            catch (FanException ex)
-            {
-                Assert.Equal("Failed to update Tag.", ex.Message);
-                Assert.Equal(1, ex.ValidationFailures.Count);
-                Assert.Equal("'Technology' already exists.", ex.ValidationFailures[0].ErrorMessage);
-            }
+            // Update the same tag is ok
+            var tagAgain = await _tagSvc.UpdateTagAsync(tag);
+            Assert.Equal(1, tagAgain.Id);
+            Assert.Equal("Technology", tagAgain.Title);
         }
 
         /// <summary>
-        /// Test <see cref="BlogService.UpdateTagAsync(Tag)"/> would call TagRepository's UpdateAsync and invalidates cache for all tags.
+        /// Test <see cref="ITagService.UpdateTagAsync(Tag)"/> would call TagRepository's UpdateAsync and invalidates cache for all tags.
         /// </summary>
         [Fact]
         public async void UpdateTag_Calls_TagRepository_And_Invalidates_Cache_For_AllTags()
         {
             // Arrange 
-            var tag = new Tag { Title = "Tag1" };
+            var tag = await _tagSvc.GetTagAsync(1);
 
             // Act
-            await _blogSvc.UpdateTagAsync(tag);
+            await _tagSvc.UpdateTagAsync(tag);
 
             // Assert
             _tagRepoMock.Verify(repo => repo.UpdateAsync(It.IsAny<Tag>()), Times.Exactly(1));
-            Assert.Null(await _cache.GetAsync(BlogService.CACHE_KEY_ALL_TAGS));
+            Assert.Null(await _cache.GetAsync(BlogCache.KEY_ALL_TAGS));
         }
     }
 }
