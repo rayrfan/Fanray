@@ -1,10 +1,11 @@
-﻿using Fan.Blog.IntegrationTests.Helpers;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Tags;
 using Fan.IntegrationTests.Base;
+using Fan.Medias;
 using System;
 using System.Collections.Generic;
-using Fan.Medias;
 
 namespace Fan.Blog.IntegrationTests.Base
 {

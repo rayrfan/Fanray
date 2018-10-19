@@ -77,7 +77,6 @@ namespace Fan.Blog.UnitTests.Base
                 settingSvc,
                 _catRepoMock.Object,
                 _postRepoMock.Object,
-                _tagRepoMock.Object,
                 mediaSvcMock.Object,
                 storageProviderMock.Object,
                 appSettingsMock.Object,

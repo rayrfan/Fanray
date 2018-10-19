@@ -1,6 +1,4 @@
-﻿using Fan.Blog.Data;
-using Fan.Blog.Helpers;
-using Fan.Blog.Models;
+﻿using Fan.Blog.Helpers;
 using Fan.Blog.Posts;
 using Fan.Exceptions;
 using Fan.Helpers;

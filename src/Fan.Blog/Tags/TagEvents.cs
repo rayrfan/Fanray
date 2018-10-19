@@ -1,5 +1,4 @@
-﻿using Fan.Blog.Models;
-using MediatR;
+﻿using MediatR;
 
 namespace Fan.Blog.Tags
 {

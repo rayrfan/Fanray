@@ -1,10 +1,8 @@
-﻿using Fan.Blog.Services;
-using Fan.Blog.Tags;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.ViewComponents
+namespace Fan.Blog.Tags
 {
     /// <summary>
     /// The BlogTags view component.

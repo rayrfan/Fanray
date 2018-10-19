@@ -4,6 +4,7 @@ using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Posts;
+using Fan.Blog.Tags;
 using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
@@ -34,7 +35,6 @@ namespace Fan.Blog.Services
         private readonly ISettingService _settingSvc;
         private readonly ICategoryRepository _catRepo;
         private readonly IPostRepository _postRepo;
-        private readonly ITagRepository _tagRepo;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogService> _logger;
         private readonly IMapper _mapper;
@@ -48,7 +48,6 @@ namespace Fan.Blog.Services
             ISettingService settingService,
             ICategoryRepository catRepo,
             IPostRepository postRepo,
-            ITagRepository tagRepo,
             IMediaService mediaSvc,
             IStorageProvider storageProvider,
             IOptionsSnapshot<AppSettings> appSettings,
@@ -61,7 +60,6 @@ namespace Fan.Blog.Services
             _settingSvc = settingService;
             _catRepo = catRepo;
             _postRepo = postRepo;
-            _tagRepo = tagRepo;
             _mediaSvc = mediaSvc;
             _storageProvider = storageProvider;
             _appSettings = appSettings.Value;

@@ -1,10 +1,11 @@
 ﻿using Fan.Blog.Helpers;
+using Fan.Blog.Models;
 using Fan.Data;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Fan.Blog.Models
+namespace Fan.Blog.Tags
 {
     public class Tag : Entity, ITaxonomy
     {

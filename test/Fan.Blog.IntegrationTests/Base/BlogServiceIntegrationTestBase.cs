@@ -1,7 +1,6 @@
 ﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Posts;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
 using Fan.Data;
@@ -104,7 +103,6 @@ namespace Fan.Blog.IntegrationTests.Base
                 _settingSvcMock.Object,
                 catRepo,
                 postRepo,
-                tagRepo,
                 _mediaSvc,
                 _storageProviderMock.Object,
                 appSettingsMock.Object,

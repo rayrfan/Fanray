@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Helpers;
+using Fan.Blog.Tags;
 using System.Collections.Generic;
 
 namespace Fan.Blog.Models

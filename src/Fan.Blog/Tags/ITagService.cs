@@ -1,5 +1,4 @@
-﻿using Fan.Blog.Models;
-using Fan.Exceptions;
+﻿using Fan.Exceptions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.Data
+namespace Fan.Blog.Tags
 {
     /// <summary>
     /// Sql implementation of the <see cref="ITagRepository"/> contract.

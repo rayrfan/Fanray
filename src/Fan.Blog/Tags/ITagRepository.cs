@@ -1,9 +1,8 @@
-﻿using Fan.Blog.Models;
-using Fan.Data;
+﻿using Fan.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.Data
+namespace Fan.Blog.Tags
 {
     /// <summary>
     /// Contract for a tag repository.
