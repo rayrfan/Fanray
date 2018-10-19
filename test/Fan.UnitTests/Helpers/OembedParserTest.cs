@@ -30,6 +30,16 @@ namespace Fan.UnitTests.Helpers
         //}
 
         [Theory]
+        [InlineData("https://www.youtube.com/watch?v=MNor4dYXa6U&w=800&h=400&start=75", "MNor4dYXa6U&w=800&h=400&start=75")]
+        [InlineData("https://www.youtube.com/watch?v=MNor4dYXa6U&t=762s", "MNor4dYXa6U&start=762s")]
+        [InlineData("https://www.youtube.com/embed/MNor4dYXa6U&amp;t=726s", "MNor4dYXa6U&amp;start=726s")]
+        [InlineData("https://youtu.be/MNor4dYXa6U", "MNor4dYXa6U")]
+        public void GetYouTubeVideoKey_gets_key_from_url(string url, string expected)
+        {
+            Assert.Equal(expected, OembedParser.GetYouTubeVideoKey(url));
+        }
+
+        [Theory]
         [InlineData("https://www.youtube.com/watch?v=MNor4dYXa6U")]
         [InlineData("https://www.youtube.com/embed/MNor4dYXa6U")]
         [InlineData("https://youtu.be/MNor4dYXa6U")]
@@ -43,7 +53,7 @@ namespace Fan.UnitTests.Helpers
         [InlineData("https://www.youtube.com/watch?v=MNor4dYXa6U&w=800&h=400&start=75", 800, 400, 75)]
         public void GetYouTubeEmbed_returns_youtube_embed_html_with_size_and_start_info(string url, int width, int height, int start)
         {
-            string expected = $@"<iframe width=""{width}"" height=""{height}"" src =""https://www.youtube.com/embed/MNor4dYXa6U?start={75}"" frameborder =""0"" allow=""autoplay; encrypted - media"" allowfullscreen></iframe>";
+            string expected = $@"<iframe width=""{width}"" height=""{height}"" src =""https://www.youtube.com/embed/MNor4dYXa6U?start={start}"" frameborder =""0"" allow=""autoplay; encrypted - media"" allowfullscreen></iframe>";
             Assert.Equal(expected, OembedParser.GetYouTubeEmbed(url));
         }
 
