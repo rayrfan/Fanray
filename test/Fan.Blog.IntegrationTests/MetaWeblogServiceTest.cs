@@ -36,12 +36,13 @@ namespace Fan.Blog.IntegrationTests
                 userSvc,
                 new FakeSignInManager(contextAccessor.Object),
                 _blogSvc,
+                _tagSvc,
                 _settingSvcMock.Object,
                 loggerMetaSvc);
         }
 
         const string APP_KEY = "appKey";
-        const string USERNAME = Actor.AUTHOR_USERNAME;
+        const string USERNAME = Actor.ADMIN_USERNAME;
         const string PASSWORD = "password";
         const string ROOT_URL = "http://localhost";
         const string BLOG_ID = "1";
@@ -55,7 +56,7 @@ namespace Fan.Blog.IntegrationTests
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                AuthorId = Actor.AUTHOR_ID.ToString(),
+                AuthorId = Actor.ADMIN_ID.ToString(),
                 Categories = null,
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",
@@ -83,7 +84,7 @@ namespace Fan.Blog.IntegrationTests
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                AuthorId = Actor.AUTHOR_ID.ToString(),
+                AuthorId = Actor.ADMIN_ID.ToString(),
                 Categories = new List<string>(), // try empty
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",
@@ -114,7 +115,7 @@ namespace Fan.Blog.IntegrationTests
             SeedTestPost();
             var metaPost = new MetaPost
             {
-                AuthorId = Actor.AUTHOR_ID.ToString(),
+                AuthorId = Actor.ADMIN_ID.ToString(),
                 Categories = new List<string> { "Windows 10" },
                 CommentPolicy = null, // ??
                 Description = "<p>This is a post from OLW</p>",

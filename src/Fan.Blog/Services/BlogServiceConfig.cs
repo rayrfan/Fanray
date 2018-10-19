@@ -16,34 +16,13 @@ namespace Fan.Blog.Services
         /// </summary>
         public const string BLOG_APP_NAME = "Blog";
 
-        // -------------------------------------------------------------------- Cache
+        // -------------------------------------------------------------------- Posts
 
         /// <summary>
         /// By default show 10 posts per page.
         /// </summary>
         public const int DEFAULT_PAGE_SIZE = 10;
         public const int DEFAULT_PAGE_INDEX = 1;
-        public const string CACHE_KEY_ALL_CATS = "BlogCategories";
-        public const string CACHE_KEY_ALL_TAGS = "BlogTags";
-        public const string CACHE_KEY_POSTS_INDEX = "BlogPostsIndex";
-        public const string CACHE_KEY_ALL_ARCHIVES = "BlogArchives";
-        public const string CACHE_KEY_POST_COUNT = "BlogPostCount";
-        public static TimeSpan CacheTime_PostsIndex = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllCats = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_AllTags = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_Archives = new TimeSpan(0, 10, 0);
-        public static TimeSpan CacheTime_PostCount = new TimeSpan(0, 10, 0);
-
-        private async Task InvalidateAllBlogCache()
-        {
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
-            await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
-        }
-
-        // -------------------------------------------------------------------- Posts
 
         /// <summary>
         /// How many words to extract into excerpt from body. Default 55.
@@ -92,7 +71,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public static List<ImageResizeInfo> GetImageResizeList(DateTimeOffset uploadedOn)
         {
-           return new List<ImageResizeInfo> {
+            return new List<ImageResizeInfo> {
                 new ImageResizeInfo {
                     TargetSize = int.MaxValue,
                     Path = GetImagePath(uploadedOn, EImageSize.Original),

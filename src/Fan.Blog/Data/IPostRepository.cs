@@ -13,6 +13,23 @@ namespace Fan.Blog.Data
     public interface IPostRepository : IRepository<Post>
     {
         /// <summary>
+        /// Creates a <see cref="Post"/>.
+        /// </summary>
+        /// <param name="post">The post to create.</param>
+        /// <param name="tagTitles">A list of tag titles associated with the post.</param>
+        /// <returns>
+        /// The inserted post with id.
+        /// </returns>
+        Task<Post> CreateAsync(Post post, IEnumerable<string> tagTitles);
+
+        /// <summary>
+        /// Updates a <see cref="Post"/>.
+        /// </summary>
+        /// <param name="post">The post to update.</param>
+        /// <param name="tagTitles">A list of tag titles associated with the post.</param>
+        Task UpdateAsync(Post post, IEnumerable<string> tagTitles);
+
+        /// <summary>
         /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
         /// it will also delete all child pages.
         /// </summary>

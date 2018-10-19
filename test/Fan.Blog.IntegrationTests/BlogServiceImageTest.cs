@@ -48,7 +48,7 @@ namespace Fan.Blog.IntegrationTests
             SeedImages(filenameSlugged);
 
             // When user uploads an image with the same name
-            var media = await _blogSvc.UploadImageAsync(_sourceStream, Actor.AUTHOR_ID, filename, contentType, EUploadedFrom.Browser);
+            var media = await _blogSvc.UploadImageAsync(_sourceStream, Actor.ADMIN_ID, filename, contentType, EUploadedFrom.Browser);
 
             // Then a second record is inserted
             Assert.Equal(2, media.Id);

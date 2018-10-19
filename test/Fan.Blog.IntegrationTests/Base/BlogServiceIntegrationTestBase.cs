@@ -1,7 +1,10 @@
 ﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Posts;
 using Fan.Blog.Services;
+using Fan.Blog.Tags;
+using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -12,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Blog.IntegrationTests.Base
@@ -23,6 +25,7 @@ namespace Fan.Blog.IntegrationTests.Base
     public class BlogServiceIntegrationTestBase : BlogIntegrationTestBase
     {
         protected IBlogService _blogSvc;
+        protected ITagService _tagSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
         protected ILoggerFactory _loggerFactory;
@@ -70,27 +73,46 @@ namespace Fan.Blog.IntegrationTests.Base
 
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+            var loggerTagSvc = _loggerFactory.CreateLogger<TagService>();
 
-            // ---------------------------------------------------------------- Mapper, Shortcode, Mediator
+            // ---------------------------------------------------------------- Mapper, Shortcode
 
             var mapper = BlogUtil.Mapper;
             var shortcodeSvc = new Mock<IShortcodeService>();
-            var mediatorMock = new Mock<IMediator>();
+
+            // ---------------------------------------------------------------- MediatR
+
+            var services = new ServiceCollection();
+            services.AddScoped<ServiceFactory>(p => p.GetService);  // MediatR.ServiceFactory
+            services.AddSingleton<FanDbContext>(_db);               // DbContext for repos
+            services.AddSingleton<IDistributedCache>(cache);
+            services.AddSingleton<ILogger<TagService>>(loggerTagSvc);
+            services.AddScoped<ITagRepository, SqlTagRepository>(); // will get _db
+
+            services.Scan(scan => scan
+               .FromAssembliesOf(typeof(IMediator), typeof(IBlogService))
+               .AddClasses()
+               .AsImplementedInterfaces());
+
+            var provider = services.BuildServiceProvider();
+            var mediator = provider.GetRequiredService<IMediator>();
+
+            _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
 
             // the blog service
             _blogSvc = new BlogService(
-                _settingSvcMock.Object, 
-                catRepo, 
-                postRepo, 
+                _settingSvcMock.Object,
+                catRepo,
+                postRepo,
                 tagRepo,
                 _mediaSvc,
-                _storageProviderMock.Object, 
-                appSettingsMock.Object, 
-                cache, 
-                loggerBlogSvc, 
-                mapper, 
-                shortcodeSvc.Object, 
-                mediatorMock.Object);
+                _storageProviderMock.Object,
+                appSettingsMock.Object,
+                cache,
+                loggerBlogSvc,
+                mapper,
+                shortcodeSvc.Object,
+                mediator);
         }
     }
 }

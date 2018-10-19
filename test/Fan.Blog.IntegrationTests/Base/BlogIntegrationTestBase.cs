@@ -83,7 +83,7 @@ namespace Fan.Blog.IntegrationTests.Base
                 MediaType = EMediaType.Image,
                 UploadedFrom = EUploadedFrom.Browser,
                 UploadedOn = DateTimeOffset.UtcNow,
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 Width = 40,
             });
             _db.SaveChanges();
@@ -104,7 +104,7 @@ namespace Fan.Blog.IntegrationTests.Base
             {
                 Body = "A post body.",
                 Category = cat,
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "A published post",
@@ -141,7 +141,7 @@ namespace Fan.Blog.IntegrationTests.Base
                 {
                     Body = $"A post body #{i}.",
                     Category = cat,
-                    UserId = Actor.AUTHOR_ID,
+                    UserId = Actor.ADMIN_ID,
                     CreatedOn = new DateTimeOffset(new DateTime(2017, 01, i), new TimeSpan(-7, 0, 0)),
                     RootId = null,
                     Title = $"Test Post #{i}",

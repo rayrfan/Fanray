@@ -68,50 +68,6 @@ namespace Fan.Blog.Services
         /// <exception cref="FanException"></exception>
         Task<Category> UpdateCategoryAsync(Category category);
 
-        // -------------------------------------------------------------------- Tags
-
-        /// <summary>
-        /// Creates a <see cref="Tag"/>.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        Task<Tag> CreateTagAsync(Tag tag);
-        /// <summary>
-        /// Deletes a <see cref="Tag"/>.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task DeleteTagAsync(int id);
-        /// <summary>
-        /// Returns tag by id, throws <see cref="FanException"/> if tag with id is not found.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<Tag> GetTagAsync(int id);
-        /// <summary>
-        /// Returns tag by slug, throws <see cref="FanException"/> if tag with slug is not found.
-        /// </summary>
-        /// <param name="slug"></param>
-        /// <returns></returns>
-        Task<Tag> GetTagBySlugAsync(string slug);
-        /// <summary>
-        /// Returns tag by title, throws <see cref="FanException"/> if tag with title is not found.
-        /// </summary>
-        /// <param name="title">Tag title.</param>
-        /// <returns></returns>
-        Task<Tag> GetTagByTitleAsync(string title);
-        /// <summary>
-        /// Returns all tags, cached after calls to DAL.
-        /// </summary>
-        /// <returns></returns>
-        Task<List<Tag>> GetTagsAsync();
-        /// <summary>
-        /// Updates a <see cref="Tag"/>.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        Task<Tag> UpdateTagAsync(Tag tag);
-
         // -------------------------------------------------------------------- Archive 
 
         /// <summary>
@@ -224,12 +180,5 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <returns></returns>
         Task<PostCount> GetPostCountAsync();
-
-        // -------------------------------------------------------------------- Setup
-
-        /// <summary>
-        /// Sets up the blog for the first time on initial launch.
-        /// </summary>
-        Task SetupAsync();
     }
 }

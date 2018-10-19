@@ -246,7 +246,7 @@ namespace Fan.Blog.IntegrationTests
             {
                 Category = cat,
                 Body = "A post body.",
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",
@@ -282,7 +282,7 @@ namespace Fan.Blog.IntegrationTests
             var post = new Post
             {
                 Body = "A post body.",
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",

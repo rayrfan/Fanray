@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Fan.Blog.Data;
 using Fan.Blog.Enums;
-using Fan.Blog.Events;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Posts;
 using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
@@ -85,7 +85,7 @@ namespace Fan.Blog.Services
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
             category = await _catRepo.CreateAsync(category);
 
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
 
             return category;
         }
@@ -114,8 +114,8 @@ namespace Fan.Blog.Services
             }
 
             await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _cache.GetAsync(CACHE_KEY_ALL_CATS, CacheTime_AllCats, async () => {
+            return await _cache.GetAsync(BlogCache.KEY_ALL_CATS, BlogCache.Time_AllCats, async () => {
                 return await _catRepo.GetListAsync();
             });
         }
@@ -192,133 +192,10 @@ namespace Fan.Blog.Services
         {
             category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
             await _catRepo.UpdateAsync(category);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
             return category;
-        }
-
-        // -------------------------------------------------------------------- Tags
-
-        /// <summary>
-        /// Creates a <see cref="Tag"/> and invalidates cache for all tags.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        public async Task<Tag> CreateTagAsync(Tag tag)
-        {
-            tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Create) as Tag;
-            tag = await _tagRepo.CreateAsync(tag);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-
-            return tag;
-        }
-
-        /// <summary>
-        /// Deletes a <see cref="Tag"/> by id and invalidates cache for all tags.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task DeleteTagAsync(int id)
-        {
-            await _tagRepo.DeleteAsync(id);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-        }
-
-        /// <summary>
-        /// Returns tag by id, throws <see cref="FanException"/> if tag with id is not found.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<Tag> GetTagAsync(int id)
-        {
-            var tags = await GetTagsAsync();
-            var tag = tags.SingleOrDefault(c => c.Id == id);
-            if (tag == null)
-            {
-                throw new FanException($"Tag with id {id} is not found.");
-            }
-
-            return tag;
-        }
-
-        /// <summary>
-        /// Returns tag by slug, throws <see cref="FanException"/> if tag with slug is not found.
-        /// </summary>
-        /// <param name="slug">Tag slug.</param>
-        /// <returns></returns>
-        public async Task<Tag> GetTagBySlugAsync(string slug)
-        {
-            if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
-
-            var tags = await GetTagsAsync();
-            var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
-            if (tag == null)
-            {
-                throw new FanException($"Tag with slug '{slug}' does not exist.");
-            }
-
-            return tag;
-        }
-
-        /// <summary>
-        /// Returns tag by title, throws <see cref="FanException"/> if tag with title is not found.
-        /// </summary>
-        /// <param name="title">Tag title.</param>
-        /// <returns></returns>
-        public async Task<Tag> GetTagByTitleAsync(string title)
-        {
-            if (title.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
-
-            var tags = await GetTagsAsync();
-            var tag = tags.SingleOrDefault(c => c.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
-            if (tag == null)
-            {
-                throw new FanException($"Tag with title '{title}' does not exist.");
-            }
-
-            return tag;
-        }
-
-        /// <summary>
-        /// Returns all tags, cached after calls to DAL.
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>
-        /// This method must return all tags as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
-        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
-        /// it must be done in presentation layer.
-        /// 
-        /// TODO: currently create and update post depend on all tags instead for querying each tag 
-        /// individually to db each time, this saves some db round trip. however there is fine line
-        /// for how large the number of tags grow, in which case we need a better strategy.
-        /// </remarks>
-        public async Task<List<Tag>> GetTagsAsync()
-        {
-            return await _cache.GetAsync(CACHE_KEY_ALL_TAGS, CacheTime_AllTags, async () => {
-                return await _tagRepo.GetListAsync();
-            });
-        }
-
-        /// <summary>
-        /// Updates a <see cref="Tag"/> and invalidates cache for all tags.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Currently when you update a tag with no change, it throws exception saying the tag you 
-        /// are updating exists already. This is really leaving to the caller not to update a tag 
-        /// with no change.
-        /// </remarks>
-        public async Task<Tag> UpdateTagAsync(Tag tag)
-        {
-            tag = await PrepTaxonomyAsync(tag, ECreateOrUpdate.Update) as Tag;
-            await _tagRepo.UpdateAsync(tag);
-            await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-            await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-
-            return tag;
         }
 
         /// <summary>
@@ -343,12 +220,12 @@ namespace Fan.Blog.Services
             }
             else
             {
-                var tag = (Tag)tax;
-                if (tag.Id != 0) origTax = await _tagRepo.GetAsync(tag.Id);
-                var allTags = await GetTagsAsync();
-                existingTitles = allTags.Select(c => c.Title).ToList();
-                existingSlugs = allTags.Select(c => c.Slug).ToList();
-                type = ETaxonomyType.Tag;
+                //var tag = (Tag)tax;
+                //if (tag.Id != 0) origTax = await _tagRepo.GetAsync(tag.Id);
+                //var allTags = await GetTagsAsync();
+                //existingTitles = allTags.Select(c => c.Title).ToList();
+                //existingSlugs = allTags.Select(c => c.Slug).ToList();
+                //type = ETaxonomyType.Tag;
             }
 
             // remove self if it is update
@@ -378,13 +255,6 @@ namespace Fan.Blog.Services
 
             _logger.LogDebug(createOrUpdate + " {@Taxonomy}", origTax);
             return origTax;
-        }
-
-        private ITaxonomy HtmlDecodeTaxonomy(ITaxonomy tax)
-        {
-            tax.Title = WebUtility.HtmlDecode(tax.Title);
-            tax.Description = WebUtility.HtmlDecode(tax.Description);
-            return tax;
         }
 
         // -------------------------------------------------------------------- Images
@@ -575,7 +445,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync()
         {
-            return await _cache.GetAsync(CACHE_KEY_ALL_ARCHIVES, CacheTime_Archives, async () =>
+            return await _cache.GetAsync(BlogCache.KEY_ALL_ARCHIVES, BlogCache.Time_Archives, async () =>
             {
                 var months = new Dictionary<DateTime, int>();
                 var years = new Dictionary<int, List<MonthItem>>();
@@ -608,102 +478,68 @@ namespace Fan.Blog.Services
             });
         }
 
-        // -------------------------------------------------------------------- Setup
-
-        /// <summary>
-        /// Sets up the blog for the first time on initial launch.
-        /// </summary>
-        /// <returns></returns>
-        public async Task SetupAsync()
-        {
-            const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray v2.0";
-            const string WELCOME_POST_BODY = @"<p>Welcome and congrats on getting your blog up and running! &nbsp;Fanray v1.0 was a minimal viable blog, you could only post through a client like the Open Live Writer. Fanray v2 builds on v1 and introduces a brand new Admin Panel, you can now do more! &nbsp;Here are a few tips to get you started and please check out the <a href=""https://github.com/FanrayMedia/Fanray/wiki"">Wiki</a> for more details.</p><h2>Getting Started</h2><p>First I recommend complete the setup by going to the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Settings"">Settings</a> page and enter your Disqus and Google Analytics information.</p><p>Bloggers probably spend most of their time writing posts. To help you be productive, I highly recommend spending a few minutes to get familiar with the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer"">Composer</a>, particularly the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer#editor"">Editor</a>.</p><p>The <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Media-Gallery"">Media Gallery</a> gives you a grand view of all your blog images. &nbsp;Here you can upload more images or edit image info etc. The uploaded images are resized and stored on either the file system or Azure Blob Storage, you can configure which <a href=""https://github.com/FanrayMedia/Fanray/wiki/Storage"">Storage</a> in the <code>appsettings.json</code>.</p><p>The <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Categories"">Categories </a>and <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Tags"">Tags</a> pages allow you to easily manage your blog's classifications. &nbsp;For categories there is a default category out of box named <i>Uncategorized</i>, go rename it to something you write about.&nbsp;</p><p>When you are ready to run this app on Azure, please refer to <a href=""https://github.com/FanrayMedia/Fanray/wiki/Deploying-to-Azure"">Deploying to Azure</a>.</p><h2>Contribute</h2><p>Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, testing and docs etc. please read the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">Contributing Guide</a>.&nbsp;</p><p>Finally, follow me <a href=""https://twitter.com/FanrayMedia"">@fanraymedia</a> and let me know what you think. Thank you and happy coding :)</p>";
-
-            // create blog setting
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>(); // could be initial or an existing blogsettings
-            await _settingSvc.UpsertSettingsAsync(blogSettings);
-
-            // get default cat
-            Category defaultCat = null;
-            try
-            {
-                defaultCat = await GetCategoryAsync(blogSettings.DefaultCategoryId);
-            }
-            catch (FanException)
-            {
-                defaultCat = await CreateCategoryAsync(DEFAULT_CATEGORY);
-            }
-
-            // TODO should I make create welcome post a option on setup
-            // create welcome post and default category
-            await CreatePostAsync(new BlogPost
-            {
-                CategoryTitle = defaultCat.Title,
-                TagTitles = new List<string> { "announcement", "blogging" },
-                Title = WELCOME_POST_TITLE,
-                Body = WELCOME_POST_BODY,
-                UserId = 1,
-                Status = EPostStatus.Published,
-                CommentStatus = ECommentStatus.AllowComments,
-                CreatedOn = DateTimeOffset.Now,
-            });
-            _logger.LogInformation("Welcome post and default category created.");
-            _logger.LogInformation("Blog Setup completes.");
-        }
-
         // -------------------------------------------------------------------- BlogPosts 
 
         /// <summary>
-        /// Creates a <see cref="BlogPost"/> and invalidates cache for posts on index page.
+        /// Creates a <see cref="BlogPost"/>.
         /// </summary>
-        /// <param name="blogPost"></param>
+        /// <param name="blogPost">Contains incoming blog post data to create.</param>
         /// <returns></returns>
+        /// <remarks>
+        /// It creates tags, post and invalidates cache for posts on index page.
+        /// </remarks>
         public async Task<BlogPost> CreatePostAsync(BlogPost blogPost)
         {
-            // blogPost is just used as a container of data
             if (blogPost == null) return blogPost;
 
-            // preps a post from blog post for saving
+            // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
-            // save post
-            await _postRepo.CreateAsync(post);
+            // before create
+            await _mediator.Publish(new BlogPostBeforeCreate { TagTitles = blogPost.TagTitles });
+
+            // create
+            await _postRepo.CreateAsync(post, blogPost.TagTitles);
 
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await InvalidateAllBlogCache();
+                await BlogCache.RemoveAllBlogCacheAsync(_cache);
             }
 
-            // get BlogPost back
-            blogPost = await GetPostAsync(post.Id);
-
-            // raise event
+            // after create
             await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
 
-            return blogPost;
+            return await GetPostAsync(post.Id);
         }
 
         /// <summary>
-        /// Updates a <see cref="BlogPost"/> and invalidates caceh for posts on index page.
+        /// Updates a <see cref="BlogPost"/>.
         /// </summary>
-        /// <param name="blogPost"></param>
-        /// <returns></returns>
+        /// <param name="blogPost">Contains incoming blog post data to update.</param>
         public async Task<BlogPost> UpdatePostAsync(BlogPost blogPost)
         {
-            // blogPost is just used as a container of data
             if (blogPost == null) return blogPost;
 
+            // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
 
+            // before update
+            await _mediator.Publish(new BlogPostBeforeUpdate
+            {
+                TagTitles = blogPost.TagTitles,
+                CurrentPost = await QueryPostAsync(blogPost.Id, EPostType.BlogPost),
+            });
+
             // update
-            await _postRepo.UpdateAsync(post);
+            await _postRepo.UpdateAsync(post, blogPost.TagTitles);
 
             // invalidate cache 
-            await InvalidateAllBlogCache();
+            await BlogCache.RemoveAllBlogCacheAsync(_cache);
 
-            // return a new blogPost with latest data
+            // after update
+            await _mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
+
             return await GetPostAsync(post.Id);
         }
 
@@ -715,7 +551,7 @@ namespace Fan.Blog.Services
         public async Task DeletePostAsync(int id)
         {
             await _postRepo.DeleteAsync(id);
-            await InvalidateAllBlogCache();
+            await BlogCache.RemoveAllBlogCacheAsync(_cache);
         }
 
         /// <summary>
@@ -869,7 +705,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task<PostCount> GetPostCountAsync()
         {
-            return await _cache.GetAsync(CACHE_KEY_POST_COUNT, CacheTime_PostCount, async () =>
+            return await _cache.GetAsync(BlogCache.KEY_POST_COUNT, BlogCache.Time_PostCount, async () =>
             {
                 return await _postRepo.GetPostCountAsync();
             });
@@ -1000,53 +836,6 @@ namespace Fan.Blog.Services
                 post.CategoryId = blogSettings.DefaultCategoryId; // TODO test
             }
 
-            // Tags & PosTags
-            if (blogPost.TagTitles != null && blogPost.TagTitles.Count > 0)
-            {
-                // make sure list has no empty strings and only unique values
-                blogPost.TagTitles = blogPost.TagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
-                var allTags = await GetTagsAsync();
-
-                if (createOrUpdate == ECreateOrUpdate.Create)
-                {
-                    foreach (var title in blogPost.TagTitles)
-                    {
-                        var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
-                        if (tag == null)
-                            tag = await CreateTagAsync(new Tag { Title = title });
-
-                        // NOTE: post.PostTags.Add(new PostTag { Post = post, Tag = tag }); 
-                        // would fail with SqlServer, though during testing it worked with Sqlite In-Mem!!
-                        // The reason is allTags are not tracked, you will receive the following exception
-                        // SqlException: Cannot insert explicit value for identity column in table 'Tag' when IDENTITY_INSERT is set to OFF.
-
-                        //post.PostTags.Add(new PostTag { Post = post, Tag = tag });  // does not work with SqlServer
-                        post.PostTags.Add(new PostTag { Post = post, TagId = tag.Id });
-                    }
-                }
-                else
-                {
-                    var tagTitlesCurrent = post.PostTags.Select(pt => pt.Tag.Title).ToList();
-
-                    var tagsToRemove = tagTitlesCurrent.Except(blogPost.TagTitles).ToList();
-                    foreach (var title in tagsToRemove)
-                    {
-                        post.PostTags.Remove(post.PostTags.Single(pt => pt.Tag.Title == title));
-                    }
-
-                    var tagsToAdd = blogPost.TagTitles.Except(tagTitlesCurrent).ToList();
-                    foreach (var title in tagsToAdd)
-                    {
-                        var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
-                        if (tag == null)
-                            tag = await CreateTagAsync(new Tag { Title = title });
-
-                        // same here, must use TagId instead Tag
-                        post.PostTags.Add(new PostTag { Post = post, TagId = tag.Id });
-                    }
-                }
-            }
-
             _logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
@@ -1160,5 +949,14 @@ namespace Fan.Blog.Services
 
             return slug;
         }
+
+        //private async Task InvalidateAllBlogCache()
+        //{
+        //    await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
+        //    await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
+        //    await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
+        //    await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
+        //    await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
+        //}
     }
 }
