@@ -21,7 +21,7 @@ namespace Fan.Blog.Tags
         /// <returns></returns>
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var tags = (await _tagSvc.GetTagsAsync()).Where(t => t.Count > 0);
+            var tags = (await _tagSvc.GetAllAsync()).Where(t => t.Count > 0);
             return View(tags);
         }
     }

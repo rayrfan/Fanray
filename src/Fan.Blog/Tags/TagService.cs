@@ -13,12 +13,13 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Tags
 {
-    public class TagService : ITagService, 
+    /// <summary>
+    /// The blog tag service.
+    /// </summary>
+    public class TagService : ITagService,
                               INotificationHandler<BlogPostBeforeCreate>,
                               INotificationHandler<BlogPostBeforeUpdate>
     {
-        public const int TAG_TITLE_MAXLEN = 24;
-
         private readonly ITagRepository _tagRepo;
         private readonly IMediator _mediator;
         private readonly IDistributedCache _cache;
@@ -33,16 +34,30 @@ namespace Fan.Blog.Tags
             _mediator = mediator;
             _cache = cache;
             _logger = logger;
-        }      
+        }
+
+        // -------------------------------------------------------------------- const
+
+        /// <summary>
+        /// The max allowed length of a tag title is 24 chars.
+        /// </summary>
+        public const int TITLE_MAXLEN = 24;
+
+        /// <summary>
+        /// The max allowed length of a tag slug is 24 chars.
+        /// </summary>
+        public const int SLUG_MAXLEN = 24;
+
+        // -------------------------------------------------------------------- public methods
 
         /// <summary>
         /// Returns tag by id, throws <see cref="FanException"/> if tag with id is not found.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Tag> GetTagAsync(int id)
+        public async Task<Tag> GetAsync(int id)
         {
-            var tags = await GetTagsAsync();
+            var tags = await GetAllAsync();
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
@@ -57,11 +72,11 @@ namespace Fan.Blog.Tags
         /// </summary>
         /// <param name="slug">Tag slug.</param>
         /// <returns></returns>
-        public async Task<Tag> GetTagBySlugAsync(string slug)
+        public async Task<Tag> GetBySlugAsync(string slug)
         {
             if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
 
-            var tags = await GetTagsAsync();
+            var tags = await GetAllAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
@@ -76,11 +91,11 @@ namespace Fan.Blog.Tags
         /// </summary>
         /// <param name="title">Tag title.</param>
         /// <returns></returns>
-        public async Task<Tag> GetTagByTitleAsync(string title)
+        public async Task<Tag> GetByTitleAsync(string title)
         {
             if (title.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
 
-            var tags = await GetTagsAsync();
+            var tags = await GetAllAsync();
             var tag = tags.SingleOrDefault(c => c.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
@@ -103,7 +118,7 @@ namespace Fan.Blog.Tags
         /// individually to db each time, this saves some db round trip. however there is fine line
         /// for how large the number of tags grow, in which case we need a better strategy.
         /// </remarks>
-        public async Task<List<Tag>> GetTagsAsync()
+        public async Task<List<Tag>> GetAllAsync()
         {
             return await _cache.GetAsync(BlogCache.KEY_ALL_TAGS, BlogCache.Time_AllTags, async () => {
                 return await _tagRepo.GetListAsync();
@@ -111,35 +126,32 @@ namespace Fan.Blog.Tags
         }
 
         /// <summary>
-        /// Creates a <see cref="Tag"/>.
+        /// Creates a new <see cref="Tag"/>.
         /// </summary>
         /// <param name="tag">The tag with data to be created.</param>
-        /// <exception cref="FanException">If title fails validation.</exception>
-        /// <remarks>
-        /// It validates tag title, generates unique slug, cleans description, assigns count
-        /// and finally invalidates cache for all tags and index posts.
-        /// </remarks>
-        public async Task<Tag> CreateTagAsync(Tag tag)
+        /// <exception cref="FanException">If tag is empty or title exists already.</exception>
+        /// <returns>Created tag.</returns>
+        public async Task<Tag> CreateAsync(Tag tag)
         {
-            if (tag == null || tag.Title.IsNullOrEmpty()) return tag;
+            if (tag == null || tag.Title.IsNullOrEmpty())
+            {
+                throw new FanException($"Invalid tag to create.");
+            }
 
             // prep title
             tag.Title = PrepareTitle(tag.Title);
 
             // make sure it is unique
-            var allTags = await GetTagsAsync();
+            var allTags = await GetAllAsync();
             if (allTags.Any(t => t.Title.Equals(tag.Title, StringComparison.CurrentCultureIgnoreCase)))
             {
                 throw new FanException($"'{tag.Title}' already exists.");
             }
 
             // prep slug, description and count
-            tag.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, allTags.Select(c => c.Slug)); // slug is based on title
+            tag.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
             tag.Description = Util.CleanHtml(tag.Description);
             tag.Count = tag.Count;
-
-            // before create 
-            await _mediator.Publish(new TagBeforeCreate());
 
             // create
             tag = await _tagRepo.CreateAsync(tag);
@@ -147,9 +159,6 @@ namespace Fan.Blog.Tags
             // remove cache
             await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
             await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-
-            // after create
-            await _mediator.Publish(new TagCreated());
 
             _logger.LogDebug("Created {@Tag}", tag);
             return tag;
@@ -159,56 +168,51 @@ namespace Fan.Blog.Tags
         /// Updates an existing <see cref="Tag"/>.
         /// </summary>
         /// <param name="tag">The tag with data to be updated.</param>
-        /// <exception cref="FanException">If title fails validation.</exception>
-        /// <remarks>
-        /// It validates tag title, generates unique slug, cleans description, assigns count
-        /// and finally invalidates cache for all tags and index posts.
-        /// </remarks>
-        public async Task<Tag> UpdateTagAsync(Tag tag)
+        /// <exception cref="FanException">If tag is invalid or title exists already.</exception>
+        /// <returns>Updated tag.</returns>
+        public async Task<Tag> UpdateAsync(Tag tag)
         {
-            if (tag == null || tag.Id <= 0 || tag.Title.IsNullOrEmpty()) return tag;
+            if (tag == null || tag.Id <= 0 || tag.Title.IsNullOrEmpty())
+            {
+                throw new FanException($"Invalid tag to update.");
+            }
 
             // prep title
             tag.Title = PrepareTitle(tag.Title);
 
             // make sure it is unique
-            var allTags = await GetTagsAsync();
-            allTags.RemoveAll(t => t.Id == tag.Id); // remove selft
+            var allTags = await GetAllAsync();
+            allTags.RemoveAll(t => t.Id == tag.Id); // remove self
             if (allTags.Any(t => t.Title.Equals(tag.Title, StringComparison.CurrentCultureIgnoreCase)))
             {
                 throw new FanException($"'{tag.Title}' already exists.");
             }
 
             // prep slug, description and count
-            var tagEntity = await _tagRepo.GetAsync(tag.Id);
-            tagEntity.Title = tag.Title; // assign new title
-            tagEntity.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, allTags.Select(c => c.Slug)); // slug is based on title
-            tagEntity.Description = Util.CleanHtml(tag.Description);
-            tagEntity.Count = tag.Count;
-
-            // before update 
-            await _mediator.Publish(new TagBeforeUpdate());
+            var entity = await _tagRepo.GetAsync(tag.Id);
+            entity.Title = tag.Title; // assign new title
+            entity.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
+            entity.Description = Util.CleanHtml(tag.Description);
+            entity.Count = tag.Count;
 
             // update 
-            await _tagRepo.UpdateAsync(tagEntity);
+            await _tagRepo.UpdateAsync(entity);
 
             // remove cache
             await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
             await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
-            // after update
-            await _mediator.Publish(new TagUpdated());
-
-            _logger.LogDebug("Updated {@Tag}", tagEntity);
-            return tag;
+            // return entity
+            _logger.LogDebug("Updated {@Tag}", entity);
+            return entity;
         }
 
         /// <summary>
-        /// Deletes a <see cref="Tag"/> by id and invalidates cache for all tags.
+        /// Deletes a <see cref="Tag"/> by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task DeleteTagAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             await _tagRepo.DeleteAsync(id);
             await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
@@ -229,7 +233,7 @@ namespace Fan.Blog.Tags
 
             // make sure list has no empty strings and only unique values
             var distinctTitles = notification.TagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct();
-            var allTags = await GetTagsAsync(); 
+            var allTags = await GetAllAsync();
 
             // create any new tags
             foreach (var title in distinctTitles)
@@ -238,7 +242,7 @@ namespace Fan.Blog.Tags
                 var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                 if (tag == null)
                 {
-                    tag = await CreateTagAsync(new Tag { Title = title });
+                    tag = await CreateAsync(new Tag { Title = title });
                 }
             }
         }
@@ -256,7 +260,7 @@ namespace Fan.Blog.Tags
             // get tags that are not among current tags
             var currentTitles = notification.CurrentPost.PostTags.Select(pt => pt.Tag.Title);
             var distinctTitles = notification.TagTitles.Except(currentTitles);
-            var allTags = await GetTagsAsync();
+            var allTags = await GetAllAsync();
 
             // create any new tags
             foreach (var title in distinctTitles)
@@ -265,7 +269,7 @@ namespace Fan.Blog.Tags
                 var tag = allTags.FirstOrDefault(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
                 if (tag == null)
                 {
-                    tag = await CreateTagAsync(new Tag { Title = title });
+                    tag = await CreateAsync(new Tag { Title = title });
                 }
             }
         }
@@ -280,7 +284,7 @@ namespace Fan.Blog.Tags
         private string PrepareTitle(string title)
         {
             title = Util.CleanHtml(title);
-            title = title.Length > TAG_TITLE_MAXLEN ? title.Substring(0, TAG_TITLE_MAXLEN) : title;
+            title = title.Length > TITLE_MAXLEN ? title.Substring(0, TITLE_MAXLEN) : title;
             return title;
         }
     }

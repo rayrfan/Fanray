@@ -7,7 +7,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blog.Tags
 {
-    public class Tag : Entity, ITaxonomy
+    /// <summary>
+    /// A blog tag.
+    /// </summary>
+    public class Tag : Entity
     {
         public Tag()
         {

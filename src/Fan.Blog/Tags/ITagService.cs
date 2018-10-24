@@ -14,41 +14,41 @@ namespace Fan.Blog.Tags
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<Tag> GetTagAsync(int id);
+        Task<Tag> GetAsync(int id);
         /// <summary>
         /// Returns tag by slug, throws <see cref="FanException"/> if tag with slug is not found.
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
-        Task<Tag> GetTagBySlugAsync(string slug);
+        Task<Tag> GetBySlugAsync(string slug);
         /// <summary>
         /// Returns tag by title, throws <see cref="FanException"/> if tag with title is not found.
         /// </summary>
         /// <param name="title">Tag title.</param>
         /// <returns></returns>
-        Task<Tag> GetTagByTitleAsync(string title);
+        Task<Tag> GetByTitleAsync(string title);
         /// <summary>
         /// Returns all tags, cached after calls to DAL.
         /// </summary>
         /// <returns></returns>
-        Task<List<Tag>> GetTagsAsync();
+        Task<List<Tag>> GetAllAsync();
         /// <summary>
-        /// Creates a <see cref="Tag"/>.
+        /// Creates a new <see cref="Tag"/>.
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        Task<Tag> CreateTagAsync(Tag tag);
+        Task<Tag> CreateAsync(Tag tag);
         /// <summary>
-        /// Updates a <see cref="Tag"/>.
+        /// Updates an existing <see cref="Tag"/>.
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        Task<Tag> UpdateTagAsync(Tag tag);
+        Task<Tag> UpdateAsync(Tag tag);
         /// <summary>
         /// Deletes a <see cref="Tag"/>.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task DeleteTagAsync(int id);
+        Task DeleteAsync(int id);
     }
 }

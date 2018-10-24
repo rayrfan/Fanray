@@ -28,7 +28,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnGetAsync()
         {
-            var tags = await _tagSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetAllAsync();
             TagListJsonStr = JsonConvert.SerializeObject(tags);
         }
 
@@ -39,7 +39,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnDeleteAsync(int id)
         {
-            await _tagSvc.DeleteTagAsync(id);
+            await _tagSvc.DeleteAsync(id);
         }
 
         /// <summary>
@@ -51,12 +51,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var tagNew = await _tagSvc.CreateTagAsync(new Tag { Title = tag.Title, Description = tag.Description });
+                var tagNew = await _tagSvc.CreateAsync(new Tag { Title = tag.Title, Description = tag.Description });
                 return new JsonResult(tagNew);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -69,12 +69,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var cat = await _tagSvc.UpdateTagAsync(tag);
-                return new JsonResult(cat);
+                var tagUpdated = await _tagSvc.UpdateAsync(tag);
+                return new JsonResult(tagUpdated);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
     }
