@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Fan.Blog.Models;
-using Fan.Blog.Validators;
 using Fan.Helpers;
 using System;
 using System.Collections.Generic;
@@ -11,9 +10,11 @@ namespace Fan.Blog.Helpers
     public class BlogUtil
     {
         /// <summary>
-        /// Returns a valid slug for a category or tag, given either a title or user inputed slug. 
+        /// Returns a valid slug for a category or tag.
         /// </summary>
-        /// <param name="input">Either title or slug</param>
+        /// <param name="title">Category or tag's title.</param>
+        /// <param name="maxlen">The max length input is allowed.</param>
+        /// <param name="existingSlugs"></param>
         /// <remarks>
         /// This method makes sure the result slug
         /// - not to exceed max len;
@@ -21,16 +22,16 @@ namespace Fan.Blog.Helpers
         /// - a unique value if its a duplicate with existings slugs;
         /// - if '#' char is present, I swap it to 's'
         /// </remarks>
-        public static string FormatTaxonomySlug(string input, IEnumerable<string> existingSlugs = null)
+        public static string FormatTaxonomySlug(string title, int maxlen, IEnumerable<string> existingSlugs = null)
         {
             // if user input exceeds max len, we trim
-            if (input.Length > TaxonomyValidator.TAXONOMY_TITLE_SLUG_MAXLEN)
+            if (title.Length > maxlen)
             {
-                input = input.Substring(0, TaxonomyValidator.TAXONOMY_TITLE_SLUG_MAXLEN);
+                title = title.Substring(0, maxlen);
             }
 
-            input = input.Replace('#', 's'); // preserve # as s before format to slug
-            var slug = Util.FormatSlug(input); // remove/replace odd char, lower case etc
+            title = title.Replace('#', 's'); // preserve # as s before format to slug
+            var slug = Util.FormatSlug(title); // remove/replace odd char, lower case etc
 
             // slug from title could be empty, e.g. the title is in Chinese
             // then we generate a random string of 6 chars

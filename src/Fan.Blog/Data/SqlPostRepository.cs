@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Models;
 using Fan.Blog.Tags;
 using Fan.Data;
@@ -29,10 +30,25 @@ namespace Fan.Blog.Data
         /// <returns>
         /// The inserted post with id.
         /// </returns>
-        public async Task<Post> CreateAsync(Post post, IEnumerable<string> tagTitles)
+        public async Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
         {
+            // Category
+            if (!categoryTitle.IsNullOrEmpty())
+            {
+                // from metaweblog with a cat inputted
+                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+            }
+            else
+            {
+                post.CategoryId = categoryId.HasValue ?
+                    // from browser
+                    categoryId :
+                    // from metaweblog with no cat inputted
+                    Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+            }
+
             // PostTags
-            if (tagTitles != null && tagTitles.Any())
+            if (!tagTitles.IsNullOrEmpty())
             {
                 // make sure list has no empty strings and only unique values
                 tagTitles = tagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct();
@@ -56,11 +72,31 @@ namespace Fan.Blog.Data
         /// </summary>
         /// <param name="post">The post to update.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
-        public async Task UpdateAsync(Post post, IEnumerable<string> tagTitles)
+        public async Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
         {
-            // PostTags
-            if (tagTitles != null && tagTitles.Any())
+            // Category
+            if (!categoryTitle.IsNullOrEmpty())
             {
+                // from metaweblog with a cat inputted
+                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+            }
+            else if (categoryId.HasValue)
+            {
+                // from browser
+                if (categoryId != post.CategoryId) post.CategoryId = categoryId;
+            }
+            else
+            {
+                // from metaweblog with no cat inputted
+                post.CategoryId = Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+            }
+
+            // PostTags
+            if (!tagTitles.IsNullOrEmpty())
+            {
+                // make sure list has no empty strings and only unique values, olw passes empty string when no tags are given
+                tagTitles = tagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct();
+
                 var currentTitles = post.PostTags.Select(pt => pt.Tag.Title);
                 var titlesToRemove = currentTitles.Except(tagTitles).ToList();
                 foreach (var title in titlesToRemove)

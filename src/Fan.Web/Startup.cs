@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.MetaWeblog;
 using Fan.Blog.Services;
@@ -94,16 +93,11 @@ namespace Fan.Web
             // Repos & Services
             services.AddScoped<IMetaRepository, SqlMetaRepository>();
             services.AddScoped<IMediaRepository, SqlMediaRepository>();
-            services.AddScoped<IPostRepository, SqlPostRepository>();
-            services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
-            services.AddScoped<ITagRepository, SqlTagRepository>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IMediaService, MediaService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
-            services.AddScoped<IMetaWeblogService, MetaWeblogService>();
             services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
             var appSettingsConfigSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsConfigSection);
@@ -117,6 +111,19 @@ namespace Fan.Web
             shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
             services.AddSingleton<IShortcodeService>(shortcodeService);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // Fan.Blog repos and services
+            //services.AddScoped<IPostRepository, SqlPostRepository>();
+            //services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
+            //services.AddScoped<ITagRepository, SqlTagRepository>();
+            //services.AddScoped<IBlogService, BlogService>();
+            //services.AddScoped<ITagService, TagService>();
+            //services.AddScoped<INotificationHandler<BlogPostBeforeCreate>, TagService>();
+            //services.AddScoped<IMetaWeblogService, MetaWeblogService>(); // verify
+            services.Scan(scan => scan
+              .FromAssembliesOf(typeof(IBlogService))
+              .AddClasses()
+              .AsImplementedInterfaces());
 
             // Mvc and Razor Pages
 

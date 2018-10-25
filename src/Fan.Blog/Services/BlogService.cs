@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fan.Blog.Categories;
 using Fan.Blog.Data;
 using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
@@ -68,191 +69,6 @@ namespace Fan.Blog.Services
             _logger = logger;
             _shortcodeSvc = shortcodeService;
             _mediator = mediator;
-        }
-
-        // -------------------------------------------------------------------- Categories
-
-        /// <summary>
-        /// Creates a <see cref="Category"/> and invalidates cache for all categories.
-        /// </summary>
-        /// <param name="category"></param>
-        /// <returns></returns>
-        public async Task<Category> CreateCategoryAsync(string title, string description = null)
-        {
-            Category category = new Category { Title = title, Description = description };
-            category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Create) as Category;
-            category = await _catRepo.CreateAsync(category);
-
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-
-            return category;
-        }
-
-        /// <summary>
-        /// Deletes a <see cref="Category"/> and reassigns posts to a default category, and 
-        /// invalidates caceh for all categories.  Throws <see cref="FanException"/> if the
-        /// category being deleted is the default category.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// The default category cannot be deleted, on the UI there is no delete button available
-        /// for default category, thus when there is only one category left, it'll be the default,
-        /// and you'll always have it available.
-        /// </remarks>
-        public async Task DeleteCategoryAsync(int id)
-        {
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-
-            // on the UI there is no delete button on the default cat
-            // therefore when there is only one category left, it'll be the default.
-            if (id == blogSettings.DefaultCategoryId)
-            {
-                throw new FanException("Default category cannot be deleted.");
-            }
-
-            await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-        }
-
-        /// <summary>
-        /// Returns category by id, throws <see cref="FanException"/> if category with id is not found.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<Category> GetCategoryAsync(int id)
-        {
-            var cats = await GetCategoriesAsync();
-            var cat = cats.SingleOrDefault(c => c.Id == id);
-            if (cat == null)
-            {
-                throw new FanException($"Category with id {id} is not found.");
-            }
-
-            return cat;
-        }
-
-        /// <summary>
-        /// Returns category by slug, throws <see cref="FanException"/> if category with slug is null or not found.
-        /// </summary>
-        /// <param name="slug"></param>
-        /// <returns></returns>
-        public async Task<Category> GetCategoryAsync(string slug)
-        {
-            if (slug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
-
-            var cats = await GetCategoriesAsync();
-            var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
-            if (cat == null)
-            {
-                throw new FanException($"Category '{slug}' does not exist.");
-            }
-
-            return cat;
-        }
-
-        /// <summary>
-        /// Returns all categories, cached after calls to DAL.
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>
-        /// This method must return all categories as <see cref="PrepPostAsync(BlogPost, ECreateOrUpdate)"/>
-        /// depends on entire tags. If any filtering needs to be done for presentation purpose, then
-        /// it must be done in presentation layer.
-        /// </remarks>
-        public async Task<List<Category>> GetCategoriesAsync()
-        {
-            return await _cache.GetAsync(BlogCache.KEY_ALL_CATS, BlogCache.Time_AllCats, async () => {
-                return await _catRepo.GetListAsync();
-            });
-        }
-
-        /// <summary>
-        /// Sets the id to default category.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task SetDefaultCategoryAsync(int id)
-        {
-            await _settingSvc.UpsertSettingsAsync(new BlogSettings
-            {
-                DefaultCategoryId = id,
-            });
-        }
-
-        /// <summary>
-        /// Updates a <see cref="Category"/> and invalidates cache for all categories.
-        /// </summary>
-        /// <param name="category"></param>
-        /// <returns></returns>
-        public async Task<Category> UpdateCategoryAsync(Category category)
-        {
-            category = await PrepTaxonomyAsync(category, ECreateOrUpdate.Update) as Category;
-            await _catRepo.UpdateAsync(category);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-
-            return category;
-        }
-
-        /// <summary>
-        /// Prepares a category or tag for create or update, making sure its title and slug are valid.
-        /// </summary>
-        /// <param name="tax">A category or tag.</param>
-        /// <param name="createOrUpdate"></param>
-        /// <returns></returns>
-        private async Task<ITaxonomy> PrepTaxonomyAsync(ITaxonomy tax, ECreateOrUpdate createOrUpdate)
-        {
-            // get existing titles and slugs
-            List<string> existingTitles = null;
-            List<string> existingSlugs = null;
-            ETaxonomyType type = ETaxonomyType.Category;
-            ITaxonomy origTax = tax;
-            if (tax is Category cat)
-            {
-                if (cat.Id != 0) origTax = await _catRepo.GetAsync(cat.Id);
-                var allCats = await GetCategoriesAsync();
-                existingTitles = allCats.Select(c => c.Title).ToList();
-                existingSlugs = allCats.Select(c => c.Slug).ToList();
-            }
-            else
-            {
-                //var tag = (Tag)tax;
-                //if (tag.Id != 0) origTax = await _tagRepo.GetAsync(tag.Id);
-                //var allTags = await GetTagsAsync();
-                //existingTitles = allTags.Select(c => c.Title).ToList();
-                //existingSlugs = allTags.Select(c => c.Slug).ToList();
-                //type = ETaxonomyType.Tag;
-            }
-
-            // remove self if it is update
-            if (createOrUpdate == ECreateOrUpdate.Update)
-            {
-                existingTitles.Remove(origTax.Title);
-                existingSlugs.Remove(origTax.Slug);
-            }
-
-            // html encode title and description
-            tax.Title = Util.CleanHtml(tax.Title);
-            tax.Description = Util.CleanHtml(tax.Description);
-
-            // validator
-            var validator = new TaxonomyValidator(existingTitles);
-            ValidationResult result = await validator.ValidateAsync(tax);
-            if (!result.IsValid)
-            {
-                throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} {type}.", result.Errors);
-            }
-
-            // slug always updated according to title
-            origTax.Slug = BlogUtil.FormatTaxonomySlug(tax.Title, existingSlugs);
-            origTax.Title = tax.Title;
-            origTax.Description = tax.Description;
-            origTax.Count = tax.Count;
-
-            _logger.LogDebug(createOrUpdate + " {@Taxonomy}", origTax);
-            return origTax;
         }
 
         // -------------------------------------------------------------------- Images
@@ -494,15 +310,19 @@ namespace Fan.Blog.Services
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // before create
-            await _mediator.Publish(new BlogPostBeforeCreate { TagTitles = blogPost.TagTitles });
+            await _mediator.Publish(new BlogPostBeforeCreate
+            {
+                CategoryTitle = blogPost.CategoryTitle,
+                TagTitles = blogPost.TagTitles
+            });
 
             // create
-            await _postRepo.CreateAsync(post, blogPost.TagTitles);
+            await _postRepo.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await BlogCache.RemoveAllBlogCacheAsync(_cache);
+                await RemoveAllCacheAsync();
             }
 
             // after create
@@ -525,15 +345,16 @@ namespace Fan.Blog.Services
             // before update
             await _mediator.Publish(new BlogPostBeforeUpdate
             {
+                CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
                 CurrentPost = await QueryPostAsync(blogPost.Id, EPostType.BlogPost),
             });
 
             // update
-            await _postRepo.UpdateAsync(post, blogPost.TagTitles);
+            await _postRepo.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache 
-            await BlogCache.RemoveAllBlogCacheAsync(_cache);
+            await RemoveAllCacheAsync();
 
             // after update
             await _mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
@@ -549,7 +370,7 @@ namespace Fan.Blog.Services
         public async Task DeletePostAsync(int id)
         {
             await _postRepo.DeleteAsync(id);
-            await BlogCache.RemoveAllBlogCacheAsync(_cache);
+            await RemoveAllCacheAsync();
         }
 
         /// <summary>
@@ -810,30 +631,6 @@ namespace Fan.Blog.Services
             post.Status = blogPost.Status;
             post.CommentStatus = blogPost.CommentStatus;
 
-            // Categories TODO check CategoryTitle first
-            if (!string.IsNullOrEmpty(blogPost.CategoryTitle)) // CatTitle takes precedence if available
-            {
-                var cat = (await GetCategoriesAsync())
-                    .SingleOrDefault(c => c.Title.Equals(blogPost.CategoryTitle, StringComparison.CurrentCultureIgnoreCase));
-                if (cat == null)
-                    post.Category = await CreateCategoryAsync(blogPost.CategoryTitle);
-                else
-                    //post.Category = cat; // todo see if id works
-                    post.CategoryId = cat.Id;
-            }
-            else if (blogPost.CategoryId.HasValue) // browser 
-            {
-                if (createOrUpdate == ECreateOrUpdate.Create)
-                    post.CategoryId = blogPost.CategoryId.Value;
-                else if (blogPost.CategoryId != post.CategoryId)
-                    post.CategoryId = blogPost.CategoryId;
-            }
-            else
-            {
-                var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                post.CategoryId = blogSettings.DefaultCategoryId; // TODO test
-            }
-
             _logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
@@ -948,13 +745,16 @@ namespace Fan.Blog.Services
             return slug;
         }
 
-        //private async Task InvalidateAllBlogCache()
-        //{
-        //    await _cache.RemoveAsync(CACHE_KEY_POSTS_INDEX);
-        //    await _cache.RemoveAsync(CACHE_KEY_ALL_CATS);
-        //    await _cache.RemoveAsync(CACHE_KEY_ALL_TAGS);
-        //    await _cache.RemoveAsync(CACHE_KEY_ALL_ARCHIVES);
-        //    await _cache.RemoveAsync(CACHE_KEY_POST_COUNT);
-        //}
+        /// <summary>
+        /// Remove all cached objects for blog.
+        /// </summary>
+        private async Task RemoveAllCacheAsync()
+        {
+            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await _cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
+            await _cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+        }
     }
 }

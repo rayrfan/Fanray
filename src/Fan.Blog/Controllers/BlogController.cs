@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Helpers;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
@@ -22,6 +23,7 @@ namespace Fan.Blog.Controllers
     public class BlogController : Controller
     {
         private readonly IBlogService _blogSvc;
+        private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<BlogController> _logger;
@@ -30,6 +32,7 @@ namespace Fan.Blog.Controllers
 
         public BlogController(
             IBlogService blogService,
+            ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
             IDistributedCache cache,
@@ -37,6 +40,7 @@ namespace Fan.Blog.Controllers
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _catSvc = catService;
             _tagSvc = tagService;
             _settingSvc = settingService;
             _cache = cache;
@@ -113,7 +117,7 @@ namespace Fan.Blog.Controllers
                 // Show it
                 return View("Post", vm);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // when user access the preview link directly or when user clicks on other links 
                 // and navigates away during the preview, hacky need to find a better way.
@@ -124,12 +128,12 @@ namespace Fan.Blog.Controllers
         public async Task<IActionResult> PostPerma(int id)
         {
             var post = await _blogSvc.GetPostAsync(id);
-            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug});
+            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug });
         }
 
         public async Task<IActionResult> Category(string slug)
         {
-            var cat = await _blogSvc.GetCategoryAsync(slug);
+            var cat = await _catSvc.GetAsync(slug);
             var posts = await _blogSvc.GetPostsForCategoryAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, cat);
@@ -138,7 +142,7 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> Tag(string slug)
         {
-            var tag = await _tagSvc.GetTagBySlugAsync(slug);
+            var tag = await _tagSvc.GetBySlugAsync(slug);
             var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);
@@ -174,7 +178,7 @@ namespace Fan.Blog.Controllers
         /// <returns></returns>
         public async Task<ContentResult> CategoryFeed(string slug)
         {
-            Category cat = await _blogSvc.GetCategoryAsync(slug);
+            var cat = await _catSvc.GetAsync(slug);
             var rss = await GetFeed(cat);
             return new ContentResult
             {

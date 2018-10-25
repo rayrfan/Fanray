@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Data;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Data;
 using Fan.Blog.Enums;
 using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;

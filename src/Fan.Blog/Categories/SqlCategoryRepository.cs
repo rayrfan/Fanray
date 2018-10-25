@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Models;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.Data
+namespace Fan.Blog.Categories
 {
     /// <summary>
     /// Sql implementation of the <see cref="ICategoryRepository"/> contract.

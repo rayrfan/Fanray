@@ -20,14 +20,14 @@ namespace Fan.Blog.Data
         /// <returns>
         /// The inserted post with id.
         /// </returns>
-        Task<Post> CreateAsync(Post post, IEnumerable<string> tagTitles);
+        Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
 
         /// <summary>
         /// Updates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to update.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
-        Task UpdateAsync(Post post, IEnumerable<string> tagTitles);
+        Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
 
         /// <summary>
         /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
@@ -47,7 +47,7 @@ namespace Fan.Blog.Data
         /// Returns a <see cref="EPostStatus.Published"/> <see cref="Post"/>, returns null if it's not found.
         /// </summary>
         Task<Post> GetAsync(string slug, int year, int month, int day);
-        
+
         /// <summary>
         /// Returns a list of posts and total post count by query or empty list if no posts found.
         /// </summary>

@@ -36,6 +36,7 @@ namespace Fan.Blog.IntegrationTests
                 userSvc,
                 new FakeSignInManager(contextAccessor.Object),
                 _blogSvc,
+                _catSvc,
                 _tagSvc,
                 _settingSvcMock.Object,
                 loggerMetaSvc);

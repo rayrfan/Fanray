@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace Fan.Blog.Helpers
 {
@@ -35,19 +33,5 @@ namespace Fan.Blog.Helpers
         /// 10 minutes.
         /// </summary>
         public static readonly TimeSpan Time_PostCount = new TimeSpan(0, 10, 0);
-
-        /// <summary>
-        /// Remove all cached objects for blog.
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <returns></returns>
-        public static async Task RemoveAllBlogCacheAsync(IDistributedCache cache)
-        {
-            await cache.RemoveAsync(KEY_POSTS_INDEX);
-            await cache.RemoveAsync(KEY_ALL_CATS);
-            await cache.RemoveAsync(KEY_ALL_TAGS);
-            await cache.RemoveAsync(KEY_ALL_ARCHIVES);
-            await cache.RemoveAsync(KEY_POST_COUNT);
-        }
     }
 }

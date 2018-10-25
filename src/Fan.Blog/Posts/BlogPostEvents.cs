@@ -5,10 +5,13 @@ using System.Collections.Generic;
 namespace Fan.Blog.Posts
 {
     /// <summary>
-    /// Called before a blog post is created.
+    /// Raised before a blog post is created.
     /// </summary>
     public class BlogPostBeforeCreate : INotification
     {
+        /// <summary>
+        /// Income category title.
+        /// </summary>
         public string CategoryTitle { get; set; }
         /// <summary>
         /// Incoming tag titles.
@@ -17,10 +20,13 @@ namespace Fan.Blog.Posts
     }
 
     /// <summary>
-    /// Called before a blog post is updated.
+    /// Raised before a blog post is updated.
     /// </summary>
     public class BlogPostBeforeUpdate : INotification
     {
+        /// <summary>
+        /// Incoming category title.
+        /// </summary>
         public string CategoryTitle { get; set; }
         /// <summary>
         /// Incoming tag titles.
@@ -33,7 +39,7 @@ namespace Fan.Blog.Posts
     }
 
     /// <summary>
-    /// Called after a blog post is created.
+    /// Raised after a blog post is created.
     /// </summary>
     public class BlogPostCreated : INotification
     {
@@ -41,7 +47,7 @@ namespace Fan.Blog.Posts
     }
 
     /// <summary>
-    /// Called after a blog post is updated.
+    /// Raised after a blog post is updated.
     /// </summary>
     public class BlogPostUpdated : INotification
     {

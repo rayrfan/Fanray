@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Data;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Data;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
@@ -24,6 +25,7 @@ namespace Fan.Blog.IntegrationTests.Base
     public class BlogServiceIntegrationTestBase : BlogIntegrationTestBase
     {
         protected IBlogService _blogSvc;
+        protected ICategoryService _catSvc;
         protected ITagService _tagSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
@@ -72,6 +74,7 @@ namespace Fan.Blog.IntegrationTests.Base
 
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+            var loggerCatSvc = _loggerFactory.CreateLogger<CategoryService>();
             var loggerTagSvc = _loggerFactory.CreateLogger<TagService>();
 
             // ---------------------------------------------------------------- Mapper, Shortcode
@@ -79,23 +82,21 @@ namespace Fan.Blog.IntegrationTests.Base
             var mapper = BlogUtil.Mapper;
             var shortcodeSvc = new Mock<IShortcodeService>();
 
-            // ---------------------------------------------------------------- MediatR
+            // ---------------------------------------------------------------- MediatR and Services
 
             var services = new ServiceCollection();
             services.AddScoped<ServiceFactory>(p => p.GetService);  // MediatR.ServiceFactory
+            services.AddSingleton<IDistributedCache>(cache);        // cache
             services.AddSingleton<FanDbContext>(_db);               // DbContext for repos
-            services.AddSingleton<IDistributedCache>(cache);
-            services.AddSingleton<ILogger<TagService>>(loggerTagSvc);
-            services.AddScoped<ITagRepository, SqlTagRepository>(); // will get _db
-
             services.Scan(scan => scan
-               .FromAssembliesOf(typeof(IMediator), typeof(IBlogService))
+               .FromAssembliesOf(typeof(IMediator), typeof(ILogger), typeof(IBlogService), typeof(ISettingService))
                .AddClasses()
                .AsImplementedInterfaces());
 
             var provider = services.BuildServiceProvider();
             var mediator = provider.GetRequiredService<IMediator>();
 
+            _catSvc = new CategoryService(catRepo, _settingSvcMock.Object, mediator, cache, loggerCatSvc);
             _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
 
             // the blog service

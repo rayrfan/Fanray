@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;

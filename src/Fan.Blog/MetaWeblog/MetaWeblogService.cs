@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
@@ -21,6 +22,7 @@ namespace Fan.Blog.MetaWeblog
         private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
         private readonly IBlogService _blogSvc;
+        private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
@@ -29,6 +31,7 @@ namespace Fan.Blog.MetaWeblog
             IUserService userService,
             SignInManager<User> signInManager,
             IBlogService blogSvc,
+            ICategoryService catSvc,
             ITagService tagService,
             ISettingService settingService,
             ILogger<MetaWeblogService> logger)
@@ -36,6 +39,7 @@ namespace Fan.Blog.MetaWeblog
             _userSvc = userService;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
+            _catSvc = catSvc;
             _tagSvc = tagService;
             _settingSvc = settingService;
             _logger = logger;
@@ -167,7 +171,7 @@ namespace Fan.Blog.MetaWeblog
 
             try
             {
-                var cats = await _blogSvc.GetCategoriesAsync();
+                var cats = await _catSvc.GetAllAsync();
                 var metaCats = new List<MetaCategory>();
 
                 foreach (var cat in cats)
@@ -205,7 +209,7 @@ namespace Fan.Blog.MetaWeblog
 
             try
             {
-                var cat = await _blogSvc.CreateCategoryAsync(name);
+                var cat = await _catSvc.CreateAsync(name);
 
                 return cat.Id;
             }
@@ -222,7 +226,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var keywords = new List<string>();
-                var tags = await _tagSvc.GetTagsAsync();
+                var tags = await _tagSvc.GetAllAsync();
                 foreach (var tag in tags)
                 {
                     keywords.Add(tag.Title);

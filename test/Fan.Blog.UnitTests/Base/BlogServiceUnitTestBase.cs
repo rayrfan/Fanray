@@ -1,5 +1,7 @@
-﻿using Fan.Blog.Data;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Data;
 using Fan.Blog.Helpers;
+using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
 using Fan.Data;
@@ -13,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Threading.Tasks;
 
 namespace Fan.Blog.UnitTests.Base
 {
@@ -31,6 +34,9 @@ namespace Fan.Blog.UnitTests.Base
         protected ILogger<SettingService> _loggerSettingSvc;
         protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
 
+        protected Mock<ISettingService> _settingSvcMock;
+        protected ICategoryService _catSvc;
+        protected ILogger<CategoryService> _loggerCatSvc;
         protected ITagService _tagSvc;
         protected ILogger<TagService> _loggerTagSvc;
 
@@ -60,6 +66,11 @@ namespace Fan.Blog.UnitTests.Base
             var settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
             var mediaSvcMock = new Mock<IMediaService>();
 
+            // blogsettings
+            _settingSvcMock = new Mock<ISettingService>();
+            _settingSvcMock.Setup(s => s.GetSettingsAsync<BlogSettings>())
+                .Returns(Task.FromResult(new BlogSettings { DefaultCategoryId = 1 }));
+
             // appsettings
             var appSettingsMock = new Mock<IOptionsSnapshot<AppSettings>>();
             appSettingsMock.Setup(o => o.Value).Returns(new AppSettings());
@@ -85,6 +96,10 @@ namespace Fan.Blog.UnitTests.Base
                 mapper,
                 shortcodeSvc.Object,
                 mediatorMock.Object);
+
+            // cat service
+            _loggerCatSvc = loggerFactory.CreateLogger<CategoryService>();
+            _catSvc = new CategoryService(_catRepoMock.Object, _settingSvcMock.Object, mediatorMock.Object, _cache, _loggerCatSvc);
 
             // tag service
             _loggerTagSvc = loggerFactory.CreateLogger<TagService>();

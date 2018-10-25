@@ -73,7 +73,7 @@ namespace Fan.Blog.IntegrationTests
 
             // Act
             var result = await _blogSvc.CreatePostAsync(blogPost);
-            var tags = await _tagSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetAllAsync();
 
             // Assert
             Assert.Equal(2, result.Id);
@@ -104,7 +104,7 @@ namespace Fan.Blog.IntegrationTests
                 Excerpt = null,
                 CategoryTitle = "Travel",
                 TagTitles = new List<string> { "Windows 10", TAG2_TITLE },
-                Tags = await _tagSvc.GetTagsAsync(),
+                Tags = await _tagSvc.GetAllAsync(),
                 CreatedOn = new DateTimeOffset(),
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
@@ -114,8 +114,8 @@ namespace Fan.Blog.IntegrationTests
             var result = await _blogSvc.CreatePostAsync(blogPost);
 
             // Assert
-            var cats = await _blogSvc.GetCategoriesAsync();
-            var tags = await _tagSvc.GetTagsAsync();
+            var cats = await _catSvc.GetAllAsync();
+            var tags = await _tagSvc.GetAllAsync();
 
             // BlogPost
             Assert.Equal(2, result.Id);
@@ -147,14 +147,14 @@ namespace Fan.Blog.IntegrationTests
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
             blogPost.TagTitles = new List<string> { "Windows 10", TAG2_TITLE }; // 1 new tag, 1 existing
-            blogPost.Tags = await _tagSvc.GetTagsAsync();
+            blogPost.Tags = await _tagSvc.GetAllAsync();
             blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
 
             var result = await _blogSvc.UpdatePostAsync(blogPost);
 
             // Assert
-            var cats = await _blogSvc.GetCategoriesAsync();
-            var tags = await _tagSvc.GetTagsAsync();
+            var cats = await _catSvc.GetAllAsync();
+            var tags = await _tagSvc.GetAllAsync();
 
             // BlogPost
             Assert.Equal(2, result.Category.Id);
@@ -191,15 +191,15 @@ namespace Fan.Blog.IntegrationTests
             // Act
             blogPost.CategoryTitle = "Travel"; // new cat
             blogPost.TagTitles = new List<string> { "Windows 10", TAG2_TITLE }; // 1 new tag, 1 existing
-            blogPost.Tags = await _tagSvc.GetTagsAsync();
+            blogPost.Tags = await _tagSvc.GetAllAsync();
             blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
             blogPost.Status = EPostStatus.Draft;
 
             var result = await _blogSvc.UpdatePostAsync(blogPost);
 
             // Assert
-            var cats = await _blogSvc.GetCategoriesAsync();
-            var tags = await _tagSvc.GetTagsAsync();
+            var cats = await _catSvc.GetAllAsync();
+            var tags = await _tagSvc.GetAllAsync();
 
             // BlogPost
             Assert.Equal(2, result.Category.Id);

@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
@@ -26,6 +27,7 @@ namespace Fan.Web.Pages
         private readonly SignInManager<User> _signInManager;
         private readonly ISettingService _settingSvc;
         private readonly IBlogService _blogSvc;
+        private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ILogger<SetupModel> _logger;
 
@@ -34,6 +36,7 @@ namespace Fan.Web.Pages
             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
             IBlogService blogService,
+            ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
             ILogger<SetupModel> logger)
@@ -42,6 +45,7 @@ namespace Fan.Web.Pages
             _roleManager = roleManager;
             _signInManager = signInManager;
             _blogSvc = blogService;
+            _catSvc = catService;
             _tagSvc = tagService;
             _settingSvc = settingService;
             _logger = logger;
@@ -234,11 +238,11 @@ namespace Fan.Web.Pages
             Category defaultCat = null;
             try
             {
-                defaultCat = await _blogSvc.GetCategoryAsync(blogSettings.DefaultCategoryId);
+                defaultCat = await _catSvc.GetAsync(blogSettings.DefaultCategoryId);
             }
             catch (FanException)
             {
-                defaultCat = await _blogSvc.CreateCategoryAsync(DEFAULT_CATEGORY);
+                defaultCat = await _catSvc.CreateAsync(DEFAULT_CATEGORY);
             }
 
             // TODO should I make create welcome post a option on setup

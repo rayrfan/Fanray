@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Enums;
+﻿using Fan.Blog.Categories;
+using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
@@ -30,6 +31,7 @@ namespace Fan.Web.Pages.Admin
     public class ComposeModel : PageModel
     {
         private readonly IBlogService _blogSvc;
+        private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
@@ -40,12 +42,14 @@ namespace Fan.Web.Pages.Admin
         public ComposeModel(
             UserManager<User> userManager,
             IBlogService blogService,
+            ICategoryService catService,
             ITagService tagService,
             IMediaService mediaSvc,
             ISettingService settingService)
         {
             _userManager = userManager;
             _blogSvc = blogService;
+            _catSvc = catService;
             _tagSvc = tagService;
             _mediaSvc = mediaSvc;
             _settingSvc = settingService;
@@ -154,7 +158,7 @@ namespace Fan.Web.Pages.Admin
             PostJson = JsonConvert.SerializeObject(postVM);
 
             // cats
-            var categories = await _blogSvc.GetCategoriesAsync();
+            var categories = await _catSvc.GetAllAsync();
             var allCats = from c in categories
                           select new CatVM
                           {
@@ -164,7 +168,7 @@ namespace Fan.Web.Pages.Admin
             CatsJson = JsonConvert.SerializeObject(allCats);
 
             // tags
-            var tags = await _tagSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetAllAsync();
             var allTags = tags.Select(t => t.Title).ToArray();
             TagsJson = JsonConvert.SerializeObject(allTags);
         }
@@ -294,14 +298,14 @@ namespace Fan.Web.Pages.Admin
             List<Tag> tags = new List<Tag>();
             foreach (var title in post.Tags) // titles
             {
-                tags.Add(await _tagSvc.GetTagByTitleAsync(title));
+                tags.Add(await _tagSvc.GetByTitleAsync(title));
             }
 
             var blogPost = new BlogPost
             {
                 User = await _userManager.GetUserAsync(HttpContext.User),
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                Category = await _blogSvc.GetCategoryAsync(post.CategoryId),
+                Category = await _catSvc.GetAsync(post.CategoryId),
                 CreatedOn = GetCreatedOn(post.PostDate),
                 Tags = tags,
                 Slug = post.Slug.IsNullOrEmpty() ? "untitled" : post.Slug,
