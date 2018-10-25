@@ -1,6 +1,5 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Images;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Medias;
 using Fan.Membership;
 using Microsoft.AspNetCore.Http;
@@ -18,13 +17,13 @@ namespace Fan.Web.Pages.Admin
 {
     public class MediaModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
         private readonly IMediaService _mediaSvc;
         private readonly IImageService _imgSvc;
         private readonly UserManager<User> _userManager;
 
         public MediaModel(
-            IBlogService blogSvc,
+            IBlogPostService blogSvc,
             IMediaService mediaSvc,
             IImageService imgService,
             UserManager<User> userManager)
@@ -67,9 +66,9 @@ namespace Fan.Web.Pages.Admin
             public IEnumerable<ImageVM> Images { get; set; }
 
             public string ErrorMessage { get; set; }
-
-            public string ImagesJson =>
-                (Images == null || Images.Count() <= 0) ? "[]" :
+          
+            public string ImagesJson => 
+                (Images == null || Images.Count() <=0) ? "[]" : 
                 JsonConvert.SerializeObject(Images);
         }
 

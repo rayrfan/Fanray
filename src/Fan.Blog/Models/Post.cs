@@ -1,5 +1,4 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Data;
 using Fan.Membership;
 using System;

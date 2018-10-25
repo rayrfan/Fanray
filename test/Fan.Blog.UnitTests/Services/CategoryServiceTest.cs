@@ -1,5 +1,5 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Helpers;
+﻿using Fan.Blog.Helpers;
+using Fan.Blog.Models;
 using Fan.Blog.UnitTests.Base;
 using Fan.Exceptions;
 using Moq;
@@ -127,7 +127,7 @@ namespace Fan.Blog.UnitTests.Services
         public async void Update_category_with_title_changed_only_in_casing_is_OK()
         {
             var cat = await _catSvc.GetAsync(1);
-            Assert.Equal("Web Development", cat.Title);
+            Assert.Equal("Web Development", cat.Title); 
 
             cat.Title = "web development";
 

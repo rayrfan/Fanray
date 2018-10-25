@@ -1,9 +1,7 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
-using Fan.Blog.Tags;
+using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Medias;
 using Fan.Membership;
@@ -30,7 +28,7 @@ namespace Fan.Web.Pages.Admin
     /// </remarks>
     public class ComposeModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
@@ -41,7 +39,7 @@ namespace Fan.Web.Pages.Admin
 
         public ComposeModel(
             UserManager<User> userManager,
-            IBlogService blogService,
+            IBlogPostService blogService,
             ICategoryService catService,
             ITagService tagService,
             IMediaService mediaSvc,

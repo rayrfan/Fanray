@@ -1,6 +1,5 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Models;
-using Fan.Blog.Stats;
 using Fan.Data;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,5 @@
-﻿using Fan.Blog.UnitTests.Helpers;
-using Fan.Blog.Models;
-using Fan.Blog.Validators;
+﻿using Fan.Blog.Models;
+using Fan.Blog.UnitTests.Helpers;
 using System.Linq;
 using Xunit;
 

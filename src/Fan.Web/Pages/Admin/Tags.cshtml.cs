@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Models;
-using Fan.Blog.Tags;
+using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

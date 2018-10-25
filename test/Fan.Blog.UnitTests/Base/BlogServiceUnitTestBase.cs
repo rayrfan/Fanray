@@ -1,10 +1,8 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Data;
+﻿using Fan.Blog.Data;
 using Fan.Blog.Helpers;
-using Fan.Blog.Images;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
-using Fan.Blog.Tags;
+using Fan.Blog.Services.Interfaces;
 using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
@@ -21,7 +19,7 @@ using System.Threading.Tasks;
 namespace Fan.Blog.UnitTests.Base
 {
     /// <summary>
-    /// Base class for <see cref="BlogService"/> unit tests.
+    /// Base class for <see cref="BlogPostService"/> unit tests.
     /// </summary>
     public class BlogServiceUnitTestBase
     {
@@ -29,9 +27,9 @@ namespace Fan.Blog.UnitTests.Base
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
-        protected BlogService _blogSvc; // we have test internal methods, thus not using IBlogService
+        protected BlogPostService _postSvc; // we have test internal methods, thus not using IBlogService
         protected IDistributedCache _cache;
-        protected ILogger<BlogService> _loggerBlogSvc;
+        protected ILogger<BlogPostService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
         protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
 
@@ -61,7 +59,7 @@ namespace Fan.Blog.UnitTests.Base
 
             // logger
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            _loggerBlogSvc = loggerFactory.CreateLogger<BlogService>();
+            _loggerBlogSvc = loggerFactory.CreateLogger<BlogPostService>();
             _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
             // services (must be after _cache)
@@ -86,15 +84,12 @@ namespace Fan.Blog.UnitTests.Base
             var shortcodeSvc = new Mock<IShortcodeService>();
             var mediatorMock = new Mock<IMediator>();
 
-            _blogSvc = new BlogService(
-                settingSvc,
-                _catRepoMock.Object,
-                _postRepoMock.Object,
-                mediaSvcMock.Object,
-                storageProviderMock.Object,
-                appSettingsMock.Object,
-                _cache,
-                _loggerBlogSvc,
+            // post service
+            _postSvc = new BlogPostService(
+                settingSvc, 
+                _postRepoMock.Object, 
+                _cache, 
+                _loggerBlogSvc, 
                 mapper,
                 shortcodeSvc.Object,
                 mediatorMock.Object);

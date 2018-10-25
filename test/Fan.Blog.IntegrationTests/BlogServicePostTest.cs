@@ -1,11 +1,11 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Models;
+using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;
+using Fan.Blog.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using Fan.Blog.IntegrationTests.Base;
 
 namespace Fan.Blog.IntegrationTests
 {

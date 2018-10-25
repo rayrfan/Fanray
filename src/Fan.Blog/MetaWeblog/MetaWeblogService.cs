@@ -1,10 +1,7 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
-using Fan.Blog.Images;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
-using Fan.Blog.Tags;
+using Fan.Blog.Services.Interfaces;
 using Fan.Medias;
 using Fan.Membership;
 using Fan.Settings;
@@ -22,7 +19,7 @@ namespace Fan.Blog.MetaWeblog
     {
         private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly IImageService _imgSvc;
@@ -32,7 +29,7 @@ namespace Fan.Blog.MetaWeblog
         public MetaWeblogService(
             IUserService userService,
             SignInManager<User> signInManager,
-            IBlogService blogSvc,
+            IBlogPostService blogSvc,
             ICategoryService catSvc,
             ITagService tagService,
             IImageService imgService,
@@ -273,7 +270,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var userId = user.Id;
-                var media = await _imgSvc.UploadAsync(new MemoryStream(mediaObject.Bits),
+                var media = await _imgSvc.UploadAsync(new MemoryStream(mediaObject.Bits), 
                     userId, mediaObject.Name, mediaObject.Type, EUploadedFrom.MetaWeblog);
 
                 return new MetaMediaInfo()

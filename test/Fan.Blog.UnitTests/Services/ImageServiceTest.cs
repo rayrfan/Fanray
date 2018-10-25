@@ -1,4 +1,4 @@
-﻿using Fan.Blog.Images;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.UnitTests.Base;
 using Fan.Medias;
 using System;

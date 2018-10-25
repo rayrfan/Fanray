@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fan.Blog.Helpers;
 using Fan.Blog.MetaWeblog;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Data;
 using Fan.Emails;
 using Fan.Medias;
@@ -121,7 +121,7 @@ namespace Fan.Web
             //services.AddScoped<INotificationHandler<BlogPostBeforeCreate>, TagService>();
             //services.AddScoped<IMetaWeblogService, MetaWeblogService>(); // verify
             services.Scan(scan => scan
-              .FromAssembliesOf(typeof(IBlogService))
+              .FromAssembliesOf(typeof(IBlogPostService))
               .AddClasses()
               .AsImplementedInterfaces());
 

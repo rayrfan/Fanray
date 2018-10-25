@@ -1,8 +1,6 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Tags;
 using Fan.Data;
 using Fan.IntegrationTests.Base;
 using Fan.Medias;
@@ -78,8 +76,7 @@ namespace Fan.Blog.IntegrationTests.Base
         protected void SeedImages(string filenameSlugged)
         {
             _db.Users.Add(Actor.User);
-            _db.Set<Media>().Add(new Media
-            {
+            _db.Set<Media>().Add(new Media {
                 Id = 1,
                 AppType = EAppType.Blog,
                 FileName = filenameSlugged,

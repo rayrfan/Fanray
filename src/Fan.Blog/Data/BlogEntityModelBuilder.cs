@@ -1,6 +1,4 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Models;
-using Fan.Blog.Tags;
+﻿using Fan.Blog.Models;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 

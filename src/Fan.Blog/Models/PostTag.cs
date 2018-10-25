@@ -1,6 +1,4 @@
-﻿using Fan.Blog.Tags;
-
-namespace Fan.Blog.Models
+﻿namespace Fan.Blog.Models
 {
     public class PostTag
     {

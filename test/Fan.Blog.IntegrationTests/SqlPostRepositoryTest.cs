@@ -1,10 +1,8 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Data;
+﻿using Fan.Blog.Data;
 using Fan.Blog.Enums;
 using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Tags;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -225,7 +223,7 @@ namespace Fan.Blog.IntegrationTests
             var list = await _postRepo.GetListAsync(query);
 
             // Assert: then all posts are returned
-            Assert.Equal(23, list.posts.Count); 
+            Assert.Equal(23, list.posts.Count);
             Assert.Equal(23, list.totalCount);
         }
 

@@ -1,8 +1,5 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.Models;
-using Fan.Blog.Stats;
-using Fan.Blog.Tags;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -43,7 +40,7 @@ namespace Fan.Blog.Data
             {
                 post.CategoryId = categoryId.HasValue ?
                     // from browser
-                    categoryId :
+                    categoryId : 
                     // from metaweblog with no cat inputted
                     Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
             }

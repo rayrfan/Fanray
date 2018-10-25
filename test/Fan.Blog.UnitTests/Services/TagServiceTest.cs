@@ -1,6 +1,5 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Tags;
 using Fan.Blog.UnitTests.Base;
 using Fan.Data;
 using Fan.Exceptions;
@@ -166,7 +165,7 @@ namespace Fan.Blog.UnitTests.Services
             Assert.Equal("technology", tag.Title); // notice title is lowercase
 
             // Act: here I change technology to Technology
-            tag.Title = "Technology";
+            tag.Title = "Technology"; 
 
             // Update the same tag is ok
             var tagAgain = await _tagSvc.UpdateAsync(tag);

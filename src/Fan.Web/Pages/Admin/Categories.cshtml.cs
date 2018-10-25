@@ -1,5 +1,5 @@
-﻿using Fan.Blog.Categories;
-using Fan.Blog.Models;
+﻿using Fan.Blog.Models;
+using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Settings;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-using Fan.Blog.Categories;
+using Fan.Blog.Data;
 using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.Models;
 using Microsoft.EntityFrameworkCore;
