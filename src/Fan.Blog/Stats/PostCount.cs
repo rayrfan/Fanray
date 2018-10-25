@@ -1,4 +1,4 @@
-﻿namespace Fan.Blog.Models
+﻿namespace Fan.Blog.Stats
 {
     public class PostCount
     {

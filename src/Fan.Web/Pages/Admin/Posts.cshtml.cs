@@ -1,5 +1,6 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Services;
+using Fan.Blog.Stats;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -15,9 +16,12 @@ namespace Fan.Web.Pages.Admin
         // -------------------------------------------------------------------- Constructor
 
         private readonly IBlogService _blogSvc;
-        public PostsModel(IBlogService blogService)
+        private readonly IStatsService _statsSvc;
+
+        public PostsModel(IBlogService blogService, IStatsService statsService)
         {
             _blogSvc = blogService;
+            _statsSvc = statsService;
         }
 
         // -------------------------------------------------------------------- Consts & Properties
@@ -46,7 +50,7 @@ namespace Fan.Web.Pages.Admin
 
         public class PostListVM
         {
-            public IEnumerable<PostVM> Posts {get;set;}
+            public IEnumerable<PostVM> Posts { get; set; }
             public int TotalPosts { get; set; }
             public int PublishedCount { get; set; }
             public int DraftCount { get; set; }
@@ -131,7 +135,7 @@ namespace Fan.Web.Pages.Admin
                               PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),
                           };
 
-            var postCount = await _blogSvc.GetPostCountAsync();
+            var postCount = await _statsSvc.GetPostCountAsync();
 
             // prep vm
             return new PostListVM

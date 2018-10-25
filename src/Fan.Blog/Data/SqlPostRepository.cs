@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Categories;
 using Fan.Blog.Enums;
 using Fan.Blog.Models;
+using Fan.Blog.Stats;
 using Fan.Blog.Tags;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
@@ -248,6 +249,9 @@ namespace Fan.Blog.Data
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Returns total number of posts by each <see cref="EPostStatus"/>.
+        /// </summary>
         public async Task<PostCount> GetPostCountAsync() => new PostCount
         {
             Published = await _entities.Where(p => p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost).CountAsync(),

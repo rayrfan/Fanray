@@ -12,15 +12,6 @@ namespace Fan.Blog.Services
     /// </summary>
     public interface IBlogService
     {
-        // -------------------------------------------------------------------- Archive 
-
-        /// <summary>
-        /// Returns a dictionary of year and months, the key is year and the value is a list of 
-        /// <see cref="MonthItem"/> objects.
-        /// </summary>
-        /// <returns></returns>
-        Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync();
-
         // -------------------------------------------------------------------- Posts
 
         /// <summary>
@@ -86,13 +77,5 @@ namespace Fan.Blog.Services
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         /// <returns></returns>
         Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts);
-
-        // -------------------------------------------------------------------- Stats
-
-        /// <summary>
-        /// Returns total number of posts by each <see cref="EPostStatus"/>.
-        /// </summary>
-        /// <returns></returns>
-        Task<PostCount> GetPostCountAsync();
     }
 }
