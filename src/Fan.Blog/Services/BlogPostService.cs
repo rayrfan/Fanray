@@ -9,7 +9,6 @@ using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Settings;
 using Fan.Shortcodes;
-using FluentValidation.Results;
 using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -70,6 +69,8 @@ namespace Fan.Blog.Services
         /// </summary>
         public const int EXCERPT_WORD_LIMIT = 55;
 
+        public const int TITLE_MAXLEN = 256;
+
         // -------------------------------------------------------------------- public methods 
 
         /// <summary>
@@ -80,9 +81,10 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// It creates tags, post and invalidates cache for posts on index page.
         /// </remarks>
-        public async Task<BlogPost> CreatePostAsync(BlogPost blogPost)
+        public async Task<BlogPost> CreateAsync(BlogPost blogPost)
         {
-            if (blogPost == null) return blogPost;
+            // validate
+            ValidatePost(blogPost);
 
             // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
@@ -105,16 +107,17 @@ namespace Fan.Blog.Services
             // after create
             await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
 
-            return await GetPostAsync(post.Id);
+            return await GetAsync(post.Id);
         }
 
         /// <summary>
         /// Updates a <see cref="BlogPost"/>.
         /// </summary>
         /// <param name="blogPost">Contains incoming blog post data to update.</param>
-        public async Task<BlogPost> UpdatePostAsync(BlogPost blogPost)
+        public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
         {
-            if (blogPost == null) return blogPost;
+            // validate
+            ValidatePost(blogPost);
 
             // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
@@ -135,7 +138,7 @@ namespace Fan.Blog.Services
             // after update
             await _mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
 
-            return await GetPostAsync(post.Id);
+            return await GetAsync(post.Id);
         }
 
         /// <summary>
@@ -143,7 +146,7 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task DeletePostAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             await _postRepo.DeleteAsync(id);
             await RemoveAllCacheAsync();
@@ -159,7 +162,7 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// This is used when you want to get a post from db.
         /// </remarks>
-        public async Task<BlogPost> GetPostAsync(int id)
+        public async Task<BlogPost> GetAsync(int id)
         {
             var post = await QueryPostAsync(id, EPostType.BlogPost);
             if (post == null) throw new FanException("Blog post not found.");
@@ -178,7 +181,7 @@ namespace Fan.Blog.Services
         /// This is used by controller. The dates are stored as UTC time in database, thus the 
         /// params year, month and day should be the UTC time.
         /// </remarks>
-        public async Task<BlogPost> GetPostAsync(string slug, int year, int month, int day)
+        public async Task<BlogPost> GetAsync(string slug, int year, int month, int day)
         {
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
@@ -187,11 +190,14 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Returns a list of blog posts for the blog index page.
+        /// Returns a list of blog posts.
         /// </summary>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsAsync(int pageIndex, int pageSize)
+        /// <remarks>
+        /// For the blog index page, admin post page, main rss feed.
+        /// </remarks>
+        public async Task<BlogPostList> GetListAsync(int pageIndex, int pageSize, bool cacheable = true)
         {
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPosts)
             {
@@ -199,14 +205,14 @@ namespace Fan.Blog.Services
                 PageSize = pageSize,
             };
 
-            // TODO cache only first page of the public site not admin
-            //if (query.PageIndex == 1)
-            //{
-            //    return await _cache.GetAsync(CACHE_KEY_POSTS_INDEX, CacheTime_PostsIndex, async () =>
-            //    {
-            //        return await QueryPostsAsync(query);
-            //    });
-            //}
+            // cache only first page of the public site, not admin or rss
+            if (query.PageIndex == 1 && cacheable)
+            {
+                return await _cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_PostsIndex, async () =>
+                {
+                    return await QueryPostsAsync(query);
+                });
+            }
 
             return await QueryPostsAsync(query);
         }
@@ -217,11 +223,10 @@ namespace Fan.Blog.Services
         /// <param name="categorySlug"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsForCategoryAsync(string categorySlug, int pageIndex)
+        public async Task<BlogPostList> GetListForCategoryAsync(string categorySlug, int pageIndex)
         {
             if (categorySlug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
 
-            // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByCategory)
             {
                 CategorySlug = categorySlug,
@@ -238,11 +243,10 @@ namespace Fan.Blog.Services
         /// <param name="tagSlug"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsForTagAsync(string tagSlug, int pageIndex)
+        public async Task<BlogPostList> GetListForTagAsync(string tagSlug, int pageIndex)
         {
             if (tagSlug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
 
-            // todo caching
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogPostsByTag)
             {
                 TagSlug = tagSlug,
@@ -260,7 +264,7 @@ namespace Fan.Blog.Services
         /// <param name="month"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsForArchive(int? year, int? month, int page = 1)
+        public async Task<BlogPostList> GetListForArchive(int? year, int? month, int page = 1)
         {
             if (!year.HasValue) throw new FanException("Year must be provided.");
             var query = new PostListQuery(EPostListQueryType.BlogPostsArchive)
@@ -276,7 +280,7 @@ namespace Fan.Blog.Services
         /// Returns a list of blog drafts.
         /// </summary>
         /// <returns></returns>
-        public async Task<BlogPostList> GetPostsForDraftsAsync()
+        public async Task<BlogPostList> GetListForDraftsAsync()
         {
             PostListQuery query = new PostListQuery(EPostListQueryType.BlogDrafts);
 
@@ -339,6 +343,21 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
+        /// Validates a blog post and throws exception if validation fails.
+        /// </summary>
+        /// <param name="blogPost"></param>
+        /// <returns></returns>
+        private void ValidatePost(BlogPost blogPost)
+        {
+            // validate
+            var errMsg = "";
+            if (blogPost == null) errMsg = "Invalid blog post.";
+            else if (blogPost.Status != EPostStatus.Draft && blogPost.Title.IsNullOrEmpty()) errMsg = "Blog post title cannot be empty.";
+            else if (!blogPost.Title.IsNullOrEmpty() && blogPost.Title.Length > TITLE_MAXLEN) errMsg = $"Blog post title cannot exceed {TITLE_MAXLEN} chars.";
+            if (!errMsg.IsNullOrEmpty()) throw new FanException(errMsg);
+        }
+
+        /// <summary>
         /// Prepares a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
         /// <param name="blogPost">The incoming post with user data.</param>
@@ -346,21 +365,10 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
-            // Validation
-            if (blogPost.Status != EPostStatus.Draft) // skip if it's a draft
-            {
-                var validator = new PostValidator();
-                ValidationResult result = await validator.ValidateAsync(blogPost);
-                if (!result.IsValid)
-                {
-                    throw new FanException($"Failed to {createOrUpdate.ToString().ToLower()} blog post.", result.Errors);
-                }
-            }
-
             // Get post
             // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            //var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create) 
@@ -472,9 +480,9 @@ namespace Fan.Blog.Services
         internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
         {
             // when user manually inputted a slug, it could exceed max len
-            if (input.Length > PostValidator.POST_TITLE_SLUG_MAXLEN)
+            if (input.Length > TITLE_MAXLEN)
             {
-                input = input.Substring(0, PostValidator.POST_TITLE_SLUG_MAXLEN);
+                input = input.Substring(0, TITLE_MAXLEN);
             }
 
             // remove/replace odd char, lower case etc

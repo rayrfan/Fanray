@@ -27,7 +27,7 @@ namespace Fan.Blog.UnitTests.Base
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
-        protected BlogPostService _postSvc; // we have test internal methods, thus not using IBlogService
+        protected BlogPostService _blogPostSvc; // we have test internal methods, thus not using IBlogPostService
         protected IDistributedCache _cache;
         protected ILogger<BlogPostService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
@@ -63,13 +63,12 @@ namespace Fan.Blog.UnitTests.Base
             _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
             // services (must be after _cache)
-            var settingSvc = new SettingService(_metaRepoMock.Object, _cache, _loggerSettingSvc);
             var mediaSvcMock = new Mock<IMediaService>();
 
-            // blogsettings
+            // settings
             _settingSvcMock = new Mock<ISettingService>();
-            _settingSvcMock.Setup(s => s.GetSettingsAsync<BlogSettings>())
-                .Returns(Task.FromResult(new BlogSettings { DefaultCategoryId = 1 }));
+            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
+            _settingSvcMock.Setup(svc => svc.GetSettingsAsync<BlogSettings>()).Returns(Task.FromResult(new BlogSettings()));
 
             // appsettings
             var appSettingsMock = new Mock<IOptionsSnapshot<AppSettings>>();
@@ -85,8 +84,8 @@ namespace Fan.Blog.UnitTests.Base
             var mediatorMock = new Mock<IMediator>();
 
             // post service
-            _postSvc = new BlogPostService(
-                settingSvc, 
+            _blogPostSvc = new BlogPostService(
+                _settingSvcMock.Object, 
                 _postRepoMock.Object, 
                 _cache, 
                 _loggerBlogSvc, 

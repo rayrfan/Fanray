@@ -68,7 +68,7 @@ namespace Fan.Blog.MetaWeblog
                     CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
 
                 return blogPost.Id.ToString();
             }
@@ -99,7 +99,7 @@ namespace Fan.Blog.MetaWeblog
                     CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
-                await _blogSvc.UpdatePostAsync(blogPost);
+                await _blogSvc.UpdateAsync(blogPost);
 
                 return true;
             }
@@ -116,7 +116,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var id = Convert.ToInt32(postId);
-                await _blogSvc.DeletePostAsync(id);
+                await _blogSvc.DeleteAsync(id);
 
                 return true;
             }
@@ -133,7 +133,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 int id = Int32.Parse(postId);
-                var post = await _blogSvc.GetPostAsync(id);
+                var post = await _blogSvc.GetAsync(id);
 
                 return ToMetaPost(post, rootUrl);
             }

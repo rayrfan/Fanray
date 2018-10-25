@@ -37,7 +37,7 @@ namespace Fan.Blog.IntegrationTests
             };
 
             // Act
-            var result = await _blogSvc.CreatePostAsync(blogPost);
+            var result = await _blogSvc.CreateAsync(blogPost);
 
             // Assert
             Assert.Equal(2, result.Id);
@@ -72,7 +72,7 @@ namespace Fan.Blog.IntegrationTests
             };
 
             // Act
-            var result = await _blogSvc.CreatePostAsync(blogPost);
+            var result = await _blogSvc.CreateAsync(blogPost);
             var tags = await _tagSvc.GetAllAsync();
 
             // Assert
@@ -111,7 +111,7 @@ namespace Fan.Blog.IntegrationTests
             };
 
             // Act
-            var result = await _blogSvc.CreatePostAsync(blogPost);
+            var result = await _blogSvc.CreateAsync(blogPost);
 
             // Assert
             var cats = await _catSvc.GetAllAsync();
@@ -141,7 +141,7 @@ namespace Fan.Blog.IntegrationTests
         {
             // Arrange
             SeedTestPost();
-            var blogPost = await _blogSvc.GetPostAsync(1);
+            var blogPost = await _blogSvc.GetAsync(1);
             var wasCreatedOn = blogPost.CreatedOn;
 
             // Act
@@ -150,7 +150,7 @@ namespace Fan.Blog.IntegrationTests
             blogPost.Tags = await _tagSvc.GetAllAsync();
             blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
 
-            var result = await _blogSvc.UpdatePostAsync(blogPost);
+            var result = await _blogSvc.UpdateAsync(blogPost);
 
             // Assert
             var cats = await _catSvc.GetAllAsync();
@@ -185,7 +185,7 @@ namespace Fan.Blog.IntegrationTests
         {
             // Arrange
             SeedTestPost();
-            var blogPost = await _blogSvc.GetPostAsync(1);
+            var blogPost = await _blogSvc.GetAsync(1);
             var wasCreatedOn = blogPost.CreatedOn;
 
             // Act
@@ -195,7 +195,7 @@ namespace Fan.Blog.IntegrationTests
             blogPost.CreatedOn = DateTimeOffset.Now; // update the post time to now, user local time
             blogPost.Status = EPostStatus.Draft;
 
-            var result = await _blogSvc.UpdatePostAsync(blogPost);
+            var result = await _blogSvc.UpdateAsync(blogPost);
 
             // Assert
             var cats = await _catSvc.GetAllAsync();
@@ -245,7 +245,7 @@ namespace Fan.Blog.IntegrationTests
             };
 
             // Act
-            var postNow = await _blogSvc.CreatePostAsync(blogPost);
+            var postNow = await _blogSvc.CreateAsync(blogPost);
 
             // Assert
             Assert.Equal("now", postNow.CreatedOnDisplay);
@@ -275,7 +275,7 @@ namespace Fan.Blog.IntegrationTests
             };
 
             // Act
-            var result = await _blogSvc.CreatePostAsync(blogPost);
+            var result = await _blogSvc.CreateAsync(blogPost);
 
             // Assert
             Assert.Equal(2, result.Id);

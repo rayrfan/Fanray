@@ -37,7 +37,7 @@ namespace Fan.Blog.Services
 
         // -------------------------------------------------------------------- consts
 
-        public const int TITLE_MAX_LEN = 256;
+        public const int TITLE_MAXLEN = 256;
 
         /// <summary>
         /// Slug cannot be one of these values if it's intended to be used right after web root.
@@ -171,11 +171,12 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         private async Task<Post> PrepPostAsync(Page page, ECreateOrUpdate createOrUpdate)
         {
-            // Validation
-            var validator = new PostValidator();
-            ValidationResult result = await validator.ValidateAsync(page);
-            if (!result.IsValid)
-                throw new FanException($"Failed to {createOrUpdate} page.", result.Errors);
+            // validate
+            var errMsg = "";
+            if (page == null) errMsg = "Invalid page.";
+            else if (page.Status != EPostStatus.Draft && page.Title.IsNullOrEmpty()) errMsg = "Page title cannot be empty.";
+            else if (page.Title.Length > TITLE_MAXLEN) errMsg = $"Page title cannot exceed {TITLE_MAXLEN} chars.";
+            if (!errMsg.IsNullOrEmpty()) throw new FanException(errMsg);
 
             // Get page
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await this.GetPageAsync(page.Id); // throws if not found
@@ -227,8 +228,8 @@ namespace Fan.Blog.Services
         private async Task<string> FormatPageSlugAsync(string input, int? parentId)
         {
             // when input is the slug user inputted, it could exceed max len
-            if (input.Length > TITLE_MAX_LEN)
-                input = input.Substring(0, TITLE_MAX_LEN);
+            if (input.Length > TITLE_MAXLEN)
+                input = input.Substring(0, TITLE_MAXLEN);
 
             var slug = Util.FormatSlug(input); // remove/replace odd char, lower case etc
 

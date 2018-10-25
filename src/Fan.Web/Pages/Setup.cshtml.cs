@@ -245,7 +245,7 @@ namespace Fan.Web.Pages
 
             // TODO should I make create welcome post a option on setup
             // create welcome post and default category
-            await _blogSvc.CreatePostAsync(new BlogPost
+            await _blogSvc.CreateAsync(new BlogPost
             {
                 CategoryTitle = defaultCat.Title,
                 TagTitles = new List<string> { "announcement", "blogging" },
@@ -284,24 +284,6 @@ namespace Fan.Web.Pages
         /// UserName can only contain alphanumeric, dash and underscore.
         /// </summary>
         public const string USERNAME_REGEX = @"^[a-zA-Z0-9-_]+$";
-        /// <summary>
-        /// Reserved keywords username cannot use.
-        /// </summary>
-        public static string[] USERNAME_RESERVED = new string[]
-        {
-            "admin", "anonymous", "api", "account", "about",
-            "blog", "blogs",
-            "contact",
-            "home", "help",
-            "login", "logout",
-            "manage",
-            "privacy", "page", "pages",
-            "register",
-            "system",
-            "terms",
-            "user", "users",
-            "signin-google"
-        };
 
         public SetupValidator()
         {
@@ -313,7 +295,6 @@ namespace Fan.Web.Pages
                 .NotEmpty()
                 .Length(NAME_MINLENGTH, USERNAME_MAXLENGTH)
                 .Matches(USERNAME_REGEX)
-                .Must(title => !USERNAME_RESERVED.Contains(title, StringComparer.CurrentCultureIgnoreCase))
                 .WithMessage(s => $"Username '{s.UserName}' is not available.");
 
             // DisplayName

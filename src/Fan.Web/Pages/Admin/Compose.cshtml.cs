@@ -121,7 +121,7 @@ namespace Fan.Web.Pages.Admin
             PostVM postVM;
             if (postId > 0) // existing post
             {
-                var post = await _blogSvc.GetPostAsync(postId);
+                var post = await _blogSvc.GetAsync(postId);
                 postVM = new PostVM
                 {
                     Id = post.Id,
@@ -197,12 +197,12 @@ namespace Fan.Web.Pages.Admin
 
             if (post.Id <= 0)
             {
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
                 blogPost.Id = post.Id;
-                blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+                blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
             return new JsonResult(GetPostAbsoluteUrl(blogPost));
@@ -229,7 +229,7 @@ namespace Fan.Web.Pages.Admin
                 Body = post.Body,
                 Status = EPostStatus.Published,
             };
-            blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+            blogPost = await _blogSvc.UpdateAsync(blogPost);
             return new JsonResult(GetPostAbsoluteUrl(blogPost));
         }
 
@@ -259,12 +259,12 @@ namespace Fan.Web.Pages.Admin
 
             if (post.Id <= 0)
             {
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
                 blogPost.Id = post.Id;
-                blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+                blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
             var postVM = new PostVM
