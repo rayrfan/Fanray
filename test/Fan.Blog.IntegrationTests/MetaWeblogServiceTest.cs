@@ -38,6 +38,7 @@ namespace Fan.Blog.IntegrationTests
                 _blogSvc,
                 _catSvc,
                 _tagSvc,
+                _imgSvc,
                 _settingSvcMock.Object,
                 loggerMetaSvc);
         }

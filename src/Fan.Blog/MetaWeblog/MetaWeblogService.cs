@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Categories;
 using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
+using Fan.Blog.Images;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
@@ -24,6 +25,7 @@ namespace Fan.Blog.MetaWeblog
         private readonly IBlogService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
+        private readonly IImageService _imgSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
 
@@ -33,6 +35,7 @@ namespace Fan.Blog.MetaWeblog
             IBlogService blogSvc,
             ICategoryService catSvc,
             ITagService tagService,
+            IImageService imgService,
             ISettingService settingService,
             ILogger<MetaWeblogService> logger)
         {
@@ -41,6 +44,7 @@ namespace Fan.Blog.MetaWeblog
             _blogSvc = blogSvc;
             _catSvc = catSvc;
             _tagSvc = tagService;
+            _imgSvc = imgService;
             _settingSvc = settingService;
             _logger = logger;
         }
@@ -269,12 +273,12 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var userId = user.Id;
-                var media = await _blogSvc.UploadImageAsync(new MemoryStream(mediaObject.Bits),
+                var media = await _imgSvc.UploadAsync(new MemoryStream(mediaObject.Bits),
                     userId, mediaObject.Name, mediaObject.Type, EUploadedFrom.MetaWeblog);
 
                 return new MetaMediaInfo()
                 {
-                    Url = _blogSvc.GetImageUrl(media, EImageSize.Original)
+                    Url = _imgSvc.GetAbsoluteUrl(media, EImageSize.Original)
                 };
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Categories;
 using Fan.Blog.Data;
 using Fan.Blog.Helpers;
+using Fan.Blog.Images;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
@@ -38,6 +39,7 @@ namespace Fan.Blog.UnitTests.Base
         protected ICategoryService _catSvc;
         protected ILogger<CategoryService> _loggerCatSvc;
         protected ITagService _tagSvc;
+        protected IImageService _imgSvc;
         protected ILogger<TagService> _loggerTagSvc;
 
         /// <summary>
@@ -104,6 +106,9 @@ namespace Fan.Blog.UnitTests.Base
             // tag service
             _loggerTagSvc = loggerFactory.CreateLogger<TagService>();
             _tagSvc = new TagService(_tagRepoMock.Object, mediatorMock.Object, _cache, _loggerTagSvc);
+
+            // image service
+            _imgSvc = new ImageService(mediaSvcMock.Object, storageProviderMock.Object, appSettingsMock.Object);
         }
     }
 }

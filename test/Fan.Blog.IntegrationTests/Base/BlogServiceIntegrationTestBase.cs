@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Categories;
 using Fan.Blog.Data;
 using Fan.Blog.Helpers;
+using Fan.Blog.Images;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Blog.Tags;
@@ -27,6 +28,7 @@ namespace Fan.Blog.IntegrationTests.Base
         protected IBlogService _blogSvc;
         protected ICategoryService _catSvc;
         protected ITagService _tagSvc;
+        protected IImageService _imgSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
         protected ILoggerFactory _loggerFactory;
@@ -98,6 +100,7 @@ namespace Fan.Blog.IntegrationTests.Base
 
             _catSvc = new CategoryService(catRepo, _settingSvcMock.Object, mediator, cache, loggerCatSvc);
             _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
+            _imgSvc = new ImageService(_mediaSvc, _storageProviderMock.Object, appSettingsMock.Object);
 
             // the blog service
             _blogSvc = new BlogService(

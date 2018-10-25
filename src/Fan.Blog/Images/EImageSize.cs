@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Fan.Blog.Enums
+﻿namespace Fan.Blog.Images
 {
     /// <summary>
     /// Blog image sizes.

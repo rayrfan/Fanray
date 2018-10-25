@@ -13,7 +13,7 @@ namespace Fan.Blog.IntegrationTests
     /// <remarks>
     /// <see cref="MetaWeblogServiceTest"/> for upload image from OLW test.
     /// </remarks>
-    public class BlogServiceImageTest : BlogServiceIntegrationTestBase
+    public class ImageServiceTest : BlogServiceIntegrationTestBase
     {
         /// <summary>
         /// A 40 x 40 png image in base64.
@@ -26,7 +26,7 @@ namespace Fan.Blog.IntegrationTests
         /// <summary>
         /// Initializes an image stream and byte array.
         /// </summary>
-        public BlogServiceImageTest()
+        public ImageServiceTest()
         {
             _sourceArray = System.Convert.FromBase64String(IMAGE_BASE64);
             _sourceStream = new MemoryStream(_sourceArray);
@@ -48,7 +48,7 @@ namespace Fan.Blog.IntegrationTests
             SeedImages(filenameSlugged);
 
             // When user uploads an image with the same name
-            var media = await _blogSvc.UploadImageAsync(_sourceStream, Actor.ADMIN_ID, filename, contentType, EUploadedFrom.Browser);
+            var media = await _imgSvc.UploadAsync(_sourceStream, Actor.ADMIN_ID, filename, contentType, EUploadedFrom.Browser);
 
             // Then a second record is inserted
             Assert.Equal(2, media.Id);
@@ -68,7 +68,7 @@ namespace Fan.Blog.IntegrationTests
             Assert.Equal("fanray logo", media.Alt);
 
             // and storage provider is called only once since it's a tiny image
-            _storageProviderMock.Verify(s => s.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<char>()), 
+            _storageProviderMock.Verify(s => s.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<char>()),
                 Times.Exactly(1));
         }
     }

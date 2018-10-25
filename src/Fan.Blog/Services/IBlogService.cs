@@ -21,36 +21,6 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         Task<Dictionary<int, List<MonthItem>>> GetArchivesAsync();
 
-        // -------------------------------------------------------------------- Images
-
-        /// <summary>
-        /// Deletes an image by id.
-        /// </summary>
-        /// <param name="mediaId"></param>
-        /// <returns></returns>
-        Task DeleteImageAsync(int mediaId);
-
-        /// <summary>
-        /// Returns absolute URL to an image.
-        /// </summary>
-        /// <param name="media">The media record representing the image.</param>
-        /// <param name="size">The image size.</param>
-        /// <returns></returns>
-        string GetImageUrl(Media media, EImageSize size);
-
-        /// <summary>
-        /// Uploads image.
-        /// </summary>
-        /// <param name="source">File stream.</param>
-        /// <param name="userId">User who uploads the file.</param>
-        /// <param name="fileName">Original filename.</param>
-        /// <param name="contentType">File content type e.g. "image/jpeg".</param>
-        /// <param name="uploadFrom">Whether the image is uploaded from browser or OLW.</param>
-        /// <returns>
-        /// <see cref="Media"/> that represents the image.
-        /// </returns>
-        Task<Media> UploadImageAsync(Stream source, int userId, string fileName, string contentType, EUploadedFrom uploadFrom);
-
         // -------------------------------------------------------------------- Posts
 
         /// <summary>
