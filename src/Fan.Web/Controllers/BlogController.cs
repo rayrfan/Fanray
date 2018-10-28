@@ -112,6 +112,7 @@ namespace Fan.Web.Controllers
                 blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
                 blogPost.Body = OembedParser.Parse(blogPost.Body);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+                blogSettings.DisqusShortname = ""; // when preview turn off disqus
                 var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
 
                 // Show it
