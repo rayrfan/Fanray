@@ -7,6 +7,7 @@ using Fan.Settings;
 using Fan.Shortcodes;
 using Fan.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
