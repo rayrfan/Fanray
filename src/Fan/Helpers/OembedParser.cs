@@ -132,9 +132,10 @@ namespace Fan.Helpers
         }
 
         /// <summary>
-        /// Given a youtube url returns the key of the video.
+        /// Returns the portion of the url that starts with video key. Returns empty string if url
+        /// is not a qualified youtube video url.
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">A full youtube video url.</param>
         /// <returns></returns>
         public static string GetYouTubeVideoKey(string url)
         {
@@ -146,8 +147,14 @@ namespace Fan.Helpers
             if (url.Contains(SHORTENED_URL)) segment = SHORTENED_URL;
             else if (url.Contains(NAVIGATION_URL)) segment = NAVIGATION_URL;
             else if (url.Contains(EMBED_URL)) segment = EMBED_URL;
+            if (segment.IsNullOrEmpty()) return "";
 
-            return segment.IsNullOrEmpty() ? "" : url.Substring(url.LastIndexOf(segment) + segment.Length);
+            string key = url.Substring(url.LastIndexOf(segment) + segment.Length);
+            // the "t" param does not work, it has to change to "start"
+            if (key.Contains("&t=")) key = key.Replace("&t=", "&start=");
+            else if (key.Contains("&amp;t=")) key = key.Replace("&amp;t=", "&amp;start=");
+
+            return key;
         }
     }
 
