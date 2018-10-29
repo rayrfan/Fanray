@@ -1,10 +1,11 @@
-﻿using Fan.Blog.IntegrationTests.Helpers;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
+using Fan.Data;
 using Fan.IntegrationTests.Base;
+using Fan.Medias;
 using System;
 using System.Collections.Generic;
-using Fan.Medias;
 
 namespace Fan.Blog.IntegrationTests.Base
 {
@@ -48,6 +49,7 @@ namespace Fan.Blog.IntegrationTests.Base
         /// <param name="db"></param>
         protected void SeedTestPost()
         {
+            _db.Set<Meta>().AddRange(GetMetas());
             _db.Users.Add(Actor.User);
             _db.Set<Post>().Add(GetPost());
             _db.SaveChanges();
@@ -61,6 +63,7 @@ namespace Fan.Blog.IntegrationTests.Base
         /// <param name="numOfPosts"></param>
         protected void SeedTestPosts(int numOfPosts)
         {
+            _db.Set<Meta>().AddRange(GetMetas());
             _db.Users.Add(Actor.User);
             _db.Set<Post>().AddRange(GetPosts(numOfPosts));
             _db.SaveChanges();
@@ -83,13 +86,27 @@ namespace Fan.Blog.IntegrationTests.Base
                 MediaType = EMediaType.Image,
                 UploadedFrom = EUploadedFrom.Browser,
                 UploadedOn = DateTimeOffset.UtcNow,
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 Width = 40,
             });
             _db.SaveChanges();
         }
 
         // -------------------------------------------------------------------- private methods
+
+        /// <summary>
+        /// Returns some blog settings.
+        /// </summary>
+        /// <returns></returns>
+        private List<Meta> GetMetas()
+        {
+            var metas = new List<Meta>
+            {
+                new Meta { Id = 1, Key = "blogsettings.defaultcategoryid", Value = "1" }
+            };
+
+            return metas;
+        }
 
         /// <summary>
         /// Returns a post associated with 1 category and 2 tags.
@@ -104,7 +121,7 @@ namespace Fan.Blog.IntegrationTests.Base
             {
                 Body = "A post body.",
                 Category = cat,
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "A published post",
@@ -141,7 +158,7 @@ namespace Fan.Blog.IntegrationTests.Base
                 {
                     Body = $"A post body #{i}.",
                     Category = cat,
-                    UserId = Actor.AUTHOR_ID,
+                    UserId = Actor.ADMIN_ID,
                     CreatedOn = new DateTimeOffset(new DateTime(2017, 01, i), new TimeSpan(-7, 0, 0)),
                     RootId = null,
                     Title = $"Test Post #{i}",

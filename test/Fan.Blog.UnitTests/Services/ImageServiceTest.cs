@@ -6,7 +6,10 @@ using Xunit;
 
 namespace Fan.Blog.UnitTests.Services
 {
-    public class ImageTest : BlogServiceUnitTestBase
+    /// <summary>
+    /// Unit tests for <see cref="ImageService"/>.
+    /// </summary>
+    public class ImageServiceTest : BlogServiceUnitTestBase
     {
         const string FILENAME = "pic.jpg";
         readonly string path;
@@ -15,7 +18,7 @@ namespace Fan.Blog.UnitTests.Services
         /// <summary>
         /// Consturctor initialization called before each test.
         /// </summary>
-        public ImageTest()
+        public ImageServiceTest()
         {
             var uploadedOn = DateTimeOffset.UtcNow;
             var year = uploadedOn.Year;
@@ -42,19 +45,19 @@ namespace Fan.Blog.UnitTests.Services
             var origUrl = $"{path}/{FILENAME}";
 
             // original -> original
-            var actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Original);
+            var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
             Assert.Equal(origUrl, actualUrl);
 
             // large -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Large);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Large);
             Assert.Equal(origUrl, actualUrl);
 
             // medium -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Medium);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Medium);
             Assert.Equal(origUrl, actualUrl);
 
             // small -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Small);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Small);
             Assert.Equal(origUrl, actualUrl);
         }
 
@@ -77,20 +80,20 @@ namespace Fan.Blog.UnitTests.Services
             var origUrl = $"{path}/{FILENAME}";
 
             // original -> original
-            var actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Original);
+            var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
             Assert.Equal(origUrl, actualUrl);
 
             // large -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Large);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Large);
             Assert.Equal(origUrl, actualUrl);
 
             // medium -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Medium);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Medium);
             Assert.Equal(origUrl, actualUrl);
 
             // small -> small
             var smallUrl = $"{path}/sm/{FILENAME}";
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Small);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Small);
             Assert.Equal(smallUrl, actualUrl);
         }
 
@@ -110,19 +113,19 @@ namespace Fan.Blog.UnitTests.Services
             var mediumUrl = $"{path}/md/{FILENAME}";
 
             // original -> original
-            var actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Original);
+            var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
             Assert.Equal(origUrl, actualUrl);
 
             // large -> original
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Large);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Large);
             Assert.Equal(origUrl, actualUrl);
 
             // medium -> medium
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Medium);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Medium);
             Assert.Equal(mediumUrl, actualUrl);
 
             // small -> small
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Small);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Small);
             Assert.Equal(smallUrl, actualUrl);
         }
 
@@ -140,19 +143,19 @@ namespace Fan.Blog.UnitTests.Services
             var largeUrl = $"{path}/lg/{FILENAME}";
 
             // original -> original
-            var actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Original);
+            var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
             Assert.Equal(origUrl, actualUrl);
 
             // large -> large
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Large);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Large);
             Assert.Equal(largeUrl, actualUrl);
 
             // medium -> medium
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Medium);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Medium);
             Assert.Equal(mediumUrl, actualUrl);
 
             // small -> small
-            actualUrl = _blogSvc.GetImageUrl(_media, EImageSize.Small);
+            actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Small);
             Assert.Equal(smallUrl, actualUrl);
         }
     }

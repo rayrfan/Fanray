@@ -19,7 +19,7 @@ namespace Fan.Blog.UnitTests.Helpers
         [InlineData("cat1", "cat1-2", new string[] { "cat1" })]
         public void FormatTaxonomySlug_Test(string input, string expected, IEnumerable<string> existingSlugs = null)
         {
-            Assert.Equal(expected, BlogUtil.FormatTaxonomySlug(input, existingSlugs));
+            Assert.Equal(expected, BlogUtil.FormatTaxonomySlug(input, 24, existingSlugs));
         }
     }
 }

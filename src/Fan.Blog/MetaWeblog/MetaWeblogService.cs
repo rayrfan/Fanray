@@ -1,7 +1,7 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Medias;
 using Fan.Membership;
 using Fan.Settings;
@@ -19,20 +19,29 @@ namespace Fan.Blog.MetaWeblog
     {
         private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
+        private readonly ICategoryService _catSvc;
+        private readonly ITagService _tagSvc;
+        private readonly IImageService _imgSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<MetaWeblogService> _logger;
 
         public MetaWeblogService(
             IUserService userService,
             SignInManager<User> signInManager,
-            IBlogService blogSvc,
+            IBlogPostService blogSvc,
+            ICategoryService catSvc,
+            ITagService tagService,
+            IImageService imgService,
             ISettingService settingService,
             ILogger<MetaWeblogService> logger)
         {
             _userSvc = userService;
             _signInManager = signInManager;
             _blogSvc = blogSvc;
+            _catSvc = catSvc;
+            _tagSvc = tagService;
+            _imgSvc = imgService;
             _settingSvc = settingService;
             _logger = logger;
         }
@@ -59,7 +68,7 @@ namespace Fan.Blog.MetaWeblog
                     CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
 
                 return blogPost.Id.ToString();
             }
@@ -90,7 +99,7 @@ namespace Fan.Blog.MetaWeblog
                     CommentStatus = await GetPostCommentStatusAsync(post.CommentPolicy),
                 };
 
-                await _blogSvc.UpdatePostAsync(blogPost);
+                await _blogSvc.UpdateAsync(blogPost);
 
                 return true;
             }
@@ -107,7 +116,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var id = Convert.ToInt32(postId);
-                await _blogSvc.DeletePostAsync(id);
+                await _blogSvc.DeleteAsync(id);
 
                 return true;
             }
@@ -124,7 +133,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 int id = Int32.Parse(postId);
-                var post = await _blogSvc.GetPostAsync(id);
+                var post = await _blogSvc.GetAsync(id);
 
                 return ToMetaPost(post, rootUrl);
             }
@@ -163,7 +172,7 @@ namespace Fan.Blog.MetaWeblog
 
             try
             {
-                var cats = await _blogSvc.GetCategoriesAsync();
+                var cats = await _catSvc.GetAllAsync();
                 var metaCats = new List<MetaCategory>();
 
                 foreach (var cat in cats)
@@ -201,7 +210,7 @@ namespace Fan.Blog.MetaWeblog
 
             try
             {
-                var cat = await _blogSvc.CreateCategoryAsync(name);
+                var cat = await _catSvc.CreateAsync(name);
 
                 return cat.Id;
             }
@@ -218,7 +227,7 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var keywords = new List<string>();
-                var tags = await _blogSvc.GetTagsAsync();
+                var tags = await _tagSvc.GetAllAsync();
                 foreach (var tag in tags)
                 {
                     keywords.Add(tag.Title);
@@ -261,12 +270,12 @@ namespace Fan.Blog.MetaWeblog
             try
             {
                 var userId = user.Id;
-                var media = await _blogSvc.UploadImageAsync(new MemoryStream(mediaObject.Bits),
+                var media = await _imgSvc.UploadAsync(new MemoryStream(mediaObject.Bits), 
                     userId, mediaObject.Name, mediaObject.Type, EUploadedFrom.MetaWeblog);
 
                 return new MetaMediaInfo()
                 {
-                    Url = _blogSvc.GetImageUrl(media, EImageSize.Original)
+                    Url = _imgSvc.GetAbsoluteUrl(media, EImageSize.Original)
                 };
             }
             catch (Exception ex)

@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace Fan.Helpers
+namespace Microsoft.AspNetCore.Mvc.ViewFeatures
 {
     /// <summary>
     /// Easily save and get complex object in and out of TempData.

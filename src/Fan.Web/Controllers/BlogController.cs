@@ -1,11 +1,13 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
-using Fan.Blog.ViewModels;
+using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Settings;
 using Fan.Shortcodes;
+using Fan.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
@@ -16,24 +18,30 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Fan.Blog.Controllers
+namespace Fan.Web.Controllers
 {
     public class BlogController : Controller
     {
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
+        private readonly ICategoryService _catSvc;
+        private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly ILogger<BlogController> _logger;
         private readonly IDistributedCache _cache;
         private readonly IShortcodeService _shortcodeSvc;
 
         public BlogController(
-            IBlogService blogService,
+            IBlogPostService blogService,
+            ICategoryService catService,
+            ITagService tagService,
             ISettingService settingService,
             IDistributedCache cache,
             IShortcodeService shortcodeService,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
+            _catSvc = catService;
+            _tagSvc = tagService;
             _settingSvc = settingService;
             _cache = cache;
             _shortcodeSvc = shortcodeService;
@@ -46,9 +54,9 @@ namespace Fan.Blog.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index(int? page)
         {
-            if (!page.HasValue || page <= 0) page = BlogService.DEFAULT_PAGE_INDEX;
+            if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var posts = await _blogSvc.GetPostsAsync(page.Value, blogSettings.PostPerPage);
+            var posts = await _blogSvc.GetListAsync(page.Value, blogSettings.PostPerPage);
 
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
             return View(vm);
@@ -77,7 +85,7 @@ namespace Fan.Blog.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Post(int year, int month, int day, string slug)
         {
-            var blogPost = await _blogSvc.GetPostAsync(slug, year, month, day);
+            var blogPost = await _blogSvc.GetAsync(slug, year, month, day);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
             return View(vm);
@@ -104,12 +112,13 @@ namespace Fan.Blog.Controllers
                 blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
                 blogPost.Body = OembedParser.Parse(blogPost.Body);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+                blogSettings.DisqusShortname = ""; // when preview turn off disqus
                 var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
 
                 // Show it
                 return View("Post", vm);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // when user access the preview link directly or when user clicks on other links 
                 // and navigates away during the preview, hacky need to find a better way.
@@ -119,14 +128,14 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> PostPerma(int id)
         {
-            var post = await _blogSvc.GetPostAsync(id);
-            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug});
+            var post = await _blogSvc.GetAsync(id);
+            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug });
         }
 
         public async Task<IActionResult> Category(string slug)
         {
-            var cat = await _blogSvc.GetCategoryAsync(slug);
-            var posts = await _blogSvc.GetPostsForCategoryAsync(slug, 1);
+            var cat = await _catSvc.GetAsync(slug);
+            var posts = await _blogSvc.GetListForCategoryAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, cat);
             return View(vm);
@@ -134,8 +143,8 @@ namespace Fan.Blog.Controllers
 
         public async Task<IActionResult> Tag(string slug)
         {
-            var tag = await _blogSvc.GetTagBySlugAsync(slug);
-            var posts = await _blogSvc.GetPostsForTagAsync(slug, 1);
+            var tag = await _tagSvc.GetBySlugAsync(slug);
+            var posts = await _blogSvc.GetListForTagAsync(slug, 1);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);
             return View(vm);
@@ -151,7 +160,7 @@ namespace Fan.Blog.Controllers
         {
             if (!year.HasValue) return RedirectToAction("Index");
 
-            var posts = await _blogSvc.GetPostsForArchive(year, month);
+            var posts = await _blogSvc.GetListForArchive(year, month);
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             string monthName = (month.HasValue && month.Value > 0) ?
                 CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Value) : "";
@@ -170,7 +179,7 @@ namespace Fan.Blog.Controllers
         /// <returns></returns>
         public async Task<ContentResult> CategoryFeed(string slug)
         {
-            Category cat = await _blogSvc.GetCategoryAsync(slug);
+            var cat = await _catSvc.GetAsync(slug);
             var rss = await GetFeed(cat);
             return new ContentResult
             {
@@ -196,27 +205,29 @@ namespace Fan.Blog.Controllers
         }
 
         /// <summary>
-        /// Returns the rss xml string for the blog or a blog category. The result is cached for 1 hour.
+        /// Returns the rss xml string for the blog or a blog category.
         /// The rss feed always returns first page with 10 results.
         /// </summary>
         /// <param name="cat"></param>
         /// <returns></returns>
         private async Task<string> GetFeed(Category cat = null)
         {
-            var key = cat == null ? "RssFeed" : $"RssFeed_{cat.Slug}";
-            return await _cache.GetAsync(key, new TimeSpan(1, 0, 0), async () =>
+            var key = cat == null ? BlogCache.KEY_MAIN_RSSFEED : string.Format(BlogCache.KEY_CAT_RSSFEED, cat.Slug);
+            var time = cat == null ? BlogCache.Time_MainRSSFeed : BlogCache.Time_CatRSSFeed;
+            return await _cache.GetAsync(key, time, async () =>
             {
                 var sw = new StringWriter();
                 using (XmlWriter xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
                 {
                     var postList = cat == null ?
-                                await _blogSvc.GetPostsAsync(1, 10) :
-                                await _blogSvc.GetPostsForCategoryAsync(cat.Slug, 1);
+                                await _blogSvc.GetListAsync(1, 10, cacheable: false) :
+                                await _blogSvc.GetListForCategoryAsync(cat.Slug, 1);
                     var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
                     var vm = new BlogPostListViewModel(postList, blogSettings, Request);
 
-                    var channelTitle = cat == null ? "Fanray" : $"{cat.Title} - Fanray";
+                    var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+                    var channelTitle = cat == null ? settings.Title : $"{cat.Title} - {settings.Title}";
                     var channelDescription = coreSettings.Tagline;
                     var channelLink = $"{Request.Scheme}://{Request.Host}";
                     var channelLastPubDate = postList.Posts.Count <= 0 ? DateTimeOffset.UtcNow : postList.Posts[0].CreatedOn;

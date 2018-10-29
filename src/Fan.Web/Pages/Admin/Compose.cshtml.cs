@@ -1,7 +1,7 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Medias;
 using Fan.Membership;
@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,9 @@ namespace Fan.Web.Pages.Admin
     /// </remarks>
     public class ComposeModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
+        private readonly ICategoryService _catSvc;
+        private readonly ITagService _tagSvc;
         private readonly ISettingService _settingSvc;
         private readonly UserManager<User> _userManager;
         private readonly IMediaService _mediaSvc;
@@ -37,12 +40,16 @@ namespace Fan.Web.Pages.Admin
 
         public ComposeModel(
             UserManager<User> userManager,
-            IBlogService blogService,
+            IBlogPostService blogService,
+            ICategoryService catService,
+            ITagService tagService,
             IMediaService mediaSvc,
             ISettingService settingService)
         {
             _userManager = userManager;
             _blogSvc = blogService;
+            _catSvc = catService;
+            _tagSvc = tagService;
             _mediaSvc = mediaSvc;
             _settingSvc = settingService;
         }
@@ -115,7 +122,7 @@ namespace Fan.Web.Pages.Admin
             PostVM postVM;
             if (postId > 0) // existing post
             {
-                var post = await _blogSvc.GetPostAsync(postId);
+                var post = await _blogSvc.GetAsync(postId);
                 postVM = new PostVM
                 {
                     Id = post.Id,
@@ -150,7 +157,7 @@ namespace Fan.Web.Pages.Admin
             PostJson = JsonConvert.SerializeObject(postVM);
 
             // cats
-            var categories = await _blogSvc.GetCategoriesAsync();
+            var categories = await _catSvc.GetAllAsync();
             var allCats = from c in categories
                           select new CatVM
                           {
@@ -160,7 +167,7 @@ namespace Fan.Web.Pages.Admin
             CatsJson = JsonConvert.SerializeObject(allCats);
 
             // tags
-            var tags = await _blogSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetAllAsync();
             var allTags = tags.Select(t => t.Title).ToArray();
             TagsJson = JsonConvert.SerializeObject(allTags);
         }
@@ -191,12 +198,12 @@ namespace Fan.Web.Pages.Admin
 
             if (post.Id <= 0)
             {
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
                 blogPost.Id = post.Id;
-                blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+                blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
             return new JsonResult(GetPostAbsoluteUrl(blogPost));
@@ -223,7 +230,7 @@ namespace Fan.Web.Pages.Admin
                 Body = post.Body,
                 Status = EPostStatus.Published,
             };
-            blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+            blogPost = await _blogSvc.UpdateAsync(blogPost);
             return new JsonResult(GetPostAbsoluteUrl(blogPost));
         }
 
@@ -253,12 +260,12 @@ namespace Fan.Web.Pages.Admin
 
             if (post.Id <= 0)
             {
-                blogPost = await _blogSvc.CreatePostAsync(blogPost);
+                blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
                 blogPost.Id = post.Id;
-                blogPost = await _blogSvc.UpdatePostAsync(blogPost);
+                blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
             var postVM = new PostVM
@@ -290,14 +297,14 @@ namespace Fan.Web.Pages.Admin
             List<Tag> tags = new List<Tag>();
             foreach (var title in post.Tags) // titles
             {
-                tags.Add(await _blogSvc.GetTagByTitleAsync(title));
+                tags.Add(await _tagSvc.GetByTitleAsync(title));
             }
 
             var blogPost = new BlogPost
             {
                 User = await _userManager.GetUserAsync(HttpContext.User),
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                Category = await _blogSvc.GetCategoryAsync(post.CategoryId),
+                Category = await _catSvc.GetAsync(post.CategoryId),
                 CreatedOn = GetCreatedOn(post.PostDate),
                 Tags = tags,
                 Slug = post.Slug.IsNullOrEmpty() ? "untitled" : post.Slug,

@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Medias;
 using Fan.Membership;
 using Microsoft.AspNetCore.Http;
@@ -17,17 +17,20 @@ namespace Fan.Web.Pages.Admin
 {
     public class MediaModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
         private readonly IMediaService _mediaSvc;
+        private readonly IImageService _imgSvc;
         private readonly UserManager<User> _userManager;
 
         public MediaModel(
-            IBlogService blogSvc,
+            IBlogPostService blogSvc,
             IMediaService mediaSvc,
+            IImageService imgService,
             UserManager<User> userManager)
         {
             _blogSvc = blogSvc;
             _mediaSvc = mediaSvc;
+            _imgSvc = imgService;
             _userManager = userManager;
         }
 
@@ -139,7 +142,7 @@ namespace Fan.Web.Pages.Admin
                 {
                     using (Stream stream = image.OpenReadStream())
                     {
-                        var media = await _blogSvc.UploadImageAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
+                        var media = await _imgSvc.UploadAsync(stream, userId, image.FileName, image.ContentType, EUploadedFrom.Browser);
                         imageVMs.Add(await MapImageVMAsync(media));
                     }
                 }
@@ -149,7 +152,8 @@ namespace Fan.Web.Pages.Admin
                 }
             }
 
-            var imageData = new ImageData {
+            var imageData = new ImageData
+            {
                 Images = imageVMs,
                 ErrorMessage = failCount <= 0 ? null :
                                 $"Only .jpg, .jpeg, .png and .gif are supported, {failCount} file(s) could not be uploaded.",
@@ -167,7 +171,7 @@ namespace Fan.Web.Pages.Admin
         {
             for (int i = 0; i < ids.Length; i++)
             {
-                await _blogSvc.DeleteImageAsync(ids[i]);
+                await _imgSvc.DeleteAsync(ids[i]);
             }
             return new JsonResult(true);
         }
@@ -224,10 +228,10 @@ namespace Fan.Web.Pages.Admin
                 UploadVia = m.UploadedFrom.ToString(),
                 Width = m.Width,
                 Height = m.Height,
-                UrlSmall = _blogSvc.GetImageUrl(m, EImageSize.Small),
-                UrlMedium = _blogSvc.GetImageUrl(m, EImageSize.Medium),
-                UrlLarge = _blogSvc.GetImageUrl(m, EImageSize.Large),
-                UrlOriginal = _blogSvc.GetImageUrl(m, EImageSize.Original),
+                UrlSmall = _imgSvc.GetAbsoluteUrl(m, EImageSize.Small),
+                UrlMedium = _imgSvc.GetAbsoluteUrl(m, EImageSize.Medium),
+                UrlLarge = _imgSvc.GetAbsoluteUrl(m, EImageSize.Large),
+                UrlOriginal = _imgSvc.GetAbsoluteUrl(m, EImageSize.Original),
             };
         }
     }

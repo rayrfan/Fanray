@@ -5,7 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fan.Blog.Models
 {
-    public class Category : Entity, ITaxonomy
+    /// <summary>
+    /// A blog category.
+    /// </summary>
+    public class Category : Entity
     {
         /// <summary>
         /// Text of the term.

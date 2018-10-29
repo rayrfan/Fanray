@@ -90,8 +90,8 @@ Vue.component('blog-categories', {
                     this.$root.toast('New category added.');
                 })
                 .catch(err => {
-                    this.errMsg = err.response.data[0].errorMessage;
-                    this.$root.toast('Add category failed.', 'red');
+                    this.errMsg = err.response.data;
+                    this.$root.toastError('Add category failed.');
                 });
         },
         // when user clicks on the Update button on the dialog
@@ -109,8 +109,8 @@ Vue.component('blog-categories', {
                     this.$root.toast('Category updated.');
                 })
                 .catch(err => {
-                    this.errMsg = err.response.data[0].errorMessage;
-                    this.$root.toast('Update category failed.', 'red');
+                    this.errMsg = err.response.data;
+                    this.$root.toastError('Update category failed.');
                 });
         },
         sortCategories() {

@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Helpers;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -14,10 +14,13 @@ namespace Fan.Web.Pages.Admin
     {
         // -------------------------------------------------------------------- Constructor
 
-        private readonly IBlogService _blogSvc;
-        public PostsModel(IBlogService blogService)
+        private readonly IBlogPostService _blogSvc;
+        private readonly IStatsService _statsSvc;
+
+        public PostsModel(IBlogPostService blogService, IStatsService statsService)
         {
             _blogSvc = blogService;
+            _statsSvc = statsService;
         }
 
         // -------------------------------------------------------------------- Consts & Properties
@@ -97,7 +100,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task<JsonResult> OnDeleteAsync(int postId, string status, int pageNumber, int pageSize)
         {
-            await _blogSvc.DeletePostAsync(postId);
+            await _blogSvc.DeleteAsync(postId);
             var list = await GetPostListVmAsync(status, pageNumber, pageSize);
             return new JsonResult(list);
         }
@@ -117,8 +120,8 @@ namespace Fan.Web.Pages.Admin
         private async Task<PostListVM> GetPostListVmAsync(string status, int pageNumber, int pageSize)
         {
             var postList = status.Equals("published", StringComparison.InvariantCultureIgnoreCase) ?
-                await _blogSvc.GetPostsAsync(pageNumber, pageSize) :
-                await _blogSvc.GetPostsForDraftsAsync(); // TODO drafts need pagination too
+                await _blogSvc.GetListAsync(pageNumber, pageSize, cacheable: false) :
+                await _blogSvc.GetListForDraftsAsync(); // TODO drafts need pagination too
 
             var postVms = from p in postList.Posts
                           select new PostVM
@@ -131,7 +134,7 @@ namespace Fan.Web.Pages.Admin
                               PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),
                           };
 
-            var postCount = await _blogSvc.GetPostCountAsync();
+            var postCount = await _statsSvc.GetPostCountAsync();
 
             // prep vm
             return new PostListVM

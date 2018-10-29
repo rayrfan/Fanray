@@ -1,6 +1,6 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,10 +15,10 @@ namespace Fan.Web.Pages.Admin
     public class SettingsModel : PageModel
     {
         private readonly ISettingService _settingSvc;
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
 
         public SettingsModel(
-             IBlogService blogService,
+             IBlogPostService blogService,
             ISettingService settingService)
         {
             _blogSvc = blogService;
