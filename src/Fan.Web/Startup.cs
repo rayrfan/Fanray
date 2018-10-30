@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using Fan.Blog.Data;
 using Fan.Blog.Helpers;
-using Fan.Blog.MetaWeblog;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Data;
-using Fan.Emails;
-using Fan.Medias;
 using Fan.Membership;
 using Fan.Settings;
-using Fan.Shortcodes;
 using Fan.Web.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -24,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Scrutor;
 
 namespace Fan.Web
 {
@@ -91,31 +87,24 @@ namespace Fan.Web
             // Mediatr
             services.AddMediatR();
 
-            // Repos & Services
-            services.AddScoped<IMetaRepository, SqlMetaRepository>();
-            services.AddScoped<IMediaRepository, SqlMediaRepository>();
-            services.AddScoped<IPostRepository, SqlPostRepository>();
-            services.AddScoped<ICategoryRepository, SqlCategoryRepository>();
-            services.AddScoped<ITagRepository, SqlTagRepository>();
-            services.AddScoped<ISettingService, SettingService>();
-            services.AddScoped<IMediaService, MediaService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEmailSender, EmailSender>();
-            services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<IXmlRpcHelper, XmlRpcHelper>();
-            services.AddScoped<IMetaWeblogService, MetaWeblogService>();
+            // Storage
+            services.AddStorageProvider(Configuration);
+
+            // Shortcodes
+            services.AddShortcodes();
+
+            // Fan and Fan.Blog services and repos, see https://bit.ly/2AtPmLn
+            services.Scan(scan => scan
+              .FromAssembliesOf(typeof(ISettingService), typeof(IBlogPostService))
+              .AddClasses()
+              .UsingRegistrationStrategy(RegistrationStrategy.Skip) // prevent added to add again
+              .AsImplementedInterfaces()
+              .WithScopedLifetime());
+
+            // Preferred Domain
             services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
-            var appSettingsConfigSection = Configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsConfigSection);
-            var appSettings = appSettingsConfigSection.Get<AppSettings>();
-            if (appSettings.MediaStorageType == EMediaStorageType.AzureBlob)
-                services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();
-            else
-                services.AddScoped<IStorageProvider, FileSysStorageProvider>();
-            var shortcodeService = new ShortcodeService();
-            shortcodeService.Add<SourceCodeShortcode>(tag: "code");
-            shortcodeService.Add<YouTubeShortcode>(tag: "youtube");
-            services.AddSingleton<IShortcodeService>(shortcodeService);
+
+            // HttpContext
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Mvc and Razor Pages

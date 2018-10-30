@@ -2,6 +2,8 @@
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
+using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
 using Fan.Shortcodes;
@@ -12,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Fan.Blog.IntegrationTests.Base
@@ -22,7 +23,10 @@ namespace Fan.Blog.IntegrationTests.Base
     /// </summary>
     public class BlogServiceIntegrationTestBase : BlogIntegrationTestBase
     {
-        protected IBlogService _blogSvc;
+        protected IBlogPostService _blogSvc;
+        protected ICategoryService _catSvc;
+        protected ITagService _tagSvc;
+        protected IImageService _imgSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
         protected ILoggerFactory _loggerFactory;
@@ -69,28 +73,42 @@ namespace Fan.Blog.IntegrationTests.Base
             // ---------------------------------------------------------------- LoggerFactory
 
             _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var loggerBlogSvc = _loggerFactory.CreateLogger<BlogService>();
+            var loggerBlogSvc = _loggerFactory.CreateLogger<BlogPostService>();
+            var loggerCatSvc = _loggerFactory.CreateLogger<CategoryService>();
+            var loggerTagSvc = _loggerFactory.CreateLogger<TagService>();
 
-            // ---------------------------------------------------------------- Mapper, Shortcode, Mediator
+            // ---------------------------------------------------------------- Mapper, Shortcode
 
             var mapper = BlogUtil.Mapper;
             var shortcodeSvc = new Mock<IShortcodeService>();
-            var mediatorMock = new Mock<IMediator>();
+
+            // ---------------------------------------------------------------- MediatR and Services
+
+            var services = new ServiceCollection();
+            services.AddScoped<ServiceFactory>(p => p.GetService);  // MediatR.ServiceFactory
+            services.AddSingleton<IDistributedCache>(cache);        // cache
+            services.AddSingleton<FanDbContext>(_db);               // DbContext for repos
+            services.Scan(scan => scan
+               .FromAssembliesOf(typeof(IMediator), typeof(ILogger), typeof(IBlogPostService), typeof(ISettingService))
+               .AddClasses()
+               .AsImplementedInterfaces());
+
+            var provider = services.BuildServiceProvider();
+            var mediator = provider.GetRequiredService<IMediator>();
+
+            _catSvc = new CategoryService(catRepo, _settingSvcMock.Object, mediator, cache, loggerCatSvc);
+            _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
+            _imgSvc = new ImageService(_mediaSvc, _storageProviderMock.Object, appSettingsMock.Object);
 
             // the blog service
-            _blogSvc = new BlogService(
+            _blogSvc = new BlogPostService(
                 _settingSvcMock.Object, 
-                catRepo, 
                 postRepo, 
-                tagRepo,
-                _mediaSvc,
-                _storageProviderMock.Object, 
-                appSettingsMock.Object, 
                 cache, 
                 loggerBlogSvc, 
                 mapper, 
                 shortcodeSvc.Object, 
-                mediatorMock.Object);
+                mediator);
         }
     }
 }

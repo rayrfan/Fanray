@@ -1,5 +1,4 @@
-﻿using Fan.Blog.Controllers;
-using Fan.Blog.Services;
+﻿using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
@@ -18,14 +17,14 @@ namespace Fan.Web.Controllers
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ISettingService _settingSvc;
-        private readonly IBlogService _blogSvc;
+        private readonly IBlogPostService _blogSvc;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
-            IBlogService blogService,
+            IBlogPostService blogService,
             ISettingService settingService,
             ILogger<HomeController> logger)
         {

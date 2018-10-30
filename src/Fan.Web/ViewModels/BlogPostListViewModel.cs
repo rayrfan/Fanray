@@ -4,7 +4,7 @@ using Fan.Blog.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace Fan.Blog.ViewModels
+namespace Fan.Web.ViewModels
 {
     /// <summary>
     /// View model for a list of blog posts.
@@ -25,7 +25,7 @@ namespace Fan.Blog.ViewModels
             PostCount = blogPostList.PostCount;
 
             if (currentPage <= 0) currentPage = 1;
-            if ((currentPage * BlogService.DEFAULT_PAGE_SIZE) < PostCount)
+            if ((currentPage * BlogPostService.DEFAULT_PAGE_SIZE) < PostCount)
             {
                 ShowOlder = true;
                 OlderPageIndex = currentPage + 1;

@@ -1,23 +1,23 @@
-﻿using Fan.Blog.Services;
+﻿using Fan.Blog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Blog.ViewComponents
+namespace Fan.Web.ViewComponents
 {
     /// <summary>
     /// The BlogArchives view component.
     /// </summary>
     public class BlogArchivesViewComponent : ViewComponent
     {
-        private readonly IBlogService _blogSvc;
-        public BlogArchivesViewComponent(IBlogService blogService)
+        private readonly IStatsService _statsSvc;
+        public BlogArchivesViewComponent(IStatsService statsService)
         {
-            _blogSvc = blogService;
+            _statsSvc = statsService;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var years = await _blogSvc.GetArchivesAsync();
+            var years = await _statsSvc.GetArchivesAsync();
             return View(years);
         }
     }

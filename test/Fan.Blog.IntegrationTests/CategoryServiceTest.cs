@@ -1,5 +1,4 @@
 ﻿using Fan.Blog.IntegrationTests.Base;
-using Fan.Blog.Models;
 using Fan.Exceptions;
 using System.Threading.Tasks;
 using Xunit;
@@ -9,7 +8,7 @@ namespace Fan.Blog.IntegrationTests
     /// <summary>
     /// Category related business rules for blog service.
     /// </summary>
-    public class BlogServiceCategoryTest : BlogServiceIntegrationTestBase
+    public class CategoryServiceTest : BlogServiceIntegrationTestBase
     {
         /// <summary>
         /// Author can create a new category with just a title.
@@ -17,7 +16,7 @@ namespace Fan.Blog.IntegrationTests
         [Fact]
         public async void Create_category_only_requires_title()
         {
-            var cat = await _blogSvc.CreateCategoryAsync("Technology");
+            var cat = await _catSvc.CreateAsync("Technology");
             Assert.Equal(1, cat.Id);
             Assert.Equal("Technology", cat.Title);
             Assert.Equal("technology", cat.Slug);
@@ -31,7 +30,7 @@ namespace Fan.Blog.IntegrationTests
         [Fact]
         public async void Default_category_cannot_be_deleted()
         {
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.DeleteCategoryAsync(1));
+            await Assert.ThrowsAsync<FanException>(() => _catSvc.DeleteAsync(1));
         }
 
         /// <summary>
@@ -44,11 +43,11 @@ namespace Fan.Blog.IntegrationTests
             SeedTestPost();
 
             // When create another category with the same title
-            Task action() => _blogSvc.CreateCategoryAsync(CAT_TITLE);
+            Task action() => _catSvc.CreateAsync(CAT_TITLE);
 
             // Then you got exception
             await Assert.ThrowsAsync<FanException>(action);
-            
+
             // and you got msgs
             try
             {
@@ -56,9 +55,7 @@ namespace Fan.Blog.IntegrationTests
             }
             catch (FanException ex)
             {
-                Assert.Equal("Failed to create Category.", ex.Message);
-                Assert.Equal(1, ex.ValidationFailures.Count);
-                Assert.Equal($"'{CAT_TITLE}' already exists.", ex.ValidationFailures[0].ErrorMessage);
+                Assert.Equal($"'{CAT_TITLE}' already exists.", ex.Message);
             }
         }
 
@@ -69,13 +66,13 @@ namespace Fan.Blog.IntegrationTests
         public async void Update_category_with_duplicate_title_throws_FanException()
         {
             // Given 2 categories
-            await _blogSvc.CreateCategoryAsync("Tech");
-            await _blogSvc.CreateCategoryAsync("Tech!!");
+            await _catSvc.CreateAsync("Tech");
+            await _catSvc.CreateAsync("Tech!!");
 
             // When update the title of one of them to be the same as other one
-            var cat = await _blogSvc.GetCategoryAsync(2);
+            var cat = await _catSvc.GetAsync(2);
             cat.Title = "Tech";
-            Task action() => _blogSvc.UpdateCategoryAsync(cat);
+            Task action() => _catSvc.UpdateAsync(cat);
 
             // Then you got exception
             await Assert.ThrowsAsync<FanException>(action);
@@ -83,13 +80,11 @@ namespace Fan.Blog.IntegrationTests
             // and error message
             try
             {
-                await _blogSvc.UpdateCategoryAsync(cat);
+                await _catSvc.UpdateAsync(cat);
             }
             catch (FanException ex)
             {
-                Assert.Equal("Failed to update Category.", ex.Message);
-                Assert.Equal(1, ex.ValidationFailures.Count);
-                Assert.Equal("'Tech' already exists.", ex.ValidationFailures[0].ErrorMessage);
+                Assert.Equal("'Tech' already exists.", ex.Message);
             }
         }
 
@@ -101,14 +96,14 @@ namespace Fan.Blog.IntegrationTests
         {
             // Given a category "Technology"
             SeedTestPost();
-            var cat = await _blogSvc.GetCategoryAsync(CAT_SLUG);
+            var cat = await _catSvc.GetAsync(CAT_SLUG);
             Assert.Equal(1, cat.Id);
             Assert.Equal("Technology", cat.Title);
 
             // When author updates the category
             cat.Title = "Music";
             cat.Description = "A music category.";
-            cat = await _blogSvc.UpdateCategoryAsync(cat);
+            cat = await _catSvc.UpdateAsync(cat);
 
             // Then the category's slug will be updated too
             Assert.Equal(1, cat.Id);
@@ -123,8 +118,8 @@ namespace Fan.Blog.IntegrationTests
         [Fact]
         public async void Get_category_throws_FanException_if_not_found()
         {
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetCategoryAsync(100));
-            await Assert.ThrowsAsync<FanException>(() => _blogSvc.GetCategoryAsync("slug-not-exist"));
+            await Assert.ThrowsAsync<FanException>(() => _catSvc.GetAsync(100));
+            await Assert.ThrowsAsync<FanException>(() => _catSvc.GetAsync("slug-not-exist"));
         }
 
         /// <summary>
@@ -141,7 +136,7 @@ namespace Fan.Blog.IntegrationTests
             SeedTestPost();
 
             // When user creates a different category "Technology!!!"
-            var cat = await _blogSvc.CreateCategoryAsync("Technology!!!");
+            var cat = await _catSvc.CreateAsync("Technology!!!");
 
             // Then category will be created with an unique slug
             Assert.Equal("technology-2", cat.Slug);
@@ -157,7 +152,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Category_with_Chinese_title_results_random_6_char_slug()
         {
             // When creating a category with a chinese title
-            var cat = await _blogSvc.CreateCategoryAsync("你好");
+            var cat = await _catSvc.CreateAsync("你好");
 
             // Then you end up with a 6-char random string
             Assert.Equal(6, cat.Slug.Length);
@@ -172,7 +167,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Category_title_with_pound_sign_will_turn_into_letter_s()
         {
             // When create a category named "C#"
-            var category = await _blogSvc.CreateCategoryAsync("C#");
+            var category = await _catSvc.CreateAsync("C#");
 
             // Then you end up with "cs" as its slug
             Assert.Equal("cs", category.Slug);
@@ -185,7 +180,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Category_title_and_description_will_be_cleaned_off_of_any_html_tags()
         {
             // When create a category with html in title or description
-            var category = await _blogSvc.CreateCategoryAsync("<h1>Test</h1>", "<p>This is a test category.</p>");
+            var category = await _catSvc.CreateAsync("<h1>Test</h1>", "<p>This is a test category.</p>");
 
             // Then you end up with clean ones
             Assert.Equal("Test", category.Title);

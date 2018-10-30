@@ -134,7 +134,7 @@ namespace Fan.Blog.Helpers
             routes.MapRoute("BlogFeed", "feed", new { controller = "Blog", action = "Feed" });
 
             // "posts/categorized/technology/feed"
-            routes.MapRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL_TEMPLATE, "{slug}"), 
+            routes.MapRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL_TEMPLATE, "{slug}"),
                 new { controller = "Blog", action = "CategoryFeed", slug = "" });
         }
     }

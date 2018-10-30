@@ -4,10 +4,10 @@ using Fan.Blog.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 
-namespace Fan.Blog.ViewModels
+namespace Fan.Web.ViewModels
 {
     /// <summary>
     /// View model for a blog post.
@@ -47,12 +47,12 @@ namespace Fan.Blog.ViewModels
                 {
                     var tag = blogPost.Tags[i];
                     sb.Append(tag.Slug.Replace("-", ""));
-                    if (i<blogPost.Tags.Count-1) sb.Append(",");
+                    if (i < blogPost.Tags.Count - 1) sb.Append(",");
                 }
                 hash = sb.ToString();
             }
 
-            var requestHostShort = request.Host.ToString().StartsWith("www.") ? 
+            var requestHostShort = request.Host.ToString().StartsWith("www.") ?
                 request.Host.ToString().Remove(0, 4) : request.Host.ToString();
             var permalinkShort = $"{request.Scheme}://{requestHostShort}{permalinkPart}";
 

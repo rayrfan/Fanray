@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Settings;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +11,13 @@ namespace Fan.Web.Pages.Admin
 {
     public class CategoriesModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
+        private readonly ICategoryService _catSvc;
         private readonly ISettingService _settingSvc;
-        public CategoriesModel(IBlogService blogService,
+
+        public CategoriesModel(ICategoryService catService,
             ISettingService settingService)
         {
-            _blogSvc = blogService;
+            _catSvc = catService;
             _settingSvc = settingService;
         }
 
@@ -32,7 +33,7 @@ namespace Fan.Web.Pages.Admin
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
             DefaultCategoryId = blogSettings.DefaultCategoryId;
 
-            var cats = await _blogSvc.GetCategoriesAsync();
+            var cats = await _catSvc.GetAllAsync();
             CategoryListJsonStr = JsonConvert.SerializeObject(cats);
         }
 
@@ -43,7 +44,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnDeleteAsync(int id)
         {
-            await _blogSvc.DeleteCategoryAsync(id);
+            await _catSvc.DeleteAsync(id);
         }
 
         /// <summary>
@@ -55,12 +56,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var cat = await _blogSvc.CreateCategoryAsync(category.Title, category.Description);
+                var cat = await _catSvc.CreateAsync(category.Title, category.Description);
                 return new JsonResult(cat);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -73,12 +74,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var cat = await _blogSvc.UpdateCategoryAsync(category);
+                var cat = await _catSvc.UpdateAsync(category);
                 return new JsonResult(cat);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -89,7 +90,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnPostDefaultAsync(int id)
         {
-            await _blogSvc.SetDefaultCategoryAsync(id);
+            await _catSvc.SetDefaultAsync(id);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Fan.Blog.UnitTests.Base;
-using Fan.Blog.Enums;
+﻿using Fan.Blog.Enums;
 using Fan.Blog.Models;
+using Fan.Blog.UnitTests.Base;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -29,12 +29,12 @@ namespace Fan.Blog.UnitTests.Services
                 .Returns(Task.FromResult((Post)null));
 
             // 2. user publishes the post
-            var slug = await _blogSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
+            var slug = await _blogPostSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
 
             // 3. user goes back to update post title
             // NOTE: at the point the existing slug is being passed in 
             // See BlogService.PrepPostAsync()
-            var theSlug = await _blogSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
+            var theSlug = await _blogPostSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
 
             Assert.Equal(theSlug, slug);
         }
@@ -58,7 +58,7 @@ namespace Fan.Blog.UnitTests.Services
                 .Returns(Task.FromResult((Post)null));
 
             // 2. user publishes the post
-            var slug = await _blogSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
+            var slug = await _blogPostSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
 
             // Now the user update the post slug
             slug = "i-want-a-different-slug-for-this-post";
@@ -66,7 +66,7 @@ namespace Fan.Blog.UnitTests.Services
             // 3. user goes back to update post title
             // NOTE: at the point the existing slug is being passed in 
             // See BlogService.PrepPostAsync()
-            var theSlug = await _blogSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
+            var theSlug = await _blogPostSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
 
             Assert.Equal(theSlug, slug);
         }

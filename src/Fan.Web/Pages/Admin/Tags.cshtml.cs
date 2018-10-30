@@ -1,5 +1,5 @@
 ﻿using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,10 +10,10 @@ namespace Fan.Web.Pages.Admin
 {
     public class TagsModel : PageModel
     {
-        private readonly IBlogService _blogSvc;
-        public TagsModel(IBlogService blogService)
+        private readonly ITagService _tagSvc;
+        public TagsModel(ITagService tagService)
         {
-            _blogSvc = blogService;
+            _tagSvc = tagService;
         }
 
         // -------------------------------------------------------------------- consts & properties
@@ -28,7 +28,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnGetAsync()
         {
-            var tags = await _blogSvc.GetTagsAsync();
+            var tags = await _tagSvc.GetAllAsync();
             TagListJsonStr = JsonConvert.SerializeObject(tags);
         }
 
@@ -39,7 +39,7 @@ namespace Fan.Web.Pages.Admin
         /// <returns></returns>
         public async Task OnDeleteAsync(int id)
         {
-            await _blogSvc.DeleteTagAsync(id);
+            await _tagSvc.DeleteAsync(id);
         }
 
         /// <summary>
@@ -51,12 +51,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var tagNew = await _blogSvc.CreateTagAsync(new Tag { Title = tag.Title, Description = tag.Description });
+                var tagNew = await _tagSvc.CreateAsync(new Tag { Title = tag.Title, Description = tag.Description });
                 return new JsonResult(tagNew);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -69,12 +69,12 @@ namespace Fan.Web.Pages.Admin
         {
             try
             {
-                var cat = await _blogSvc.UpdateTagAsync(tag);
-                return new JsonResult(cat);
+                var tagUpdated = await _tagSvc.UpdateAsync(tag);
+                return new JsonResult(tagUpdated);
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures);
+                return BadRequest(ex.Message);
             }
         }
     }

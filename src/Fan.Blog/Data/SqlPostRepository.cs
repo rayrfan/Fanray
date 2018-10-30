@@ -3,7 +3,6 @@ using Fan.Blog.Models;
 using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +18,100 @@ namespace Fan.Blog.Data
         public SqlPostRepository(FanDbContext db) : base(db)
         {
             _db = db;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Post"/>.
+        /// </summary>
+        /// <param name="post">The post to create.</param>
+        /// <param name="tagTitles">A list of tag titles associated with the post.</param>
+        /// <returns>
+        /// The inserted post with id.
+        /// </returns>
+        public async Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        {
+            // Category
+            if (!categoryTitle.IsNullOrEmpty())
+            {
+                // from metaweblog with a cat inputted
+                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+            }
+            else
+            {
+                post.CategoryId = categoryId.HasValue ?
+                    // from browser
+                    categoryId : 
+                    // from metaweblog with no cat inputted
+                    Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+            }
+
+            // PostTags
+            if (!tagTitles.IsNullOrEmpty())
+            {
+                // make sure list has no empty strings and only unique values
+                tagTitles = tagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct();
+
+                var tags = _db.Set<Tag>(); // all tags
+                foreach (var title in tagTitles)
+                {
+                    // lookup the tag (any new tag is already created prior)
+                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    post.PostTags.Add(new PostTag { Post = post, Tag = tag });
+                }
+            }
+
+            await _entities.AddAsync(post);
+            await _db.SaveChangesAsync();
+            return post;
+        }
+
+        /// <summary>
+        /// Updates a <see cref="Post"/>.
+        /// </summary>
+        /// <param name="post">The post to update.</param>
+        /// <param name="tagTitles">A list of tag titles associated with the post.</param>
+        public async Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        {
+            // Category
+            if (!categoryTitle.IsNullOrEmpty())
+            {
+                // from metaweblog with a cat inputted
+                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+            }
+            else if (categoryId.HasValue)
+            {
+                // from browser
+                if (categoryId != post.CategoryId) post.CategoryId = categoryId;
+            }
+            else
+            {
+                // from metaweblog with no cat inputted
+                post.CategoryId = Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+            }
+
+            // PostTags
+            if (!tagTitles.IsNullOrEmpty())
+            {
+                // make sure list has no empty strings and only unique values, olw passes empty string when no tags are given
+                tagTitles = tagTitles.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct();
+
+                var currentTitles = post.PostTags.Select(pt => pt.Tag.Title);
+                var titlesToRemove = currentTitles.Except(tagTitles).ToList();
+                foreach (var title in titlesToRemove)
+                {
+                    post.PostTags.Remove(post.PostTags.Single(pt => pt.Tag.Title == title));
+                }
+
+                var tags = _db.Set<Tag>(); // all tags
+                var titlesToAdd = tagTitles.Except(currentTitles);
+                foreach (var title in titlesToAdd)
+                {
+                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    post.PostTags.Add(new PostTag { PostId = post.Id, TagId = tag.Id });
+                }
+            }
+
+            await _db.SaveChangesAsync();
         }
 
         /// <summary>
@@ -153,6 +246,9 @@ namespace Fan.Blog.Data
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Returns total number of posts by each <see cref="EPostStatus"/>.
+        /// </summary>
         public async Task<PostCount> GetPostCountAsync() => new PostCount
         {
             Published = await _entities.Where(p => p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost).CountAsync(),

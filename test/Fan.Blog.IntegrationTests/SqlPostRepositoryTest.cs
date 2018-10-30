@@ -1,7 +1,7 @@
-﻿using Fan.Blog.IntegrationTests.Base;
-using Fan.Blog.IntegrationTests.Helpers;
-using Fan.Blog.Data;
+﻿using Fan.Blog.Data;
 using Fan.Blog.Enums;
+using Fan.Blog.IntegrationTests.Base;
+using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -223,7 +223,7 @@ namespace Fan.Blog.IntegrationTests
             var list = await _postRepo.GetListAsync(query);
 
             // Assert: then all posts are returned
-            Assert.Equal(23, list.posts.Count); 
+            Assert.Equal(23, list.posts.Count);
             Assert.Equal(23, list.totalCount);
         }
 
@@ -246,7 +246,7 @@ namespace Fan.Blog.IntegrationTests
             {
                 Category = cat,
                 Body = "A post body.",
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",
@@ -282,7 +282,7 @@ namespace Fan.Blog.IntegrationTests
             var post = new Post
             {
                 Body = "A post body.",
-                UserId = Actor.AUTHOR_ID,
+                UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 RootId = null,
                 Title = "Hello World",

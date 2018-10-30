@@ -74,8 +74,8 @@
                     this.$root.toast('New tag added.');
                 })
                 .catch(err => {
-                    this.errMsg = err.response.data[0].errorMessage;
-                    this.$root.toast('Add tag failed.', 'red');
+                    this.errMsg = err.response.data;
+                    this.$root.toastError('Add tag failed.');
                 });
         },
         // when user clicks on the Update button on the dialog
@@ -93,8 +93,8 @@
                     this.$root.toast('Tag updated.');
                 })
                 .catch(err => {
-                    this.errMsg = err.response.data[0].errorMessage;
-                    this.$root.toast('Update tag failed.', 'red');
+                    this.errMsg = err.response.data;
+                    this.$root.toastError('Update tag failed.');
                 });
         },
         sortTags() {
