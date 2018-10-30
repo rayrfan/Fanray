@@ -155,7 +155,7 @@ Vue.component('blog-media', {
                 })
                 .catch(err => {
                     this.progressDialog = false;
-                    this.$root.toast('Image upload failed.', 'red');
+                    this.$root.toastError('Image upload failed.');
                     console.log(err);
                 });
         },

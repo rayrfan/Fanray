@@ -72,7 +72,7 @@ Vue.component('blog-categories', {
                     this.defaultCategoryId = id;
                 })
                 .catch(err => {
-                    this.$root.toast('Set default category failed.', 'red');
+                    this.$root.toastError('Set default category failed.');
                     console.log(err);
                 });
         },
