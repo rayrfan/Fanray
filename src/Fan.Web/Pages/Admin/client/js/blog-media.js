@@ -5,7 +5,7 @@ let store = new Vuex.Store({
         selectedImages: [],
     },
     mutations: {
-        setSelectedImages (state, newSelectedImages) {
+        setSelectedImages(state, newSelectedImages) {
             state.selectedImages = newSelectedImages;
         },
         addSelectedImage(state, image) {
@@ -40,11 +40,12 @@ Vue.component('blog-media', {
         pageNumber: 1,
         selectedImageIdx: 0,
         errMsg: '',
+        totalFileCount: 0,
         isEditor: false,
     }),
     mounted() {
         this.initWindowDnd();
-         
+
         if (this.mode === 'editor') {
             this.isEditor = true;
             console.log("media gallery in editor mode, loading images...");
@@ -58,8 +59,8 @@ Vue.component('blog-media', {
         leftArrowVisible: function () {
             return this.selectedImages.length > 1 && this.selectedImageIdx > 0;
         },
-        rightArrowVisible () {
-            return this.selectedImages.length > 1 && this.selectedImageIdx < this.selectedImages.length-1;
+        rightArrowVisible() {
+            return this.selectedImages.length > 1 && this.selectedImageIdx < this.selectedImages.length - 1;
         },
         selectedImages() { // from store
             return this.$store.state.selectedImages;
@@ -100,19 +101,12 @@ Vue.component('blog-media', {
          * @param {any} files
          */
         dragFilesUpload(files) {
-            this.progressDialog = true;
-
-            const formData = new FormData();
             if (!files.length) return;
-            Array.from(Array(files.length).keys())
-                 .map(x => {
-                     formData.append('images', files[x]);
-                 });
-
-            this.sendImages(formData);
+            this.sendImages(this.getFormData(files));
         },
         /**
          * Click Upload button to choose files to upload.
+         * Validate files for type and size
          */
         chooseFilesUpload() {
             const input = document.createElement('input');
@@ -121,14 +115,54 @@ Vue.component('blog-media', {
             input.setAttribute('multiple', null);
             input.click();
             input.onchange = () => {
-                this.progressDialog = true;
-                const formData = new FormData();
-                for (let i = 0; i < input.files.length; i++) {
-                    formData.append('images', input.files[i]);
-                }
-
-                this.sendImages(formData);
+                this.sendImages(this.getFormData(input.files));
             };
+        },
+        /**
+         * Helper to get formData for dragFilesUpload and chooseFilesUpload.
+         * It also valid files for type and size and update errMsg as necessary.
+         */
+        getFormData(fileList) {
+            this.progressDialog = true;
+            const formData = new FormData();
+            this.totalFileCount = fileList.length;
+            this.errMsg = ''; // reset errMsg to empty
+
+            let invalidTypeCount = 0;
+            let invalidSizeCount = 0;
+            let fileArray = [];
+            for (let i = 0; i < this.totalFileCount; i++) {
+                let file = fileList[i];
+                let valid = false;
+
+                // check file type
+                this.validFileTypes.forEach(type => {
+                    if (file.name.substr(file.name.length - type.length, type.length).toLowerCase() === type.toLowerCase()) {
+                        valid = true;
+                        return;
+                    }
+                });
+
+                // add file if valid type and size
+                if (valid) {
+                    if (file.size <= this.maxImageFileSize) fileArray.push(file);
+                    else invalidSizeCount++;
+                }
+                else invalidTypeCount++;
+            }
+
+            console.log('invalidTypeCount: ', invalidTypeCount);
+            console.log('invalidSizeCount: ', invalidSizeCount);
+            console.log('fileArray: ', fileArray);
+
+            // add good files to formData
+            fileArray.forEach(file => formData.append('images', file));
+
+            // append appropriate error messages
+            if (invalidTypeCount > 0) this.errMsg += this.errFileType + ' ';
+            if (invalidSizeCount > 0) this.errMsg += this.errFileSize + ' ';
+
+            return formData;
         },
         /**
          * Send files to server. The API returns ImageData with a list of media just uploaded and errorMessage if
@@ -138,19 +172,22 @@ Vue.component('blog-media', {
         sendImages(formData) {
             axios.post('/admin/media?handler=image', formData, this.$root.headers)
                 .then(resp => {
-                    if (resp.data.images.length > 0) {
-                        for (var i = 0; i < resp.data.images.length; i++) {
-                            this.images.unshift(resp.data.images[i]);
-                        }
+                    var uploadedCount = resp.data.images.length;
 
-                        // inc total number of image by the number of added images
-                        console.log(this.count);
-                        this.count += resp.data.images.length;
-                        console.log(this.count);
-
+                    if (uploadedCount > 0) {
+                        resp.data.images.forEach(img => this.images.unshift(img));
+                        this.count += uploadedCount; // inc total number of image by the number of added images
+                        console.log(`${uploadedCount} images uploaded, now you have total ${this.count} images.`);
                         this.$root.toast('Image uploaded.');
                     }
-                    if (resp.data.errorMessage) this.errMsg = resp.data.errorMessage;
+
+                    // handle err msgs
+                    if (resp.data.errorMessages.length > 0)
+                        resp.data.errorMessages.forEach(msg => this.errMsg += msg + ' ');
+
+                    if (this.errMsg)
+                        this.errMsg += `${uploadedCount} of ${this.totalFileCount} files were uploaded.`;
+
                     this.progressDialog = false;
                 })
                 .catch(err => {
@@ -185,7 +222,7 @@ Vue.component('blog-media', {
             }
             else {
                 image.selected = true;
-                this.$store.dispatch('selectImage', image);           
+                this.$store.dispatch('selectImage', image);
             }
         },
         /**
@@ -203,9 +240,9 @@ Vue.component('blog-media', {
          * Clicks show more button to return next page of images.
          */
         showMore() {
-            this.pageNumber++; 
+            this.pageNumber++;
             // if user deletes an image, this will ensure to re-get current page before moving to next page
-            if (this.images.length < this.pageSize) this.pageNumber--; 
+            if (this.images.length < this.pageSize) this.pageNumber--;
             let url = `/admin/media?handler=more&pageNumber=${this.pageNumber}`;
             axios.get(url).then(resp => {
                 // returned data is the list of images
@@ -215,7 +252,7 @@ Vue.component('blog-media', {
                         return img.id === resp.data[i].id;
                     });
 
-                    if (!found) 
+                    if (!found)
                         this.images.push(resp.data[i]); // only append to images if not found
                 }
             }).catch(err => console.log(err));
@@ -240,7 +277,7 @@ Vue.component('blog-media', {
                 let url = `/admin/media?handler=delete`;
                 axios.post(url, ids, this.$root.headers)
                     .then(resp => {
-                        console.log("before delete images length: ",this.images.length);
+                        console.log("before delete images length: ", this.images.length);
                         // remove selected images from images since they are deleted
                         for (var i = 0; i < selectedCount; i++) {
                             let idx = this.images.findIndex(img => img.id === this.selectedImages[i].id);
@@ -248,10 +285,10 @@ Vue.component('blog-media', {
                         }
 
                         // set selectedImages to empty
-                        this.$store.dispatch('emptySelectedImages'); 
+                        this.$store.dispatch('emptySelectedImages');
 
                         // dec total number of images
-                        console.log("after delete images length: ",this.images.length);
+                        console.log("after delete images length: ", this.images.length);
                         console.log("total count before delete: ", this.count);
                         this.count -= selectedCount;
                         console.log("total count after delete: ", this.count);

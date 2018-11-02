@@ -220,6 +220,10 @@
                     images: [],
                     count: 0,
                     pageSize: @MediaModel.PAGE_SIZE,
+                    maxImageFileSize: @ImageService.MAX_FILE_SIZE,
+                    validFileTypes: @Html.Raw(ImageService.ValidFileTypesJson),
+                    errFileType: '@ImageService.ERR_MSG_FILETYPE',
+                    errFileSize: '@ImageService.ERR_MSG_FILESIZE',
                 };
             }
         };
