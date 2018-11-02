@@ -1,11 +1,11 @@
-﻿@* 
+﻿@*
     The media component template used by Admin Media and Compose pages.
     See blog-media.js, Media.cshtml, Compose.cshtml, and blog-compose.js.
 *@
 <script type="text/x-template" id="blog-media-template">
     <div>
         <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
-            <span id="droptext">Drop files to upload</span>
+            <span class="droptext">Drop files to upload</span>
         </div>
 
         <v-toolbar class="elevation-1 media-toolbar" v-bind:style="[isEditor ? {'top' : '0'} : {'top' : '48px'}]">

@@ -20,6 +20,22 @@
     @Html.AntiForgeryToken()
 
     <div id="app" v-cloak>
+        <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
+            <span class="droptext">Drop files to upload</span>
+        </div>
+        <v-dialog v-model="composerUploadProgress"
+                  persistent
+                  width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Uploading ...
+                    <v-progress-linear indeterminate
+                                       color="white"
+                                       class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
         <v-app id="inspire" style="background-color:white">
             @* Drawer *@
             <v-navigation-drawer fixed
@@ -121,12 +137,12 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
                 @*<v-footer class="pa-3" absolute style="height:auto">
-                        <v-layout justify-center>
-                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
-                                <v-icon large color="info">help_outline</v-icon>
-                            </a>
-                        </v-layout>
-                    </v-footer>*@
+                    <v-layout justify-center>
+                        <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                            <v-icon large color="info">help_outline</v-icon>
+                        </a>
+                    </v-layout>
+                </v-footer>*@
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"

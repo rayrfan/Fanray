@@ -85,7 +85,8 @@
     font: bold 42px Oswald, DejaVu Sans, Tahoma, sans-serif;
 }
 
-#droptext {
+// composer and media share this class
+.droptext {
     display: table-cell;
     text-align: center;
     vertical-align: middle;

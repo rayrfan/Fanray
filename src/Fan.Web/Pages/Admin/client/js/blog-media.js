@@ -3,6 +3,7 @@ let store = new Vuex.Store({
     strict: true,
     state: {
         selectedImages: [],
+        errMsg: '',
     },
     mutations: {
         setSelectedImages(state, newSelectedImages) {
@@ -14,6 +15,10 @@ let store = new Vuex.Store({
         removeSelectedImage(state, idx) {
             state.selectedImages.splice(idx, 1);
         },
+        setErrMsg(state, newMsg) {
+            if (!newMsg) state.errMsg = newMsg;
+            else state.errMsg += newMsg;
+        },
     },
     actions: {
         selectImage: function ({ commit }, image) {
@@ -22,8 +27,14 @@ let store = new Vuex.Store({
         deselectImage: function ({ commit }, idx) {
             commit('removeSelectedImage', idx);
         },
-        emptySelectedImages({ commit, state }) {
+        emptySelectedImages({ commit }) {
             commit('setSelectedImages', []);
+        },
+        setErrMsg({ commit }, msg) {
+            commit('setErrMsg', msg);
+        },
+        emptyErrMsg({ commit }) {
+            commit('setErrMsg', '');
         },
     },
 });
@@ -39,7 +50,6 @@ Vue.component('blog-media', {
         progressDialog: false,
         pageNumber: 1,
         selectedImageIdx: 0,
-        errMsg: '',
         totalFileCount: 0,
         isEditor: false,
     }),
@@ -64,6 +74,9 @@ Vue.component('blog-media', {
         },
         selectedImages() { // from store
             return this.$store.state.selectedImages;
+        },
+        errMsg() {
+            return this.$store.state.errMsg;
         },
     },
     methods: {
@@ -126,7 +139,7 @@ Vue.component('blog-media', {
             this.progressDialog = true;
             const formData = new FormData();
             this.totalFileCount = fileList.length;
-            this.errMsg = ''; // reset errMsg to empty
+            this.$store.dispatch('emptyErrMsg');
 
             let invalidTypeCount = 0;
             let invalidSizeCount = 0;
@@ -159,8 +172,8 @@ Vue.component('blog-media', {
             fileArray.forEach(file => formData.append('images', file));
 
             // append appropriate error messages
-            if (invalidTypeCount > 0) this.errMsg += this.errFileType + ' ';
-            if (invalidSizeCount > 0) this.errMsg += this.errFileSize + ' ';
+            if (invalidTypeCount > 0) this.$store.dispatch('setErrMsg', this.errFileType + ' ');
+            if (invalidSizeCount > 0) this.$store.dispatch('setErrMsg', this.errFileSize + ' ');
 
             return formData;
         },
@@ -172,7 +185,7 @@ Vue.component('blog-media', {
         sendImages(formData) {
             axios.post('/admin/media?handler=image', formData, this.$root.headers)
                 .then(resp => {
-                    var uploadedCount = resp.data.images.length;
+                    let uploadedCount = resp.data.images.length;
 
                     if (uploadedCount > 0) {
                         resp.data.images.forEach(img => this.images.unshift(img));
@@ -183,10 +196,10 @@ Vue.component('blog-media', {
 
                     // handle err msgs
                     if (resp.data.errorMessages.length > 0)
-                        resp.data.errorMessages.forEach(msg => this.errMsg += msg + ' ');
+                        resp.data.errorMessages.forEach(msg => this.$store.dispatch('setErrMsg', msg + ' '));
 
                     if (this.errMsg)
-                        this.errMsg += `${uploadedCount} of ${this.totalFileCount} files were uploaded.`;
+                        this.$store.dispatch('setErrMsg', `${uploadedCount} of ${this.totalFileCount} files were uploaded.`);
 
                     this.progressDialog = false;
                 })
@@ -265,19 +278,17 @@ Vue.component('blog-media', {
         },
         deleteImages() {
             if (confirm('Are you sure you want to delete the image(s)? They will no longer appear anywhere on your website. This cannot be undone!')) {
-                console.log('deleting image: ', this.selectedImage);
+                this.$store.dispatch('emptyErrMsg');
 
                 const selectedCount = this.selectedImages.length;
                 let ids = [];
                 for (var i = 0; i < selectedCount; i++) {
                     ids.push(this.selectedImages[i].id);
                 }
-                console.log(ids);
 
                 let url = `/admin/media?handler=delete`;
                 axios.post(url, ids, this.$root.headers)
                     .then(resp => {
-                        console.log("before delete images length: ", this.images.length);
                         // remove selected images from images since they are deleted
                         for (var i = 0; i < selectedCount; i++) {
                             let idx = this.images.findIndex(img => img.id === this.selectedImages[i].id);
@@ -288,11 +299,7 @@ Vue.component('blog-media', {
                         this.$store.dispatch('emptySelectedImages');
 
                         // dec total number of images
-                        console.log("after delete images length: ", this.images.length);
-                        console.log("total count before delete: ", this.count);
                         this.count -= selectedCount;
-                        console.log("total count after delete: ", this.count);
-
                         this.$root.toast('Image deleted.');
                     })
                     .catch(err => {
