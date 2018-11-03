@@ -52,10 +52,11 @@ Vue.component('blog-media', {
         selectedImageIdx: 0,
         totalFileCount: 0,
         isEditor: false,
+        fileInput: null,
     }),
     mounted() {
         this.initWindowDnd();
-
+        this.initFileInput();
         if (this.mode === 'editor') {
             this.isEditor = true;
             console.log("media gallery in editor mode, loading images...");
@@ -118,18 +119,18 @@ Vue.component('blog-media', {
             this.sendImages(this.getFormData(files));
         },
         /**
-         * Click Upload button to choose files to upload.
-         * Validate files for type and size
+         * File input init and click Upload button to choose files to upload.
+         * Note: I couldn't do input.onchange because MS Edge does not support it.
          */
+        initFileInput() {
+            let self = this;
+            this.fileInput = document.getElementById("fileInput");
+            this.fileInput.addEventListener("change", function () {
+                self.sendImages(self.getFormData(self.fileInput.files));
+            }, false);
+        },
         chooseFilesUpload() {
-            const input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', 'image/*');
-            input.setAttribute('multiple', null);
-            input.click();
-            input.onchange = () => {
-                this.sendImages(this.getFormData(input.files));
-            };
+            this.fileInput.click();
         },
         /**
          * Helper to get formData for dragFilesUpload and chooseFilesUpload.
@@ -164,11 +165,8 @@ Vue.component('blog-media', {
                 else invalidTypeCount++;
             }
 
-            console.log('invalidTypeCount: ', invalidTypeCount);
-            console.log('invalidSizeCount: ', invalidSizeCount);
-            console.log('fileArray: ', fileArray);
-
             // add good files to formData
+            console.log('fileArray: ', fileArray);
             fileArray.forEach(file => formData.append('images', file));
 
             // append appropriate error messages
