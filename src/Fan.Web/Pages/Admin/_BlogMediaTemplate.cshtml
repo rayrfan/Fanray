@@ -15,23 +15,23 @@
             </v-btn>
             <v-btn @@click="editImages"
                    color="info"
-                   v-show="this.selectedImages.length > 0">
+                   v-show="selectedImages.length > 0">
                 Edit
             </v-btn>
             <v-btn @@click="deleteImages"
                    color="error"
-                   v-show="this.selectedImages.length > 0">
+                   v-show="selectedImages.length > 0">
                 <v-icon>delete</v-icon>
             </v-btn>
             <v-btn @@click="insertImages"
                    color="info"
-                   v-show="this.selectedImages.length > 0 && this.isEditor">
+                   v-show="selectedImages.length > 0 && isEditor">
                 Insert
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn @@click.stop="closeMediaDialog"
                    color="info"
-                   v-show="this.isEditor">
+                   v-show="isEditor">
                 Close
             </v-btn>
         </v-toolbar>
