@@ -1,4 +1,5 @@
-﻿using Fan.Helpers;
+﻿using Fan.Exceptions;
+using Fan.Helpers;
 using Fan.Settings;
 using ImageMagick;
 using Microsoft.Extensions.Options;
@@ -20,21 +21,9 @@ namespace Fan.Medias
     /// </remarks>
     public class MediaService : IMediaService
     {
-        /// <summary>
-        /// If image file size exceeds 5MB then use a lower quality.
-        /// </summary>
-        public const long IMAGE_MAX_LEN = 5 * ByteSize.BytesInMegaByte;
-
-        /// <summary>
-        /// Max len for a media filename is 128.
-        /// </summary>
-        public const int MEDIA_FILENAME_MAXLEN = 128;
-
         private readonly IStorageProvider _storageProvider;
         private readonly AppSettings _appSettings;
         private readonly IMediaRepository _mediaRepo;
-
-        // -------------------------------------------------------------------- constructor
 
         public MediaService(IStorageProvider storageProvider,
             IOptionsSnapshot<AppSettings> settings,
@@ -44,6 +33,13 @@ namespace Fan.Medias
             _appSettings = settings.Value;
             _mediaRepo = mediaRepo;
         }
+
+        // -------------------------------------------------------------------- const
+
+        /// <summary>
+        /// Max len for a media filename is 128.
+        /// </summary>
+        public const int MEDIA_FILENAME_MAXLEN = 128;
 
         // -------------------------------------------------------------------- public methods
 
@@ -109,7 +105,7 @@ namespace Fan.Medias
         /// <param name="alt"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<Media> UpdateMediaAsync(int id, 
+        public async Task<Media> UpdateMediaAsync(int id,
             string title,
             string caption,
             string alt,
@@ -160,35 +156,40 @@ namespace Fan.Medias
                     widthOrig = imageColl[0].Width;
                     heightOrig = imageColl[0].Height;
 
+                    // currently for gif I only save original so there is no resizing
+                    // TODO: with ImageMagick resizing a gif take a long time 
+                    // plus the resized gif has a larger file size than original
+                    // I tried limit gif length to 800px, but even resizing to small has these issues
+
                     // resize and store
                     foreach (var resize in resizes)
                     {
-                        // save original without resizing, currently I couldn't dec original file size by resizing with ImageMagick
+                        // save original without resizing
                         if (resize.TargetSize == int.MaxValue)
                         {
                             source.Position = 0;
                             await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
                         }
-                        else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
-                        {
-                            resizeCount++;
-                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
+                        //else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
+                        //{
+                        //    resizeCount++;
+                        //    var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
 
-                            imageColl.Coalesce();
-                            foreach (var image in imageColl)
-                            {
-                                var colors = image.TotalColors;
-                                image.Resize(width, height); // resize will make # of colors higher
-                                image.Quantize(new QuantizeSettings
-                                {
-                                    Colors = colors, // set it back to the smaller original colors
-                                    DitherMethod = DitherMethod.No
-                                });
-                            }
+                        //    imageColl.Coalesce();
+                        //    foreach (var image in imageColl)
+                        //    {
+                        //        var colors = image.TotalColors;
+                        //        image.Resize(width, height); // resize will make # of colors higher
+                        //        image.Quantize(new QuantizeSettings
+                        //        {
+                        //            Colors = colors, // set it back to the smaller original colors
+                        //            DitherMethod = DitherMethod.No
+                        //        });
+                        //    }
 
-                            imageColl.Optimize();
-                            await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
-                        }
+                        //    imageColl.Optimize();
+                        //    await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
+                        //}
                     }
                 }
             }
@@ -294,7 +295,7 @@ namespace Fan.Medias
                 height = targetSize;
             }
             else // square or landscape
-            {                
+            {
                 width = targetSize;
                 height = origHeight * (targetSize / origWidth);
             }

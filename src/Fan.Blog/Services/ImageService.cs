@@ -1,9 +1,11 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Services.Interfaces;
+using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Medias;
 using Fan.Settings;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,6 +48,26 @@ namespace Fan.Blog.Services
         /// For accepted file types https://en.support.wordpress.com/accepted-filetypes/
         /// </remarks>
         public static readonly string[] Accepted_Image_Types = { ".jpg", ".jpeg", ".gif", ".png" };
+
+        /// <summary>
+        /// validFileTypes: ['.jpg', '.jpeg', '.png', '.gif']
+        /// </summary>
+        public static string ValidFileTypesJson = JsonConvert.SerializeObject(Accepted_Image_Types);
+
+        /// <summary>
+        /// Max image file size is 5MB.
+        /// </summary>
+        public const long MAX_FILE_SIZE = 5 * ByteSize.BytesInMegaByte;
+
+        /// <summary>
+        /// Error message for valid file types.
+        /// </summary>
+        public const string ERR_MSG_FILETYPE = "Only .jpg, .jpeg, .png and .gif are supported.";
+
+        /// <summary>
+        /// Error message for valid file size.
+        /// </summary>
+        public const string ERR_MSG_FILESIZE = "File cannot be larger than 5MB.";
 
         /// <summary>
         /// The separator used in image paths is '/'.
@@ -97,6 +119,21 @@ namespace Fan.Blog.Services
                 new ImageResizeInfo {
                     TargetSize = SMALL_IMG_SIZE,
                     Path = GetImagePath(uploadedOn, EImageSize.Small),
+                    PathSeparator = IMAGE_PATH_SEPARATOR,
+                },
+            };
+        }
+
+        /// <summary>
+        /// For gif I only save original so there is no resizing.
+        /// </summary>
+        /// <param name="uploadedOn"></param>
+        public static List<ImageResizeInfo> GetImageResizeListForGif(DateTimeOffset uploadedOn)
+        {
+            return new List<ImageResizeInfo> {
+                new ImageResizeInfo {
+                    TargetSize = int.MaxValue,
+                    Path = GetImagePath(uploadedOn, EImageSize.Original),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
             };
@@ -213,7 +250,13 @@ namespace Fan.Blog.Services
             var ctype = "." + contentType.Substring(contentType.LastIndexOf("/") + 1).ToLower();
             if (ext.IsNullOrEmpty() || !Accepted_Image_Types.Contains(ext) || !Accepted_Image_Types.Contains(ctype))
             {
-                throw new NotSupportedException("Upload file type is not supported.");
+                throw new NotSupportedException(ERR_MSG_FILETYPE);
+            }
+
+            // check file size
+            if (source.Length > MAX_FILE_SIZE)
+            {
+                throw new FanException(ERR_MSG_FILESIZE);
             }
 
             // uploadedOn 
@@ -226,7 +269,8 @@ namespace Fan.Blog.Services
             var uniqueFileName = await GetUniqueFileNameAsync(fileNameSlugged, uploadedOn);
 
             // get image resizes
-            var resizes = GetImageResizeList(uploadedOn);
+            var resizes = contentType.Equals("image/gif") ?
+                GetImageResizeListForGif(uploadedOn) : GetImageResizeList(uploadedOn);
 
             return await _mediaSvc.UploadImageAsync(source, resizes, uniqueFileName, contentType, title,
                 uploadedOn, EAppType.Blog, userId, uploadFrom);
