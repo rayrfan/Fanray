@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using Fan.Blog.Models;
 using Fan.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fan.Blog.Helpers
 {
@@ -18,11 +16,11 @@ namespace Fan.Blog.Helpers
         /// <remarks>
         /// This method makes sure the result slug
         /// - not to exceed max len;
-        /// - if <see cref="Util.FormatSlug(string)"/> returns empty string, it generates a random one;
+        /// - if <see cref="Util.Slugify(string)"/> returns empty string, it generates a random one;
         /// - a unique value if its a duplicate with existings slugs;
         /// - if '#' char is present, I swap it to 's'
         /// </remarks>
-        public static string FormatTaxonomySlug(string title, int maxlen, IEnumerable<string> existingSlugs = null)
+        public static string SlugifyTaxonomy(string title, int maxlen, IEnumerable<string> existingSlugs = null)
         {
             // if user input exceeds max len, we trim
             if (title.Length > maxlen)
@@ -30,26 +28,14 @@ namespace Fan.Blog.Helpers
                 title = title.Substring(0, maxlen);
             }
 
-            title = title.Replace('#', 's'); // preserve # as s before format to slug
-            var slug = Util.FormatSlug(title); // remove/replace odd char, lower case etc
+            // preserve # as s before format to slug
+            title = title.Replace('#', 's');
 
-            // slug from title could be empty, e.g. the title is in Chinese
-            // then we generate a random string of 6 chars
-            if (slug.IsNullOrEmpty())
-            {
-                slug = Util.RandomString(6);
-            }
+            // make slug
+            var slug = Util.Slugify(title, randomCharCountOnEmpty: 6);
 
             // make sure slug is unique
-            int i = 2;
-            if (existingSlugs != null)
-            {
-                while (existingSlugs.Contains(slug))
-                {
-                    slug = $"{slug}-{i}";
-                    i++;
-                }
-            }
+            slug = Util.UniquefySlug(slug, existingSlugs);
 
             return slug;
         }

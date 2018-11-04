@@ -10,7 +10,7 @@ namespace Fan.UnitTests.Helpers
     public class UtilTest
     {
         /// <summary>
-        /// Test for <see cref="Util.FormatSlug(string)"/>.
+        /// Test for <see cref="Util.Slugify(string)"/>.
         /// </summary>
         [Theory]
         [InlineData("c#", "c")]
@@ -20,9 +20,9 @@ namespace Fan.UnitTests.Helpers
         [InlineData("1.1-1_1_.-", "1-1-1-1")]
         [InlineData("你好。", "")]
         [InlineData("<script>A post title</script>", "scripta-post-title-script")]
-        public void FormatSlug_Test(string slug, string expected)
+        public void Slugify_turns_a_string_into_url_friendly_slug(string title, string expected)
         {
-            Assert.Equal(expected, Util.FormatSlug(slug));
+            Assert.Equal(expected, Util.Slugify(title));
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Fan.UnitTests.Helpers
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5 words.", 6)]
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5…", 5)]
         [InlineData("<p></p>", "", 55)]
-        public void GetExcerpt_Test(string body, string expected, int wordLimit)
+        public void GetExcerpt_returns_a_string_excerpt_from_a_given_html(string body, string expected, int wordLimit)
         {
             Assert.Equal(expected, Util.GetExcerpt(body, wordLimit));
         }
@@ -75,11 +75,11 @@ namespace Fan.UnitTests.Helpers
         [Fact]
         public void DateTimeOffset_should_be_used_instead_of_DateTime()
         {
-            Assert.Equal("now", DateTimeOffset.UtcNow.Humanize()); 
-            Assert.Equal("now", DateTimeOffset.Now.Humanize()); 
+            Assert.Equal("now", DateTimeOffset.UtcNow.Humanize());
+            Assert.Equal("now", DateTimeOffset.Now.Humanize());
 
             // OK
-            Assert.Equal("now", DateTime.UtcNow.Humanize()); 
+            Assert.Equal("now", DateTime.UtcNow.Humanize());
             // Ambiguous
             // Fails on IANA time zone machine it outputs "now" 
             // but on my local windows it outputs "7 hours ago"
@@ -90,7 +90,7 @@ namespace Fan.UnitTests.Helpers
         [InlineData("你好。", "你好。")]
         [InlineData("c#", "c#")]
         [InlineData("<h1>", "&lt;h1&gt;")]
-        public void WebUtility_HtmlEncode_Test(string input, string expected)
+        public void WebUtility_HtmlEncode_escapes_special_chars(string input, string expected)
         {
             Assert.Equal(expected, WebUtility.HtmlEncode(input));
         }

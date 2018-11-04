@@ -149,7 +149,7 @@ namespace Fan.Blog.Services
             var category = new Category
             {
                 Title = title,
-                Slug = BlogUtil.FormatTaxonomySlug(title, SLUG_MAXLEN, allCats.Select(c => c.Slug)),
+                Slug = BlogUtil.SlugifyTaxonomy(title, SLUG_MAXLEN, allCats.Select(c => c.Slug)),
                 Description = Util.CleanHtml(description),
                 Count = 0,
             };
@@ -192,7 +192,7 @@ namespace Fan.Blog.Services
             // prep slug, description and count
             var entity = await _catRepo.GetAsync(category.Id);
             entity.Title = category.Title; // assign new title
-            entity.Slug = BlogUtil.FormatTaxonomySlug(category.Title, SLUG_MAXLEN, allCats.Select(c => c.Slug)); // slug is based on title
+            entity.Slug = BlogUtil.SlugifyTaxonomy(category.Title, SLUG_MAXLEN, allCats.Select(c => c.Slug)); // slug is based on title
             entity.Description = Util.CleanHtml(category.Description);
             entity.Count = category.Count;
 

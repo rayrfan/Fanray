@@ -239,7 +239,7 @@ namespace Fan.Blog.IntegrationTests
             var uploadedOn = DateTimeOffset.UtcNow;
             var year = uploadedOn.Year.ToString();
             var month = uploadedOn.Month.ToString("d2");
-            var expectedUrl = $"{STORAGE_ENDPOINT}/media/blog/{year}/{month}/fanray-logo-1.png";
+            var expectedUrl = $"{STORAGE_ENDPOINT}/media/blog/{year}/{month}/fanray-logo-2.png";
             Assert.Equal(expectedUrl, mediaInfo.Url);
 
             // and storage provider is called only once since it's a tiny image
