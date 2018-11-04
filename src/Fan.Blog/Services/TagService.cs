@@ -152,7 +152,7 @@ namespace Fan.Blog.Services
             }
 
             // prep slug, description and count
-            tag.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
+            tag.Slug = BlogUtil.SlugifyTaxonomy(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
             tag.Description = Util.CleanHtml(tag.Description);
             tag.Count = tag.Count;
 
@@ -194,7 +194,7 @@ namespace Fan.Blog.Services
             // prep slug, description and count
             var entity = await _tagRepo.GetAsync(tag.Id);
             entity.Title = tag.Title; // assign new title
-            entity.Slug = BlogUtil.FormatTaxonomySlug(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
+            entity.Slug = BlogUtil.SlugifyTaxonomy(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
             entity.Description = Util.CleanHtml(tag.Description);
             entity.Count = tag.Count;
 

@@ -320,7 +320,7 @@ namespace Fan.Blog.Services
             }
 
             // slug file name
-            var slug = Util.FormatSlug(fileNameWithoutExt);
+            var slug = Util.Slugify(fileNameWithoutExt);
             if (slug.IsNullOrEmpty()) // slug may end up empty
             {
                 slug = Util.RandomString(6);
@@ -345,7 +345,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         private async Task<string> GetUniqueFileNameAsync(string fileNameSlugged, DateTimeOffset uploadedOn)
         {
-            int i = 1;
+            int i = 2;
             while (await _mediaSvc.ExistsAsync(m => m.AppType == EAppType.Blog &&
                                                     m.UploadedOn.Year == uploadedOn.Year &&
                                                     m.UploadedOn.Month == uploadedOn.Month &&
@@ -353,7 +353,7 @@ namespace Fan.Blog.Services
             {
                 var lookUp = ".";
                 var replace = $"-{i}.";
-                if (i > 1)
+                if (i > 2)
                 {
                     int j = i - 1;
                     lookUp = $"-{j}.";

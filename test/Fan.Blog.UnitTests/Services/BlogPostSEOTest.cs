@@ -8,7 +8,10 @@ using Xunit;
 
 namespace Fan.Blog.UnitTests.Services
 {
-    public class SEOTest : BlogServiceUnitTestBase
+    /// <summary>
+    /// Unit tests post title and slug.
+    /// </summary>
+    public class BlogPostSEOTest : BlogServiceUnitTestBase
     {
         /// <summary>
         /// This test is to make sure the following, <see cref="https://github.com/FanrayMedia/Fanray/issues/88"/>
@@ -69,6 +72,55 @@ namespace Fan.Blog.UnitTests.Services
             var theSlug = await _blogPostSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
 
             Assert.Equal(theSlug, slug);
+        }
+
+        /// <summary>
+        /// When create a post the slug is guaranteed to be unique.
+        /// </summary>
+        [Theory]
+        [InlineData("A blog post title", "a-blog-post-title", "a-blog-post-title-2")]
+        [InlineData("A blog post title 2", "a-blog-post-title-2", "a-blog-post-title-3")]
+        public async void Create_post_will_always_produce_unique_slug(string title, string slug, string expected)
+        {
+            // Given an existing post with slug 
+            var dt = DateTimeOffset.Now;
+            _postRepoMock.Setup(r => r.GetAsync(slug, dt.Year, dt.Month, dt.Day))
+                .Returns(Task.FromResult(new Post { Id = 10000, Slug = slug }));
+
+            // When user publishes the post that will conflict with existing slug
+            var postId = 1;
+            var slugUnique = await _blogPostSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
+
+            // Then a unique slug is produced
+            Assert.Equal(expected, slugUnique);
+        }
+
+        /// <summary>
+        /// If user manually updates an existing post's slug and it conflicts with an existing post,
+        /// my blog will resolve the conflict by producing an unique slug automatically.
+        /// </summary>
+        [Fact]
+        public async void Update_post_will_produce_unique_slug_if_user_updates_slug_to_run_into_conflict()
+        {
+            // Given an existing post
+            var slug = "i-want-a-different-slug-for-this-post";
+            var dt = DateTimeOffset.Now;
+            _postRepoMock.Setup(r => r.GetAsync(slug, dt.Year, dt.Month, dt.Day))
+                .Returns(Task.FromResult(new Post { Id = 10000, Slug = slug }));
+
+            // When user publishes the post and update the slug
+            var postId = 1;
+            var title = "A blog post title";
+            var slugCreated = await _blogPostSvc.GetBlogPostSlugAsync(title, dt, ECreateOrUpdate.Create, postId);
+            Assert.Equal("a-blog-post-title", slugCreated);
+
+            // Now the user update the post slug
+            slugCreated = "i-want-a-different-slug-for-this-post";
+
+            // Then
+            var slugUpdated = await _blogPostSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
+
+            Assert.Equal("i-want-a-different-slug-for-this-post-2", slugUpdated);
         }
     }
 }

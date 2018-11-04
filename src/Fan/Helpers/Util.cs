@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Humanizer;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -10,18 +11,28 @@ using TimeZoneConverter;
 
 namespace Fan.Helpers
 {
+    /// <summary>
+    /// Utility helpers.
+    /// </summary>
     public static class Util
     {
         /// <summary>
-        /// Produces optional, URL-friendly version of a title, "like-this-one". 
-        /// hand-tuned for speed, reflects performance refactoring contributed by John Gietzen (user otac0n) 
+        /// Returns the slug of a given string. 
         /// </summary>
+        /// <param name="title"></param>
+        /// <param name="randomCharCountOnEmpty">
+        /// The result slug could be empty if given title is non-english such as chinese, turn this 
+        /// to false will return a random string of the specified number of chars instead of empty string.
+        /// </param>
         /// <remarks>
+        /// Produces optional, URL-friendly version of a title, "like-this-one",
+        /// hand-tuned for speed, reflects performance refactoring contributed by John Gietzen (user otac0n) 
         /// http://stackoverflow.com/questions/25259/how-does-stackoverflow-generate-its-seo-friendly-urls
         /// </remarks>
-        public static string FormatSlug(string title)
+        public static string Slugify(string title, int randomCharCountOnEmpty = 0)
         {
-            if (title == null) return "";
+            if (title == null)
+                return randomCharCountOnEmpty <= 0 ? "" : Util.RandomString(randomCharCountOnEmpty);
 
             const int maxlen = 80;
             int len = title.Length;
@@ -57,10 +68,63 @@ namespace Fan.Helpers
                 if (i == maxlen) break;
             }
 
-            if (prevdash)
-                return sb.ToString().Substring(0, sb.Length - 1);
+            var slug = prevdash ? sb.ToString().Substring(0, sb.Length - 1) : sb.ToString();
+            if (slug == string.Empty && randomCharCountOnEmpty > 0) slug = Util.RandomString(randomCharCountOnEmpty);
+
+            return slug;
+        }
+
+        /// <summary>
+        /// Returns a new slug by appending a counter to the given slug.  This method is called 
+        /// when caller already determined the slug is a duplicate.
+        /// </summary>
+        /// <param name="slug">The current slug that runs into conflict.</param>
+        /// <param name="i">The counter on what slug should be appended with.</param>
+        /// <returns></returns>
+        public static string UniquefySlug(string slug, IEnumerable<string> existingSlugs)
+        {
+            if (slug.IsNullOrEmpty() || existingSlugs.IsNullOrEmpty()) return slug;
+
+            int i = 2;
+            while (existingSlugs.Contains(slug))
+            {
+                var lookup = $"-{i}";
+                if (slug.EndsWith(lookup))
+                {
+                    var idx = slug.LastIndexOf(lookup);
+                    slug = slug.Remove(idx, lookup.Length).Insert(idx, $"-{++i}");
+                }
+                else
+                {
+                    slug = $"{slug}-{i}";
+                }
+            }
+
+            return slug;
+        }
+
+        /// <summary>
+        /// Returns a new slug by appending a counter to the given slug.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public static string UniquefySlug(string slug, ref int i)
+        {
+            if (slug.IsNullOrEmpty()) return slug;
+
+            var lookup = $"-{i}";
+            if (slug.EndsWith(lookup))
+            {
+                var idx = slug.LastIndexOf(lookup);
+                slug = slug.Remove(idx, lookup.Length).Insert(idx, $"-{++i}");
+            }
             else
-                return sb.ToString();
+            {
+                slug = $"{slug}-{i}";
+            }
+
+            return slug;
         }
 
         /// <summary>
@@ -181,7 +245,7 @@ namespace Fan.Helpers
                 if (body.IsNullOrEmpty()) return "";
 
                 // html entities https://stackoverflow.com/a/10971380/32240
-                body = WebUtility.HtmlDecode(body); 
+                body = WebUtility.HtmlDecode(body);
 
                 return body.Truncate(wordsLimit, Truncator.FixedNumberOfWords);
             }
