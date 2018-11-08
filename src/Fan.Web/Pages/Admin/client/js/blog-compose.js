@@ -17,13 +17,13 @@
         previewUrl: null,
         postUrl: null,
         previewDialogVisible: false,
-        progressVisible: false,
         editor: null,
         snackbar: {
             show: false,
             text: '',
             color: '',
         },
+        composerUploadProgress: false,
     }),
     computed: {
         disablePubButton() {
@@ -53,9 +53,66 @@
     },
     mounted() {
         this.pubText = this.post.published ? 'Update' : 'Publish';
+        this.initWindowDnd();
         this.initEditor();
     },
     methods: {
+        /**
+         * Initialize window drag drop events, dragFilesUpload and sendIMages.
+         */
+        initWindowDnd() {
+            console.log('initWindowDnd');
+            window.addEventListener("dragenter", function (e) {
+                document.querySelector("#dropzone").style.visibility = "";
+                document.querySelector("#dropzone").style.opacity = 1;
+            });
+
+            window.addEventListener("dragleave", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "hidden";
+                document.querySelector("#dropzone").style.opacity = 0;
+            });
+
+            window.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "";
+                document.querySelector("#dropzone").style.opacity = 1;
+            });
+
+            let self = this;
+            window.addEventListener("drop", function (e) {
+                e.preventDefault();
+                document.querySelector("#dropzone").style.visibility = "hidden";
+                document.querySelector("#dropzone").style.opacity = 0;
+                if (!self.mediaDialogVisible) self.dragFilesUpload(e.dataTransfer.files); // prevent gallery call this
+            });
+        },
+        dragFilesUpload(files) {
+            if (!files.length) return;
+            this.composerUploadProgress = true; // open progress
+            const formData = new FormData();
+            Array.from(Array(files.length).keys()).map(x => formData.append('images', files[x]));
+            this.sendImages(formData);
+        },
+        sendImages(formData) {
+            axios.post('/admin/media?handler=image', formData, this.$root.headers)
+                .then(resp => {
+                    if (resp.data.images.length > 0) {
+                        this.insertImagesToEditor(resp.data.images);
+                        this.$root.toast('Image uploaded.');
+                    }
+                    else {
+                        this.$root.toastError('Some files were not uploaded due to file type or size not supported.');
+                    }
+                    this.composerUploadProgress = false; // close progress
+                    this.$store.dispatch('emptyErrMsg');
+                })
+                .catch(err => {
+                    this.composerUploadProgress = false; // close progress
+                    this.$root.toastError('Image upload failed.');
+                    console.log(err);
+                });
+        },
         initEditor() {
             let typingTimer;
             let self = this;
@@ -141,26 +198,34 @@
                 .catch(err => { console.log(err); });
         },
         /**
-         * Inserts selected images to editor.
+         * Inserts selected images from gallery to editor.
+         */
+        insertImages() {
+            this.insertImagesToEditor(this.selectedImages);
+            this.mediaDialogVisible = false;
+            this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
+            this.$store.dispatch('emptyErrMsg');
+        },
+        /**
+         * Inserts images to editor.
          * https://docs.ckeditor.com/ckeditor5/latest/builds/guides/faq.html#where-are-the-editorinserthtml-and-editorinserttext-methods-how-to-insert-some-content
          * https://docs.ckeditor.com/ckeditor5/latest/features/image.html#image-captions
          */
-        insertImages() {
+        insertImagesToEditor(images) {
             let imgsHtml = '';
-            this.selectedImages.forEach(img => {
+            images.forEach(img => {
                 imgsHtml += `<figure class="image"><img src="${img.urlMedium}" alt="${img.alt}" title="${img.title}"><figcaption>${img.caption}</figcaption></figure>`;
                 img.selected = false; // remove the checkmark
             });
-            this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
             const viewFragment = this.editor.data.processor.toView(imgsHtml);
             const modelFragment = this.editor.data.toModel(viewFragment);
             this.editor.model.insertContent(modelFragment, this.editor.model.document.selection);
-            this.mediaDialogVisible = false;
         },
         closeMediaDialog() {
             this.mediaDialogVisible = false;
-            this.selectedImages.forEach(img => img.selected = false ); // remove checkmarks
+            this.selectedImages.forEach(img => img.selected = false); // remove checkmarks
             this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
+            this.$store.dispatch('emptyErrMsg');
         },
         titleEnter() {
             this.post.title = this.post.title.replace(/\n/g, ' ');

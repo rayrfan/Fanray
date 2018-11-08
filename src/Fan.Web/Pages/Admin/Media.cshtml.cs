@@ -1,5 +1,6 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Services.Interfaces;
+using Fan.Exceptions;
 using Fan.Medias;
 using Fan.Membership;
 using Microsoft.AspNetCore.Http;
@@ -64,11 +65,9 @@ namespace Fan.Web.Pages.Admin
         public class ImageData
         {
             public IEnumerable<ImageVM> Images { get; set; }
-
-            public string ErrorMessage { get; set; }
-          
-            public string ImagesJson => 
-                (Images == null || Images.Count() <=0) ? "[]" : 
+            public IEnumerable<string> ErrorMessages { get; set; }
+            public string ImagesJson =>
+                (Images == null || Images.Count() <= 0) ? "[]" :
                 JsonConvert.SerializeObject(Images);
         }
 
@@ -133,9 +132,9 @@ namespace Fan.Web.Pages.Admin
         public async Task<JsonResult> OnPostImageAsync(IList<IFormFile> images)
         {
             var userId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User));
-            List<ImageVM> imageVMs = new List<ImageVM>();
+            var imageVMs = new List<ImageVM>();
+            var errMsgs = new List<string>();
 
-            int failCount = 0;
             foreach (var image in images)
             {
                 try
@@ -148,15 +147,18 @@ namespace Fan.Web.Pages.Admin
                 }
                 catch (NotSupportedException ex)
                 {
-                    failCount++;
+                    errMsgs.Add(ex.Message);
+                }
+                catch (FanException ex) // todo consider errcode
+                {
+                    errMsgs.Add(ex.Message);
                 }
             }
 
             var imageData = new ImageData
             {
                 Images = imageVMs,
-                ErrorMessage = failCount <= 0 ? null :
-                                $"Only .jpg, .jpeg, .png and .gif are supported, {failCount} file(s) could not be uploaded.",
+                ErrorMessages = errMsgs.Distinct(),
             };
 
             return new JsonResult(imageData);

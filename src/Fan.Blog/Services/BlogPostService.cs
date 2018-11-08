@@ -41,7 +41,7 @@ namespace Fan.Blog.Services
             ILogger<BlogPostService> logger,
             IMapper mapper,
             IShortcodeService shortcodeService,
-            IMediator mediator) 
+            IMediator mediator)
         {
             _settingSvc = settingService;
             _postRepo = postRepo;
@@ -90,7 +90,8 @@ namespace Fan.Blog.Services
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // before create
-            await _mediator.Publish(new BlogPostBeforeCreate {
+            await _mediator.Publish(new BlogPostBeforeCreate
+            {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles
             });
@@ -123,7 +124,8 @@ namespace Fan.Blog.Services
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // before update
-            await _mediator.Publish(new BlogPostBeforeUpdate {
+            await _mediator.Publish(new BlogPostBeforeUpdate
+            {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
                 CurrentPost = await QueryPostAsync(blogPost.Id, EPostType.BlogPost),
@@ -371,7 +373,7 @@ namespace Fan.Blog.Services
             //var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
 
             // CreatedOn
-            if (createOrUpdate == ECreateOrUpdate.Create) 
+            if (createOrUpdate == ECreateOrUpdate.Create)
             {
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
@@ -433,7 +435,7 @@ namespace Fan.Blog.Services
             if (blogPost.UpdatedOn.HasValue)
             {
                 blogPost.UpdatedOnDisplay =
-                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy"); 
+                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy");
             }
 
             // Title
@@ -471,13 +473,13 @@ namespace Fan.Blog.Services
         /// <param name="blogPostId">Used for making sure slug is unique when updating.</param>
         /// <returns></returns>
         /// <remarks>
-        /// If input is slug, either this is update or a create with user inputted slug, then <see cref="Util.FormatSlug(string)"/>
+        /// If input is slug, either this is update or a create with user inputted slug, then <see cref="Util.Slugify(string)"/>
         /// will not alter it. This is very important for SEO as updating slug on an existing post will
         /// break links in search results. On the other hand, if user deliberately updated the slug
         /// when doing an update on post, then it will alter it accordingly. Please see the test case
         /// on this method.
         /// </remarks>
-        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId) 
+        internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId)
         {
             // when user manually inputted a slug, it could exceed max len
             if (input.Length > TITLE_MAXLEN)
@@ -485,15 +487,8 @@ namespace Fan.Blog.Services
                 input = input.Substring(0, TITLE_MAXLEN);
             }
 
-            // remove/replace odd char, lower case etc
-            var slug = Util.FormatSlug(input);
-
-            // slug from title could be empty, e.g. the title is in Chinese
-            // then we generate a random string of 6 chars
-            if (string.IsNullOrEmpty(slug))
-            {
-                slug = Util.RandomString(8);
-            }
+            // make slug
+            var slug = Util.Slugify(input, randomCharCountOnEmpty: 8);
 
             // make sure slug is unique
             int i = 2;
@@ -501,8 +496,7 @@ namespace Fan.Blog.Services
             {
                 while (await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
                 {
-                    slug = $"{slug}-{i}";
-                    i++;
+                    slug = Util.UniquefySlug(slug, ref i);
                 }
             }
             else // update
@@ -510,8 +504,7 @@ namespace Fan.Blog.Services
                 var p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 while (p != null && p.Id != blogPostId)
                 {
-                    slug = $"{slug}-{i}";
-                    i++;
+                    slug = Util.UniquefySlug(slug, ref i);
                     p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 }
             }

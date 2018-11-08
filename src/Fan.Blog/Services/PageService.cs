@@ -231,7 +231,7 @@ namespace Fan.Blog.Services
             if (input.Length > TITLE_MAXLEN)
                 input = input.Substring(0, TITLE_MAXLEN);
 
-            var slug = Util.FormatSlug(input); // remove/replace odd char, lower case etc
+            var slug = Util.Slugify(input); // remove/replace odd char, lower case etc
 
             // slug from title could be empty, e.g. the title is in Chinese
             // then we generate a random string of 6 chars

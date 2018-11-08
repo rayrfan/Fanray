@@ -57,7 +57,7 @@ namespace Fan.Blog.IntegrationTests
             Assert.Equal(contentType, media.ContentType);
 
             // with a unique name
-            Assert.Equal("fanray-logo-1.png", media.FileName);
+            Assert.Equal("fanray-logo-2.png", media.FileName);
 
             // 0 resized, only orig was saved
             Assert.Equal(0, media.ResizeCount);
