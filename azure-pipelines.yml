@@ -1,0 +1,18 @@
+# Linux Job
+- job: Linux
+
+pool:
+  vmImage: 'Ubuntu 16.04'
+  
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreInstaller@0
+  displayName: 'Use .NET Core sdk 2.2.101'
+  inputs:
+    version: 2.2.101
+
+- script: |
+  dotnet build --configuration $(buildConfiguration)
+  dotnet test --configuration $(buildConfiguration)
