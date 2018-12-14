@@ -120,9 +120,9 @@ namespace Fan.Web
             {
                 options.AddPolicy("AdminRoles", policy => policy.RequireRole("Administrator", "Editor"));
             });
-
+             
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => {
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
