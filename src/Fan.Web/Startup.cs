@@ -123,6 +123,7 @@ namespace Fan.Web
              
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddSessionStateTempDataProvider()
                 .AddJsonOptions(options => {
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -131,6 +132,8 @@ namespace Fan.Web
                 {
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
                 });
+
+            services.AddSession(); // for TempData only
 
             // https://stackoverflow.com/q/50472962/32240
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -169,6 +172,7 @@ namespace Fan.Web
             app.UseStaticFiles();
             app.UseAuthentication(); // UseIdentity is obsolete, UseAuth is recommended
             app.UseCookiePolicy();
+            app.UseSession(); // for TempData only
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
