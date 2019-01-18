@@ -1,19 +1,13 @@
-﻿@using Microsoft.AspNetCore.Http.Features
+﻿@model CookieConsentViewModel
 
-@{
-    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
-    var showBanner = !consentFeature?.CanTrack ?? false;
-    var cookieString = consentFeature?.CreateConsentCookie();
-}
-
-@if (showBanner)
+@if (Model.ShowBanner)
 {
     <nav id="cookieConsent" class="navbar fixed-bottom navbar-dark bg-dark" role="alert">
         <p class="navbar-text navbar-nav">
             This website uses cookies to ensure you get the best experience on our website.
             <a aria-label="learn more about cookies" tabindex="0" href="http://cookiesandyou.com" target="_blank">Learn more</a>
         </p>
-        <button type="button" class="btn btn-warning" data-cookie-string="@cookieString">Got it!</button>
+        <button type="button" class="btn btn-warning" data-cookie-string="@Model.CookieString">Got it!</button>
     </nav>
     <script>
         (function () {
