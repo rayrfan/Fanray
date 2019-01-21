@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.ViewComponents
+namespace Fan.Web.Widgets
 {
     /// <summary>
     /// The BlogCategories view component.
@@ -19,7 +19,7 @@ namespace Fan.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var cats = (await _catSvc.GetAllAsync()).Where(t => t.Count > 0);
-            return View(cats);
+            return View("~/Widgets/BlogCategories/BlogCategories.cshtml", cats);
         }
     }
 }

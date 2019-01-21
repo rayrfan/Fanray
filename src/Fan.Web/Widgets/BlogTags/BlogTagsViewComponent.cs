@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.ViewComponents
+namespace Fan.Web.Widgets
 {
     /// <summary>
     /// The BlogTags view component.
@@ -23,7 +23,7 @@ namespace Fan.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var tags = (await _tagSvc.GetAllAsync()).Where(t => t.Count > 0);
-            return View(tags);
+            return View("~/Widgets/BlogTags/BlogTags.cshtml", tags);
         }
     }
 }

@@ -1,0 +1,17 @@
+﻿@model IEnumerable<Tag>
+
+<div class="widget">
+    <h4 class="widget-header">Tags</h4>
+    <div class="widget-content">
+        <ul class="widget-tags">
+            @foreach (var t in Model)
+            {
+                <li>
+                    <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
+                    <span class="tag-multiplier">× @t.Count</span>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
