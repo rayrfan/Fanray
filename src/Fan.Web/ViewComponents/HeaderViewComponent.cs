@@ -37,7 +37,7 @@ namespace Fan.Web.ViewComponents
                 IsSignedIn = isSignedIn,
             };
 
-            return View(vm);
+            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Header.cshtml", vm);
         }
     }
 }

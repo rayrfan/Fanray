@@ -47,7 +47,7 @@ namespace Fan.Web.ViewComponents
             if (vm.AppInsightsFullScript.IsNullOrEmpty() && vm.GoogleAnalyticsTrackingID.IsNullOrEmpty())
                 return Content(string.Empty);
 
-            return View(vm);
+            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Analytics.cshtml", vm);
         }
     }
 }
