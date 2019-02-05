@@ -16,11 +16,11 @@ namespace Fan.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Fan.Blogs.Models.Category", b =>
+            modelBuilder.Entity("Fan.Blog.Models.Category", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -46,7 +46,7 @@ namespace Fan.Migrations
                 b.ToTable("Blog_Category");
             });
 
-            modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
+            modelBuilder.Entity("Fan.Blog.Models.Post", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -101,7 +101,7 @@ namespace Fan.Migrations
                 b.ToTable("Blog_Post");
             });
 
-            modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
+            modelBuilder.Entity("Fan.Blog.Models.PostTag", b =>
             {
                 b.Property<int>("PostId");
 
@@ -114,7 +114,7 @@ namespace Fan.Migrations
                 b.ToTable("Blog_PostTag");
             });
 
-            modelBuilder.Entity("Fan.Blogs.Models.Tag", b =>
+            modelBuilder.Entity("Fan.Blog.Models.Tag", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -153,14 +153,13 @@ namespace Fan.Migrations
                     .IsRequired()
                     .HasMaxLength(256);
 
+                b.Property<int>("Type");
+
                 b.Property<string>("Value");
 
-                b.HasKey("Id")
-                    .HasAnnotation("SqlServer:Clustered", false);
+                b.HasKey("Id");
 
-                b.HasIndex("Key")
-                    .IsUnique()
-                    .HasAnnotation("SqlServer:Clustered", true);
+                b.HasIndex("Type");
 
                 b.ToTable("Core_Meta");
             });
@@ -171,17 +170,19 @@ namespace Fan.Migrations
                     .ValueGeneratedOnAdd()
                     .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                b.Property<string>("Alt");
+
                 b.Property<int>("AppType");
 
                 b.Property<string>("Caption");
 
-                b.Property<string>("Description");
-
-                b.Property<string>("FileName")
+                b.Property<string>("ContentType")
                     .IsRequired()
                     .HasMaxLength(256);
 
-                b.Property<string>("ContentType")
+                b.Property<string>("Description");
+
+                b.Property<string>("FileName")
                     .IsRequired()
                     .HasMaxLength(256);
 
@@ -190,8 +191,6 @@ namespace Fan.Migrations
                 b.Property<long>("Length");
 
                 b.Property<byte>("MediaType");
-
-                b.Property<string>("Alt");
 
                 b.Property<int>("ResizeCount");
 
@@ -384,9 +383,9 @@ namespace Fan.Migrations
                 b.ToTable("Core_UserToken");
             });
 
-            modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
+            modelBuilder.Entity("Fan.Blog.Models.Post", b =>
             {
-                b.HasOne("Fan.Blogs.Models.Category", "Category")
+                b.HasOne("Fan.Blog.Models.Category", "Category")
                     .WithMany()
                     .HasForeignKey("CategoryId");
 
@@ -396,14 +395,14 @@ namespace Fan.Migrations
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
+            modelBuilder.Entity("Fan.Blog.Models.PostTag", b =>
             {
-                b.HasOne("Fan.Blogs.Models.Post", "Post")
+                b.HasOne("Fan.Blog.Models.Post", "Post")
                     .WithMany("PostTags")
                     .HasForeignKey("PostId")
                     .OnDelete(DeleteBehavior.Cascade);
 
-                b.HasOne("Fan.Blogs.Models.Tag", "Tag")
+                b.HasOne("Fan.Blog.Models.Tag", "Tag")
                     .WithMany("PostTags")
                     .HasForeignKey("TagId")
                     .OnDelete(DeleteBehavior.Cascade);

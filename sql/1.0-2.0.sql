@@ -75,6 +75,41 @@ GO
 
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
 BEGIN
+    ALTER TABLE [Core_Meta] DROP CONSTRAINT [PK_Core_Meta];
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+BEGIN
+    DROP INDEX [IX_Core_Meta_Key] ON [Core_Meta];
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+BEGIN
+    ALTER TABLE [Core_Meta] ADD [Type] int NOT NULL DEFAULT 0;
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+BEGIN
+    ALTER TABLE [Core_Meta] ADD CONSTRAINT [PK_Core_Meta] PRIMARY KEY ([Id]);
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+BEGIN
+    CREATE INDEX [IX_Core_Meta_Type] ON [Core_Meta] ([Type]);
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';
 END;
 
@@ -118,7 +153,7 @@ GO
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20180530163323_FanV2_0', N'2.1.1-rtm-30846');
+    VALUES (N'20180530163323_FanV2_0', N'2.2.1-servicing-10028');
 END;
 
 GO

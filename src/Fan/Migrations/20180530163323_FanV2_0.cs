@@ -62,6 +62,30 @@ namespace Fan.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 256);
 
+            migrationBuilder.DropPrimaryKey(
+              name: "PK_Core_Meta",
+              table: "Core_Meta");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Core_Meta_Key",
+                table: "Core_Meta");
+
+            migrationBuilder.AddColumn<int>(
+                name: "Type",
+                table: "Core_Meta",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Core_Meta",
+                table: "Core_Meta",
+                column: "Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Core_Meta_Type",
+                table: "Core_Meta",
+                column: "Type");
+
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.feedshowexcerpt' WHERE [Key] = 'blogsettings.rssshowexcerpt';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.postperpage' WHERE [Key] = 'blogsettings.pagesize';");
@@ -118,6 +142,31 @@ namespace Fan.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 256,
                 oldNullable: true);
+
+            migrationBuilder.DropPrimaryKey(
+              name: "PK_Core_Meta",
+              table: "Core_Meta");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Core_Meta_Type",
+                table: "Core_Meta");
+
+            migrationBuilder.DropColumn(
+                name: "Type",
+                table: "Core_Meta");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Core_Meta",
+                table: "Core_Meta",
+                column: "Id")
+                .Annotation("SqlServer:Clustered", false);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Core_Meta_Key",
+                table: "Core_Meta",
+                column: "Key",
+                unique: true)
+                .Annotation("SqlServer:Clustered", true);
 
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcommentsonblogpost' WHERE [Key] = 'blogsettings.allowcomments';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.rssshowexcerpt' WHERE [Key] = 'blogsettings.feedshowexcerpt';");
