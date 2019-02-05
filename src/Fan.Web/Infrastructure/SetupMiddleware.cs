@@ -33,8 +33,8 @@ namespace Fan.Web.Infrastructure
                 var setupUrl = $"{context.Request.Scheme}://{context.Request.Host}/setup";
                 var currentUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}";
 
-                // skip setup page itself and ico, js, css files
-                string[] exts = { ".ico", ".js", ".css" };
+                // don't redirect to setup if url is setup itself or certain types of files
+                string[] exts = { ".ico", ".js", ".css", ".map" };
                 if (!currentUrl.Equals(setupUrl, StringComparison.OrdinalIgnoreCase) && 
                     !exts.Any(ext=> currentUrl.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
