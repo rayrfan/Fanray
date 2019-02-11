@@ -1,10 +1,9 @@
 ﻿using Fan.Data;
 using Fan.IntegrationTests.Base;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Xunit;
 
-namespace Fan.IntegrationTests
+namespace Fan.IntegrationTests.Data
 {
     /// <summary>
     /// Tests for <see cref="SqlMetaRepository"/> class.
@@ -19,11 +18,10 @@ namespace Fan.IntegrationTests
         }
 
         /// <summary>
-        /// Test for <see cref="SqlMetaRepository.CreateAsync(Meta)"/> method when key already exists,
-        /// <see cref="DbUpdateException"/> will be thrown.
+        /// Test for <see cref="SqlMetaRepository.CreateAsync(Meta)"/> method when key already exists.
         /// </summary>
         [Fact]
-        public async void Create_meta_throws_DbUpdateException_if_key_already_exists()
+        public async void Meta_table_allows_duplicate_keys()
         {
             // Arrange
             var meta = new Meta { Key = "key", Value = "value" };
@@ -31,7 +29,7 @@ namespace Fan.IntegrationTests
 
             // Act & Assert
             await _repo.CreateAsync(meta);
-            var ex = await Assert.ThrowsAsync<DbUpdateException>(() => _repo.CreateAsync(meta2));
+            await _repo.CreateAsync(meta2);
         }
 
         /// <summary>
