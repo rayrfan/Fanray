@@ -40,7 +40,7 @@ namespace Fan.Settings
         {
             return await _cache.GetAsync(CACHE_KEY_ALL_SETTINGS, new TimeSpan(0, 10, 0), async () =>
             {
-                return await _repo.AllAsync();
+                return (await _repo.FindAsync(m => m.Type == EMetaType.Setting)).ToList();
             });
         }
 

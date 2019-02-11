@@ -17,15 +17,6 @@ namespace Fan.Data
         }
 
         /// <summary>
-        /// Returns all the meta records, returns empty list if no records are found.
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>
-        /// TODO I should probably limit this instead of return all.
-        /// </remarks>
-        public async Task<List<Meta>> AllAsync() => await _entities.AsNoTracking().ToListAsync();
-
-        /// <summary>
         /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
         /// </summary>
         /// <param name="key">The caller should pass this key in proper casing.</param>

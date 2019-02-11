@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -58,8 +59,8 @@ namespace Fan.UnitTests.Settings
             // Arrange
             _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
                 .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "New value" }));
-            _repoMock.Setup(repo => repo.AllAsync())
-                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "New value" } }));
+            _repoMock.Setup(repo => repo.FindAsync(m => m.Type == EMetaType.Setting))
+                .Returns(Task.FromResult((new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "New value" } }).AsEnumerable()));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
@@ -74,8 +75,8 @@ namespace Fan.UnitTests.Settings
             // Arrange
             _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
                 .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "Fanray" }));
-            _repoMock.Setup(repo => repo.AllAsync())
-                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "Fanray" } }));
+            _repoMock.Setup(repo => repo.FindAsync(m => m.Type == EMetaType.Setting))
+                .Returns(Task.FromResult((new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "Fanray" } }).AsEnumerable()));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
