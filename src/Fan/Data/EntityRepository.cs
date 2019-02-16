@@ -61,6 +61,17 @@ namespace Fan.Data
         }
 
         /// <summary>
+        /// Deletes an entity.
+        /// </summary>
+        /// <param name="id">The integer id of the entity.</param>
+        public virtual async Task DeleteAsync(int id)
+        {
+            var entity = await _entities.SingleAsync(e => e.Id == id);
+            _entities.Remove(entity);
+            await _db.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Returns a list of objects of T based on search predicate.
         /// </summary>
         /// <param name="predicate"></param>

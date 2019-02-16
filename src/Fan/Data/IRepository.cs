@@ -33,6 +33,12 @@ namespace Fan.Data
         Task<IEnumerable<T>> CreateRangeAsync(IEnumerable<T> objs);
 
         /// <summary>
+        /// Deletes an entity.
+        /// </summary>
+        /// <param name="id">The integer id of the entity.</param>
+        Task DeleteAsync(int id);
+
+        /// <summary>
         /// Returns objects found from data source based on search predicate.
         /// </summary>
         /// <param name="predicate"></param>
