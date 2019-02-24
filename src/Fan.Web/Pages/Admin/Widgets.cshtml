@@ -1,0 +1,162 @@
+﻿@page
+@model Fan.Web.Pages.Admin.WidgetsModel
+@{
+    ViewData["Title"] = "Widgets";
+}
+
+<site-widgets inline-template>
+    <v-container fluid>
+        <v-layout align-start>
+            <v-flex xs8 sm6 md3 elevation-1 ma-2>
+                <v-list two-line>
+                    <v-subheader>
+                        Available Widgets
+                    </v-subheader>
+                    <draggable v-model="widgetInfos" :options="{group: {name:'widgets', pull:'clone', put: false}, sort: false}"
+                               style="cursor:pointer">
+                        <template v-for="item in widgetInfos">
+                            <v-list-tile :key="item.id" avatar style="border:1px solid #eee;margin:5px">
+                                <v-list-tile-content>
+                                    <v-list-tile-title v-html="item.name"></v-list-tile-title>
+                                    <v-list-tile-sub-title v-html="item.description"></v-list-tile-sub-title>
+                                </v-list-tile-content>
+                            </v-list-tile>
+                        </template>
+                    </draggable>
+                </v-list>
+            </v-flex>
+            <v-flex xs8 sm6 md3>
+                <v-list two-line class="elevation-1 ma-2" v-for="area in widgetAreas" :key="area.id">
+                    <v-subheader>
+                        {{ area.title }}
+                    </v-subheader>
+                    <draggable v-model="area.widgets" :options="{group:'widgets'}"
+                               @@add="add($event, area.id)"
+                               @@sort="sort($event, area.id)"
+                               style="min-height: 10px;cursor:move">
+                        <template v-for="widget in area.widgets">
+                            <v-list-tile :key="widget.id" avatar style="border:1px solid #eee;margin:5px">
+                                <v-list-tile-content>
+                                    <v-list-tile-title v-html="widget.title"></v-list-tile-title>
+                                    <v-list-tile-sub-title v-html="widget.name"></v-list-tile-sub-title>
+                                </v-list-tile-content>
+                                <v-list-tile-action>
+                                    <v-list-tile-action-text style="padding-top:25px">
+                                        <v-btn flat icon style="margin-right: 4px" @@click="editWidget(widget)">
+                                            <v-icon>edit</v-icon>
+                                        </v-btn>
+                                        <v-btn flat icon @@click="deleteWidget(widget.id, area.id)">
+                                            <v-icon>delete</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action-text>
+                                </v-list-tile-action>
+                            </v-list-tile>
+                        </template>
+                    </draggable>
+                </v-list>
+            </v-flex>
+        </v-layout>
+        <v-dialog lazy
+                  v-model="dialogVisible"
+                  @@keydown.esc="closeDialog"
+                  content-class="cat-dialog">
+            <v-card>
+                <v-card-title>
+                    <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn @@click="closeDialog">Close</v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text class="widget-edit-body">
+                    <iframe class="widget-edit-frame"
+                            v-if="widgetEditUrl"
+                            :src="widgetEditUrl"
+                            :title="dialogTitle"></iframe>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </v-container>    
+</site-widgets>
+
+@section ComponentScripts {
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.3/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.17.0/vuedraggable.min.js"></script>
+    <script>
+        let widgetsMixin = {
+            data: function () {
+                return {
+                    widgetInfos: @Html.Raw(Model.WidgetInfosJson),
+                    widgetAreas: @Html.Raw(Model.WidgetAreasJson),
+                }
+            },
+        }
+
+        Vue.component('site-widgets', {
+            mixins: [widgetsMixin],
+            data: () => ({
+                dialogVisible: false,
+                dialogTitle: '',
+                widgetEditUrl: null,
+            }),
+            methods: {                
+                add: function (evt, areaId) {
+                    console.log('evt: ', evt);
+                    console.log('newIndex: ', evt.newIndex);
+                    console.log('areaId: ', areaId);
+
+                    let areaIdx = this.widgetAreas.findIndex(c => c.id === areaId)
+                    let newWidgetType = this.widgetAreas[areaIdx].widgets[evt.newIndex].type;
+                    console.log('newWidgetType: ', newWidgetType);
+
+                    let payload = {
+                        index: evt.newIndex,
+                        widgetType: newWidgetType,
+                        areaId: areaId,
+                    };
+
+                    axios.post('/admin/widgets?handler=add', payload, this.$root.headers)
+                        .then(resp => {
+                            let newWid = resp.data;
+                            console.log('resp.data: ', newWid);
+                            this.widgetAreas[areaIdx].widgets.splice(evt.newIndex, 1, newWid);
+                            console.log(this.widgetAreas[areaIdx].widgets);
+                        })
+                        .catch(err => {
+                            this.errMsg = err.response.data;
+                            this.$root.toastError('Add widget failed.');
+                        });
+                },
+                sort: function (evt, areaId) {
+                    console.log(evt);
+                    console.log(areaId);
+                },
+                editWidget: function (widget) {
+                    console.log(widget);
+                    this.dialogTitle = widget.title + ' (' + widget.name + ')';
+                    this.dialogVisible = true;
+
+                    axios.post('/admin/widgets?handler=edit', widget, this.$root.headers)
+                        .then(resp => {
+                            this.widgetEditUrl = resp.data;
+                            console.log(this.widgetEditUrl);
+                        })
+                        .catch(err => { console.log(err); });
+                },
+                deleteWidget: function (wid, areaId) {
+                    console.log(wid);
+                    console.log(areaId);
+                    if (confirm(`Are you sure to delete the widget?`)) {
+                        axios.delete(`/admin/widgets?widgetId=${wid}&areaId=${areaId}`, this.$root.headers)
+                            .then(resp => {
+                            })
+                            .catch(err => {
+                            });
+                    }
+                },
+                closeDialog() {
+                    this.dialogVisible = false;
+                },
+            }
+        });
+    </script>
+}

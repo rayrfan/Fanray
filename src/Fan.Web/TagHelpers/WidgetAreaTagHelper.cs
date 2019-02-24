@@ -1,4 +1,4 @@
-﻿using Fan.Web.Widgets;
+﻿using Fan.Web.Pages.Widgets;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

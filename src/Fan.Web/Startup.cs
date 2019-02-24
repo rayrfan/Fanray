@@ -131,6 +131,7 @@ namespace Fan.Web
                 .AddRazorPagesOptions(options =>
                 {
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                    options.Conventions.AuthorizeFolder("/Widgets", "AdminRoles");
                 });
 
             services.AddSession(); // for TempData only

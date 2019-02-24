@@ -1,0 +1,8 @@
+{
+  "name": "My Widget",
+  "description": "My testing widget.",
+  "type": "Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests",
+  "version": "1.0.0",
+  "author": "Ray Fan",
+  "url": "https://www.fanray.com"
+}

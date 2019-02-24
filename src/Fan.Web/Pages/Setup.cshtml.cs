@@ -4,6 +4,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
+using Fan.Widgets;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace Fan.Web.Pages
         private readonly IBlogPostService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
+        private readonly IWidgetService _widgetSvc;
         private readonly ILogger<SetupModel> _logger;
 
         public SetupModel(
@@ -37,6 +39,7 @@ namespace Fan.Web.Pages
             ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
+            IWidgetService widgetService,
             ILogger<SetupModel> logger)
         {
             _userManager = userManager;
@@ -46,6 +49,7 @@ namespace Fan.Web.Pages
             _catSvc = catService;
             _tagSvc = tagService;
             _settingSvc = settingService;
+            _widgetSvc = widgetService;
             _logger = logger;
         }
 
@@ -172,6 +176,9 @@ namespace Fan.Web.Pages
                     // setup blog
                     await SetupBlogAsync();
 
+                    // setup widgets
+                    await SetupWidgets();
+
                     return new JsonResult(true);
                 }
 
@@ -259,6 +266,29 @@ namespace Fan.Web.Pages
             });
             _logger.LogInformation("Welcome post and default category created.");
             _logger.LogInformation("Blog Setup completes.");
+        }
+
+        /// <summary>
+        /// Setup widget areas and widgets for default theme.
+        /// </summary>
+        private async Task SetupWidgets()
+        {
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3);
+
+            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web",
+                WidgetService.BlogSidebar1.Id, 0);
+            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web",
+                WidgetService.BlogSidebar1.Id, 1);
+            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web",
+                WidgetService.BlogSidebar1.Id, 2);
+            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web",
+                WidgetService.BlogSidebar1.Id, 3);
         }
     }
 

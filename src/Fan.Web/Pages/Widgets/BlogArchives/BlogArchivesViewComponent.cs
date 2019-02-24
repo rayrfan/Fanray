@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Widgets
+namespace Fan.Web.Pages.Widgets.BlogArchives
 {
     /// <summary>
     /// The BlogArchives view component.
@@ -18,7 +18,7 @@ namespace Fan.Web.Widgets
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var years = await _statsSvc.GetArchivesAsync();
-            return View("~/Widgets/BlogArchives/BlogArchives.cshtml", years);
+            return View("~/Pages/Widgets/BlogArchives/BlogArchives.cshtml", years);
         }
     }
 }
