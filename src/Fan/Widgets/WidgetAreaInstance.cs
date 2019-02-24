@@ -3,7 +3,7 @@
 namespace Fan.Widgets
 {
     /// <summary>
-    /// A widget area view model with a list of <see cref="Widget"/> in the area.
+    /// A widget area instance contains a list of <see cref="WidgetInstance"/>.
     /// </summary>
     /// <remarks>
     /// This is an unique challenge in which there is json serialization involved to both database 
@@ -11,13 +11,13 @@ namespace Fan.Widgets
     /// widgets but do include them when serializing to front client. JsonIgnore or ShouldSerialize 
     /// would not work in this particular scenario.
     /// </remarks>
-    public class WidgetAreaViewModel : WidgetArea
+    public class WidgetAreaInstance : WidgetArea
     {
-        public WidgetAreaViewModel()
+        public WidgetAreaInstance()
         {
-            Widgets = new List<WidgetViewModel>();
+            Widgets = new List<WidgetInstance>();
         }
 
-        public List<WidgetViewModel> Widgets { get; set; }
+        public List<WidgetInstance> Widgets { get; set; }
     }
 }

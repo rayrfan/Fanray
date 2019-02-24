@@ -19,11 +19,12 @@ namespace Fan.IntegrationTests.Widgets
     {
         private const string MY_WIDGET_TYPE = "Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests";
         private WidgetService _svc;
+        private SqlMetaRepository _metaRepo;
 
         public WidgetServiceTest()
         {
             // meta repo
-            var repo = new SqlMetaRepository(_db);
+            _metaRepo = new SqlMetaRepository(_db);
 
             // setup CoreSettings
             var settingSvcMock = new Mock<ISettingService>();
@@ -42,7 +43,7 @@ namespace Fan.IntegrationTests.Widgets
             // theme service
             var themeSvc = new ThemeService(settingSvcMock.Object, env.Object, _cache, loggerThemeSvc);
 
-            _svc = new WidgetService(repo, themeSvc, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
+            _svc = new WidgetService(_metaRepo, themeSvc, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
             {
                 // set widget dir
                 WidgetDirectoryName = "Widgets"
@@ -138,27 +139,33 @@ namespace Fan.IntegrationTests.Widgets
             // When a widget is dropped to area
             var widget = await _svc.AddWidgetAsync(MY_WIDGET_TYPE, WidgetService.BlogSidebar1.Id, 0);
 
-            // Then area contains both instances
+            // Then widget instance has the default val
             Assert.Equal("My Widget", widget.Title);
-            Assert.True(widget is MyWidget);
         }
 
         [Fact]
-        public void A_widget_is_instantiated_from_json_and_type_info_strings()
+        public async void A_widget_is_instantiated_from_json_and_type_info_strings()
         {
-            // Given a json string that represent an instance of BlogTagsWidget
-            string json = @"{""age"":10,""title"":""Tags"",""id"":0}";
+            // Given widget area and a widget in the area
+            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
+            var widgetVm = await _svc.AddWidgetAsync(MY_WIDGET_TYPE, WidgetService.BlogSidebar1.Id, 0);
 
-            // and full path of the BlogTagsWidget type info
-            // Note: the type must exist in this DLL or referencing DLL.
-            var type = Type.GetType(MY_WIDGET_TYPE);
-            //var type = typeof(Widget); // will make last assert fail
+            // When the meta record is retrieved
+            var widgetMeta = await _metaRepo.GetAsync(widgetVm.Id);
 
-            // When we instantiate the widget
-            var widget = JsonConvert.DeserializeObject(json, type);
+            // I'm able to get the widget type
+            var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
+            Assert.Equal(MY_WIDGET_TYPE, widget.Type);
+
+            // Given a json string that represent an instance of MyWidget
+            string json = @"{""age"":10,""title"":""Tags"",""id"":0, ""type"":""Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests""}";
+            // And the widget type I got from above
+            var type = Type.GetType(widget.Type);
+
+            // When I deserialize it
+            var myWidget = (MyWidget) JsonConvert.DeserializeObject(json, type);
 
             // Then we get the actual instance
-            var myWidget = (MyWidget)widget;
             Assert.Equal(10, myWidget.Age);
         }
 
@@ -210,7 +217,7 @@ namespace Fan.IntegrationTests.Widgets
             // When user udpates the widget instance
             MyWidget myWidget = (MyWidget) await _svc.GetWidgetAsync(widget.Id);
             myWidget.Age = 20;
-            await _svc.UpdateWidgetAsync(myWidget);
+            await _svc.UpdateWidgetAsync(widget.Id, myWidget);
 
             // Then the widget instance is updated
             var myWidgetAgain = (MyWidget)await _svc.GetWidgetAsync(widget.Id);

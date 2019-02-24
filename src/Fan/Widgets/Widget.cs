@@ -6,12 +6,12 @@
     public class Widget
     {
         /// <summary>
-        /// Id of the widget instance. TODO: should I move this to vm?
-        /// </summary>
-        public int Id { get; set; }
-        /// <summary>
         /// Widget title.
         /// </summary>
         public string Title { get; set; }
+        /// <summary>
+        /// The full .NET type of the widget "namespace.type, assembly".
+        /// </summary>
+        public string Type { get; set; }
     }
 }

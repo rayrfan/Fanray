@@ -24,7 +24,7 @@ namespace Fan.Widgets
         public static WidgetArea Footer3 = new WidgetArea { Id = "footer3", Title = "Footer 3" };
 
         public const string WIDGET_INFO_FILE_NAME = "widget.json";
-        public string WidgetDirectoryName { get; set; } = "Pages/Widgets";
+        public string WidgetDirectoryName { get; set; } = $"Pages{Path.DirectorySeparatorChar}Widgets";
 
         private readonly IMetaRepository metaRepository;
         private readonly IThemeService themeService;
@@ -76,27 +76,27 @@ namespace Fan.Widgets
         /// </summary>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        public async Task<WidgetAreaViewModel> GetAreaAsync(string areaId)
+        public async Task<WidgetAreaInstance> GetAreaAsync(string areaId)
         {
             var list = await GetCurrentThemeAreasAsync();
             return list.Single(a => a.Id == areaId);
         }
 
         /// <summary>
-        /// Returns a list of widget areas for the current theme, the areas are filled with
-        /// widget instances they contain.
+        /// Returns a list of <see cref="WidgetAreaInstance"/> for the current theme, 
+        /// each area has the a list of <see cref="WidgetInstance"/> it contains.
         /// </summary>
-        public async Task<IEnumerable<WidgetAreaViewModel>> GetCurrentThemeAreasAsync()
+        public async Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync()
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             return await distributedCache.GetAsync(cacheKey, Cache_Time_Current_Theme_Areas, async () =>
             {
-                var list = new List<WidgetAreaViewModel>();
+                var list = new List<WidgetAreaInstance>();
 
                 var themeInfos = await themeService.GetInstalledThemesInfoAsync();
-                var currentTheme = themeInfos.Single(t => t.Name == coreSettings.Theme);
+                var currentTheme = themeInfos.Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
                 var areaIds = currentTheme.WidgetAreas; // current theme's widget areas ids
 
                 foreach (var areaId in areaIds)
@@ -104,7 +104,7 @@ namespace Fan.Widgets
                     var metaArea = await metaRepository.GetAsync(areaId);
                     var widgetArea = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
-                    var widgetAreaViewModel = new WidgetAreaViewModel {
+                    var widgetAreaViewModel = new WidgetAreaInstance {
                         Id = widgetArea.Id,
                         Title = widgetArea.Title,
                         WidgetIds = widgetArea.WidgetIds,
@@ -112,13 +112,9 @@ namespace Fan.Widgets
 
                     foreach (var id in widgetArea.WidgetIds)
                     {
-                        var metaWidget = await metaRepository.GetAsync(id);
-                        var type = Type.GetType(metaWidget.Key);
-                        var widget = (Widget)JsonConvert.DeserializeObject(metaWidget.Value, type);
-
-                        var widgetInfos = await GetInstalledWidgetsInfoAsync();
-                        var widgetInfo = widgetInfos.Single(wi => wi.Type == metaWidget.Key);
-                        var widgetViewModel = new WidgetViewModel {
+                        var widget = await GetWidgetAsync(id);
+                        var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+                        var widgetViewModel = new WidgetInstance {
                             Id = id, // set id
                             Title = widget.Title,
                             Name = widgetInfo.Name,
@@ -152,6 +148,7 @@ namespace Fan.Widgets
                 {
                     var file = Path.Combine(dir, WIDGET_INFO_FILE_NAME);
                     var info = JsonConvert.DeserializeObject<WidgetInfo>(await File.ReadAllTextAsync(file));
+                    info.Folder = new DirectoryInfo(dir).Name; // set folder
                     list.Add(info);
                 }
 
@@ -160,25 +157,42 @@ namespace Fan.Widgets
         }
 
         /// <summary>
+        /// Returns a <see cref="WidgetInfo"/> based on a given widget type.
+        /// </summary>
+        /// <param name="widgetType"></param>
+        /// <returns></returns>
+        public async Task<WidgetInfo> GetWidgetInfoAsync(string widgetType)
+        {
+            var widgetInfos = await GetInstalledWidgetsInfoAsync();
+            return widgetInfos.Single(wi => wi.Type.Equals(widgetType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
         /// Creates a widget instance when user drops a widget in a widget area.
         /// </summary>
         /// <param name="widgetType"></param>
         /// <param name="areaId"></param>
-        /// <returns>The id of the new instance.</returns>
+        /// <returns>A widget view model.</returns>
         /// <remarks>
         /// When a user drops a widget into a widget area, an instance of the widget will be created 
         /// then the area is updated with the new widget instance's id added to its id list.
         /// </remarks>
-        public async Task<Widget> AddWidgetAsync(string widgetType, string areaId, int index)
+        public async Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index)
         {
             // create new widget instance
             var type = Type.GetType(widgetType);
             var widget = (Widget)Activator.CreateInstance(type);
 
+            // add type info
+            widget.Type = widgetType;
+
+            // get widget info
+            var widgetInfo = await GetWidgetInfoAsync(widgetType);
+
             // create widget meta record
             var metaWidget = await metaRepository.CreateAsync(new Meta
             {
-                Key = widgetType, // widget type as Key in meta
+                Key = widgetInfo.Folder,
                 Value = JsonConvert.SerializeObject(widget),
                 Type = EMetaType.Widget,
             });
@@ -201,9 +215,12 @@ namespace Fan.Widgets
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             await distributedCache.RemoveAsync(cacheKey);
 
-            // set id
-            widget.Id = metaWidget.Id;
-            return widget;
+            return new WidgetInstance {
+                Id = metaWidget.Id,
+                Title = widget.Title,
+                Name = widgetInfo.Name,
+                Type = widgetType,
+            };
         }
 
         /// <summary>
@@ -214,17 +231,17 @@ namespace Fan.Widgets
         public async Task<Widget> GetWidgetAsync(int id)
         {
             var widgetMeta = await metaRepository.GetAsync(id);
-            var type = Type.GetType(widgetMeta.Key); // Key is the widget type
+            var widgetBase = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
 
-            var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
-            widget.Id = id;
+            var type = Type.GetType(widgetBase.Type);
 
-            return widget;
+            // the actual widget is returned
+            return (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
         }
 
-        public async Task UpdateWidgetAsync(Widget widget)
+        public async Task UpdateWidgetAsync(int id, Widget widget)
         {
-            var meta = await metaRepository.GetAsync(widget.Id);
+            var meta = await metaRepository.GetAsync(id);
             meta.Value = JsonConvert.SerializeObject(widget);
             await metaRepository.UpdateAsync(meta);
         }

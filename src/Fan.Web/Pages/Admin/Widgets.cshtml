@@ -135,7 +135,7 @@
                     this.dialogTitle = widget.title + ' (' + widget.name + ')';
                     this.dialogVisible = true;
 
-                    axios.post('/admin/widgets?handler=edit', widget, this.$root.headers)
+                    axios.get(`/admin/widgets?handler=edit&widgetId=${widget.id}`)
                         .then(resp => {
                             this.widgetEditUrl = resp.data;
                             console.log(this.widgetEditUrl);

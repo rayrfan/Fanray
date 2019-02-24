@@ -41,20 +41,20 @@ namespace Fan.Web.Pages.Admin
         public async Task<IActionResult> OnPostAddAsync([FromBody]AddWidgetDto dto)
         {
             // insert to db a new widget instance based on type
-            var widget = await _widgetService.AddWidgetAsync(dto.WidgetType, dto.AreaId, dto.Index);
-
-            // 
-            var widgetInfos = await _widgetService.GetInstalledWidgetsInfoAsync();
-            var widgetInfo = widgetInfos.Single(wi => wi.Type == dto.WidgetType);
-
-            var widgetVm = new WidgetViewModel { Id = widget.Id, Name = widgetInfo.Name, Title = widget.Title };
+            var widgetVm = await _widgetService.AddWidgetAsync(dto.WidgetType, dto.AreaId, dto.Index);
             return new JsonResult(widgetVm);
         }
 
-        public async Task<JsonResult> OnPostEditAsync([FromBody]Widget widget)
+        /// <summary>
+        /// Returns the widget edit page url.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <returns></returns>
+        public async Task<JsonResult> OnGetEditAsync(int widgetId)
         {
-            // url to edit
-            return new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/blogtags/edit");
+            var widget = await _widgetService.GetWidgetAsync(widgetId);
+            var widgetInfo = await _widgetService.GetWidgetInfoAsync(widget.Type);
+            return new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{widgetInfo.Folder}/edit");
         }
 
         /// <summary>

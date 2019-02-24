@@ -12,21 +12,27 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task RegisterAreaAsync(WidgetArea widgetArea);
         /// <summary>
-        /// 
+        /// Returns an <see cref="WidgetAreaInstance"/> by id.
         /// </summary>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        Task<WidgetAreaViewModel> GetAreaAsync(string areaId);
+        Task<WidgetAreaInstance> GetAreaAsync(string areaId);
         /// <summary>
         /// Returns the current theme's widget areas.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<WidgetAreaViewModel>> GetCurrentThemeAreasAsync();
+        Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync();
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<WidgetInfo>> GetInstalledWidgetsInfoAsync();
+        /// <summary>
+        /// Returns a <see cref="WidgetInfo"/> based on a given widget type.
+        /// </summary>
+        /// <param name="widgetType"></param>
+        /// <returns></returns>
+        Task<WidgetInfo> GetWidgetInfoAsync(string widgetType);
         /// <summary>
         /// 
         /// </summary>
@@ -38,14 +44,18 @@ namespace Fan.Widgets
         /// </summary>
         /// <param name="widgetType"></param>
         /// <param name="areaId"></param>
-        /// <returns></returns>
-        Task<Widget> AddWidgetAsync(string widgetType, string areaId, int index); // int
+        /// <param name="index">The index of the added widget in the id array.</param>
+        /// <returns>
+        /// A widget view model.
+        /// </returns>
+        Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index);
         /// <summary>
         /// Updates a widget instance.
         /// </summary>
+        /// <param name="id">The id of the widget instance.</param>
         /// <param name="widget"></param>
         /// <returns></returns>
-        Task UpdateWidgetAsync(Widget widget);
+        Task UpdateWidgetAsync(int id, Widget widget);
         /// <summary>
         /// Removes a widget instance from a widget area.
         /// </summary>
