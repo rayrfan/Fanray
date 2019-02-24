@@ -1,0 +1,11 @@
+{
+  "name": "Clarity",
+  "version": "2.0.0",
+  "author": "Ray Fan",
+  "url": "https://www.fanray.com",
+  "description": "The Clarity theme for Fanray blog.",
+  "license": "MIT",
+  "layout": "responsive",
+  "column": "right-sidebar",
+  "widgetAreas": [ "blog-sidebar1" ]
+}
