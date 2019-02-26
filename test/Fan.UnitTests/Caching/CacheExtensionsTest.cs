@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fan.UnitTests.Helpers
+namespace Fan.UnitTests.Caching
 {
     /// <summary>
     /// Test for <see cref="CacheExtensions"/> class.
@@ -33,7 +33,7 @@ namespace Fan.UnitTests.Helpers
         /// and subsequently it returns the object from cache without calling the service.
         /// </summary>
         [Fact]
-        public async void GetAsync_ExtensionMethod_IsAbleTo_Cache_Object()
+        public async void GetAsync_is_able_to_cache_object()
         {
             // Arrange: Given a service that returns CoreSettings
             var _svc = new Mock<ISettingService>();
@@ -63,22 +63,20 @@ namespace Fan.UnitTests.Helpers
         /// Unalbe to cache derived class (is-a), its property TotalStrings is not serialized.
         /// </summary>
         [Fact]
-        public async void GetAsync_Is_Not_AbleTo_Cache_StrList()
+        public async void GetAsync_is_not_able_serialize_prop_on_derived_list_type()
         {
             await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                var list = new StrList
-                {
-                    "test"
-                };
+                var list = new StrList();
+                list.Add("test");
                 list.TotalStrings = 1;
                 return list;
-            });
+            }, includeTypeName: true);
 
             var result = await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
                 return new StrList();
-            });
+            }, includeTypeName: true);
 
             Assert.Single(result);
             Assert.NotEqual(1, result.TotalStrings);
@@ -86,10 +84,10 @@ namespace Fan.UnitTests.Helpers
         }
 
         /// <summary>
-        /// Able to cahce containing class (has-a), its property TotalStrings is serialized correctly.
+        /// Able to cache containing class (has-a), its property TotalStrings is serialized correctly.
         /// </summary>
         [Fact]
-        public async void GetAsync_IsAbleTo_Cache_StrList2()
+        public async void GetAsync_is_able_to_serialize_prop_on_type_that_contains_list()
         {
             await _cache.GetAsync("strlist2-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
@@ -107,6 +105,57 @@ namespace Fan.UnitTests.Helpers
             Assert.Single(result.Strings);
             Assert.Equal(1, result.TotalStrings);
         }
+
+        /// <summary>
+        /// When includeTypeName is set to true, the cache is able to serialize and deserialize
+        /// derived types.
+        /// </summary>
+        [Fact]
+        public async void GetAsync_is_able_to_serialize_derived_types()
+        {
+            // Given a company with 1 employee cached
+            await _cache.GetAsync("company-key", new TimeSpan(0, 1, 0), async () =>
+            {
+                return new Company
+                {
+                    FullName = "Some Company",
+                    Employees = new List<Person>
+                    {
+                        new Engineer
+                        {
+                            Name = "Ray Fan",
+                            Stars = 5
+                        }
+                    }
+                };
+            }, includeTypeName: true);
+
+            // When the company is accessed from cache again
+            var result = await _cache.GetAsync("company-key", new TimeSpan(0, 1, 0), async () =>
+            {
+                return new Company(); // won't be returned since a cached ver is available
+            }, includeTypeName: true);
+
+            // Then the derived type is returned
+            // Note if includeTypeName is not set to true, the type here will be "Person"
+            Assert.Equal("Engineer", result.Employees[0].GetType().Name);
+        }
+    }
+
+    class Person
+    {
+        public string Name { get; set; }
+    }
+
+    class Engineer : Person
+    {
+        public int Stars { get; set; }
+    }
+
+    class Company
+    {
+        public string FullName { get; set; }
+        public IList<Person> Employees { get; set; }
     }
 
     /// <summary>
