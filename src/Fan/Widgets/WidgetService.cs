@@ -53,9 +53,6 @@ namespace Fan.Widgets
         private const string CACHE_KEY_INSTALLED_WIDGETS_INFO = "installed-widgets-info";
         private TimeSpan Cache_Time_Installed_Widgets_Info = new TimeSpan(0, 10, 0);
 
-        //private const string CACHE_KEY_WIDGETS_BY_AREA = "{0}-widgets";
-        //private TimeSpan Cache_Time_Widgets_By_Area = new TimeSpan(0, 10, 0);
-
         /// <summary>
         /// Register a widget area during setup.
         /// </summary>
@@ -93,7 +90,7 @@ namespace Fan.Widgets
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             return await distributedCache.GetAsync(cacheKey, Cache_Time_Current_Theme_Areas, async () =>
             {
-                var list = new List<WidgetAreaInstance>();
+                var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
                 var themeInfos = await themeService.GetInstalledThemesInfoAsync();
                 var currentTheme = themeInfos.Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
@@ -104,7 +101,7 @@ namespace Fan.Widgets
                     var metaArea = await metaRepository.GetAsync(areaId);
                     var widgetArea = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
-                    var widgetAreaViewModel = new WidgetAreaInstance {
+                    var widgetAreaInstance = new WidgetAreaInstance {
                         Id = widgetArea.Id,
                         Title = widgetArea.Title,
                         WidgetIds = widgetArea.WidgetIds,
@@ -114,19 +111,22 @@ namespace Fan.Widgets
                     {
                         var widget = await GetWidgetAsync(id);
                         var widgetInfo = await GetWidgetInfoAsync(widget.Type);
-                        var widgetViewModel = new WidgetInstance {
-                            Id = id, // set id
+                        var widgetInstance = new WidgetInstance {
+                            Id = id,
                             Title = widget.Title,
                             Name = widgetInfo.Name,
+                            Folder = widgetInfo.Folder,
                         };
-                        widgetAreaViewModel.Widgets.Add(widgetViewModel);
+
+                        widgetAreaInstance.Widgets.Add(widget);
+                        widgetAreaInstance.WidgetInstances.Add(widgetInstance);
                     }
 
-                    list.Add(widgetAreaViewModel);
+                    widgetAreaInstancelist.Add(widgetAreaInstance);
                 }
 
-                return list;
-            });
+                return widgetAreaInstancelist;
+            }, includeTypeName: true);
         }
 
         /// <summary>
@@ -141,7 +141,6 @@ namespace Fan.Widgets
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_INFO, Cache_Time_Installed_Widgets_Info, async () =>
             { 
                 var list = new List<WidgetInfo>();
-                //var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGET_DIRECTORY_NAME);
                 var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WidgetDirectoryName);
 
                 foreach (var dir in Directory.GetDirectories(widgetsFolder))
@@ -168,14 +167,16 @@ namespace Fan.Widgets
         }
 
         /// <summary>
-        /// Creates a widget instance when user drops a widget in a widget area.
+        /// Creates a widget instance.
         /// </summary>
-        /// <param name="widgetType"></param>
-        /// <param name="areaId"></param>
-        /// <returns>A widget view model.</returns>
+        /// <param name="widgetType">The .NET type of the widget to add.</param>
+        /// <param name="areaId">The id of the area the widget is added to.</param>
+        /// <param name="index">The index of the added widget in the id array.</param>
+        /// <returns>A <see cref="WidgetInstance"/>.</returns>
         /// <remarks>
-        /// When a user drops a widget into a widget area, an instance of the widget will be created 
-        /// then the area is updated with the new widget instance's id added to its id list.
+        /// This is used when user drops a widget in a widget area, an instance of the widget 
+        /// will be created then the area is updated with the new widget instance's id added 
+        /// to its id list.
         /// </remarks>
         public async Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index)
         {

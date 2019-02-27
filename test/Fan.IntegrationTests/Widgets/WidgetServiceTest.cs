@@ -76,8 +76,8 @@ namespace Fan.IntegrationTests.Widgets
             var widgetArea = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
 
             // Then it should have a list of widget instances
-            Assert.NotNull(widgetArea.Widgets);
-            Assert.Equal(2, widgetArea.Widgets.Count);
+            Assert.NotNull(widgetArea.WidgetInstances);
+            Assert.Equal(2, widgetArea.WidgetInstances.Count);
             Assert.Equal(w2.Id, widgetArea.WidgetIds[1]);
         }
 
@@ -198,7 +198,7 @@ namespace Fan.IntegrationTests.Widgets
 
             // Then there is only one widget left in the area
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.Single(area.Widgets);
+            Assert.Single(area.WidgetInstances);
         }
 
         [Fact]

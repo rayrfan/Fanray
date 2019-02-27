@@ -1,4 +1,4 @@
-﻿using Fan.Web.Pages.Widgets;
+﻿using Fan.Widgets;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -24,10 +24,13 @@ namespace Fan.Web.TagHelpers
         /// https://github.com/aspnet/Mvc/issues/5504#issuecomment-258671545
         /// </remarks>
         private readonly IViewComponentHelper viewComponentHelper;
+        private readonly IWidgetService widgetService;
 
-        public WidgetAreaTagHelper(IViewComponentHelper viewComponentHelper)
+        public WidgetAreaTagHelper(IViewComponentHelper viewComponentHelper,
+            IWidgetService widgetService)
         {
             this.viewComponentHelper = viewComponentHelper;
+            this.widgetService = widgetService;
         }
 
         /// <summary>
@@ -52,17 +55,16 @@ namespace Fan.Web.TagHelpers
 
             ((IViewContextAware)this.viewComponentHelper).Contextualize(ViewContext);
 
-            var socialIcons = await viewComponentHelper.InvokeAsync("SocialIcons");
-            output.Content.AppendHtml(socialIcons.GetString());
+            var area = await widgetService.GetAreaAsync(Id);
 
-            var blogTags = await viewComponentHelper.InvokeAsync(typeof(BlogTagsViewComponent));
-            output.Content.AppendHtml(blogTags.GetString());
+            for (int i = 0; i < area.WidgetIds.Length; i++)
+            {
+                var widgetIns = area.WidgetInstances[i];
+                var widget = area.Widgets[i];
 
-            var blogCats = await viewComponentHelper.InvokeAsync("BlogCategories");
-            output.Content.AppendHtml(blogCats.GetString());
-
-            var blogArchives = await viewComponentHelper.InvokeAsync("BlogArchives");
-            output.Content.AppendHtml(blogArchives.GetString());
+                var content = await viewComponentHelper.InvokeAsync(widgetIns.Folder, widget);
+                output.Content.AppendHtml(content.GetString());
+            }
         }
     }
 }

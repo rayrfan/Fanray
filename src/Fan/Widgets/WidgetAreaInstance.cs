@@ -15,9 +15,11 @@ namespace Fan.Widgets
     {
         public WidgetAreaInstance()
         {
-            Widgets = new List<WidgetInstance>();
+            WidgetInstances = new List<WidgetInstance>();
+            Widgets = new List<Widget>();
         }
 
-        public List<WidgetInstance> Widgets { get; set; }
+        public List<WidgetInstance> WidgetInstances { get; set; }
+        public List<Widget> Widgets { get; set; }
     }
 }
