@@ -105,7 +105,7 @@ namespace Fan.Web
             services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
 
             // HttpContext
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
 
             // Mvc and Razor Pages
 
