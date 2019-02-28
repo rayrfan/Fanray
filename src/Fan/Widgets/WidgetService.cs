@@ -18,7 +18,7 @@ namespace Fan.Widgets
         public static WidgetArea BlogSidebar1 = new WidgetArea { Id = "blog-sidebar1", Title = "Blog Sidebar1" };
         public static WidgetArea BlogSidebar2 = new WidgetArea { Id = "blog-sidebar2", Title = "Blog Sidebar2" };
         public static WidgetArea BlogBeforePost = new WidgetArea { Id = "blog-beforepost", Title = "Blog Before Post" };
-        public static WidgetArea BlogAfterPost = new WidgetArea { Id = "blog-beforepost", Title = "Blog After Post" };
+        public static WidgetArea BlogAfterPost = new WidgetArea { Id = "blog-afterpost", Title = "Blog After Post" };
         public static WidgetArea Footer1 = new WidgetArea { Id = "footer1", Title = "Footer 1" };
         public static WidgetArea Footer2 = new WidgetArea { Id = "footer2", Title = "Footer 2" };
         public static WidgetArea Footer3 = new WidgetArea { Id = "footer3", Title = "Footer 3" };
@@ -184,6 +184,22 @@ namespace Fan.Widgets
             var type = Type.GetType(widgetType);
             var widget = (Widget)Activator.CreateInstance(type);
 
+            return await AddWidgetAsync(widget, widgetType, areaId, index);
+        }
+
+        /// <summary>
+        /// Creates a widget instance.
+        /// </summary>
+        /// <param name="widget">Widget object to be added.</param>
+        /// <param name="widgetType">The .NET type of the widget to add.</param>
+        /// <param name="areaId">The id of the area the widget is added to.</param>
+        /// <param name="index">The index of the added widget in the id array.</param>
+        /// <returns>A <see cref="WidgetInstance"/>.</returns>
+        /// <remarks>
+        /// This is used when initializing widget areas with widget instances.
+        /// </remarks>
+        public async Task<WidgetInstance> AddWidgetAsync(Widget widget, string widgetType, string areaId, int index)
+        {
             // add type info
             widget.Type = widgetType;
 
@@ -216,7 +232,8 @@ namespace Fan.Widgets
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             await distributedCache.RemoveAsync(cacheKey);
 
-            return new WidgetInstance {
+            return new WidgetInstance
+            {
                 Id = metaWidget.Id,
                 Title = widget.Title,
                 Name = widgetInfo.Name,

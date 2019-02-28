@@ -4,6 +4,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
+using Fan.Web.Pages.Widgets.SocialIcons;
 using Fan.Widgets;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -273,6 +274,7 @@ namespace Fan.Web.Pages
         /// </summary>
         private async Task SetupWidgets()
         {
+            // areas
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost);
@@ -281,7 +283,9 @@ namespace Fan.Web.Pages
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3);
 
-            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web",
+            // widgets
+            var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
+            await _widgetSvc.AddWidgetAsync(socialIconsWidget, "Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web",
                 WidgetService.BlogSidebar1.Id, 0);
             await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web",
                 WidgetService.BlogSidebar1.Id, 1);

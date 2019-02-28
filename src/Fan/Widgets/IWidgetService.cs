@@ -34,21 +34,36 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task<WidgetInfo> GetWidgetInfoAsync(string widgetType);
         /// <summary>
-        /// 
+        /// Returns a <see cref="Widget"/> by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Task<Widget> GetWidgetAsync(int id);
         /// <summary>
-        /// Adds a widget instance to widget area.
+        /// Creates a widget instance.
         /// </summary>
-        /// <param name="widgetType"></param>
-        /// <param name="areaId"></param>
+        /// <param name="widgetType">The .NET type of the widget to add.</param>
+        /// <param name="areaId">The id of the area the widget is added to.</param>
         /// <param name="index">The index of the added widget in the id array.</param>
-        /// <returns>
-        /// A widget view model.
-        /// </returns>
+        /// <returns>A <see cref="WidgetInstance"/>.</returns>
+        /// <remarks>
+        /// This is used when user drops a widget in a widget area, an instance of the widget 
+        /// will be created then the area is updated with the new widget instance's id added 
+        /// to its id list.
+        /// </remarks>
         Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index);
+        /// <summary>
+        /// Creates a widget instance.
+        /// </summary>
+        /// <param name="widget">Widget object to be added.</param>
+        /// <param name="widgetType">The .NET type of the widget to add.</param>
+        /// <param name="areaId">The id of the area the widget is added to.</param>
+        /// <param name="index">The index of the added widget in the id array.</param>
+        /// <returns>A <see cref="WidgetInstance"/>.</returns>
+        /// <remarks>
+        /// This is used when initializing widget areas with widget instances.
+        /// </remarks>
+        Task<WidgetInstance> AddWidgetAsync(Widget widget, string widgetType, string areaId, int index);
         /// <summary>
         /// Updates a widget instance.
         /// </summary>
