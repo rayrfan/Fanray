@@ -8,17 +8,21 @@
     <v-container fluid>
         <v-layout align-start>
             <v-flex xs8 sm6 md3 elevation-1 ma-2>
-                <v-list two-line>
+                <v-list dense>
                     <v-subheader>
                         Available Widgets
                     </v-subheader>
-                    <draggable v-model="widgetInfos" :options="{group: {name:'widgets', pull:'clone', put: false}, sort: false}"
+                    <draggable id="widget-infos" 
+                               v-model="widgetInfos" 
+                               :options="{group: {name:'widgets', pull:'clone', put: false}, sort: false}"
                                style="cursor:pointer">
-                        <template v-for="item in widgetInfos">
-                            <v-list-tile :key="item.id" avatar style="border:1px solid #eee;margin:5px">
+                        <template v-for="info in widgetInfos">
+                            <v-list-tile :key="info.id" avatar style="border:1px solid #eee;margin:5px">
                                 <v-list-tile-content>
-                                    <v-list-tile-title v-html="item.name"></v-list-tile-title>
-                                    <v-list-tile-sub-title v-html="item.description"></v-list-tile-sub-title>
+                                    <div>
+                                        <span style="font-weight:bold;color:#333">{{info.name}}</span>
+                                        <span style="color:#999">- {{info.description}}</span>
+                                    </div>
                                 </v-list-tile-content>
                             </v-list-tile>
                         </template>
@@ -26,26 +30,30 @@
                 </v-list>
             </v-flex>
             <v-flex xs8 sm6 md3>
-                <v-list two-line class="elevation-1 ma-2" v-for="area in widgetAreas" :key="area.id">
+                <v-list dense class="elevation-1 ma-2" v-for="area in widgetAreas" :key="area.id">
                     <v-subheader>
                         {{ area.title }}
                     </v-subheader>
-                    <draggable v-model="area.widgets" :options="{group:'widgets'}"
-                               @@add="add($event, area.id)"
-                               @@sort="sort($event, area.id)"
+                    <draggable :id="area.id" 
+                               v-model="area.widgets" 
+                               :options="{group:'widgets'}"
+                               @@add="add"
+                               @@sort="sort"
                                style="min-height: 10px;cursor:move">
-                        <template v-for="widget in area.widgets">
+                        <template v-for="widget in area.widgetInstances">
                             <v-list-tile :key="widget.id" avatar style="border:1px solid #eee;margin:5px">
                                 <v-list-tile-content>
-                                    <v-list-tile-title v-html="widget.title"></v-list-tile-title>
-                                    <v-list-tile-sub-title v-html="widget.name"></v-list-tile-sub-title>
+                                    <div>
+                                        <span style="font-weight:bold;color:#333">{{widget.name}}</span>
+                                        <span style="color:#999">: {{widget.title}}</span>
+                                    </div>
                                 </v-list-tile-content>
                                 <v-list-tile-action>
-                                    <v-list-tile-action-text style="padding-top:25px">
+                                    <v-list-tile-action-text>
                                         <v-btn flat icon style="margin-right: 4px" @@click="editWidget(widget)">
                                             <v-icon>edit</v-icon>
                                         </v-btn>
-                                        <v-btn flat icon @@click="deleteWidget(widget.id, area.id)">
+                                        <v-btn flat icon @@click="deleteWidget(widget, area.id)">
                                             <v-icon>delete</v-icon>
                                         </v-btn>
                                     </v-list-tile-action-text>
@@ -59,7 +67,7 @@
         <v-dialog lazy
                   v-model="dialogVisible"
                   @@keydown.esc="closeDialog"
-                  content-class="cat-dialog">
+                  content-class="widget-edit-dialog">
             <v-card>
                 <v-card-title>
                     <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
@@ -67,7 +75,7 @@
                     <v-btn @@click="closeDialog">Close</v-btn>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-card-text class="widget-edit-body">
+                <v-card-text class="preview-body">
                     <iframe class="widget-edit-frame"
                             v-if="widgetEditUrl"
                             :src="widgetEditUrl"
@@ -99,39 +107,76 @@
                 widgetEditUrl: null,
             }),
             methods: {                
-                add: function (evt, areaId) {
-                    console.log('evt: ', evt);
-                    console.log('newIndex: ', evt.newIndex);
-                    console.log('areaId: ', areaId);
-
-                    let areaIdx = this.widgetAreas.findIndex(c => c.id === areaId)
-                    let newWidgetType = this.widgetAreas[areaIdx].widgets[evt.newIndex].type;
-                    console.log('newWidgetType: ', newWidgetType);
-
-                    let payload = {
+                add: function (evt) {
+                    console.log("adding... ");
+                    let fromInfos = evt.from.id === 'widget-infos';
+                    let dto = {
+                        areaToId: evt.to.id,
                         index: evt.newIndex,
-                        widgetType: newWidgetType,
-                        areaId: areaId,
+                        widgetType: null,
+                        widgetId: 0,
+                        areaFromId: null,
+                        name: null,
+                        title: null,
                     };
 
-                    axios.post('/admin/widgets?handler=add', payload, this.$root.headers)
+                    if (fromInfos) {
+                        dto.widgetType = this.widgetInfos[evt.oldIndex].type;
+                    }
+                    else {
+                        let areaIdx = this.widgetAreas.findIndex(c => c.id === evt.from.id);
+                        let widgetIns = this.widgetAreas[areaIdx].widgetInstances[evt.oldIndex];
+                        dto.widgetType = widgetIns.type;
+                        dto.widgetId = widgetIns.id;
+                        dto.areaFromId = evt.from.id;
+                        dto.name = widgetIns.name;
+                        dto.title = widgetIns.title;
+                    }
+
+                    axios.post('/admin/widgets?handler=add', dto, this.$root.headers)
                         .then(resp => {
-                            let newWid = resp.data;
-                            console.log('resp.data: ', newWid);
-                            this.widgetAreas[areaIdx].widgets.splice(evt.newIndex, 1, newWid);
-                            console.log(this.widgetAreas[areaIdx].widgets);
+                            let areaToIdx = this.widgetAreas.findIndex(c => c.id === evt.to.id);
+                            if (fromInfos) {
+                                this.widgetAreas[areaToIdx].widgetInstances.splice(evt.newIndex, 0, resp.data);
+                            }
+                            else {
+                                // remove from widget from old area
+                                let areaFromIdx = this.widgetAreas.findIndex(c => c.id === evt.from.id);
+                                this.widgetAreas[areaFromIdx].widgetInstances.splice(evt.oldIndex, 1);
+                                // add to new area
+                                this.widgetAreas[areaToIdx].widgetInstances.splice(evt.newIndex, 0, resp.data);
+                            }
                         })
                         .catch(err => {
-                            this.errMsg = err.response.data;
+                            console.log(err);
                             this.$root.toastError('Add widget failed.');
                         });
                 },
-                sort: function (evt, areaId) {
-                    console.log(evt);
-                    console.log(areaId);
+                sort: function (evt) {
+                    if (evt.from.id !== evt.to.id) return;
+                    console.log("ordering... ");
+
+                    let areaIdx = this.widgetAreas.findIndex(c => c.id === evt.from.id);
+                    let widgetInst = this.widgetAreas[areaIdx].widgetInstances[evt.oldIndex];
+                    let dto = {
+                        index: evt.newIndex,
+                        widgetId: widgetInst.id,
+                        areaId: evt.from.id,
+                    };
+
+                    axios.post('/admin/widgets?handler=reorder', dto, this.$root.headers)
+                        .then(() => {
+                            // remove from old index and add to new index
+                            this.widgetAreas[areaIdx].widgetInstances.splice(evt.oldIndex, 1);
+                            this.widgetAreas[areaIdx].widgetInstances.splice(evt.newIndex, 0, widgetInst);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.$root.toastError('Order widget failed.');
+                        });
                 },
                 editWidget: function (widget) {
-                    console.log(widget);
+                    console.log("editing widget: ", widget);
                     this.dialogTitle = widget.title + ' (' + widget.name + ')';
                     this.dialogVisible = true;
 
@@ -140,16 +185,23 @@
                             this.widgetEditUrl = resp.data;
                             console.log(this.widgetEditUrl);
                         })
-                        .catch(err => { console.log(err); });
+                        .catch(err => {
+                            console.log(err);
+                            this.$root.toastError('Edit widget failed.');
+                        });
                 },
-                deleteWidget: function (wid, areaId) {
-                    console.log(wid);
-                    console.log(areaId);
+                deleteWidget: function (widget, areaId) {
+                    console.log("deleting widget: ", widget);
                     if (confirm(`Are you sure to delete the widget?`)) {
-                        axios.delete(`/admin/widgets?widgetId=${wid}&areaId=${areaId}`, this.$root.headers)
+                        axios.delete(`/admin/widgets?widgetId=${widget.id}&areaId=${areaId}`, this.$root.headers)
                             .then(resp => {
+                                let areaIdx = this.widgetAreas.findIndex(c => c.id === areaId);
+                                let widx = this.widgetAreas[areaIdx].widgetInstances.indexOf(widget);
+                                this.widgetAreas[areaIdx].widgetInstances.splice(widx, 1);
                             })
                             .catch(err => {
+                                console.log(err);
+                                this.$root.toastError('Delete widget failed.');
                             });
                     }
                 },

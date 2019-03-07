@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Fan.Widgets;
+﻿using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fan.Web.Pages.Admin
 {
@@ -35,14 +34,31 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// string widgetType, int index, string areaId
+        /// When user drags a widget from info to an area or from an area to anther area.
         /// </summary>
         /// <returns></returns>
         public async Task<IActionResult> OnPostAddAsync([FromBody]AddWidgetDto dto)
         {
-            // insert to db a new widget instance based on type
-            var widgetVm = await _widgetService.AddWidgetAsync(dto.WidgetType, dto.AreaId, dto.Index);
-            return new JsonResult(widgetVm);
+            WidgetInstance widgetInst = null;
+
+            // user drags a widget from infos to an area
+            if (dto.AreaFromId.IsNullOrEmpty())
+            {
+                widgetInst = await _widgetService.CreateWidgetAsync(dto.WidgetType);
+                await _widgetService.AddWidgetToAreaAsync(widgetInst.Id, dto.AreaToId, dto.Index);
+            }
+            else // user drags a widget from area to another
+            {
+                await _widgetService.RemoveWidgetFromAreaAsync(dto.WidgetId, dto.AreaFromId);
+                await _widgetService.AddWidgetToAreaAsync(dto.WidgetId, dto.AreaToId, dto.Index);
+            }
+
+            return new JsonResult(widgetInst);
+        }
+
+        public async Task OnPostReorderAsync([FromBody]OrderWidgetDto dto)
+        {
+            await _widgetService.OrderWidgetInAreaAsync(dto.WidgetId, dto.AreaId, dto.Index);
         }
 
         /// <summary>
@@ -58,20 +74,52 @@ namespace Fan.Web.Pages.Admin
         }
 
         /// <summary>
-        /// DELETE a widget instance by id.
+        /// DELETE a widget instance from an area.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="widgetId"></param>
+        /// <param name="areaId"></param>
         /// <returns></returns>
         public async Task OnDeleteAsync(int widgetId, string areaId)
         {
-            //await _widgetService.RemoveWidgetAsync(widgetId, areaId);
+            await _widgetService.RemoveWidgetFromAreaAsync(widgetId, areaId);
+            await _widgetService.DeleteWidgetAsync(widgetId);
         }
     }
 
     public class AddWidgetDto
     {
+        /// <summary>
+        /// The new index in the area to insert a widget.
+        /// </summary>
         public int Index { get; set; }
+        /// <summary>
+        /// The type of the widget user drags.
+        /// </summary>
         public string WidgetType { get; set; }
+        /// <summary>
+        /// Id of the area user drags widget to.
+        /// </summary>
+        public string AreaToId { get; set; }
+        /// <summary>
+        /// Id of the widget user drags from an area, 0 if user drags widget from infos.
+        /// </summary>
+        public int WidgetId { get; set; }
+        /// <summary>
+        /// Id of the area user drags widget from, null if user drags widget from infos. 
+        /// </summary>
+        public string AreaFromId { get; set; }
+
+        public string Name { get; set; }
+        public string Title { get; set; }
+    }
+
+    public class OrderWidgetDto
+    {
+        /// <summary>
+        /// The new index to insert the widget.
+        /// </summary>
+        public int Index { get; set; }
+        public int WidgetId { get; set; }
         public string AreaId { get; set; }
     }
 }
