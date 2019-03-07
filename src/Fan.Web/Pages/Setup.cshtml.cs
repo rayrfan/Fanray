@@ -283,16 +283,23 @@ namespace Fan.Web.Pages
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3);
 
-            // widgets
+            // Social Icons
             var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
-            await _widgetSvc.AddWidgetAsync(socialIconsWidget, "Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web",
-                WidgetService.BlogSidebar1.Id, 0);
-            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web",
-                WidgetService.BlogSidebar1.Id, 1);
-            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web",
-                WidgetService.BlogSidebar1.Id, 2);
-            await _widgetSvc.AddWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web",
-                WidgetService.BlogSidebar1.Id, 3);
+            var widgetInst = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, 
+                "Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 0);
+
+            // Blog Tags
+            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 1);
+
+            // Blog Categories
+            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 2);
+
+            // Blog Archives
+            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 3);
         }
     }
 

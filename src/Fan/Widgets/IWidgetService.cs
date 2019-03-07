@@ -6,7 +6,7 @@ namespace Fan.Widgets
     public interface IWidgetService
     {
         /// <summary>
-        /// 
+        /// Register a pre-defined area into the system.
         /// </summary>
         /// <param name="widgetArea"></param>
         /// <returns></returns>
@@ -23,7 +23,7 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync();
         /// <summary>
-        /// 
+        /// Returns all the installed widget infos.
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<WidgetInfo>> GetInstalledWidgetsInfoAsync();
@@ -34,36 +34,11 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task<WidgetInfo> GetWidgetInfoAsync(string widgetType);
         /// <summary>
-        /// Returns a <see cref="Widget"/> by id.
+        /// Returns a <see cref="Widget"/> by id for update.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Task<Widget> GetWidgetAsync(int id);
-        /// <summary>
-        /// Creates a widget instance.
-        /// </summary>
-        /// <param name="widgetType">The .NET type of the widget to add.</param>
-        /// <param name="areaId">The id of the area the widget is added to.</param>
-        /// <param name="index">The index of the added widget in the id array.</param>
-        /// <returns>A <see cref="WidgetInstance"/>.</returns>
-        /// <remarks>
-        /// This is used when user drops a widget in a widget area, an instance of the widget 
-        /// will be created then the area is updated with the new widget instance's id added 
-        /// to its id list.
-        /// </remarks>
-        Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index);
-        /// <summary>
-        /// Creates a widget instance.
-        /// </summary>
-        /// <param name="widget">Widget object to be added.</param>
-        /// <param name="widgetType">The .NET type of the widget to add.</param>
-        /// <param name="areaId">The id of the area the widget is added to.</param>
-        /// <param name="index">The index of the added widget in the id array.</param>
-        /// <returns>A <see cref="WidgetInstance"/>.</returns>
-        /// <remarks>
-        /// This is used when initializing widget areas with widget instances.
-        /// </remarks>
-        Task<WidgetInstance> AddWidgetAsync(Widget widget, string widgetType, string areaId, int index);
         /// <summary>
         /// Updates a widget instance.
         /// </summary>
@@ -72,11 +47,57 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task UpdateWidgetAsync(int id, Widget widget);
         /// <summary>
-        /// Removes a widget instance from a widget area.
+        /// Adds a widget instance to a widget area.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <param name="areaId">The id of the area the widget is added to.</param>
+        /// <param name="index">The index of the added widget in the id array.</param>
+        /// <returns>A <see cref="WidgetInstance"/>.</returns>
+        /// <remarks>
+        /// This is used when user drops a widget in a widget area, an instance of the widget 
+        /// will be created then the area is updated with the new widget instance's id added 
+        /// to its id list.
+        /// </remarks>
+        Task AddWidgetToAreaAsync(int widgetId, string areaId, int index);
+        /// <summary>
+        /// Removes a widget instance from a widget area. The widget instance is not deleted.
+        /// This is used when user moves a widget instance from one area to another.
         /// </summary>
         /// <param name="widgetId"></param>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        Task RemoveWidgetAsync(int widgetId, string areaId);
+        Task RemoveWidgetFromAreaAsync(int widgetId, string areaId);
+        /// <summary>
+        /// Moves a widget in an area to a new position.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <param name="areaId"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        Task OrderWidgetInAreaAsync(int widgetId, string areaId, int index);
+        /// <summary>
+        /// Creates a widget instance by type. 
+        /// </summary>
+        /// <param name="widgetType"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// The newly created instance has the widget's default values.
+        /// </remarks>
+        Task<WidgetInstance> CreateWidgetAsync(string widgetType);
+        /// <summary>
+        /// Creates a widget instance by a given widget object.
+        /// </summary>
+        /// <param name="widget"></param>
+        /// <param name="widgetType"></param>
+        /// <remarks>
+        /// The widget object has the widget's seed values.
+        /// </remarks>
+        Task<WidgetInstance> CreateWidgetAsync(Widget widget, string widgetType);
+        /// <summary>
+        /// Deletes a widget instance.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <returns></returns>
+        Task DeleteWidgetAsync(int widgetId);        
     }
 }

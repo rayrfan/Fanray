@@ -17,5 +17,9 @@
         /// Folder name, <see cref="WidgetInfo.Folder"/>.
         /// </summary>
         public string Folder { get; set; }
+        /// <summary>
+        /// The id of the area the widget instance resides in.
+        /// </summary>
+        public string AreaId { get; set; }
     }
 }

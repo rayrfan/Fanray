@@ -7,5 +7,5 @@
   "license": "MIT",
   "layout": "responsive",
   "column": "right-sidebar",
-  "widgetAreas": [ "blog-sidebar1" ]
+  "widgetAreas": [ "blog-sidebar1", "blog-sidebar2" ]
 }

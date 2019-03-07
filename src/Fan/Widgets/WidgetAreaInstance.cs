@@ -19,7 +19,13 @@ namespace Fan.Widgets
             Widgets = new List<Widget>();
         }
 
+        /// <summary>
+        /// Widget instances for display.
+        /// </summary>
         public List<WidgetInstance> WidgetInstances { get; set; }
+        /// <summary>
+        /// Widgets for passing into the view components.
+        /// </summary>
         public List<Widget> Widgets { get; set; }
     }
 }

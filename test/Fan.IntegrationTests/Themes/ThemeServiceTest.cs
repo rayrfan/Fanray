@@ -33,8 +33,11 @@ namespace Fan.IntegrationTests.Themes
             _svc = new ThemeService(settingSvcMock.Object, env.Object, _cache, logger);
         }
 
+        /// <summary>
+        /// On the admin panel themes page, all installed themes will display there.
+        /// </summary>
         [Fact]
-        public async void Admin_Panel_Themes_page_will_display_all_installed_themes()
+        public async void Admin_panel_themes_page_displays_all_installed_themes()
         {
             // When I have only 1 installed theme
             var themes = await _svc.GetInstalledThemesInfoAsync();
@@ -65,9 +68,11 @@ namespace Fan.IntegrationTests.Themes
             // When Admin Panel Themes page retrieves themes info
             var themes = await _svc.GetInstalledThemesInfoAsync();
 
-            // Then the theme contains one widget area the "blog-sidebar1"
-            Assert.True(themes[0].WidgetAreas[0] == "blog-sidebar1");
-            Assert.Single(themes[0].WidgetAreas);
+            // Then the theme contains 2 areas 
+            var areas = themes[0].WidgetAreas;
+            Assert.Equal(2, areas.Length);
+            Assert.True(areas[0] == "blog-sidebar1");
+            Assert.True(areas[1] == "blog-sidebar2");
         }
     }
 }

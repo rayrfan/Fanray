@@ -15,10 +15,10 @@ namespace Fan.Widgets
 {
     public class WidgetService : IWidgetService
     {
-        public static WidgetArea BlogSidebar1 = new WidgetArea { Id = "blog-sidebar1", Title = "Blog Sidebar1" };
-        public static WidgetArea BlogSidebar2 = new WidgetArea { Id = "blog-sidebar2", Title = "Blog Sidebar2" };
-        public static WidgetArea BlogBeforePost = new WidgetArea { Id = "blog-beforepost", Title = "Blog Before Post" };
-        public static WidgetArea BlogAfterPost = new WidgetArea { Id = "blog-afterpost", Title = "Blog After Post" };
+        public static WidgetArea BlogSidebar1 = new WidgetArea { Id = "blog-sidebar1", Title = "Blog - Sidebar1" };
+        public static WidgetArea BlogSidebar2 = new WidgetArea { Id = "blog-sidebar2", Title = "Blog - Sidebar2" };
+        public static WidgetArea BlogBeforePost = new WidgetArea { Id = "blog-beforepost", Title = "Blog - Before Post" };
+        public static WidgetArea BlogAfterPost = new WidgetArea { Id = "blog-afterpost", Title = "Blog - After Post" };
         public static WidgetArea Footer1 = new WidgetArea { Id = "footer1", Title = "Footer 1" };
         public static WidgetArea Footer2 = new WidgetArea { Id = "footer2", Title = "Footer 2" };
         public static WidgetArea Footer3 = new WidgetArea { Id = "footer3", Title = "Footer 3" };
@@ -53,6 +53,8 @@ namespace Fan.Widgets
         private const string CACHE_KEY_INSTALLED_WIDGETS_INFO = "installed-widgets-info";
         private TimeSpan Cache_Time_Installed_Widgets_Info = new TimeSpan(0, 10, 0);
 
+        // -------------------------------------------------------------------- widget areas
+
         /// <summary>
         /// Register a widget area during setup.
         /// </summary>
@@ -76,7 +78,7 @@ namespace Fan.Widgets
         public async Task<WidgetAreaInstance> GetAreaAsync(string areaId)
         {
             var list = await GetCurrentThemeAreasAsync();
-            return list.Single(a => a.Id == areaId);
+            return list.Single(a => a.Id.Equals(areaId, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -116,6 +118,8 @@ namespace Fan.Widgets
                             Title = widget.Title,
                             Name = widgetInfo.Name,
                             Folder = widgetInfo.Folder,
+                            AreaId = areaId,
+                            Type = widget.Type,
                         };
 
                         widgetAreaInstance.Widgets.Add(widget);
@@ -128,6 +132,8 @@ namespace Fan.Widgets
                 return widgetAreaInstancelist;
             }, includeTypeName: true);
         }
+
+        // -------------------------------------------------------------------- widget infos
 
         /// <summary>
         /// Returns a list of widget info for all widgets found in "Fan.Web.Widgets" folder.
@@ -166,83 +172,10 @@ namespace Fan.Widgets
             return widgetInfos.Single(wi => wi.Type.Equals(widgetType, StringComparison.OrdinalIgnoreCase));
         }
 
-        /// <summary>
-        /// Creates a widget instance.
-        /// </summary>
-        /// <param name="widgetType">The .NET type of the widget to add.</param>
-        /// <param name="areaId">The id of the area the widget is added to.</param>
-        /// <param name="index">The index of the added widget in the id array.</param>
-        /// <returns>A <see cref="WidgetInstance"/>.</returns>
-        /// <remarks>
-        /// This is used when user drops a widget in a widget area, an instance of the widget 
-        /// will be created then the area is updated with the new widget instance's id added 
-        /// to its id list.
-        /// </remarks>
-        public async Task<WidgetInstance> AddWidgetAsync(string widgetType, string areaId, int index)
-        {
-            // create new widget instance
-            var type = Type.GetType(widgetType);
-            var widget = (Widget)Activator.CreateInstance(type);
-
-            return await AddWidgetAsync(widget, widgetType, areaId, index);
-        }
+        // -------------------------------------------------------------------- get / update
 
         /// <summary>
-        /// Creates a widget instance.
-        /// </summary>
-        /// <param name="widget">Widget object to be added.</param>
-        /// <param name="widgetType">The .NET type of the widget to add.</param>
-        /// <param name="areaId">The id of the area the widget is added to.</param>
-        /// <param name="index">The index of the added widget in the id array.</param>
-        /// <returns>A <see cref="WidgetInstance"/>.</returns>
-        /// <remarks>
-        /// This is used when initializing widget areas with widget instances.
-        /// </remarks>
-        public async Task<WidgetInstance> AddWidgetAsync(Widget widget, string widgetType, string areaId, int index)
-        {
-            // add type info
-            widget.Type = widgetType;
-
-            // get widget info
-            var widgetInfo = await GetWidgetInfoAsync(widgetType);
-
-            // create widget meta record
-            var metaWidget = await metaRepository.CreateAsync(new Meta
-            {
-                Key = widgetInfo.Folder,
-                Value = JsonConvert.SerializeObject(widget),
-                Type = EMetaType.Widget,
-            });
-
-            // get area
-            var metaArea = await metaRepository.GetAsync(areaId);
-            var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
-
-            // insert new id to area
-            List<int> widgetIdsList = area.WidgetIds.ToList();
-            widgetIdsList.Insert(index, metaWidget.Id);
-            area.WidgetIds = widgetIdsList.ToArray();
-
-            // update meta
-            metaArea.Value = JsonConvert.SerializeObject(area);
-            await metaRepository.UpdateAsync(metaArea);
-
-            // invalidate areas from cache
-            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
-            var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
-            await distributedCache.RemoveAsync(cacheKey);
-
-            return new WidgetInstance
-            {
-                Id = metaWidget.Id,
-                Title = widget.Title,
-                Name = widgetInfo.Name,
-                Type = widgetType,
-            };
-        }
-
-        /// <summary>
-        /// Returns a widget for update.
+        /// Returns a <see cref="Widget"/> for update.
         /// </summary>
         /// <param name="widgetType"></param>
         /// <returns></returns>
@@ -257,6 +190,12 @@ namespace Fan.Widgets
             return (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
         }
 
+        /// <summary>
+        /// Updates a widget instance.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="widget"></param>
+        /// <returns></returns>
         public async Task UpdateWidgetAsync(int id, Widget widget)
         {
             var meta = await metaRepository.GetAsync(id);
@@ -264,22 +203,41 @@ namespace Fan.Widgets
             await metaRepository.UpdateAsync(meta);
         }
 
+        // -------------------------------------------------------------------- add / remove / order
+
         /// <summary>
-        /// Remove the widget instance from area by delete the widget instance meta record and
-        /// delete the id from the area mete record's id array.
+        /// Adds a widget instance to a widget area.
+        /// </summary>
+        /// <param name="widgetId">Id of the widget to add to the area.</param>
+        /// <param name="areaId">Id of the area the widget is added to.</param>
+        /// <param name="index">Index of the widget in the area's widgets id array.</param>
+        public async Task AddWidgetToAreaAsync(int widgetId, string areaId, int index)
+        {
+            // get area
+            var metaArea = await metaRepository.GetAsync(areaId);
+            var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
+
+            // insert new id to area
+            List<int> widgetIdsList = area.WidgetIds.ToList();
+            widgetIdsList.Insert(index, widgetId);
+            area.WidgetIds = widgetIdsList.ToArray();
+
+            // update meta
+            metaArea.Value = JsonConvert.SerializeObject(area);
+            await metaRepository.UpdateAsync(metaArea);
+
+            // invalidate cache
+            await InvalidAreaCacheAsync();
+        }
+
+        /// <summary>
+        /// Removes a widget instance from a widget area.
         /// </summary>
         /// <param name="widgetId"></param>
         /// <param name="areaId"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Remove a widget from area will invalidate cache on the areas.
-        /// </remarks>
-        public async Task RemoveWidgetAsync(int widgetId, string areaId)
+        public async Task RemoveWidgetFromAreaAsync(int widgetId, string areaId)
         {
-            // delete the instance
-            await metaRepository.DeleteAsync(widgetId);
-
-            // get the area from db
+            // get the area by key
             var metaArea = await metaRepository.GetAsync(areaId);
             var widgetArea = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
@@ -290,6 +248,104 @@ namespace Fan.Widgets
             metaArea.Value = JsonConvert.SerializeObject(widgetArea);
             await metaRepository.UpdateAsync(metaArea);
 
+            // invalidate areas from cache
+            await InvalidAreaCacheAsync();
+        }
+
+        /// <summary>
+        /// Moves a widget in an area to a new position.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <param name="areaId"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task OrderWidgetInAreaAsync(int widgetId, string areaId, int index)
+        {
+            // get area
+            var metaArea = await metaRepository.GetAsync(areaId);
+            var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
+
+            // reorder the widget in area
+            var widgetIdsList = area.WidgetIds.ToList();
+            widgetIdsList.Remove(widgetId);
+            widgetIdsList.Insert(index, widgetId);
+            area.WidgetIds = widgetIdsList.ToArray();
+
+            // update meta
+            metaArea.Value = JsonConvert.SerializeObject(area);
+            await metaRepository.UpdateAsync(metaArea);
+
+            // invalidate cache
+            await InvalidAreaCacheAsync();
+        }
+
+        // -------------------------------------------------------------------- create / delete
+
+        /// <summary>
+        /// Creates a widget instance by type. 
+        /// </summary>
+        /// <param name="widgetType"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// The newly created instance has the widget's default values.
+        /// </remarks>
+        public async Task<WidgetInstance> CreateWidgetAsync(string widgetType)
+        {
+            var type = Type.GetType(widgetType);
+            var widget = (Widget)Activator.CreateInstance(type);
+            return await CreateWidgetAsync(widget, widgetType);
+        }
+
+        /// <summary>
+        /// Creates a widget instance by a given widget object.
+        /// </summary>
+        /// <param name="widget"></param>
+        /// <param name="widgetType"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// The widget object has the widget's seed values.
+        /// </remarks>
+        public async Task<WidgetInstance> CreateWidgetAsync(Widget widget, string widgetType)
+        {
+            // add type info
+            widget.Type = widgetType;
+
+            // get widget info
+            var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+
+            // create widget meta record
+            var metaWidget = await metaRepository.CreateAsync(new Meta
+            {
+                Key = widgetInfo.Folder,
+                Value = JsonConvert.SerializeObject(widget),
+                Type = EMetaType.Widget,
+            });
+
+            return new WidgetInstance
+            {
+                Id = metaWidget.Id,
+                Title = widget.Title,
+                Name = widgetInfo.Name,
+                Type = widget.Type,
+            };
+        }
+
+        /// <summary>
+        /// Deletes a widget instance.
+        /// </summary>
+        /// <param name="widgetId"></param>
+        /// <returns></returns>
+        public async Task DeleteWidgetAsync(int widgetId)
+        {
+            await metaRepository.DeleteAsync(widgetId);
+        }
+
+        /// <summary>
+        /// Invalidates areas cache.
+        /// </summary>
+        /// <returns></returns>
+        private async Task InvalidAreaCacheAsync()
+        {
             // invalidate areas from cache
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
