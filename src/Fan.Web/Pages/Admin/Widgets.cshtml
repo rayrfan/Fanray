@@ -12,8 +12,8 @@
                     <v-subheader>
                         Available Widgets
                     </v-subheader>
-                    <draggable id="widget-infos" 
-                               v-model="widgetInfos" 
+                    <draggable id="widget-infos"
+                               v-model="widgetInfos"
                                :options="{group: {name:'widgets', pull:'clone', put: false}, sort: false}"
                                style="cursor:pointer">
                         <template v-for="info in widgetInfos">
@@ -34,8 +34,8 @@
                     <v-subheader>
                         {{ area.title }}
                     </v-subheader>
-                    <draggable :id="area.id" 
-                               v-model="area.widgets" 
+                    <draggable :id="area.id"
+                               v-model="area.widgets"
                                :options="{group:'widgets'}"
                                @@add="add"
                                @@sort="sort"
@@ -69,14 +69,20 @@
                   @@keydown.esc="closeDialog"
                   content-class="widget-edit-dialog">
             <v-card>
-                <v-card-title>
+                <v-card-title class="pl-4 pt-2 pb-0">
                     <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
                     <v-spacer></v-spacer>
-                    <v-btn @@click="closeDialog">Close</v-btn>
+                    <v-btn flat small fab @@click="closeDialog">
+                        <v-icon>close</v-icon>
+                    </v-btn>
                 </v-card-title>
                 <v-divider></v-divider>
                 <v-card-text class="preview-body">
-                    <iframe class="widget-edit-frame"
+                    <iframe ref="editIframe"
+                            @@load="resizeIframe"
+                            frameborder="0" 
+                            scrolling="no"
+                            class="widget-edit-frame"
                             v-if="widgetEditUrl"
                             :src="widgetEditUrl"
                             :title="dialogTitle"></iframe>
@@ -89,7 +95,7 @@
 @section ComponentScripts {
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.3/Sortable.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.17.0/vuedraggable.min.js"></script>
-    <script>
+    <script>      
         let widgetsMixin = {
             data: function () {
                 return {
@@ -106,7 +112,7 @@
                 dialogTitle: '',
                 widgetEditUrl: null,
             }),
-            methods: {                
+            methods: {                 
                 add: function (evt) {
                     console.log("adding... ");
                     let fromInfos = evt.from.id === 'widget-infos';
@@ -177,13 +183,13 @@
                 },
                 editWidget: function (widget) {
                     console.log("editing widget: ", widget);
-                    this.dialogTitle = widget.title + ' (' + widget.name + ')';
+                    this.dialogTitle = widget.name;
                     this.dialogVisible = true;
 
                     axios.get(`/admin/widgets?handler=edit&widgetId=${widget.id}`)
                         .then(resp => {
                             this.widgetEditUrl = resp.data;
-                            console.log(this.widgetEditUrl);
+                            console.log('widget edit url: ', this.widgetEditUrl);
                         })
                         .catch(err => {
                             console.log(err);
@@ -204,6 +210,15 @@
                                 this.$root.toastError('Delete widget failed.');
                             });
                     }
+                },
+                /**
+                * A hack to make iframe height same as its content.
+                * https://stackoverflow.com/a/9976309/32240
+                * https://stackoverflow.com/a/819455/32240
+                */
+                resizeIframe() {
+                    let f = this.$refs.editIframe;
+                    f.style.height = f.contentWindow.document.body.scrollHeight + 'px';
                 },
                 closeDialog() {
                     this.dialogVisible = false;
