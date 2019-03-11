@@ -50,7 +50,10 @@
             methods: {
                 updateParent(data) {
                     window.parent.document.dispatchEvent(new CustomEvent('widgetUpdated', { detail: data }));
-                }
+                },
+                updateParentErr(err) {
+                    window.parent.document.dispatchEvent(new CustomEvent('widgetUpdatedFailed', { detail: err }));
+                },
             }
         })
     </script>

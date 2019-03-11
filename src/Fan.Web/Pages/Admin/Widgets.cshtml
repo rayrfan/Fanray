@@ -133,6 +133,10 @@
                         self.$root.toast('Widget updated.');
                         self.closeDialog();
                     });
+                    window.document.addEventListener('widgetUpdatedFailed', e => {
+                        console.log('widget update failed...', e.detail);
+                        self.$root.toastError('Widget update failed.');
+                    });
                 },
                 /**
                  * When user drags a widget from info's section or an area to an area.
