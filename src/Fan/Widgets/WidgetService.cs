@@ -185,9 +185,11 @@ namespace Fan.Widgets
             var widgetBase = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
 
             var type = Type.GetType(widgetBase.Type);
+            var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
+            widget.Id = id;
 
             // the actual widget is returned
-            return (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
+            return widget;
         }
 
         /// <summary>
@@ -201,6 +203,7 @@ namespace Fan.Widgets
             var meta = await metaRepository.GetAsync(id);
             meta.Value = JsonConvert.SerializeObject(widget);
             await metaRepository.UpdateAsync(meta);
+            await InvalidAreaCacheAsync();
         }
 
         // -------------------------------------------------------------------- add / remove / order
@@ -211,7 +214,8 @@ namespace Fan.Widgets
         /// <param name="widgetId">Id of the widget to add to the area.</param>
         /// <param name="areaId">Id of the area the widget is added to.</param>
         /// <param name="index">Index of the widget in the area's widgets id array.</param>
-        public async Task AddWidgetToAreaAsync(int widgetId, string areaId, int index)
+        /// <returns></returns>
+        public async Task<WidgetInstance> AddWidgetToAreaAsync(int widgetId, string areaId, int index)
         {
             // get area
             var metaArea = await metaRepository.GetAsync(areaId);
@@ -222,12 +226,29 @@ namespace Fan.Widgets
             widgetIdsList.Insert(index, widgetId);
             area.WidgetIds = widgetIdsList.ToArray();
 
+            // update widget instance id and areaId
+            var widget = await GetWidgetAsync(widgetId);
+            widget.Id = widgetId;
+            widget.AreaId = areaId;
+            await UpdateWidgetAsync(widgetId, widget);
+
             // update meta
             metaArea.Value = JsonConvert.SerializeObject(area);
             await metaRepository.UpdateAsync(metaArea);
 
             // invalidate cache
             await InvalidAreaCacheAsync();
+
+            var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+            return new WidgetInstance
+            {
+                Id = widgetId,
+                Title = widget.Title,
+                Name = widgetInfo.Name,
+                Folder = widgetInfo.Folder,
+                AreaId = areaId,
+                Type = widget.Type,
+            };
         }
 
         /// <summary>
@@ -289,7 +310,7 @@ namespace Fan.Widgets
         /// <remarks>
         /// The newly created instance has the widget's default values.
         /// </remarks>
-        public async Task<WidgetInstance> CreateWidgetAsync(string widgetType)
+        public async Task<int> CreateWidgetAsync(string widgetType)
         {
             var type = Type.GetType(widgetType);
             var widget = (Widget)Activator.CreateInstance(type);
@@ -305,7 +326,7 @@ namespace Fan.Widgets
         /// <remarks>
         /// The widget object has the widget's seed values.
         /// </remarks>
-        public async Task<WidgetInstance> CreateWidgetAsync(Widget widget, string widgetType)
+        public async Task<int> CreateWidgetAsync(Widget widget, string widgetType)
         {
             // add type info
             widget.Type = widgetType;
@@ -321,13 +342,7 @@ namespace Fan.Widgets
                 Type = EMetaType.Widget,
             });
 
-            return new WidgetInstance
-            {
-                Id = metaWidget.Id,
-                Title = widget.Title,
-                Name = widgetInfo.Name,
-                Type = widget.Type,
-            };
+            return metaWidget.Id;
         }
 
         /// <summary>

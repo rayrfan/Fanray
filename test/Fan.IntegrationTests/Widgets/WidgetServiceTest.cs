@@ -117,12 +117,12 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
 
             // When user drags a widget from the widget infos section to an area
-            var widgetInst = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // Then the area would contain the widget
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.Contains(widgetInst.Id, area.WidgetIds);  
+            Assert.Contains(widgetId, area.WidgetIds);  
         }
 
         /// <summary>
@@ -136,20 +136,24 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
             // and a widget in area 1
-            var widgetInst = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user drags the widget from area sidebar1 to area sidebar2
-            await _svc.RemoveWidgetFromAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id);
-            await _svc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar2.Id, 0);
+            await _svc.RemoveWidgetFromAreaAsync(widgetId, WidgetService.BlogSidebar1.Id);
+            await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar2.Id, 0);
 
             // Then area sidebar1 would not have the widget anymore
             var area1 = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.DoesNotContain(widgetInst.Id, area1.WidgetIds);
+            Assert.DoesNotContain(widgetId, area1.WidgetIds);
 
             // and area sidebar2 would have the widget
             var area2 = await _svc.GetAreaAsync(WidgetService.BlogSidebar2.Id);
-            Assert.Contains(widgetInst.Id, area2.WidgetIds);
+            Assert.Contains(widgetId, area2.WidgetIds);
+
+            // and widget's areaId will be updated too
+            var widgetAgain = await _svc.GetWidgetAsync(widgetId);
+            Assert.Equal(WidgetService.BlogSidebar2.Id, widgetAgain.AreaId);
         }
 
         /// <summary>
@@ -164,8 +168,8 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
 
             // When a widget is dropped to area from infos
-            var widget = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widget.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widget = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // Then widget instance has the default val
             Assert.Equal("My Widget", widget.Title);
@@ -181,18 +185,18 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
             // and two widget instances
-            var w1 = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(w1.Id, WidgetService.BlogSidebar1.Id, 0);
-            var w2 = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(w2.Id, WidgetService.BlogSidebar1.Id, 1);
+            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
+            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(w2Id, WidgetService.BlogSidebar1.Id, 1);
 
             // When we retrieve a widget area
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
 
             // Then area contains both instances
             Assert.Equal(2, area.WidgetInstances.Count);
-            Assert.Equal(w1.Id, area.WidgetIds[0]);
-            Assert.Equal(w2.Id, area.WidgetIds[1]);
+            Assert.Equal(w1Id, area.WidgetIds[0]);
+            Assert.Equal(w2Id, area.WidgetIds[1]);
         }
 
         /// <summary>
@@ -203,11 +207,11 @@ namespace Fan.IntegrationTests.Widgets
         {
             // Given widget area and a widget in the area
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            var widgetVm = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widgetVm.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When the meta record is retrieved
-            var widgetMeta = await _metaRepo.GetAsync(widgetVm.Id);
+            var widgetMeta = await _metaRepo.GetAsync(widgetId);
 
             // I'm able to get the widget type
             var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
@@ -235,12 +239,12 @@ namespace Fan.IntegrationTests.Widgets
             // Given a theme with two areas and a widget instance
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-            var widgetInst = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetInst = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user deletes the widget
-            await _svc.RemoveWidgetFromAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id);
-            await _svc.DeleteWidgetAsync(widgetInst.Id);
+            await _svc.RemoveWidgetFromAreaAsync(widgetId, WidgetService.BlogSidebar1.Id);
+            await _svc.DeleteWidgetAsync(widgetId);
 
             // Then the area does not have the widget anymore
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
@@ -256,18 +260,18 @@ namespace Fan.IntegrationTests.Widgets
             // Given two widgets w1 and w2 in blog-sidebar1 area
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-            var w1 = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(w1.Id, WidgetService.BlogSidebar1.Id, 0);
-            var w2 = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(w2.Id, WidgetService.BlogSidebar1.Id, 1);
+            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
+            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(w2Id, WidgetService.BlogSidebar1.Id, 1);
 
             // When user moves w1 below w2
-            await _svc.OrderWidgetInAreaAsync(w1.Id, WidgetService.BlogSidebar1.Id, 1);
+            await _svc.OrderWidgetInAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 1);
 
             // Then w1 is placed after w2
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.Equal(w1.Id, area.WidgetIds[1]);
-            Assert.Equal(w2.Id, area.WidgetIds[0]);
+            Assert.Equal(w1Id, area.WidgetIds[1]);
+            Assert.Equal(w2Id, area.WidgetIds[0]);
         }
 
         [Fact]
@@ -275,16 +279,16 @@ namespace Fan.IntegrationTests.Widgets
         {
             // Given a widget area "blog-sidebar1" and a widget
             await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            var widget = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
-            await _svc.AddWidgetToAreaAsync(widget.Id, WidgetService.BlogSidebar1.Id, 0);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user udpates the widget instance
-            MyWidget myWidget = (MyWidget) await _svc.GetWidgetAsync(widget.Id);
+            MyWidget myWidget = (MyWidget) await _svc.GetWidgetAsync(widgetId);
             myWidget.Age = 20;
-            await _svc.UpdateWidgetAsync(widget.Id, myWidget);
+            await _svc.UpdateWidgetAsync(widgetId, myWidget);
 
             // Then the widget instance is updated
-            var myWidgetAgain = (MyWidget)await _svc.GetWidgetAsync(widget.Id);
+            var myWidgetAgain = (MyWidget)await _svc.GetWidgetAsync(widgetId);
             Assert.Equal(20, myWidgetAgain.Age);
         }
     }

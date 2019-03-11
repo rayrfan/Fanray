@@ -58,7 +58,7 @@ namespace Fan.Widgets
         /// will be created then the area is updated with the new widget instance's id added 
         /// to its id list.
         /// </remarks>
-        Task AddWidgetToAreaAsync(int widgetId, string areaId, int index);
+        Task<WidgetInstance> AddWidgetToAreaAsync(int widgetId, string areaId, int index);
         /// <summary>
         /// Removes a widget instance from a widget area. The widget instance is not deleted.
         /// This is used when user moves a widget instance from one area to another.
@@ -83,7 +83,7 @@ namespace Fan.Widgets
         /// <remarks>
         /// The newly created instance has the widget's default values.
         /// </remarks>
-        Task<WidgetInstance> CreateWidgetAsync(string widgetType);
+        Task<int> CreateWidgetAsync(string widgetType);
         /// <summary>
         /// Creates a widget instance by a given widget object.
         /// </summary>
@@ -92,7 +92,7 @@ namespace Fan.Widgets
         /// <remarks>
         /// The widget object has the widget's seed values.
         /// </remarks>
-        Task<WidgetInstance> CreateWidgetAsync(Widget widget, string widgetType);
+        Task<int> CreateWidgetAsync(Widget widget, string widgetType);
         /// <summary>
         /// Deletes a widget instance.
         /// </summary>
