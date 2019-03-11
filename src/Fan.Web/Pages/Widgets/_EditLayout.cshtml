@@ -1,0 +1,58 @@
+﻿@* Layout for Widgets Edit pages *@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.5/dist/vuetify.min.css" rel="stylesheet">
+    <style>
+        .theme--light.application {
+            background-color: #fff
+        }
+
+        [v-cloak] {
+            display: none
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    @Html.AntiForgeryToken()
+    <v-app id="widget-edit-app" v-cloak>
+        <v-content>
+            <v-container fill-height>
+                <v-layout align-top>
+                    <v-flex xs12 sm8 md4>
+                        @RenderBody()
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-content>
+    </v-app>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.8/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.5/dist/vuetify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        new Vue({
+            el: '#widget-edit-app',
+            computed: {
+                tok() {
+                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
+                },
+                headers() {
+                    return { headers: { 'XSRF-TOKEN': this.tok } };
+                },
+            },
+            methods: {
+                updateParent(data) {
+                    window.parent.document.dispatchEvent(new CustomEvent('widgetUpdated', { detail: data }));
+                }
+            }
+        })
+    </script>
+</body>
+</html>
