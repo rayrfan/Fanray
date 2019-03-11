@@ -1,10 +1,17 @@
-﻿@model IEnumerable<Tag>
+﻿@model Tuple<IEnumerable<Fan.Blog.Models.Tag>, Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget>
+@{
+    var tags = Model.Item1;
+    var widget = Model.Item2;
+}
 
 <div class="widget">
-    <h4 class="widget-header">Tags</h4>
+    @if (!widget.Title.IsNullOrEmpty())
+    { 
+        <h4 class="widget-header">@widget.Title</h4> 
+    }
     <div class="widget-content">
         <ul class="widget-tags">
-            @foreach (var t in Model)
+            @foreach (var t in tags)
             {
                 <li>
                     <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
