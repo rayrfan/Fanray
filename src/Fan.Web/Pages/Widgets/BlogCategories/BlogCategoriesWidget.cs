@@ -10,6 +10,9 @@ namespace Fan.Web.Pages.Widgets.BlogCategories
             ShowPostCount = true;
         }
 
+        /// <summary>
+        /// Whether to show post count next to category.
+        /// </summary>
         public bool ShowPostCount { get; set; }
     }
 }
