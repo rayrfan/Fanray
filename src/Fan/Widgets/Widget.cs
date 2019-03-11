@@ -16,14 +16,15 @@ namespace Fan.Widgets
         /// </summary>
         public string AreaId { get; set; }
         /// <summary>
-        /// Widget title.
+        /// Widget title (optional). 
         /// </summary>
-        [Required]
+        /// <remarks>
+        /// The title can be left blank and if so the html will not emit for the title.
+        /// </remarks>
         public string Title { get; set; }
         /// <summary>
         /// The full .NET type of the widget "namespace.type, assembly".
         /// </summary>
-        [Required]
         public string Type { get; set; }
     }
 }

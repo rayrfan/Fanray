@@ -5,24 +5,27 @@
 }
 
 <div class="widget">
-    <h4 class="widget-header">@widget.Title</h4>
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h4 class="widget-header">@widget.Title</h4>
+    }
     <div class="widget-content">
         <ul class="widget-categories">
             @foreach (var c in categories)
             {
-            <li>
-                <a href="@c.RssRelativeLink">
-                    <i class="icon-rss" aria-hidden="true" style="color:orange"></i>
-                </a>
-                @if (widget.ShowPostCount)
-                {
-                    <a title="@c.Description" href="@c.RelativeLink">@c.Title (@c.Count)</a>
-                }
-                else
-                {
-                    <a title="@c.Description" href="@c.RelativeLink">@c.Title</a>
-                }
-            </li>
+                <li>
+                    <a href="@c.RssRelativeLink">
+                        <i class="icon-rss" aria-hidden="true" style="color:orange"></i>
+                    </a>
+                    @if (widget.ShowPostCount)
+                    {
+                        <a title="@c.Description" href="@c.RelativeLink">@c.Title (@c.Count)</a>
+                    }
+                    else
+                    {
+                        <a title="@c.Description" href="@c.RelativeLink">@c.Title</a>
+                    }
+                </li>
             }
         </ul>
     </div>
