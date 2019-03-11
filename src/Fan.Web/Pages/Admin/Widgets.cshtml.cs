@@ -44,13 +44,13 @@ namespace Fan.Web.Pages.Admin
             // user drags a widget from infos to an area
             if (dto.AreaFromId.IsNullOrEmpty())
             {
-                widgetInst = await _widgetService.CreateWidgetAsync(dto.WidgetType);
-                await _widgetService.AddWidgetToAreaAsync(widgetInst.Id, dto.AreaToId, dto.Index);
+                var widgetId = await _widgetService.CreateWidgetAsync(dto.WidgetType);
+                widgetInst = await _widgetService.AddWidgetToAreaAsync(widgetId, dto.AreaToId, dto.Index);
             }
             else // user drags a widget from area to another
             {
                 await _widgetService.RemoveWidgetFromAreaAsync(dto.WidgetId, dto.AreaFromId);
-                await _widgetService.AddWidgetToAreaAsync(dto.WidgetId, dto.AreaToId, dto.Index);
+                widgetInst = await _widgetService.AddWidgetToAreaAsync(dto.WidgetId, dto.AreaToId, dto.Index);
             }
 
             return new JsonResult(widgetInst);
@@ -64,13 +64,12 @@ namespace Fan.Web.Pages.Admin
         /// <summary>
         /// Returns the widget edit page url.
         /// </summary>
-        /// <param name="widgetId"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnGetEditAsync(int widgetId)
+        public async Task<JsonResult> OnPostEditAsync([FromBody]EditWidgetDto dto)
         {
-            var widget = await _widgetService.GetWidgetAsync(widgetId);
-            var widgetInfo = await _widgetService.GetWidgetInfoAsync(widget.Type);
-            return new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{widgetInfo.Folder}/edit");
+            var widgetInfo = await _widgetService.GetWidgetInfoAsync(dto.WidgetType);
+            return new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{widgetInfo.Folder}/edit?widgetId={dto.WidgetId}");
         }
 
         /// <summary>
@@ -121,5 +120,11 @@ namespace Fan.Web.Pages.Admin
         public int Index { get; set; }
         public int WidgetId { get; set; }
         public string AreaId { get; set; }
+    }
+
+    public class EditWidgetDto
+    {
+        public string WidgetType { get; set; }
+        public int WidgetId { get; set; }
     }
 }

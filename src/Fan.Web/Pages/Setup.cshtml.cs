@@ -285,21 +285,21 @@ namespace Fan.Web.Pages
 
             // Social Icons
             var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
-            var widgetInst = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, 
+            var widgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, 
                 "Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 0);
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 0);
 
             // Blog Tags
-            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 1);
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 1);
 
             // Blog Categories
-            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 2);
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 2);
 
             // Blog Archives
-            widgetInst = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInst.Id, WidgetService.BlogSidebar1.Id, 3);
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 3);
         }
     }
 
