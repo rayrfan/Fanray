@@ -53,6 +53,8 @@ babel js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-r
 
 ### Develop
 
+cd into /admin/client
+
 ```bash
 sass --watch scss/admin.scss:../../../wwwroot/admin/css/admin.css
 sass --watch scss/compose.scss:../../../wwwroot/admin/css/compose.css

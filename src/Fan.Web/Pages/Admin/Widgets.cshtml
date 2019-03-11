@@ -36,7 +36,7 @@
                     </v-subheader>
                     <draggable :id="area.id"
                                v-model="area.widgets"
-                               :options="{group:'widgets'}"
+                               :options="{group:'widgets', ghostClass:'sortable-ghost'}"
                                @@add="add"
                                @@sort="sort"
                                style="min-height: 10px;cursor:move">
@@ -77,7 +77,7 @@
                     </v-btn>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-card-text class="preview-body">
+                <v-card-text>
                     <iframe ref="editIframe"
                             @@load="resizeIframe"
                             frameborder="0" 
