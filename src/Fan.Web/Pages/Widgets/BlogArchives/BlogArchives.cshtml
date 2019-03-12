@@ -1,19 +1,33 @@
-﻿@model Dictionary<int, List<MonthItem>>
+﻿@model Tuple<Dictionary<int, List<Fan.Blog.Models.MonthItem>>, Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget>
+@{
+    var years = Model.Item1;
+    var widget = Model.Item2;
+}
 
 <div class="widget">
-    <h4 class="widget-header">Archives</h4>
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h4 class="widget-header">@widget.Title</h4>
+    }
     <div class="widget-content">
-        <ul class="month-list">
-            @foreach (var year in Model)
+        <ul class="blog-archives">
+            @foreach (var year in years)
             {
-                <li class="year">
-                    @year.Key
-                    <ul class="months">
+                <li class="archive-node">
+                    <a class="archive-year">@year.Key</a>
+                    <ul class="archive-months">
                         @foreach (var item in year.Value)
                         {
-                            <li>
-                                <a href="@item.Url">@item.Title</a> (@item.Count)
-                            </li>
+                        <li>
+                            @if (widget.ShowPostCount)
+                            {
+                                <a href="@item.Url">@item.Title</a> <text>(@item.Count)</text>
+                            }
+                            else
+                            {
+                                <a href="@item.Url">@item.Title</a>
+                            }
+                        </li>
                         }
                     </ul>
                 </li>
@@ -21,3 +35,15 @@
         </ul>
     </div>
 </div>
+
+@* https://www.w3schools.com/howto/howto_js_accordion.asp *@
+<script>
+    var acc = document.getElementsByClassName("archive-year");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var me = this.nextElementSibling;
+            me.style.display = (me.style.display === "block") ? "none" : "block";
+        });
+    }
+</script>

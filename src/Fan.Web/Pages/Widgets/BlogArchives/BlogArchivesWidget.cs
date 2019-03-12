@@ -10,6 +10,9 @@ namespace Fan.Web.Pages.Widgets.BlogArchives
             ShowPostCount = true;
         }
 
+        /// <summary>
+        /// Whether to show post count next to archive month.
+        /// </summary>
         public bool ShowPostCount { get; set; }
     }
 }

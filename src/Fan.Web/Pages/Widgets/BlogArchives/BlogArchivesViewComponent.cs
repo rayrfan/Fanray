@@ -1,5 +1,9 @@
-﻿using Fan.Blog.Services.Interfaces;
+﻿using Fan.Blog.Models;
+using Fan.Blog.Services.Interfaces;
+using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Web.Pages.Widgets.BlogArchives
@@ -15,10 +19,13 @@ namespace Fan.Web.Pages.Widgets.BlogArchives
             _statsSvc = statsService;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(Widget widget)
         {
+            var blogArchivesWidget = (BlogArchivesWidget)widget;
             var years = await _statsSvc.GetArchivesAsync();
-            return View("~/Pages/Widgets/BlogArchives/BlogArchives.cshtml", years);
+
+            return View("~/Pages/Widgets/BlogArchives/BlogArchives.cshtml", 
+                new Tuple<Dictionary<int, List<MonthItem>>, BlogArchivesWidget>(years, blogArchivesWidget));
         }
     }
 }
