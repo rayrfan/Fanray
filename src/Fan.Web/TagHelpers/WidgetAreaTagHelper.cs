@@ -11,10 +11,9 @@ namespace Fan.Web.TagHelpers
     /// <summary>
     /// A Tag Helper that renders a widget area, requires a valid area id.
     /// </summary>
-    [HtmlTargetElement("widget-area", Attributes = AREA_ID)]
+    [HtmlTargetElement("widget-area", Attributes = "id")]
     public class WidgetAreaTagHelper : TagHelper
     {
-        private const string AREA_ID = "id";
         /// <summary>
         /// Used to invoke ViewComponent. This injected helper is "neutral", not specific for our 
         /// view, so we have to "contextualize" it for the current view ViewContext before using.
@@ -36,7 +35,7 @@ namespace Fan.Web.TagHelpers
         /// <summary>
         /// The area id, bound to tag attribute.
         /// </summary>
-        [HtmlAttributeName(AREA_ID)]
+        [HtmlAttributeName("id")]
         public string Id { get; set; }
 
         /// <summary>
@@ -50,7 +49,6 @@ namespace Fan.Web.TagHelpers
         {
             output.TagMode = TagMode.StartTagAndEndTag;
             output.TagName = "div";
-            output.Attributes.SetAttribute(AREA_ID, "id");
             output.Attributes.SetAttribute("class", "widgets");
 
             ((IViewContextAware)this.viewComponentHelper).Contextualize(ViewContext);

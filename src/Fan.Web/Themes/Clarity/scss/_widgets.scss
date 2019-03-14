@@ -24,26 +24,11 @@
         padding: 0 1.5rem;
     }
 
-    .widget-content {
+    .widget-body {
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem 1.5rem;
         font-size: .875rem;
         color: rgba(255, 255, 255, 0.6);
-
-        .social-icons {
-            .svg-icon {
-                text-decoration: none;
-                padding-right: 5px;
-                height: 28px; // size of the icon
-                width: 28px;
-                filter: invert(.5);
-            }
-
-            .svg-icon:hover {
-                cursor: pointer;
-                filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
-            }
-        }
     }
 
     ul {
@@ -73,11 +58,8 @@
     }
 }
 
-.widget-categories {
-    
-}
-
-.widget-tags {
+// BlogTags Widget
+.blog-tags {
     .tag {
         padding: 3px 12px 5px 12px;
         text-decoration: none;
@@ -120,3 +102,18 @@
     }
 }
 
+// SocialIcons Widget
+.social-icons {
+    .svg-icon {
+        text-decoration: none;
+        padding-right: 5px;
+        height: 28px; // size of the icon
+        width: 28px;
+        filter: invert(.5);
+    }
+
+    .svg-icon:hover {
+        cursor: pointer;
+        filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
+    }
+}
