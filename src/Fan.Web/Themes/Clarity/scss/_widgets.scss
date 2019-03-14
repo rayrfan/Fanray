@@ -31,8 +31,17 @@
         color: rgba(255, 255, 255, 0.6);
 
         .social-icons {
-            a {
+            .svg-icon {
                 text-decoration: none;
+                padding-right: 5px;
+                height: 28px; // size of the icon
+                width: 28px;
+                filter: invert(.5);
+            }
+
+            .svg-icon:hover {
+                cursor: pointer;
+                filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
             }
         }
     }
@@ -84,12 +93,13 @@
     }
 }
 
-.month-list {
+// BlogArchives Widget
+.blog-archives {
     li {
         font-weight: normal;
     }
 
-    .year {
+    .archive-node {
         cursor: pointer;
         color: #555;
         font-weight: bold;
@@ -100,18 +110,13 @@
             font-weight: bold;
         }
     }
-
     // hide months under year that is not on the very top
-    .year:not(:first-child) .months {
+    .archive-year-node:not(:first-child) .archive-months {
         display: none
     }
 
     ul ul {
         display: none;
-    }
-
-    .open {
-        display: block;
     }
 }
 

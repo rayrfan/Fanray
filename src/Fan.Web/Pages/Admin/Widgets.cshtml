@@ -137,6 +137,10 @@
                         console.log('widget update failed...', e.detail);
                         self.$root.toastError('Widget update failed.');
                     });
+                    window.document.addEventListener('updateIframeHeight', e => {
+                        console.log('update parent iframe height...', e.detail);
+                        self.updateIframeHeight(e.detail);
+                    });
                 },
                 /**
                  * When user drags a widget from info's section or an area to an area.
@@ -266,6 +270,10 @@
                 resizeIframe() {
                     let f = this.$refs.editIframe;
                     f.style.height = f.contentWindow.document.body.scrollHeight + 'px';
+                },
+                updateIframeHeight(h) {
+                    let f = this.$refs.editIframe;
+                    f.style.height = h + 'px';
                 },
                 closeDialog() {
                     this.dialogVisible = false;

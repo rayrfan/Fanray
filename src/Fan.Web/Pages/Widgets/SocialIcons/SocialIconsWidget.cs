@@ -1,4 +1,5 @@
 ﻿using Fan.Widgets;
+using System;
 using System.Collections.Generic;
 
 namespace Fan.Web.Pages.Widgets.SocialIcons
@@ -11,56 +12,93 @@ namespace Fan.Web.Pages.Widgets.SocialIcons
         public SocialIconsWidget()
         {
             Title = "Follow Me";
+            Links = new List<SocialLink>();
         }
 
         /// <summary>
-        /// Default is "Follow Me".
-        /// </summary>
-        //public string Title { get; set; } = "Follow Me";
-        //public string Description { get; set; } = "Add social media link to your site.";
-
-        // -------------------------------------------------------------------- widget properties
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public EIconSize Size { get; set; } = EIconSize.Medium;
-        /// <summary>
         /// A list of social links.
         /// </summary>
-        public IEnumerable<string> Links { get; set; }
-        //public IEnumerable<SocialLink> Links { get; set; }
+        public List<SocialLink> Links { get; set; }
 
         /// <summary>
-        /// https://fontawesome.com/icons?d=gallery&m=free
+        /// Icon match names between user input url domain and icon source 
+        /// <see cref="https://github.com/simple-icons/simple-icons"/> 
         /// </summary>
-        public static readonly string[] Icons =
+        /// <remarks>
+        /// The url domain user inputs must match one of these value for a specific svg icon to show up, 
+        /// if the url domain does not match any of the following, it will have the value of "link".
+        /// </remarks>
+        public static readonly string[] IconNames =
         {
             "500px",
             "amazon", "apple",
             "bandcamp", "behance", "bitbucket",
             "codepen",
-            "dev", "deviantart", "dribbble", "dropbox",
+            "dev", "deviantart", "dribbble", "dropbox", "discord",
             "etsy",
             "facebook", "flickr", "foursquare",
             "goodreads", "google", "github", "gitlab", "gitter",
-            "instagram", "itunes",
-            "link", "linkedin",
+            "instagram",
+            "linkedin",
             "medium", "meetup",
             "pinterest",
             "reddit", "rss",
-            "skype", "slack", "slideshare", "soundcloud", "spotify",
+            "stackoverflow", "skype", "slack", "slideshare", "soundcloud", "spotify",
             "tumblr", "twitch", "twitter",
             "vimeo", "vk",
             "weibo",
             "yelp", "youtube",
         };
+
+        /// <summary>
+        /// Returns my initial social links for seeding.
+        /// </summary>
+        /// <returns></returns>
+        public static List<SocialLink> SocialLinkSeeds = new List<SocialLink>
+        {
+            new SocialLink { Icon = "rss", Url = "/feed" },
+            new SocialLink { Icon = "twitter", Url = "https://twitter.com/fanraymedia" },
+            new SocialLink { Icon = "youtube", Url = "https://www.youtube.com/user/fanraymedia" },
+            new SocialLink { Icon = "github", Url = "https://github.com/fanraymedia" },
+        };
+
+        /// <summary>
+        /// Returns a <see cref="SocialLink"/> object given an url. The icon will be "link" icon if
+        /// no pre-defined icons match. The icon will be "rss" icon if url ends with "/feed". 
+        /// Returns null if url is invalid.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static SocialLink GetSocialLink(string url)
+        {
+            try
+            {
+                if (url.EndsWith("/feed")) return new SocialLink { Icon = "rss", Url = url };
+
+                var socialLink = new SocialLink { Icon = "link", Url = url };
+                var uri = new Uri(url);
+                var host = uri.Host;
+                foreach (var icon in IconNames)
+                {
+                    if (host.Contains(icon, StringComparison.OrdinalIgnoreCase))
+                    {
+                        socialLink.Icon = icon;
+                        break;
+                    }
+                }
+
+                return socialLink;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     }
 
-    public enum EIconSize
+    public class SocialLink
     {
-        Small,
-        Medium,
-        Large,
+        public string Icon { get; set; }
+        public string Url { get; set; }
     }
 }
