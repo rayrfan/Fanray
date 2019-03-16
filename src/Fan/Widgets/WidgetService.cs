@@ -72,13 +72,14 @@ namespace Fan.Widgets
 
         /// <summary>
         /// Returns a widget area by id from current theme's areas.
+        /// Returns null if no area by id is found.
         /// </summary>
         /// <param name="areaId"></param>
         /// <returns></returns>
         public async Task<WidgetAreaInstance> GetAreaAsync(string areaId)
         {
             var list = await GetCurrentThemeAreasAsync();
-            return list.Single(a => a.Id.Equals(areaId, StringComparison.OrdinalIgnoreCase));
+            return list.SingleOrDefault(a => a.Id.Equals(areaId, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

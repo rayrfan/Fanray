@@ -11,6 +11,10 @@ namespace Fan.Web.TagHelpers
     /// <summary>
     /// A Tag Helper that renders a widget area, requires a valid area id.
     /// </summary>
+    /// <remarks>
+    /// TODO there should tag attributes that allow user to specify what html tag to surround the
+    /// area, right now I'm hard coding a div. Also a css class to attach to the area.
+    /// </remarks>
     [HtmlTargetElement("widget-area", Attributes = "id")]
     public class WidgetAreaTagHelper : TagHelper
     {
@@ -45,6 +49,12 @@ namespace Fan.Web.TagHelpers
         [HtmlAttributeNotBound]
         public ViewContext ViewContext { get; set; }
 
+        /// <summary>
+        /// Outputs widget area html or nothing if the given widget area id is not found.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.TagMode = TagMode.StartTagAndEndTag;
@@ -54,6 +64,7 @@ namespace Fan.Web.TagHelpers
             ((IViewContextAware)this.viewComponentHelper).Contextualize(ViewContext);
 
             var area = await widgetService.GetAreaAsync(Id);
+            if (area == null) return;
 
             for (int i = 0; i < area.WidgetIds.Length; i++)
             {
