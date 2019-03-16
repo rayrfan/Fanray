@@ -4,6 +4,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
+using Fan.Web.Pages.Widgets.RecentBlogPosts;
 using Fan.Web.Pages.Widgets.SocialIcons;
 using Fan.Widgets;
 using FluentValidation;
@@ -274,7 +275,7 @@ namespace Fan.Web.Pages
         /// </summary>
         private async Task SetupWidgets()
         {
-            // areas
+            // Areas
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost);
@@ -282,6 +283,8 @@ namespace Fan.Web.Pages
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3);
+
+            // Area: BlogSidebar1
 
             // Social Icons
             var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
@@ -300,6 +303,13 @@ namespace Fan.Web.Pages
             // Blog Archives
             widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 3);
+
+            // Area: BlogAfterPost
+
+            // Recent Blog Posts
+            var recentBlogPostsWidget = new RecentBlogPostsWidget { ShowPostExcerpt = true };
+            widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "Fan.Web.Pages.Widgets.RecentBlogPosts.RecentBlogPostsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
         }
     }
 
