@@ -179,7 +179,8 @@ namespace Fan.Web
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                db.Database.Migrate();
+                if (!db.Database.ProviderName.Equals("Microsoft.EntityFrameworkCore.InMemory"))
+                    db.Database.Migrate();
             }
         }
 

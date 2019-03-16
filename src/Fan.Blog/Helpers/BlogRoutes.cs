@@ -8,7 +8,7 @@ namespace Fan.Blog.Helpers
     {
         private const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
         private const string PREVIEW_POST_RELATIVE_URL_TEMPLATE = "preview/post/{0}/{1}/{2}/{3}";
-        private const string POST_PERMA_URL_TEMPLATE = "post/{0}";
+        private const string POST_PERMA_URL_TEMPLATE = "blog/post/{0}";
         private const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
         private const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
         private const string CATEGORY_RSS_URL_TEMPLATE = "posts/categorized/{0}/feed";
@@ -104,6 +104,8 @@ namespace Fan.Blog.Helpers
         /// <param name="routes"></param>
         public static void RegisterRoutes(IRouteBuilder routes)
         {
+            routes.MapRoute("Blog", "blog", new { controller = "Blog", action = "Index" });
+
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
             routes.MapRoute("BlogPostPerma", string.Format(POST_PERMA_URL_TEMPLATE, "{id}"),
