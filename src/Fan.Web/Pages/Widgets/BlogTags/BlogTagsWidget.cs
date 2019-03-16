@@ -16,13 +16,17 @@ namespace Fan.Web.Pages.Widgets.BlogTags
         public BlogTagsWidget()
         {
             Title = "Tags";
-            MaxTagsDisplayed = 100;
         }
 
         /// <summary>
         /// Maximum number of tags displayed. Default 100, range must be between 1 and 10,000.
         /// </summary>
         [Range(1, 10000, ErrorMessage = "Value for {0} must be between {1} and {2}.")]
-        public int MaxTagsDisplayed { get; set; }
+        public int MaxTagsDisplayed { get; set; } = 100;
+
+        /// <summary>
+        /// Whether to show post count.
+        /// </summary>
+        public bool ShowPostCount { get; set; } = true;
     }
 }

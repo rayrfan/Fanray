@@ -15,10 +15,12 @@
             {
                 <li>
                     <a class="tag" rel="tag" title="@t.Description" href="@t.RelativeLink" style="background-color:@t.Color;">@t.Title</a>
-                    <span class="tag-multiplier">× @t.Count</span>
+                    @if (widget.ShowPostCount)
+                    {
+                        <span class="tag-post-count">@t.Count</span>
+                    }
                 </li>
             }
         </ul>
     </div>
 </div>
-

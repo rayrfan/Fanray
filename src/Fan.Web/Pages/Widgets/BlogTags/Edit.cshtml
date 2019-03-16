@@ -11,6 +11,7 @@
         <v-text-field label="Max number of tags to display"
                       v-model="widget.maxTagsDisplayed"
                       :rules="maxTagsDisplayedRules"></v-text-field>
+        <v-checkbox label="Show post counts" v-model="widget.showPostCount"></v-checkbox>
         <v-btn @@click="save" :disabled="!valid">Save</v-btn>
     </v-form>
 </edit-widget>

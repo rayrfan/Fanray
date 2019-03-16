@@ -1,6 +1,5 @@
 ﻿using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
-using Fan.Web.Pages.Widgets.BlogTags;
 using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -8,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Pages.Widgets
+namespace Fan.Web.Pages.Widgets.BlogTags
 {
     /// <summary>
     /// The BlogTags view component.
