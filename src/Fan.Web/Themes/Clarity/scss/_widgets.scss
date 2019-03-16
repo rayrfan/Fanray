@@ -1,8 +1,13 @@
-﻿.widgets {
+﻿aside .widgets {
     padding-top: 5rem;
 }
 
+.blog-afterpost {
+    margin: 15px 0 0 -10px;
+}
+
 .widget {
+    /*border:1px red solid;*/
     font-size: .875rem;
     padding-bottom: 2rem;
 
@@ -28,7 +33,6 @@
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem 1.5rem;
         font-size: .875rem;
-        color: rgba(255, 255, 255, 0.6);
     }
 
     ul {
@@ -58,7 +62,9 @@
     }
 }
 
-// BlogTags Widget
+/**
+ * Blog Tags Widget
+ */
 .blog-tags {
     .tag {
         padding: 3px 12px 5px 12px;
@@ -67,15 +73,28 @@
         white-space: nowrap;
         color: white;
     }
+    // tag post count will be prefixed with "x"
+    .tag-post-count:before {
+        content: "×";
+    }
 
-    .tag-multiplier {
+    .tag-post-count {
         color: #666;
         margin-right: 4px;
         font-size: 12px;
     }
 }
 
-// BlogArchives Widget
+// tags after a blog post will flow hori
+.blog-afterpost .blog-tags {
+    li {
+        display: inline;
+    }
+}
+
+/**
+ * Blog Archives Widget
+ */
 .blog-archives {
     li {
         font-weight: normal;
@@ -102,7 +121,72 @@
     }
 }
 
-// SocialIcons Widget
+/**
+ * Recent Blog Posts Widget
+ */
+.recent-blog-posts {
+    h2 a {
+        color: #222325;
+    }
+
+    h2 a:hover {
+        color: #0174CE;
+    }
+
+    .recent-post-info {
+        font-size: smaller;
+        color: #777;
+    }
+
+    .icon-user:before {
+        font-size: small;
+        content: "by ";
+    }
+
+    .icon-calendar:before {
+        font-size: small;
+        content: "on ";
+    }
+}
+
+aside .recent-blog-posts {
+    padding: 0 6px 0 16px;
+
+    h2 {
+        font-weight: normal;
+        line-height: 0.9;
+    }
+
+    h2 a {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    li {
+        list-style: square;
+    }
+}
+
+.blog-afterpost .recent-blog-posts {
+    display: flex;
+
+    li {
+        width: 100%;
+        margin: 0 13px 0 0;
+    }
+
+    h2 a {
+        font-size: 18px;
+    }
+
+    p {
+        font-size: medium;
+    }
+}
+
+/**
+ * Social Icons Widget
+ */
 .social-icons {
     .svg-icon {
         text-decoration: none;
