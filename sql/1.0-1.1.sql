@@ -1,4 +1,4 @@
-﻿IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+﻿IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     DECLARE @var0 sysname;
     SELECT @var0 = [d].[name]
@@ -11,56 +11,56 @@ END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     EXEC sp_rename N'[Core_Media].[AppId]', N'AppType', N'COLUMN';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [Caption] nvarchar(max) NULL;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [ContentType] nvarchar(256) NOT NULL DEFAULT N'';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [Width] int NOT NULL DEFAULT 0;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [Height] int NOT NULL DEFAULT 0;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [Alt] nvarchar(max) NULL;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Media] ADD [ResizeCount] int NOT NULL DEFAULT 0;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     DECLARE @var1 sysname;
     SELECT @var1 = [d].[name]
@@ -73,87 +73,73 @@ END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
-BEGIN
-    ALTER TABLE [Core_Meta] DROP CONSTRAINT [PK_Core_Meta];
-END;
-
-GO
-
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     DROP INDEX [IX_Core_Meta_Key] ON [Core_Meta];
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     ALTER TABLE [Core_Meta] ADD [Type] int NOT NULL DEFAULT 0;
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
-    ALTER TABLE [Core_Meta] ADD CONSTRAINT [PK_Core_Meta] PRIMARY KEY ([Id]);
+    CREATE UNIQUE CLUSTERED INDEX [IX_Core_Meta_Type_Key] ON [Core_Meta] ([Type], [Key]);
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
-BEGIN
-    CREATE INDEX [IX_Core_Meta_Type] ON [Core_Meta] ([Type]);
-END;
-
-GO
-
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.feedshowexcerpt' WHERE [Key] = 'blogsettings.rssshowexcerpt';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.postperpage' WHERE [Key] = 'blogsettings.pagesize';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     UPDATE [Core_Meta] SET [Value] = 1 WHERE [Key] = 'blogsettings.showexcerpt';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     UPDATE [Core_Meta] SET [Key] = 'blogsettings.postlistdisplay' WHERE [Key] = 'blogsettings.showexcerpt';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     DELETE FROM [Core_Meta] WHERE [Key] = 'blogsettings.excerptwordlimit';
 END;
 
 GO
 
-IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20180530163323_FanV2_0')
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20180530163323_FanV2_0', N'2.2.1-servicing-10028');
+    VALUES (N'20190318202954_FanV1_1', N'2.2.3-servicing-35854');
 END;
 
 GO

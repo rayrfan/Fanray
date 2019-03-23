@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 
 namespace Fan.Data
@@ -17,11 +17,16 @@ namespace Fan.Data
         }
 
         /// <summary>
-        /// Returns a <see cref="Meta"/> by its key, returns null if it's not found.
+        /// Returns a <see cref="Meta"/> by its key (case-insensitive) and <see cref="EMetaType"/>, returns null if it's not found.
         /// </summary>
-        /// <param name="key">The caller should pass this key in proper casing.</param>
+        /// <param name="key">The key's casing is ignored.</param>
+        /// <param name="type">The <see cref="EMetaType"/> of the meta.</param>
         /// <returns></returns>
-        public async Task<Meta> GetAsync(string key) =>
-             await _entities.SingleOrDefaultAsync(m => m.Key == key);
+        /// <remarks>
+        /// A meta record is unique by combination of key and type.
+        /// </remarks>
+        public async Task<Meta> GetAsync(string key, EMetaType type) =>
+             await _entities.SingleOrDefaultAsync(m => m.Key.Equals(key, StringComparison.OrdinalIgnoreCase)
+                                                    && m.Type == type);
     }
 }

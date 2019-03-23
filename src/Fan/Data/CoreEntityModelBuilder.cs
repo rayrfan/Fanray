@@ -22,7 +22,8 @@ namespace Fan.Data
             builder.Entity<Meta>(entity =>
             {
                 entity.ToTable("Core_Meta");
-                entity.HasIndex(e => new { e.Type });
+                entity.HasKey(e => e.Id).ForSqlServerIsClustered(clustered: false);
+                entity.HasIndex(e => new { e.Type, e.Key }).IsUnique().ForSqlServerIsClustered();
             });
             builder.Entity<Media>(entity =>
             {

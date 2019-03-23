@@ -4,7 +4,7 @@ using System;
 
 namespace Fan.Migrations
 {
-    public partial class FanSchemaV1 : Migration
+    public partial class FanV1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

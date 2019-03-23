@@ -3,26 +3,26 @@ using Fan.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 namespace Fan.Migrations
 {
     [DbContext(typeof(FanDbContext))]
-    partial class FanDbContextModelSnapshot : ModelSnapshot
+    [Migration("20171120170827_FanV1")]
+    partial class FanV1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
+                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Fan.Blog.Models.Category", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.Category", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
 
@@ -44,11 +44,10 @@ namespace Fan.Migrations
                     b.ToTable("Blog_Category");
                 });
 
-            modelBuilder.Entity("Fan.Blog.Models.Post", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Body");
 
@@ -69,6 +68,7 @@ namespace Fan.Migrations
                     b.Property<int?>("RootId");
 
                     b.Property<string>("Slug")
+                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<byte>("Status");
@@ -99,7 +99,7 @@ namespace Fan.Migrations
                     b.ToTable("Blog_Post");
                 });
 
-            modelBuilder.Entity("Fan.Blog.Models.PostTag", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
                 {
                     b.Property<int>("PostId");
 
@@ -112,11 +112,10 @@ namespace Fan.Migrations
                     b.ToTable("Blog_PostTag");
                 });
 
-            modelBuilder.Entity("Fan.Blog.Models.Tag", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.Tag", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Color")
                         .HasMaxLength(32);
@@ -144,21 +143,18 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Data.Meta", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(256);
-
-                    b.Property<int>("Type");
 
                     b.Property<string>("Value");
 
                     b.HasKey("Id")
                         .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.HasIndex("Type", "Key")
+                    b.HasIndex("Key")
                         .IsUnique()
                         .HasAnnotation("SqlServer:Clustered", true);
 
@@ -168,18 +164,9 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Medias.Media", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Alt");
-
-                    b.Property<int>("AppType");
-
-                    b.Property<string>("Caption");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                    b.Property<int>("AppId");
 
                     b.Property<string>("Description");
 
@@ -187,13 +174,9 @@ namespace Fan.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
-                    b.Property<int>("Height");
-
                     b.Property<long>("Length");
 
                     b.Property<byte>("MediaType");
-
-                    b.Property<int>("ResizeCount");
 
                     b.Property<string>("Title")
                         .HasMaxLength(256);
@@ -203,8 +186,6 @@ namespace Fan.Migrations
                     b.Property<DateTimeOffset>("UploadedOn");
 
                     b.Property<int>("UserId");
-
-                    b.Property<int>("Width");
 
                     b.HasKey("Id");
 
@@ -218,8 +199,7 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Membership.Role", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
@@ -247,8 +227,7 @@ namespace Fan.Migrations
             modelBuilder.Entity("Fan.Membership.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("AccessFailedCount");
 
@@ -258,6 +237,7 @@ namespace Fan.Migrations
                     b.Property<DateTimeOffset>("CreatedOn");
 
                     b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<string>("Email")
@@ -304,8 +284,7 @@ namespace Fan.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("ClaimType");
 
@@ -323,8 +302,7 @@ namespace Fan.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("ClaimType");
 
@@ -384,9 +362,9 @@ namespace Fan.Migrations
                     b.ToTable("Core_UserToken");
                 });
 
-            modelBuilder.Entity("Fan.Blog.Models.Post", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.Post", b =>
                 {
-                    b.HasOne("Fan.Blog.Models.Category", "Category")
+                    b.HasOne("Fan.Blogs.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
@@ -396,14 +374,14 @@ namespace Fan.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Fan.Blog.Models.PostTag", b =>
+            modelBuilder.Entity("Fan.Blogs.Models.PostTag", b =>
                 {
-                    b.HasOne("Fan.Blog.Models.Post", "Post")
+                    b.HasOne("Fan.Blogs.Models.Post", "Post")
                         .WithMany("PostTags")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fan.Blog.Models.Tag", "Tag")
+                    b.HasOne("Fan.Blogs.Models.Tag", "Tag")
                         .WithMany("PostTags")
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade);

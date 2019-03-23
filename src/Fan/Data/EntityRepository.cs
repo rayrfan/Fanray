@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Fan.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,9 +44,16 @@ namespace Fan.Data
         /// </exception>
         public virtual async Task<T> CreateAsync(T entity)
         {
-            await _entities.AddAsync(entity);
-            await _db.SaveChangesAsync();
-            return entity;
+            try
+            {
+                await _entities.AddAsync(entity);
+                await _db.SaveChangesAsync();
+                return entity;
+            }
+            catch (DbUpdateException dbUpdException)
+            {
+                throw new FanException(EExceptionType.MetaDuplicate, dbUpdException);
+            }
         }
 
         /// <summary>

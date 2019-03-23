@@ -2,7 +2,7 @@
 
 namespace Fan.Migrations
 {
-    public partial class FanV2_0 : Migration
+    public partial class FanV1_1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -62,10 +62,6 @@ namespace Fan.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 256);
 
-            migrationBuilder.DropPrimaryKey(
-              name: "PK_Core_Meta",
-              table: "Core_Meta");
-
             migrationBuilder.DropIndex(
                 name: "IX_Core_Meta_Key",
                 table: "Core_Meta");
@@ -76,15 +72,12 @@ namespace Fan.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Core_Meta",
-                table: "Core_Meta",
-                column: "Id");
-
             migrationBuilder.CreateIndex(
-                name: "IX_Core_Meta_Type",
+                name: "IX_Core_Meta_Type_Key",
                 table: "Core_Meta",
-                column: "Type");
+                columns: new[] { "Type", "Key" },
+                unique: true)
+                .Annotation("SqlServer:Clustered", true);
 
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.allowcomments' WHERE [Key] = 'blogsettings.allowcommentsonblogpost';");
             migrationBuilder.Sql("UPDATE [Core_Meta] SET [Key] = 'blogsettings.feedshowexcerpt' WHERE [Key] = 'blogsettings.rssshowexcerpt';");
@@ -143,23 +136,13 @@ namespace Fan.Migrations
                 oldMaxLength: 256,
                 oldNullable: true);
 
-            migrationBuilder.DropPrimaryKey(
-              name: "PK_Core_Meta",
-              table: "Core_Meta");
-
             migrationBuilder.DropIndex(
-                name: "IX_Core_Meta_Type",
+                name: "IX_Core_Meta_Type_Key",
                 table: "Core_Meta");
 
             migrationBuilder.DropColumn(
                 name: "Type",
                 table: "Core_Meta");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Core_Meta",
-                table: "Core_Meta",
-                column: "Id")
-                .Annotation("SqlServer:Clustered", false);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Core_Meta_Key",

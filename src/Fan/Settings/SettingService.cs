@@ -112,7 +112,7 @@ namespace Fan.Settings
                 }
                 else
                 {
-                    var setting = await _repo.GetAsync(key);
+                    var setting = await _repo.GetAsync(key, EMetaType.Setting);
                     if (setting != null && setting.Value != valueStr)
                     {
                         setting.Value = valueStr;

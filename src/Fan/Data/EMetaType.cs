@@ -10,12 +10,20 @@
         /// </summary>
         Setting = 0,
         /// <summary>
+        /// A theme.
+        /// </summary>
+        Theme = 1,
+        /// <summary>
+        /// A system defined widget area.
+        /// </summary>
+        WidgetAreaBySystem = 2,
+        /// <summary>
+        /// A theme defined widget area.
+        /// </summary>
+        WidgetAreaByTheme = 3,
+        /// <summary>
         /// A widget instance.
         /// </summary>
-        Widget = 1,
-        /// <summary>
-        /// A widget area.
-        /// </summary>
-        WidgetArea = 2,
+        Widget = 4,
     }
 }
