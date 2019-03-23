@@ -1,11 +1,25 @@
 {
   "name": "Clarity",
-  "version": "2.0.0",
+  "version": "1.1.0",
+  "themeUrl": "https://www.fanray.com",
   "author": "Ray Fan",
-  "url": "https://www.fanray.com",
-  "description": "The Clarity theme for Fanray blog.",
-  "license": "MIT",
-  "layout": "responsive",
-  "column": "right-sidebar",
-  "widgetAreas": [ "blog-sidebar1", "blog-sidebar2" ]
+  "authorUrl": "https://www.fanray.com",
+  "license": "Apache 2.0",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+  "description": "Theme file for testing.",
+  "tags": [ "responsive", "three-column", "right-sidebar", "left-sidebar" ],
+  "widgetAreas": [
+    {
+      "id": "blog-sidebar1",
+      "name": "Blog Right Sidebar"
+    },
+    {
+      "id": "blog-sidebar2",
+      "name": "Blog Left Sidebar"
+    },
+    {
+      "id": "my-area",
+      "name": "My Exclusive Widget Area"
+    }
+  ]
 }

@@ -15,10 +15,11 @@ using Xunit;
 
 namespace Fan.IntegrationTests.Widgets
 {
-    public class WidgetServiceTest : IntegrationTestBase
-    {
+    public class WidgetServiceTest : IntegrationTestBase, IAsyncLifetime
+    {     
         private const string MY_WIDGET_TYPE = "Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests";
         private WidgetService _svc;
+        private IThemeService themeService;
         private SqlMetaRepository _metaRepo;
 
         public WidgetServiceTest()
@@ -41,9 +42,9 @@ namespace Fan.IntegrationTests.Widgets
             var loggerThemeSvc = _loggerFactory.CreateLogger<ThemeService>();
 
             // theme service
-            var themeSvc = new ThemeService(settingSvcMock.Object, env.Object, _cache, loggerThemeSvc);
+            themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
 
-            _svc = new WidgetService(_metaRepo, themeSvc, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
+            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
             {
                 // set widget dir
                 WidgetDirectoryName = "Widgets"
@@ -51,19 +52,28 @@ namespace Fan.IntegrationTests.Widgets
         }
 
         /// <summary>
-        /// During site setup pre-defined areas will be registered.
+        /// Setup theme and 3 areas (1 theme defined, 2 system defined).
+        /// </summary>
+        /// <returns></returns>
+        public async Task InitializeAsync()
+        {
+            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
+            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2.Id);
+            await themeService.ActivateThemeAsync("Clarity");
+        }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// During site setup system-defined areas will be registered.
         /// </summary>
         [Fact]
-        public async void Widget_areas_are_predefined_and_registered_during_setup()
+        public async void System_defined_widget_areas_are_registered_at_setup_thus_available_from_start()
         {
-            // Given some pre-defined widget areas
-            var blogSidebar1 = WidgetService.BlogSidebar1;
-            var blogSidebar2 = WidgetService.BlogSidebar2;
-
-            // When the system sets up, it would register the widget areas
-            await _svc.RegisterAreaAsync(blogSidebar1);
-            await _svc.RegisterAreaAsync(blogSidebar2);
-
+            // Given system defined areas already exist
             // Then the system would have widget areas avaiable for retrival
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
             Assert.NotNull(area);
@@ -76,15 +86,11 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void Admin_panel_widgets_page_displays_all_areas_in_the_current_theme()
         {
-            // Given my current theme uses 2 widget areas
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-
             // When the Admin Panel Widgets page is requested
             var areas = await _svc.GetCurrentThemeAreasAsync();
 
             // Then it will display all areas in the current theme
-            Assert.Equal(2, areas.ToList().Count());
+            Assert.Equal(3, areas.ToList().Count());
         }
 
         /// <summary>
@@ -112,17 +118,13 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drag_a_widget_from_widget_infos_section_to_an_area()
         {
-            // Given a theme with 2 widget areas
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-
             // When user drags a widget from the widget infos section to an area
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // Then the area would contain the widget
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.Contains(widgetId, area.WidgetIds);  
+            Assert.Contains(widgetId, area.WidgetIds);
         }
 
         /// <summary>
@@ -132,10 +134,7 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drag_a_widget_from_an_area_to_another_area()
         {
-            // Given a theme with two widget areas
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-            // and a widget in area 1
+            // Given a widget in area blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
@@ -164,9 +163,6 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void When_user_drops_a_widget_from_info_section_to_area_widget_has_initial_default_values()
         {
-            // Given widget area "blog-sidebar1"
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-
             // When a widget is dropped to area from infos
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             var widget = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -181,10 +177,7 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drop_same_widget_multiple_times_to_an_area()
         {
-            // Given a theme with 2 widget areas
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-            // and two widget instances
+            // Given two widget instances in blog sidebar1
             var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
             var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
@@ -205,8 +198,7 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void A_widget_is_instantiated_from_json_and_type_info_strings()
         {
-            // Given widget area and a widget in the area
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
+            // Given a widget in the area blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
@@ -236,9 +228,7 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_delete_a_widget_from_an_area()
         {
-            // Given a theme with two areas and a widget instance
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
+            // Given a widget in blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             var widgetInst = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
@@ -258,8 +248,6 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_order_widgets_in_an_area()
         {
             // Given two widgets w1 and w2 in blog-sidebar1 area
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2);
             var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
             var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
@@ -277,8 +265,7 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_update_instance_properties()
         {
-            // Given a widget area "blog-sidebar1" and a widget
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1);
+            // Given a widget in blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 

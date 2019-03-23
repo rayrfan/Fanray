@@ -1,11 +1,21 @@
 {
   "name": "Clarity",
-  "version": "2.0.0",
-  "author": "Ray Fan",
-  "url": "https://www.fanray.com",
   "description": "A Bootstrap 4 based theme for Fanray blog.",
-  "license": "MIT",
-  "layout": "responsive",
-  "column": "right-sidebar",
-  "widgetAreas": [ "blog-sidebar1", "blog-afterpost" ]
+  "version": "1.1.0",
+  "themeUrl": "https://www.fanray.com",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com",
+  "license": "Apache 2.0",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+  "tags": [ "responsive", "right-sidebar" ],
+  "widgetAreas": [
+    {
+      "id": "blog-sidebar1",
+      "name": "Blog Sidebar"
+    },
+    {
+      "id": "blog-after-post",
+      "name": "Blog After Post Content"
+    }
+  ]
 }

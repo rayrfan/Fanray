@@ -4,6 +4,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
+using Fan.Themes;
 using Fan.Web.Pages.Widgets.RecentBlogPosts;
 using Fan.Web.Pages.Widgets.SocialIcons;
 using Fan.Widgets;
@@ -27,6 +28,7 @@ namespace Fan.Web.Pages
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ISettingService _settingSvc;
+        private readonly IThemeService _themeService;
         private readonly IBlogPostService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
@@ -41,6 +43,7 @@ namespace Fan.Web.Pages
             ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
+            IThemeService themeService,
             IWidgetService widgetService,
             ILogger<SetupModel> logger)
         {
@@ -51,6 +54,7 @@ namespace Fan.Web.Pages
             _catSvc = catService;
             _tagSvc = tagService;
             _settingSvc = settingService;
+            _themeService = themeService;
             _widgetSvc = widgetService;
             _logger = logger;
         }
@@ -179,7 +183,7 @@ namespace Fan.Web.Pages
                     await SetupBlogAsync();
 
                     // setup widgets
-                    await SetupWidgets();
+                    await SetupThemeAndWidgets();
 
                     return new JsonResult(true);
                 }
@@ -271,18 +275,24 @@ namespace Fan.Web.Pages
         }
 
         /// <summary>
-        /// Setup widget areas and widgets for default theme.
+        /// Activiates the default Clarity theme, registers system-defined widget areas, 
+        /// then load some widgets.
         /// </summary>
-        private async Task SetupWidgets()
+        private async Task SetupThemeAndWidgets()
         {
-            // Areas
-            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2);
-            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3);
+            // Clarity theme
+            await _themeService.ActivateThemeAsync("Clarity");
+
+            // System-defined Areas
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePostList.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPostList.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3.Id);
 
             // Area: BlogSidebar1
 

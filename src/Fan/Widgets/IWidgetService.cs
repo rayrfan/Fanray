@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Fan.Data;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Widgets
@@ -6,11 +7,12 @@ namespace Fan.Widgets
     public interface IWidgetService
     {
         /// <summary>
-        /// Register a pre-defined area into the system.
+        /// Registers a widget area by its id and type.
         /// </summary>
-        /// <param name="widgetArea"></param>
+        /// <param name="areaId">The id of the widget area.</param>
+        /// <param name="type">The <see cref="EMetaType"/> of the area.</param>
         /// <returns></returns>
-        Task RegisterAreaAsync(WidgetArea widgetArea);
+        Task<Meta> RegisterAreaAsync(string areaId, EMetaType type = EMetaType.WidgetAreaBySystem);
         /// <summary>
         /// Returns an <see cref="WidgetAreaInstance"/> by id.
         /// </summary>
@@ -18,9 +20,9 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task<WidgetAreaInstance> GetAreaAsync(string areaId);
         /// <summary>
-        /// Returns the current theme's widget areas.
+        /// Returns a list of <see cref="WidgetAreaInstance"/> for the current theme, 
+        /// each area contains its a list of <see cref="WidgetInstance"/>.
         /// </summary>
-        /// <returns></returns>
         Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync();
         /// <summary>
         /// Returns all the installed widget infos.

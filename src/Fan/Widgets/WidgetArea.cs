@@ -8,13 +8,9 @@
         }
 
         /// <summary>
-        /// Pre-defined identifier for the area. e.g. "blog-sidebar1".
+        /// Id of the area.
         /// </summary>
-        public string Id { get; set; }
-        /// <summary>
-        /// Area title, e.g. "Blog Sidebar1".
-        /// </summary>
-        public string Title { get; set; }
+        public string Id { get; set; }        
         /// <summary>
         /// Widget instances ids the area contains.
         /// </summary>

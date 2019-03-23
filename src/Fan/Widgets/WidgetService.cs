@@ -1,4 +1,6 @@
 ﻿using Fan.Data;
+using Fan.Exceptions;
+using Fan.Helpers;
 using Fan.Settings;
 using Fan.Themes;
 using Microsoft.AspNetCore.Hosting;
@@ -7,21 +9,36 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fan.Widgets
 {
     public class WidgetService : IWidgetService
     {
-        public static WidgetArea BlogSidebar1 = new WidgetArea { Id = "blog-sidebar1", Title = "Blog - Sidebar1" };
-        public static WidgetArea BlogSidebar2 = new WidgetArea { Id = "blog-sidebar2", Title = "Blog - Sidebar2" };
-        public static WidgetArea BlogBeforePost = new WidgetArea { Id = "blog-beforepost", Title = "Blog - Before Post" };
-        public static WidgetArea BlogAfterPost = new WidgetArea { Id = "blog-afterpost", Title = "Blog - After Post" };
-        public static WidgetArea Footer1 = new WidgetArea { Id = "footer1", Title = "Footer 1" };
-        public static WidgetArea Footer2 = new WidgetArea { Id = "footer2", Title = "Footer 2" };
-        public static WidgetArea Footer3 = new WidgetArea { Id = "footer3", Title = "Footer 3" };
+        public static WidgetAreaInfo BlogSidebar1 = new WidgetAreaInfo { Id = "blog-sidebar1", Name = "Blog - Sidebar1" };
+        public static WidgetAreaInfo BlogSidebar2 = new WidgetAreaInfo { Id = "blog-sidebar2", Name = "Blog - Sidebar2" };
+        public static WidgetAreaInfo BlogBeforePost = new WidgetAreaInfo { Id = "blog-before-post", Name = "Blog - Before Post" };
+        public static WidgetAreaInfo BlogAfterPost = new WidgetAreaInfo { Id = "blog-after-post", Name = "Blog - After Post" };
+        public static WidgetAreaInfo BlogBeforePostList = new WidgetAreaInfo { Id = "blog-before-post-list", Name = "Blog - Before Post List" };
+        public static WidgetAreaInfo BlogAfterPostList = new WidgetAreaInfo { Id = "blog-after-post-list", Name = "Blog - After Post List" };
+        public static WidgetAreaInfo Footer1 = new WidgetAreaInfo { Id = "footer1", Name = "Footer 1" };
+        public static WidgetAreaInfo Footer2 = new WidgetAreaInfo { Id = "footer2", Name = "Footer 2" };
+        public static WidgetAreaInfo Footer3 = new WidgetAreaInfo { Id = "footer3", Name = "Footer 3" };
+
+        public static IEnumerable<WidgetAreaInfo> SystemDefinedWidgetAreaInfos = new List<WidgetAreaInfo>
+        {
+            BlogSidebar1,
+            BlogSidebar2,
+            BlogBeforePost,
+            BlogAfterPost,
+            BlogBeforePostList,
+            BlogAfterPostList,
+            Footer1,
+            Footer2,
+            Footer3,
+        };
 
         public const string WIDGET_INFO_FILE_NAME = "widget.json";
         public string WidgetDirectoryName { get; set; } = $"Pages{Path.DirectorySeparatorChar}Widgets";
@@ -56,17 +73,25 @@ namespace Fan.Widgets
         // -------------------------------------------------------------------- widget areas
 
         /// <summary>
-        /// Register a widget area during setup.
+        /// Registers a widget area by its id and type.
         /// </summary>
-        /// <param name="area"></param>
+        /// <param name="areaId">The id of the widget area.</param>
+        /// <param name="type">The <see cref="EMetaType"/> of the area.</param>
         /// <returns></returns>
-        public async Task RegisterAreaAsync(WidgetArea area)
+        public async Task<Meta> RegisterAreaAsync(string areaId, EMetaType type = EMetaType.WidgetAreaBySystem)
         {
-            await metaRepository.CreateAsync(new Meta
+            var key = areaId;
+            if (IsThemeDefinedArea(areaId))
             {
-                Key = area.Id,
-                Value = JsonConvert.SerializeObject(area),
-                Type = EMetaType.WidgetArea,
+                key = await GetThemeAreaMetaKeyAsync(areaId);
+                type = EMetaType.WidgetAreaByTheme;
+            }
+
+            return await metaRepository.CreateAsync(new Meta
+            {
+                Key = key,
+                Value = JsonConvert.SerializeObject(new WidgetArea { Id = areaId }),
+                Type = type,
             });
         }
 
@@ -84,8 +109,12 @@ namespace Fan.Widgets
 
         /// <summary>
         /// Returns a list of <see cref="WidgetAreaInstance"/> for the current theme, 
-        /// each area has the a list of <see cref="WidgetInstance"/> it contains.
+        /// each area contains its a list of <see cref="WidgetInstance"/>.
         /// </summary>
+        /// <remarks>
+        /// This method has a side effect of registering a theme defined widget area,
+        /// that happens when a user adds an area to the theme on the fly.
+        /// </remarks>
         public async Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync()
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
@@ -95,18 +124,21 @@ namespace Fan.Widgets
             {
                 var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
-                var themeInfos = await themeService.GetInstalledThemesInfoAsync();
-                var currentTheme = themeInfos.Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
-                var areaIds = currentTheme.WidgetAreas; // current theme's widget areas ids
-
-                foreach (var areaId in areaIds)
+                var currentTheme = (await themeService.GetInstalledThemesInfoAsync())
+                                   .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
+                foreach (var areaInfo in currentTheme.WidgetAreas)
                 {
-                    var metaArea = await metaRepository.GetAsync(areaId);
+                    var metaArea = await GetAreaMetaAsync(areaInfo.Id);
+                    if (metaArea == null)
+                    {
+                        // if not found this should be a newly added theme-defined area
+                        metaArea = await RegisterAreaAsync(areaInfo.Id, EMetaType.WidgetAreaByTheme);
+                    }
                     var widgetArea = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
                     var widgetAreaInstance = new WidgetAreaInstance {
                         Id = widgetArea.Id,
-                        Title = widgetArea.Title,
+                        Title = GetAreaName(widgetArea.Id, areaInfo.Name),
                         WidgetIds = widgetArea.WidgetIds,
                     };
 
@@ -119,7 +151,7 @@ namespace Fan.Widgets
                             Title = widget.Title,
                             Name = widgetInfo.Name,
                             Folder = widgetInfo.Folder,
-                            AreaId = areaId,
+                            AreaId = areaInfo.Id,
                             Type = widget.Type,
                         };
 
@@ -219,7 +251,7 @@ namespace Fan.Widgets
         public async Task<WidgetInstance> AddWidgetToAreaAsync(int widgetId, string areaId, int index)
         {
             // get area
-            var metaArea = await metaRepository.GetAsync(areaId);
+            var metaArea = await GetAreaMetaAsync(areaId); // metaRepository.GetAsync(areaId, type);
             var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
             // insert new id to area
@@ -260,7 +292,7 @@ namespace Fan.Widgets
         public async Task RemoveWidgetFromAreaAsync(int widgetId, string areaId)
         {
             // get the area by key
-            var metaArea = await metaRepository.GetAsync(areaId);
+            var metaArea = await GetAreaMetaAsync(areaId); // metaRepository.GetAsync(areaId, type);
             var widgetArea = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
             // delete the id from area's id array
@@ -284,7 +316,7 @@ namespace Fan.Widgets
         public async Task OrderWidgetInAreaAsync(int widgetId, string areaId, int index)
         {
             // get area
-            var metaArea = await metaRepository.GetAsync(areaId);
+            var metaArea = await GetAreaMetaAsync(areaId); // await metaRepository.GetAsync(areaId);
             var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
             // reorder the widget in area
@@ -335,13 +367,23 @@ namespace Fan.Widgets
             // get widget info
             var widgetInfo = await GetWidgetInfoAsync(widget.Type);
 
-            // create widget meta record
-            var metaWidget = await metaRepository.CreateAsync(new Meta
+            Meta metaWidget = null;
+            while (metaWidget == null)
             {
-                Key = widgetInfo.Folder,
-                Value = JsonConvert.SerializeObject(widget),
-                Type = EMetaType.Widget,
-            });
+                try
+                {
+                    // create widget meta record
+                    metaWidget = await metaRepository.CreateAsync(new Meta
+                    {
+                        Key = string.Format($"{widgetInfo.Folder}-{Util.RandomString(6)}").ToLower(),
+                        Value = JsonConvert.SerializeObject(widget),
+                        Type = EMetaType.Widget,
+                    });
+                }
+                catch (FanException ex) when (ex.ExceptionType == EExceptionType.MetaDuplicate)
+                {
+                }
+            }
 
             return metaWidget.Id;
         }
@@ -354,6 +396,65 @@ namespace Fan.Widgets
         public async Task DeleteWidgetAsync(int widgetId)
         {
             await metaRepository.DeleteAsync(widgetId);
+        }
+
+        // -------------------------------------------------------------------- private methods
+
+        /// <summary>
+        /// Returns a <see cref="Meta"/> area record that is either by system or by theme.
+        /// </summary>
+        /// <param name="areaId"></param>
+        /// <returns></returns>
+        private async Task<Meta> GetAreaMetaAsync(string areaId)
+        {
+            var key = areaId;
+            var type = EMetaType.WidgetAreaBySystem;
+            if (IsThemeDefinedArea(areaId))
+            {
+                key = await GetThemeAreaMetaKeyAsync(areaId);
+                type = EMetaType.WidgetAreaByTheme;
+            }
+
+            return await metaRepository.GetAsync(key, type);
+        }
+
+        /// <summary>
+        /// Returns true if the area id is a system-defined widget area.
+        /// </summary>
+        /// <param name="areaId"></param>
+        /// <returns></returns>
+        private bool IsThemeDefinedArea(string areaId)
+        {
+            return !SystemDefinedWidgetAreaInfos.Any(sa => sa.Id.Equals(areaId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Returns the meta key for a theme-defined widget area. 
+        /// Theme-defined widget area meta key is prefixed by current theme and all lower case.
+        /// </summary>
+        /// <param name="areaId"></param>
+        /// <returns></returns>
+        private async Task<string> GetThemeAreaMetaKeyAsync(string areaId)
+        {
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            return string.Format($"{coreSettings.Theme}-{areaId}").ToLower();
+        }
+
+        /// <summary>
+        /// Returns an area's display name for Admin Panel Widgets page.
+        /// </summary>
+        /// <param name="areaId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If user didn't provide a name for a widget area, if the area is theme defined its id is returned,
+        /// if the area is system defined the default name is returned.
+        /// </remarks>
+        private string GetAreaName(string areaId, string name)
+        {
+            if (!name.IsNullOrEmpty()) return name;
+            var areaInfo = SystemDefinedWidgetAreaInfos.Single(a => a.Id.Equals(areaId, StringComparison.OrdinalIgnoreCase));
+            return areaInfo == null ? areaId : areaInfo.Name;
         }
 
         /// <summary>

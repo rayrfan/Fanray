@@ -20,6 +20,10 @@ namespace Fan.Widgets
         }
 
         /// <summary>
+        /// Area title, e.g. "Blog Sidebar1".
+        /// </summary>
+        public string Title { get; set; }
+        /// <summary>
         /// Widget instances for display.
         /// </summary>
         public List<WidgetInstance> WidgetInstances { get; set; }
