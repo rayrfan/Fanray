@@ -17,14 +17,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{596A1022-8E0
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
+		azure-pipelines.yml = azure-pipelines.yml
 		CONTRIBUTING.md = CONTRIBUTING.md
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{36CBCC5A-2BEC-415A-97E2-09A4AC8A0872}"
 	ProjectSection(SolutionItems) = preProject
-		sql\1.0-2.0.sql = sql\1.0-2.0.sql
-		sql\README.md = sql\README.md
+		sql\1.0-1.1.sql = sql\1.0-1.1.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.UnitTests", "test\Fan.UnitTests\Fan.UnitTests.csproj", "{DB82A852-A913-4AEE-AD16-B62472F29092}"

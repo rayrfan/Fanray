@@ -1,0 +1,8 @@
+{
+  "name": "Blog Archives",
+  "description": "A montly archive of your blog posts.",
+  "type": "Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web",
+  "version": "1.0.0",
+  "author": "Ray Fan",
+  "url": "https://www.fanray.com"
+}

@@ -118,7 +118,7 @@ namespace Fan.Blog.Data
         /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
         /// it will also delete all child pages.
         /// </summary>
-        public async Task DeleteAsync(int id)
+        public new async Task DeleteAsync(int id)
         {
             // SingleAsync will throw if id is not found or not unique
             var post = await _entities.SingleAsync(c => c.Id == id);

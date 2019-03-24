@@ -1,0 +1,47 @@
+﻿@page
+@model Fan.Web.Pages.Widgets.RecentBlogPosts.EditModel
+@{
+    ViewData["Title"] = "Edit Recent Blog Posts Widget";
+    Layout = "~/Pages/Widgets/_EditLayout.cshtml";
+}
+
+<edit-widget inline-template>
+    <v-form v-model="valid">
+        <v-text-field label="Title" v-model="widget.title"></v-text-field>
+        <v-text-field label="Number of posts to show"
+                      v-model="widget.numberOfPostsToShow"
+                      :rules="numberOfPostsToShowRules"></v-text-field>
+        <v-checkbox label="Show post author" v-model="widget.showPostAuthor"></v-checkbox>
+        <v-checkbox label="Show post date" v-model="widget.showPostDate"></v-checkbox>
+        <v-checkbox label="Show post excerpt" v-model="widget.showPostExcerpt"></v-checkbox>
+        <v-btn @@click="save" :disabled="!valid">Save</v-btn>
+    </v-form>
+</edit-widget>
+
+@section Scripts{
+    <script>
+        Vue.component('edit-widget', {
+            data: () => ({
+                widget: @Html.Raw(Model.WidgetJson),
+                valid: false,
+                numberOfPostsToShowRules: [
+                    v => !!v || 'Required',
+                    v => /^[0-9]+$/.test(v) || 'Integer only',
+                    v => (parseInt(v) >= 1 && parseInt(v) <= 6) || 'Must be between 1 and 6',
+                ],
+            }),
+            methods: {
+                save() {
+                    axios.post('/widgets/recentblogposts/edit', this.widget, this.$root.headers)
+                        .then(() => this.$root.updateParent({
+                            title: this.widget.title,
+                            widgetId: this.widget.id,
+                            areaId: this.widget.areaId,
+                        }))
+                        .catch(err => this.$root.updateParentErr(err));
+                }
+            },
+        });
+    </script>
+}
+

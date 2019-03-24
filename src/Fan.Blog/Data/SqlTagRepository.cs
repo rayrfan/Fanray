@@ -20,21 +20,6 @@ namespace Fan.Blog.Data
         }
 
         /// <summary>
-        /// Deletes a tag and its associated posts.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Tag and PostTag are related by FK with cascade delete.
-        /// </remarks>
-        public async Task DeleteAsync(int id)
-        {
-            var tag = await _entities.SingleAsync(t => t.Id == id);
-            _db.Remove(tag); // cascade delete will take care of PostTag assoc
-            await _db.SaveChangesAsync();
-        }
-
-        /// <summary>
         /// Returns all tags or empty list if no tags found. The returned list is ordered by 
         /// <see cref="Tag.Count"/> desc and then by <see cref="Tag.Title"/>.
         /// </summary>

@@ -22,7 +22,7 @@ namespace Fan.Blog.UnitTests.Services
         public TagServiceTest()
         {
             // blog settings
-            _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings"))
+            _metaRepoMock.Setup(repo => repo.GetAsync("BlogSettings", EMetaType.Setting))
                 .Returns(Task.FromResult(new Meta { Key = "BlogSettings", Value = JsonConvert.SerializeObject(new BlogSettings()) }));
 
             // mocks

@@ -1,0 +1,21 @@
+{
+  "name": "Clarity",
+  "description": "A Bootstrap 4 based theme for Fanray blog.",
+  "version": "1.1.0",
+  "themeUrl": "https://www.fanray.com",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com",
+  "license": "Apache 2.0",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+  "tags": [ "responsive", "right-sidebar" ],
+  "widgetAreas": [
+    {
+      "id": "blog-sidebar1",
+      "name": "Blog Sidebar"
+    },
+    {
+      "id": "blog-after-post",
+      "name": "Blog After Post Content"
+    }
+  ]
+}

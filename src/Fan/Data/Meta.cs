@@ -23,5 +23,10 @@ namespace Fan.Data
         /// know how to deserialize it back an object.
         /// </summary>
         public string Value { get; set; }
+
+        /// <summary>
+        /// The type of meta.
+        /// </summary>
+        public EMetaType Type { get; set; }
     }
 }

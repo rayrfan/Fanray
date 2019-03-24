@@ -105,7 +105,7 @@ namespace Fan.Web
             services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
 
             // HttpContext
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
 
             // Mvc and Razor Pages
 
@@ -120,9 +120,10 @@ namespace Fan.Web
             {
                 options.AddPolicy("AdminRoles", policy => policy.RequireRole("Administrator", "Editor"));
             });
-
+             
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                .AddSessionStateTempDataProvider()
                 .AddJsonOptions(options => {
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -130,7 +131,10 @@ namespace Fan.Web
                 .AddRazorPagesOptions(options =>
                 {
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                    options.Conventions.AuthorizeFolder("/Widgets", "AdminRoles");
                 });
+
+            services.AddSession(); // for TempData only
 
             // https://stackoverflow.com/q/50472962/32240
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -169,12 +173,14 @@ namespace Fan.Web
             app.UseStaticFiles();
             app.UseAuthentication(); // UseIdentity is obsolete, UseAuth is recommended
             app.UseCookiePolicy();
+            app.UseSession(); // for TempData only
             app.UseMvc(routes => RegisterRoutes(routes, app));
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var db = serviceScope.ServiceProvider.GetService<FanDbContext>();
-                db.Database.Migrate();
+                if (!db.Database.ProviderName.Equals("Microsoft.EntityFrameworkCore.InMemory"))
+                    db.Database.Migrate();
             }
         }
 

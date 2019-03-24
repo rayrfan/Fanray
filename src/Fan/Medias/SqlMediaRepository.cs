@@ -15,13 +15,6 @@ namespace Fan.Medias
             _db = db;
         }
 
-        public async Task DeleteAsync(int id)
-        {
-            var media = await _entities.SingleAsync(m => m.Id == id);
-            _entities.Remove(media);
-            await _db.SaveChangesAsync();
-        }
-
         public async Task<Media> GetAsync(string fileName, DateTimeOffset uploadedOn)
         {
             return await _entities.SingleOrDefaultAsync(m =>

@@ -44,9 +44,22 @@ namespace Fan.Exceptions
         }
 
         /// <summary>
+        /// Thrown with a <see cref="EExceptionType"/> and inner exception.
+        /// </summary>
+        /// <param name="exceptionType"></param>
+        /// <param name="inner"></param>
+        public FanException(EExceptionType exceptionType, Exception inner)
+            : base("", inner)
+        {
+            ExceptionType = exceptionType;
+        }
+
+        /// <summary>
         /// A list of <see cref="ValidationFailure"/>. Null if the exception thrown is not
         /// as a result of <see cref="ValidationResult.IsValid"/> being false.
         /// </summary>
         public IList<ValidationFailure> ValidationFailures { get; }
+
+        public EExceptionType ExceptionType { get; }
     }
 }

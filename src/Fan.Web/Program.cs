@@ -31,7 +31,8 @@ namespace Fan.Web
             Log.Logger = new LoggerConfiguration()
                .ReadFrom.Configuration(configuration)
                .Enrich.FromLogContext()
-               .WriteTo.ApplicationInsightsTraces(configuration.GetValue<string>("ApplicationInsights:InstrumentationKey"))
+               .WriteTo.ApplicationInsights(configuration.GetValue<string>("ApplicationInsights:InstrumentationKey"),
+                        TelemetryConverter.Traces, Serilog.Events.LogEventLevel.Information)
                .CreateLogger();
 
             try
