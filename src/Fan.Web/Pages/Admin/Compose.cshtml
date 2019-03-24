@@ -12,7 +12,7 @@
     <title>@ViewData["Title"] - Fanray</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
-    <link href="https://unpkg.com/vuetify@1.4.6/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.7/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/themes/@Model.Theme/css/content.css" asp-append-version="true" />
 </head>
@@ -137,12 +137,12 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
                 @*<v-footer class="pa-3" absolute style="height:auto">
-                    <v-layout justify-center>
-                        <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
-                            <v-icon large color="info">help_outline</v-icon>
-                        </a>
-                    </v-layout>
-                </v-footer>*@
+                        <v-layout justify-center>
+                            <a target="_blank" style="text-decoration:none" href="https://github.com/FanrayMedia/Fanray/wiki/Using-the-Composer" title="How to use the composer">
+                                <v-icon large color="info">help_outline</v-icon>
+                            </a>
+                        </v-layout>
+                    </v-footer>*@
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3"
@@ -218,15 +218,15 @@
         </v-app>
     </div>
     <environment include="Development">
-        <script src="https://unpkg.com/vue@2.6.0/dist/vue.js"></script>
-        <script src="https://unpkg.com/vuetify@1.4.6/dist/vuetify.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.7/dist/vuetify.js"></script>
     </environment>
     <environment exclude="Development">
-        <script src="https://unpkg.com/vue@2.6.0/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/vuetify@1.4.6/dist/vuetify.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.7/dist/vuetify.min.js"></script>
     </environment>
-    <script src="https://unpkg.com/vuex@3.0.1/dist/vuex.min.js"></script>
-    <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.0/dist/vuex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
     <script src="~/admin/js/ckeditor.js" asp-append-version="true"></script>
     <partial name="_BlogMediaTemplate" />
     <script>
