@@ -60,7 +60,6 @@ namespace Fan.Web.ViewModels
                 $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}" :
                 $"https://twitter.com/intent/tweet?text={Title}&url={permalinkShort}&hashtags={hash}";
             FacebookShareLink = $"https://www.facebook.com/sharer/sharer.php?u={permalinkShort}";
-            GoogleShareLink = $"https://plus.google.com/share?url={permalinkShort}";
             LinkedInShareLink = $"http://www.linkedin.com/shareArticle?mini=true&url={permalinkShort}&title={Title}";
         }
 
@@ -137,7 +136,6 @@ namespace Fan.Web.ViewModels
 
         public string TwitterShareLink { get; }
         public string FacebookShareLink { get; }
-        public string GoogleShareLink { get; }
         public string LinkedInShareLink { get; }
     }
 }
