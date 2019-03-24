@@ -1,0 +1,35 @@
+﻿@page
+@model Fan.Web.Pages.Widgets.BlogCategories.EditModel
+@{
+    ViewData["Title"] = "Edit Blog Categories Widget";
+    Layout = "~/Pages/Widgets/_EditLayout.cshtml";
+}
+
+<edit-widget inline-template>
+    <v-form>
+        <v-text-field label="Title" v-model="widget.title"></v-text-field>
+        <v-checkbox label="Show post counts" v-model="widget.showPostCount"></v-checkbox>
+        <v-btn @@click="save">Save</v-btn>
+    </v-form>
+</edit-widget>
+
+@section Scripts{
+    <script>
+        Vue.component('edit-widget', {
+            data: () => ({
+                widget: @Html.Raw(Model.WidgetJson),
+            }),
+            methods: {
+                save() {
+                    axios.post('/widgets/blogcategories/edit', this.widget, this.$root.headers)
+                        .then(() => this.$root.updateParent({
+                            title: this.widget.title,
+                            widgetId: this.widget.id,
+                            areaId: this.widget.areaId,
+                        }))
+                        .catch(err => this.$root.updateParentErr(err));
+                }
+            },
+        });
+    </script>
+}

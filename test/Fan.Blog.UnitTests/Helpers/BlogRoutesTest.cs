@@ -46,7 +46,7 @@ namespace Fan.Blog.UnitTests.Helpers
             var postId = 1;
             var permalink = BlogRoutes.GetPostPermalink(postId);
 
-            Assert.Equal("/post/1", permalink);
+            Assert.Equal("/blog/post/1", permalink);
         }
 
         /// <summary>

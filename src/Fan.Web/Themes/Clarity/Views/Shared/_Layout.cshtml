@@ -31,14 +31,14 @@
 </head>
 <body>
     <vc:header />
-    <partial name="_CookieConsentPartial" />
+    <vc:cookie-consent />
     <main role="main" class="container">
         <div class="row">
             <div class="col-md-9 blog-main">
                 @RenderBody()
             </div>
             <aside class="col-md-3">
-                <partial name="_Sidebar" />
+                <widget-area id="blog-sidebar1" />
             </aside>
         </div>
     </main>

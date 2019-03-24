@@ -129,7 +129,7 @@ namespace Fan.Web.Controllers
         public async Task<IActionResult> PostPerma(int id)
         {
             var post = await _blogSvc.GetAsync(id);
-            return RedirectToAction("Post", new { post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day, post.Slug });
+            return Redirect(BlogRoutes.GetPostRelativeLink(post.CreatedOn, post.Slug));
         }
 
         public async Task<IActionResult> Category(string slug)

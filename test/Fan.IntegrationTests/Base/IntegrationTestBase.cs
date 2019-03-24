@@ -1,8 +1,11 @@
 ﻿using Fan.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 
 namespace Fan.IntegrationTests.Base
@@ -12,12 +15,18 @@ namespace Fan.IntegrationTests.Base
         /// <summary>
         /// A <see cref="FanDbContext"/> built with Sqlite in-memory mode.
         /// </summary>
-        protected FanDbContext _db;
-        private ILoggerFactory _loggerFactory;
+        protected readonly FanDbContext _db;
+        protected readonly ILoggerFactory _loggerFactory;
+        protected readonly MemoryDistributedCache _cache;
 
         public IntegrationTestBase()
         {
-            _loggerFactory = new ServiceCollection().AddLogging().BuildServiceProvider().GetService<ILoggerFactory>();
+            var serviceProvider = new ServiceCollection().AddMemoryCache().AddLogging().BuildServiceProvider();
+            _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+
+            var memCacheOptions = serviceProvider.GetService<IOptions<MemoryDistributedCacheOptions>>();
+            _cache = new MemoryDistributedCache(memCacheOptions);
+
             _db = GetContextWithSqlite();
         }
 

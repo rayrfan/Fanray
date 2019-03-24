@@ -4,6 +4,10 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Settings;
+using Fan.Themes;
+using Fan.Web.Pages.Widgets.RecentBlogPosts;
+using Fan.Web.Pages.Widgets.SocialIcons;
+using Fan.Widgets;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +28,11 @@ namespace Fan.Web.Pages
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ISettingService _settingSvc;
+        private readonly IThemeService _themeService;
         private readonly IBlogPostService _blogSvc;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
+        private readonly IWidgetService _widgetSvc;
         private readonly ILogger<SetupModel> _logger;
 
         public SetupModel(
@@ -37,6 +43,8 @@ namespace Fan.Web.Pages
             ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
+            IThemeService themeService,
+            IWidgetService widgetService,
             ILogger<SetupModel> logger)
         {
             _userManager = userManager;
@@ -46,6 +54,8 @@ namespace Fan.Web.Pages
             _catSvc = catService;
             _tagSvc = tagService;
             _settingSvc = settingService;
+            _themeService = themeService;
+            _widgetSvc = widgetService;
             _logger = logger;
         }
 
@@ -172,6 +182,9 @@ namespace Fan.Web.Pages
                     // setup blog
                     await SetupBlogAsync();
 
+                    // setup widgets
+                    await SetupThemeAndWidgets();
+
                     return new JsonResult(true);
                 }
 
@@ -225,8 +238,9 @@ namespace Fan.Web.Pages
         private async Task SetupBlogAsync()
         {
             const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray v2.0";
-            const string WELCOME_POST_BODY = @"<p>Welcome and congrats on getting your blog up and running! &nbsp;Fanray v1.0 was a minimal viable blog, you could only post through a client like the Open Live Writer. Fanray v2 builds on v1 and introduces a brand new Admin Panel, you can now do more! &nbsp;Here are a few tips to get you started and please check out the <a href=""https://github.com/FanrayMedia/Fanray/wiki"">Wiki</a> for more details.</p><h2>Getting Started</h2><p>First I recommend complete the setup by going to the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Settings"">Settings</a> page and enter your Disqus and Google Analytics information.</p><p>Bloggers probably spend most of their time writing posts. To help you be productive, I highly recommend spending a few minutes to get familiar with the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer"">Composer</a>, particularly the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer#editor"">Editor</a>.</p><p>The <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Media-Gallery"">Media Gallery</a> gives you a grand view of all your blog images. &nbsp;Here you can upload more images or edit image info etc. The uploaded images are resized and stored on either the file system or Azure Blob Storage, you can configure which <a href=""https://github.com/FanrayMedia/Fanray/wiki/Storage"">Storage</a> in the <code>appsettings.json</code>.</p><p>The <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Categories"">Categories </a>and <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Tags"">Tags</a> pages allow you to easily manage your blog's classifications. &nbsp;For categories there is a default category out of box named <i>Uncategorized</i>, go rename it to something you write about.&nbsp;</p><p>When you are ready to run this app on Azure, please refer to <a href=""https://github.com/FanrayMedia/Fanray/wiki/Deploying-to-Azure"">Deploying to Azure</a>.</p><h2>Contribute</h2><p>Fanray is in its early stages and requires support to move ahead. You can contribute in many ways - ideas, bugs, testing and docs etc. please read the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">Contributing Guide</a>.&nbsp;</p><p>Finally, follow me <a href=""https://twitter.com/FanrayMedia"">@fanraymedia</a> and let me know what you think. Thank you and happy coding :)</p>";
+            const string WELCOME_POST_TITLE = "Welcome to Fanray Blog";
+            const string WELCOME_POST_BODY = @"<p>A few tips to get you started.&nbsp;</p><ul><li>Go to <a href=""/admin/settings"">Settings</a> and enter your Disqus and Google Analytics information.</li><li>Go to <a href=""/admin/widgets"">Widgets</a> and update Social Icons to your own media links.</li><li>Spend a few minutes to get familiar with the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer"">Composer</a>, knowing how to effectively input different contents in the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer#editor"">Editor</a> will help you become more productive blogging.</li><li>Check out <code>appsettings.json</code> to update database, storage, preferred domain, logging and diagnostic settings for local and production.</li><li>When you are ready to run this app on Azure, refer to <a href=""https://github.com/FanrayMedia/Fanray/wiki/Deploying-to-Azure"">Deploying to Azure</a>.</li><li>Feel like contributing? See the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">Contributing Guide</a>.</li></ul><p>Thank you and happy coding :)</p>";
+            const string WELCOME_POST_EXCERPT = "Welcome to Fanray Blog. Here are a few tips to get you started using the blog.";
 
             // create blog setting
             var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>(); // could be initial or an existing blogsettings
@@ -249,9 +263,9 @@ namespace Fan.Web.Pages
             {
                 CategoryTitle = defaultCat.Title,
                 TagTitles = new List<string> { "announcement", "blogging" },
-                //Tags = await _tagSvc.GetTagsAsync(),
                 Title = WELCOME_POST_TITLE,
                 Body = WELCOME_POST_BODY,
+                Excerpt = WELCOME_POST_EXCERPT,
                 UserId = 1,
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
@@ -259,6 +273,54 @@ namespace Fan.Web.Pages
             });
             _logger.LogInformation("Welcome post and default category created.");
             _logger.LogInformation("Blog Setup completes.");
+        }
+
+        /// <summary>
+        /// Activiates the default Clarity theme, registers system-defined widget areas, 
+        /// then load some widgets.
+        /// </summary>
+        private async Task SetupThemeAndWidgets()
+        {
+            // Clarity theme
+            await _themeService.ActivateThemeAsync("Clarity");
+
+            // System-defined Areas
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePost.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePostList.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPostList.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3.Id);
+
+            // Area: BlogSidebar1
+
+            // Social Icons
+            var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
+            var widgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, 
+                "Fan.Web.Pages.Widgets.SocialIcons.SocialIconsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 0);
+
+            // Blog Tags
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogTags.BlogTagsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 1);
+
+            // Blog Categories
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 2);
+
+            // Blog Archives
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Pages.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 3);
+
+            // Area: BlogAfterPost
+
+            // Recent Blog Posts
+            var recentBlogPostsWidget = new RecentBlogPostsWidget { ShowPostExcerpt = true };
+            widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "Fan.Web.Pages.Widgets.RecentBlogPosts.RecentBlogPostsWidget, Fan.Web");
+            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
         }
     }
 

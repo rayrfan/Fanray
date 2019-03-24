@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -56,10 +57,10 @@ namespace Fan.UnitTests.Settings
         public async void UpsertSettings_updates_meta_if_setting_exists_and_a_new_value_comes_in()
         {
             // Arrange
-            _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
+            _repoMock.Setup(repo => repo.GetAsync("coresettings.title", EMetaType.Setting))
                 .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "New value" }));
-            _repoMock.Setup(repo => repo.AllAsync())
-                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "New value" } }));
+            _repoMock.Setup(repo => repo.FindAsync(m => m.Type == EMetaType.Setting))
+                .Returns(Task.FromResult((new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "New value" } }).AsEnumerable()));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());
@@ -72,10 +73,10 @@ namespace Fan.UnitTests.Settings
         public async void UpsertSettings_does_not_update_meta_if_setting_exists_but_value_not_new()
         {
             // Arrange
-            _repoMock.Setup(repo => repo.GetAsync("coresettings.title"))
+            _repoMock.Setup(repo => repo.GetAsync("coresettings.title", EMetaType.Setting))
                 .Returns(Task.FromResult(new Meta() { Key = "coresettings.title", Value = "Fanray" }));
-            _repoMock.Setup(repo => repo.AllAsync())
-                .Returns(Task.FromResult(new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "Fanray" } }));
+            _repoMock.Setup(repo => repo.FindAsync(m => m.Type == EMetaType.Setting))
+                .Returns(Task.FromResult((new List<Meta>() { new Meta() { Key = "coresettings.title", Value = "Fanray" } }).AsEnumerable()));
 
             // Act
             await _settingSvc.UpsertSettingsAsync(new CoreSettings());

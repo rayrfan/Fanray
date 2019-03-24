@@ -79,19 +79,19 @@ namespace Fan.Blog.Services
         public const char IMAGE_PATH_SEPARATOR = '/';
 
         /// <summary>
-        /// Large image size 1200 pixel.
+        /// Large image size 1800 pixel.
         /// </summary>
-        public const int LARGE_IMG_SIZE = 1200;
+        public const int LARGE_IMG_SIZE = 1800;
 
         /// <summary>
-        /// Medium image size 800 pixel.
+        /// Medium image size 1200 pixel.
         /// </summary>
-        public const int MEDIUM_IMG_SIZE = 800;
+        public const int MEDIUM_IMG_SIZE = 1200;
 
         /// <summary>
-        /// Small image size 400 pixel.
+        /// Small image size 600 pixel.
         /// </summary>
-        public const int SMALL_IMG_SIZE = 400;
+        public const int SMALL_IMG_SIZE = 600;
 
         /// <summary>
         /// The different image resizes per image upload.

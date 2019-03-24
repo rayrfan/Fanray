@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Fan.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,9 +44,16 @@ namespace Fan.Data
         /// </exception>
         public virtual async Task<T> CreateAsync(T entity)
         {
-            await _entities.AddAsync(entity);
-            await _db.SaveChangesAsync();
-            return entity;
+            try
+            {
+                await _entities.AddAsync(entity);
+                await _db.SaveChangesAsync();
+                return entity;
+            }
+            catch (DbUpdateException dbUpdException)
+            {
+                throw new FanException(EExceptionType.MetaDuplicate, dbUpdException);
+            }
         }
 
         /// <summary>
@@ -58,6 +66,17 @@ namespace Fan.Data
             _entities.AddRange(entities);
             await _db.SaveChangesAsync();
             return entities;
+        }
+
+        /// <summary>
+        /// Deletes an entity.
+        /// </summary>
+        /// <param name="id">The integer id of the entity.</param>
+        public virtual async Task DeleteAsync(int id)
+        {
+            var entity = await _entities.SingleAsync(e => e.Id == id);
+            _entities.Remove(entity);
+            await _db.SaveChangesAsync();
         }
 
         /// <summary>

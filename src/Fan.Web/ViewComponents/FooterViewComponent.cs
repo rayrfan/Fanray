@@ -16,7 +16,7 @@ namespace Fan.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            return View(coreSettings);
+            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Footer.cshtml", coreSettings);
         }
     }
 }
