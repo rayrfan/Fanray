@@ -14,19 +14,16 @@
 	<a href="#license">License</a>
   </p>
   <p align="center">
-	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
-	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
-	</a>
-	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
-	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
+	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
 	</a>
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="feature branch status">
+	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
 	</a>
   </p>
   <p align="center">
     <a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
-	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="feature branch status">
+	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="Gitter">
     </a>
     <a href="https://github.com/FanrayMedia/Fanray/contributors/">
       <img src="https://img.shields.io/github/contributors/FanrayMedia/Fanray.svg" alt="Contributors" />
@@ -45,20 +42,9 @@
 
 Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for details.
 
-| Blog | Infrastructure | Libs / Frameworks
-| --- | --- |  --- | 
-| Autosave draft    | Caching                                   | ASP.NET Core
-| Categories, Tags  | Error Handling						    | Bootstrap4
-| Comments (Disqus) | Events									| CKEditor5
-| Google Analytics  | Image Resizing                            | Entity Framework Core
-| Media Gallery     | Logging (File, Seq, ApplicationInsights)  | HtmlAgilityPack
-| Open Live Writer  | MetaWeblog API                            | Magick.NET
-| Preferred Domain  | Settings                                  | Mediatr
-| RSS               | Storage (File System, Azure Blob Storage) | Moq
-| SEO-Friendly URLs | Testing (Unit, Integration)               | Serilog
-| Shortcodes		| Validation								| Vue.js 
-| Site Setup        |                                           | Vuetify.js
-| Widgets           |											| xUnit
+**Blog**: Autosave draft, Categories, Comments (Disqus), Google Analytics, Media Gallery, Open Live Writer, Preferred Domain, RSS, SEO-Friendly URLs, Shortcodes, Site Setup, Users, Widgets.
+
+**Infrastructure**: Caching, Error Handling, Events, Image Resizing, Logging (File, Seq, ApplicationInsights), MetaWeblog API, Settings, Storage (File System, Azure Blob Storage), Testing (Unit, Integration), Validation.
  
 ## Quick Start
 

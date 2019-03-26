@@ -3,8 +3,7 @@
 The Clarity is the default Fanray theme.  All Fanray themes must provide the following 2 css files
 
 - **style.css**: the theme styles for client site.
-- **content.css**: the content styles for the editor, it includes **typography** and the **content width** from the theme styles. 
-This css file enables user to see the exact post styling while the user is still composing the post.
+- **content.css**: the content styles for the editor, it includes **typography** and the **content width** from the theme styles. It's used in Compose.cshtml, this css file enables user to see the exact post styling while the user is still composing the post.
 
 ## Scss
 
