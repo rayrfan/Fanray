@@ -7,7 +7,7 @@
 <site-widgets inline-template>
     <v-container fluid>
         <v-layout align-start>
-            <v-flex xs8 sm6 md3 elevation-1 ma-2>
+            <v-flex xs6 md4 elevation-1 ma-2>
                 <v-list dense>
                     <v-subheader>
                         Available Widgets
@@ -29,7 +29,7 @@
                     </draggable>
                 </v-list>
             </v-flex>
-            <v-flex xs8 sm6 md3>
+            <v-flex xs6 md4>
                 <v-list dense class="elevation-1 ma-2" v-for="area in widgetAreas" :key="area.id">
                     <v-subheader>
                         {{ area.title }}
