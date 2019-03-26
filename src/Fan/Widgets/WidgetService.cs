@@ -41,7 +41,13 @@ namespace Fan.Widgets
         };
 
         public const string WIDGET_INFO_FILE_NAME = "widget.json";
-        public string WidgetDirectoryName { get; set; } = $"Pages{Path.DirectorySeparatorChar}Widgets";
+        public const string WIDGET_INFO_DIR_NAME = "Widgets";
+        /// <summary>
+        /// Returns the path to widget view file which is located in Fan.Web/Widgets folder.
+        /// </summary>
+        /// <param name="widgetName"></param>
+        /// <returns></returns>
+        public static string GetWidgetViewPath(string widgetName) => $"~/Widgets/{widgetName}/{widgetName}.cshtml";
 
         private readonly IMetaRepository metaRepository;
         private readonly IThemeService themeService;
@@ -180,7 +186,7 @@ namespace Fan.Widgets
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_INFO, Cache_Time_Installed_Widgets_Info, async () =>
             { 
                 var list = new List<WidgetInfo>();
-                var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WidgetDirectoryName);
+                var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGET_INFO_DIR_NAME);
 
                 foreach (var dir in Directory.GetDirectories(widgetsFolder))
                 {

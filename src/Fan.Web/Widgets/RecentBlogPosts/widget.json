@@ -1,0 +1,8 @@
+{
+  "name": "Recent Blog Posts",
+  "description": "Your most recent posts. Visible only when you have at least 2 posts.",
+  "type": "Fan.Web.Widgets.RecentBlogPosts.RecentBlogPostsWidget, Fan.Web",
+  "version": "1.0.0",
+  "author": "Ray Fan",
+  "url": "https://www.fanray.com"
+}

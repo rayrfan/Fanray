@@ -40,11 +40,11 @@
 
 ## Features
 
-Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for details.
-
 **Blog**: Autosave draft, Categories, Comments (Disqus), Google Analytics, Media Gallery, Open Live Writer, Preferred Domain, RSS, SEO-Friendly URLs, Shortcodes, Site Setup, Users, Widgets.
 
 **Infrastructure**: Caching, Error Handling, Events, Image Resizing, Logging (File, Seq, ApplicationInsights), MetaWeblog API, Settings, Storage (File System, Azure Blob Storage), Testing (Unit, Integration), Validation.
+
+Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for details.
  
 ## Quick Start
 

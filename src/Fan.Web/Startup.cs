@@ -130,6 +130,7 @@ namespace Fan.Web
                 })
                 .AddRazorPagesOptions(options =>
                 {
+                    options.RootDirectory = "/Manage";
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
                     options.Conventions.AuthorizeFolder("/Widgets", "AdminRoles");
                 });

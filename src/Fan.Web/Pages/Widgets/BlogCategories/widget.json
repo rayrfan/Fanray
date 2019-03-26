@@ -1,8 +1,0 @@
-{
-  "name": "Blog Categories",
-  "description": "A list of blog categories.",
-  "type": "Fan.Web.Pages.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web",
-  "version": "1.0.0",
-  "author": "Ray Fan",
-  "url": "https://www.fanray.com"
-}

@@ -44,11 +44,7 @@ namespace Fan.IntegrationTests.Widgets
             // theme service
             themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
 
-            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
-            {
-                // set widget dir
-                WidgetDirectoryName = "Widgets"
-            };
+            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc);
         }
 
         /// <summary>
