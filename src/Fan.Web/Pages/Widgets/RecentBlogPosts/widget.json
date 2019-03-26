@@ -1,6 +1,6 @@
 {
   "name": "Recent Blog Posts",
-  "description": "Your most recent posts. Note: you must have at least have 2 posts for it to show up.",
+  "description": "Your most recent posts. Visible only when you have at least 2 posts.",
   "type": "Fan.Web.Pages.Widgets.RecentBlogPosts.RecentBlogPostsWidget, Fan.Web",
   "version": "1.0.0",
   "author": "Ray Fan",
