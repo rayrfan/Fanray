@@ -5,7 +5,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Settings;
 using Fan.Shortcodes;
-using Fan.Web.ViewModels;
+using Fan.Web.Mvc.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Distributed;
@@ -18,7 +18,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Fan.Web.Controllers
+namespace Fan.Web.Mvc.Controllers
 {
     public class BlogController : Controller
     {

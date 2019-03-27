@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Controllers
+namespace Fan.Web.Mvc.Controllers
 {
     public class HomeController : Controller
     {

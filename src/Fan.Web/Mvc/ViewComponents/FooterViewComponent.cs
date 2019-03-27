@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Web.ViewComponents
+namespace Fan.Web.Mvc.ViewComponents
 {
     public class FooterViewComponent : ViewComponent
     {

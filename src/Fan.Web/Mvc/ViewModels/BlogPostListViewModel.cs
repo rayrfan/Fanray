@@ -4,7 +4,7 @@ using Fan.Blog.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace Fan.Web.ViewModels
+namespace Fan.Web.Mvc.ViewModels
 {
     /// <summary>
     /// View model for a list of blog posts.

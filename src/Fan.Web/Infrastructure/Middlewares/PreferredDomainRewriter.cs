@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 
-namespace Fan.Web.Infrastructure
+namespace Fan.Web.Infrastructure.Middlewares
 {
     public class PreferredDomainRewriter : IPreferredDomainRewriter
     {

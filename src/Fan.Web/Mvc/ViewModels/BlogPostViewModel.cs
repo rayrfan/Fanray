@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Fan.Web.ViewModels
+namespace Fan.Web.Mvc.ViewModels
 {
     /// <summary>
     /// View model for a blog post.

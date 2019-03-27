@@ -1,4 +1,4 @@
-﻿namespace Fan.Web.ViewModels
+﻿namespace Fan.Web.Mvc.ViewModels
 {
     public class CookieConsentViewModel
     {

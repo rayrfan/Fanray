@@ -1,11 +1,11 @@
 ﻿using Fan.Membership;
 using Fan.Settings;
-using Fan.Web.ViewModels;
+using Fan.Web.Mvc.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Web.ViewComponents
+namespace Fan.Web.Mvc.ViewComponents
 {
     public class HeaderViewComponent : ViewComponent
     {

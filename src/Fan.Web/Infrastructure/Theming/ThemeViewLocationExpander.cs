@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Fan.Web.Infrastructure
+namespace Fan.Web.Infrastructure.Theming
 {
     /// <summary>
     /// Expand view location to themes, theme's view overrides view with same name outside.

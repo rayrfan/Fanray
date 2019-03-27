@@ -1,12 +1,12 @@
 ﻿using Fan.Settings;
-using Fan.Web.ViewModels;
+using Fan.Web.Mvc.ViewModels;
 using Microsoft.ApplicationInsights.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.Web.ViewComponents
+namespace Fan.Web.Mvc.ViewComponents
 {
     /// <summary>
     /// The view component for Google Analytics and Application Insights.

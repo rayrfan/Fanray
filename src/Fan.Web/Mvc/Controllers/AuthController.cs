@@ -1,11 +1,11 @@
 ﻿using Fan.Membership;
-using Fan.Web.ViewModels;
+using Fan.Web.Mvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Controllers
+namespace Fan.Web.Mvc.Controllers
 {
     /// <summary>
     /// Api for authentication.

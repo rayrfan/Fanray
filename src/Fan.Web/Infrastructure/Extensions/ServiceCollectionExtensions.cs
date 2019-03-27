@@ -2,9 +2,8 @@
 using Fan.Settings;
 using Fan.Shortcodes;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Fan.Web.Infrastructure
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
