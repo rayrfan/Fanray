@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Web.Mvc.ViewModels
+namespace Fan.Web.Api.ViewModels
 {
     /// <summary>
     /// The view model for Pages/Login.cshtml.
