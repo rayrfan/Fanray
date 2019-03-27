@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Fan.Web.Pages.Admin
+namespace Fan.Web.Manage.Admin
 {
     /// <summary>
     /// The admin index page, it redirects.

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Pages.Admin
+namespace Fan.Web.Manage.Admin
 {
     public class WidgetsModel : PageModel
     {
