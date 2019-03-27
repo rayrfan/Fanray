@@ -40,7 +40,7 @@ namespace Fan.IntegrationTests.Data
         }
 
         /// <summary>
-        /// Meta table Key with value that is different in casing is considered different values.
+        /// Meta table Key column is case sensitive, "key" and "Key" are considered two different values.
         /// </summary>
         [Fact]
         public async void Meta_table_key_is_case_sensitive()

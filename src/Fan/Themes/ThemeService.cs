@@ -63,11 +63,12 @@ namespace Fan.Themes
                 throw new FanException($"Theme {folderName} contains invalid characters.");
 
             // register theme if not exist
+            folderName = folderName.ToLower(); // lower case
             if (await metaRepository.GetAsync(folderName, EMetaType.Theme) == null)
             {
                 await metaRepository.CreateAsync(new Meta
                 {
-                    Key = folderName.ToLower(), // lower case
+                    Key = folderName, 
                     Value = "", // empty for now
                     Type = EMetaType.Theme,
                 });
