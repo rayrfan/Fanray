@@ -82,9 +82,6 @@ namespace Fan.Medias
             {
                 await source.CopyToAsync(fileStream);
             }
-
-            // edge case for composer file dropping
-            source.Close();
         }
 
         /// <summary>

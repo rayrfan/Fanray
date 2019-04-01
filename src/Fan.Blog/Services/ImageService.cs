@@ -79,19 +79,27 @@ namespace Fan.Blog.Services
         public const char IMAGE_PATH_SEPARATOR = '/';
 
         /// <summary>
-        /// Large image size 1800 pixel.
+        /// Large image (lg) size 1600 pixel (2x).
         /// </summary>
-        public const int LARGE_IMG_SIZE = 1800;
+        public const int LARGE_IMG_SIZE = 1600;
 
         /// <summary>
-        /// Medium image size 1200 pixel.
+        /// Medium large image (ml) size 1200 pixel (1.5x).
         /// </summary>
-        public const int MEDIUM_IMG_SIZE = 1200;
+        public const int MEDIUM_LARGE_IMG_SIZE = 1200;
 
         /// <summary>
-        /// Small image size 600 pixel.
+        /// Medium image (md) size 800 pixel (1x default).
         /// </summary>
-        public const int SMALL_IMG_SIZE = 600;
+        public const int MEDIUM_IMG_SIZE = 800;
+
+        /// <summary>
+        /// Small image (sm) size 400 pixel.
+        /// </summary>
+        /// <remarks>
+        /// Good for media gallery, small low res phones.
+        /// </remarks>
+        public const int SMALL_IMG_SIZE = 400;
 
         /// <summary>
         /// The different image resizes per image upload.
@@ -112,6 +120,11 @@ namespace Fan.Blog.Services
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
                 new ImageResizeInfo {
+                    TargetSize = MEDIUM_LARGE_IMG_SIZE,
+                    Path = GetImagePath(uploadedOn, EImageSize.MediumLarge),
+                    PathSeparator = IMAGE_PATH_SEPARATOR,
+                },
+                new ImageResizeInfo {
                     TargetSize = MEDIUM_IMG_SIZE,
                     Path = GetImagePath(uploadedOn, EImageSize.Medium),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
@@ -125,7 +138,7 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// For gif I only save original so there is no resizing.
+        /// For gif I only save original and small.
         /// </summary>
         /// <param name="uploadedOn"></param>
         public static List<ImageResizeInfo> GetImageResizeListForGif(DateTimeOffset uploadedOn)
@@ -134,6 +147,11 @@ namespace Fan.Blog.Services
                 new ImageResizeInfo {
                     TargetSize = int.MaxValue,
                     Path = GetImagePath(uploadedOn, EImageSize.Original),
+                    PathSeparator = IMAGE_PATH_SEPARATOR,
+                },
+                new ImageResizeInfo {
+                    TargetSize = SMALL_IMG_SIZE,
+                    Path = GetImagePath(uploadedOn, EImageSize.Small),
                     PathSeparator = IMAGE_PATH_SEPARATOR,
                 },
             };
@@ -156,6 +174,9 @@ namespace Fan.Blog.Services
             {
                 case EImageSize.Large:
                     sizePath = "lg";
+                    break;
+                case EImageSize.MediumLarge:
+                    sizePath = "ml";
                     break;
                 case EImageSize.Medium:
                     sizePath = "md";
@@ -186,11 +207,18 @@ namespace Fan.Blog.Services
 
             // delete file from storage
             await DeleteImageFileAsync(media, EImageSize.Original);
-            if (resizeCount == 3)
+            if (resizeCount == 4)
             {
                 await DeleteImageFileAsync(media, EImageSize.Small);
                 await DeleteImageFileAsync(media, EImageSize.Medium);
+                await DeleteImageFileAsync(media, EImageSize.MediumLarge);
                 await DeleteImageFileAsync(media, EImageSize.Large);
+            }
+            else if (resizeCount == 3)
+            {
+                await DeleteImageFileAsync(media, EImageSize.Small);
+                await DeleteImageFileAsync(media, EImageSize.Medium);
+                await DeleteImageFileAsync(media, EImageSize.MediumLarge);
             }
             else if (resizeCount == 2)
             {
