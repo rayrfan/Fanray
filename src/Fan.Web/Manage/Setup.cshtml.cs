@@ -299,27 +299,26 @@ namespace Fan.Web.Pages
 
             // Social Icons
             var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
-            var widgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, 
-                "Fan.Web.Widgets.SocialIcons.SocialIconsWidget, Fan.Web");
+            var widgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, "SocialIcons");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 0);
 
             // Blog Tags
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Widgets.BlogTags.BlogTagsWidget, Fan.Web");
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogTags");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 1);
 
             // Blog Categories
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Widgets.BlogCategories.BlogCategoriesWidget, Fan.Web");
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogCategories");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 2);
 
             // Blog Archives
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("Fan.Web.Widgets.BlogArchives.BlogArchivesWidget, Fan.Web");
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogArchives");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 3);
 
             // Area: BlogAfterPost
 
             // Recent Blog Posts
             var recentBlogPostsWidget = new RecentBlogPostsWidget { ShowPostExcerpt = true };
-            widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "Fan.Web.Widgets.RecentBlogPosts.RecentBlogPostsWidget, Fan.Web");
+            widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "RecentBlogPosts");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
         }
     }

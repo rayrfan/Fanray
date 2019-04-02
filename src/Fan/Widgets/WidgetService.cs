@@ -11,7 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Fan.IntegrationTests")]
 
 namespace Fan.Widgets
 {
@@ -151,14 +154,13 @@ namespace Fan.Widgets
                     foreach (var id in widgetArea.WidgetIds)
                     {
                         var widget = await GetWidgetAsync(id);
-                        var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+                        var widgetInfo = await GetWidgetInfoByFolderAsync(widget.Folder);
                         var widgetInstance = new WidgetInstance {
                             Id = id,
                             Title = widget.Title,
                             Name = widgetInfo.Name,
-                            Folder = widgetInfo.Folder,
+                            Folder = widget.Folder,
                             AreaId = areaInfo.Id,
-                            Type = widget.Type,
                         };
 
                         widgetAreaInstance.Widgets.Add(widget);
@@ -200,17 +202,6 @@ namespace Fan.Widgets
             });
         }
 
-        /// <summary>
-        /// Returns a <see cref="WidgetInfo"/> based on a given widget type.
-        /// </summary>
-        /// <param name="widgetType"></param>
-        /// <returns></returns>
-        public async Task<WidgetInfo> GetWidgetInfoAsync(string widgetType)
-        {
-            var widgetInfos = await GetInstalledWidgetsInfoAsync();
-            return widgetInfos.Single(wi => wi.Type.Equals(widgetType, StringComparison.OrdinalIgnoreCase));
-        }
-
         // -------------------------------------------------------------------- get / update
 
         /// <summary>
@@ -222,8 +213,9 @@ namespace Fan.Widgets
         {
             var widgetMeta = await metaRepository.GetAsync(id);
             var widgetBase = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
+            var widgetType = await GetWidgetTypeByFolderAsync(widgetBase.Folder);
 
-            var type = Type.GetType(widgetBase.Type);
+            var type = Type.GetType(widgetType);
             var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
             widget.Id = id;
 
@@ -278,15 +270,14 @@ namespace Fan.Widgets
             // invalidate cache
             await InvalidAreaCacheAsync();
 
-            var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+            var widgetInfo = await GetWidgetInfoByFolderAsync(widget.Folder);
             return new WidgetInstance
             {
                 Id = widgetId,
                 Title = widget.Title,
                 Name = widgetInfo.Name,
-                Folder = widgetInfo.Folder,
+                Folder = widget.Folder,
                 AreaId = areaId,
-                Type = widget.Type,
             };
         }
 
@@ -342,36 +333,37 @@ namespace Fan.Widgets
         // -------------------------------------------------------------------- create / delete
 
         /// <summary>
-        /// Creates a widget instance by type. 
+        /// Creates a widget instance. 
         /// </summary>
         /// <param name="widgetType"></param>
         /// <returns></returns>
         /// <remarks>
         /// The newly created instance has the widget's default values.
         /// </remarks>
-        public async Task<int> CreateWidgetAsync(string widgetType)
+        public async Task<int> CreateWidgetAsync(string folder)
         {
+            var widgetType = await GetWidgetTypeByFolderAsync(folder);
             var type = Type.GetType(widgetType);
             var widget = (Widget)Activator.CreateInstance(type);
-            return await CreateWidgetAsync(widget, widgetType);
+            return await CreateWidgetAsync(widget, folder);
         }
 
         /// <summary>
         /// Creates a widget instance by a given widget object.
         /// </summary>
         /// <param name="widget"></param>
-        /// <param name="widgetType"></param>
+        /// <param name="folder"></param>
         /// <returns></returns>
         /// <remarks>
         /// The widget object has the widget's seed values.
         /// </remarks>
-        public async Task<int> CreateWidgetAsync(Widget widget, string widgetType)
+        public async Task<int> CreateWidgetAsync(Widget widget, string folder)
         {
             // add type info
-            widget.Type = widgetType;
+            widget.Folder = folder;
 
             // get widget info
-            var widgetInfo = await GetWidgetInfoAsync(widget.Type);
+            var widgetInfo = await GetWidgetInfoByFolderAsync(folder);
 
             Meta metaWidget = null;
             while (metaWidget == null)
@@ -405,6 +397,28 @@ namespace Fan.Widgets
         }
 
         // -------------------------------------------------------------------- private methods
+
+        /// <summary>
+        /// Returns widget type by folder.
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <returns></returns>
+        internal async Task<string> GetWidgetTypeByFolderAsync(string folder)
+        {
+            var info = await GetWidgetInfoByFolderAsync(folder); 
+            return info.Type;
+        }
+
+        /// <summary>
+        /// Returns <see cref="WidgetInfo"/> by folder.
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <returns></returns>
+        private async Task<WidgetInfo> GetWidgetInfoByFolderAsync(string folder)
+        {
+            var widgetInfos = await GetInstalledWidgetsInfoAsync();
+            return widgetInfos.Single(wi => wi.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
+        }
 
         /// <summary>
         /// Returns a <see cref="Meta"/> area record that is either by system or by theme.

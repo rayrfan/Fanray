@@ -153,7 +153,7 @@
                     let dto = {
                         areaToId: evt.to.id,
                         index: evt.newIndex,
-                        widgetType: null,
+                        folder: null,
                         widgetId: 0,
                         areaFromId: null,
                         name: null,
@@ -161,13 +161,13 @@
                     };
 
                     if (fromInfos) {
-                        dto.widgetType = this.widgetInfos[evt.oldIndex].type;
+                        dto.folder = this.widgetInfos[evt.oldIndex].folder;
                     }
                     else {
                         let area = this.widgetAreas.find(a => a.id === evt.from.id);
                         let widgetIns = area.widgetInstances[evt.oldIndex];
 
-                        dto.widgetType = widgetIns.type;
+                        dto.folder = widgetIns.folder;
                         dto.widgetId = widgetIns.id;
                         dto.areaFromId = evt.from.id;
                         dto.name = widgetIns.name;
@@ -230,7 +230,7 @@
                     this.dialogVisible = true;
 
                     let dto = {
-                        widgetType: widget.type,
+                        folder: widget.folder,
                         widgetId: widget.id,
                     };
                     axios.post('/admin/widgets?handler=edit', dto, this.$root.headers)

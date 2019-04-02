@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Fan.Widgets
+﻿namespace Fan.Widgets
 {
     /// <summary>
     /// Widget base class.
@@ -23,8 +21,8 @@ namespace Fan.Widgets
         /// </remarks>
         public string Title { get; set; }
         /// <summary>
-        /// The full .NET type of the widget "namespace.type, assembly".
+        /// Folder name, <see cref="WidgetInfo.Folder"/>.
         /// </summary>
-        public string Type { get; set; }
+        public string Folder { get; set; }
     }
 }

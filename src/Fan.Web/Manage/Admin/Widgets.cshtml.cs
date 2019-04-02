@@ -44,7 +44,7 @@ namespace Fan.Web.Manage.Admin
             // user drags a widget from infos to an area
             if (dto.AreaFromId.IsNullOrEmpty())
             {
-                var widgetId = await _widgetService.CreateWidgetAsync(dto.WidgetType);
+                var widgetId = await _widgetService.CreateWidgetAsync(dto.Folder);
                 widgetInst = await _widgetService.AddWidgetToAreaAsync(widgetId, dto.AreaToId, dto.Index);
             }
             else // user drags a widget from area to another
@@ -56,10 +56,8 @@ namespace Fan.Web.Manage.Admin
             return new JsonResult(widgetInst);
         }
 
-        public async Task OnPostReorderAsync([FromBody]OrderWidgetDto dto)
-        {
+        public async Task OnPostReorderAsync([FromBody]OrderWidgetDto dto) =>
             await _widgetService.OrderWidgetInAreaAsync(dto.WidgetId, dto.AreaId, dto.Index);
-        }
 
         /// <summary>
         /// Returns the widget edit page url.
@@ -69,11 +67,8 @@ namespace Fan.Web.Manage.Admin
         /// <remarks>
         /// The edit files are in /Manage/Widgets folder.
         /// </remarks>
-        public async Task<JsonResult> OnPostEditAsync([FromBody]EditWidgetDto dto)
-        {
-            var widgetInfo = await _widgetService.GetWidgetInfoAsync(dto.WidgetType);
-            return new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{widgetInfo.Folder}Edit?widgetId={dto.WidgetId}");
-        }
+        public JsonResult OnPostEdit([FromBody]EditWidgetDto dto) =>
+            new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{dto.Folder}Edit?widgetId={dto.WidgetId}");
 
         /// <summary>
         /// DELETE a widget instance from an area.
@@ -95,9 +90,9 @@ namespace Fan.Web.Manage.Admin
         /// </summary>
         public int Index { get; set; }
         /// <summary>
-        /// The type of the widget user drags.
+        /// The folder name of the widget user drags.
         /// </summary>
-        public string WidgetType { get; set; }
+        public string Folder { get; set; }
         /// <summary>
         /// Id of the area user drags widget to.
         /// </summary>
@@ -127,7 +122,7 @@ namespace Fan.Web.Manage.Admin
 
     public class EditWidgetDto
     {
-        public string WidgetType { get; set; }
+        public string Folder { get; set; }
         public int WidgetId { get; set; }
     }
 }
