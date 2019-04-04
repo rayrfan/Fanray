@@ -1,4 +1,5 @@
 ﻿using Fan.Data;
+using Fan.Exceptions;
 using Fan.IntegrationTests.Base;
 using Fan.Settings;
 using Fan.Themes;
@@ -38,6 +39,9 @@ namespace Fan.IntegrationTests.Themes
             _svc = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, logger);
         }
 
+        /// <summary>
+        /// Activating a theme will register the theme and the theme defined widget areas.
+        /// </summary>
         [Fact]
         public async void When_user_activates_a_theme_the_theme_and_its_defined_widget_areas_will_be_registered()
         {
@@ -50,6 +54,20 @@ namespace Fan.IntegrationTests.Themes
 
             Assert.Equal("clarity", metaTheme.Key);
             Assert.Equal("clarity-my-area", metaArea.Key);
+        }
+
+        /// <summary>
+        /// A theme's folder name can only be alphanumeric, dash, underscore; it cannot contain
+        /// characters like '/', ' ', '.' etc.
+        /// </summary>
+        /// <param name="folder"></param>
+        [Theory]
+        [InlineData("test.")]
+        [InlineData("test one")]
+        [InlineData("/test")]
+        public async void Invalid_theme_folder_name_cannot_be_activated(string folder)
+        {
+            await Assert.ThrowsAsync<FanException>(() => _svc.ActivateThemeAsync(folder));
         }
 
         /// <summary>

@@ -58,8 +58,7 @@ namespace Fan.Themes
         public async Task ActivateThemeAsync(string folderName)
         {
             // verify folderName 
-            var regex = new Regex(THEME_FOLDER_REGEX);
-            if (!regex.IsMatch(folderName))
+            if (!IsValidFolderName(folderName))
                 throw new FanException($"Theme {folderName} contains invalid characters.");
 
             // register theme if not exist
@@ -114,11 +113,15 @@ namespace Fan.Themes
 
             foreach (var dir in Directory.GetDirectories(themesDir))
             {
+                var dirTokens = dir.Split(Path.DirectorySeparatorChar);
+                var folder = dirTokens[dirTokens.Length - 1];
+
+                // load only valid folder name
+                if (!IsValidFolderName(folder)) continue;
+
                 var file = Path.Combine(dir, THEME_INFO_FILE_NAME);
                 var themeInfo = JsonConvert.DeserializeObject<ThemeInfo>(await File.ReadAllTextAsync(file));
-
-                var dirTokens = dir.Split(Path.DirectorySeparatorChar);
-                themeInfo.Folder = dirTokens[dirTokens.Length - 1];
+                themeInfo.Folder = folder;
 
                 // make sure no duplicate areas based on id
                 themeInfo.WidgetAreas = themeInfo.WidgetAreas.DistinctBy(a => a.Id).ToArray();
@@ -131,5 +134,7 @@ namespace Fan.Themes
 
             return list;
         }
+
+        private bool IsValidFolderName(string folder) => new Regex(THEME_FOLDER_REGEX).IsMatch(folder);
     }
 }
