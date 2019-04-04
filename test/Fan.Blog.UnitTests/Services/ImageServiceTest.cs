@@ -1,7 +1,9 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.UnitTests.Base;
 using Fan.Medias;
+using Moq;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Fan.Blog.UnitTests.Services
@@ -11,9 +13,10 @@ namespace Fan.Blog.UnitTests.Services
     /// </summary>
     public class ImageServiceTest : BlogServiceUnitTestBase
     {
-        const string FILENAME = "pic.jpg";
-        readonly string path;
+        readonly string _absPath;
         readonly Media _media;
+        const string FILENAME = "pic.jpg";
+        const string STORAGE_ENDPOINT = "https://localhost:44381";
 
         /// <summary>
         /// Consturctor initialization called before each test.
@@ -23,13 +26,88 @@ namespace Fan.Blog.UnitTests.Services
             var uploadedOn = DateTimeOffset.UtcNow;
             var year = uploadedOn.Year;
             var month = uploadedOn.Month.ToString("d2");
-            path = $"{STORAGE_ENDPOINT}/media/blog/{year}/{month}";
+            _absPath = $"{STORAGE_ENDPOINT}/media/blog/{year}/{month}";
+
+            _storageProMock.Setup(pro => pro.StorageEndpoint).Returns(STORAGE_ENDPOINT);
 
             _media = new Media
             {
                 FileName = FILENAME,
                 UploadedOn = uploadedOn,
             };
+        }
+
+        [Fact]
+        public async void ProcessResponsiveImageAsync_on_large_2200x1650_landscape_picture()
+        {
+            // Setup media
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+                .Returns(Task.FromResult(new Media
+                {
+                    FileName = "painting-2200x1650.jpg",
+                    ResizeCount = 4,
+                    Width = 2200,
+                    Height = 1650,
+                    UploadedOn = new DateTimeOffset(2019, 4, 3, 0, 0, 0, TimeSpan.Zero),
+                }));
+
+            var input = "<img src=\"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg\" alt=\"painting 2200x1650\">";
+            var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg\" alt=\"painting 2200x1650\" " +
+                           "srcset=\"https://localhost:44381/media/blog/2019/04/sm/painting-2200x1650.jpg 400w, " +
+                           "https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg 800w, " + 
+                           "https://localhost:44381/media/blog/2019/04/ml/painting-2200x1650.jpg 1200w, " +
+                           "https://localhost:44381/media/blog/2019/04/lg/painting-2200x1650.jpg 2x\" " +
+                           "sizes=\"(max-width: 1200px) 100vw, 1200px\">";
+            var output = await _imgSvc.ProcessResponsiveImageAsync(input);
+
+            Assert.Equal(expected, output);
+        }
+
+        [Fact]
+        public async void ProcessRepsonsiveImageAsync_on_medium_large_960x1440_portrait_picture()
+        {
+            // Setup media
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+                .Returns(Task.FromResult(new Media
+                {
+                    FileName = "nightsky-960x1440.jpg",
+                    ResizeCount = 3,
+                    Width = 960,
+                    Height = 1440,
+                    UploadedOn = new DateTimeOffset(2019, 4, 3, 0, 0, 0, TimeSpan.Zero),
+                }));
+
+            var input = "<img src=\"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg\" alt=\"nightsky 960x1440\">";
+            var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg\" alt=\"nightsky 960x1440\" "+
+                           "srcset=\"https://localhost:44381/media/blog/2019/04/sm/nightsky-960x1440.jpg 400w, "+
+                           "https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg 800w, "+
+                           "https://localhost:44381/media/blog/2019/04/ml/nightsky-960x1440.jpg 1200w, "+
+                           "https://localhost:44381/media/blog/2019/04/nightsky-960x1440.jpg 960w\" "+
+                           "sizes=\"(max-width: 960px) 100vw, 960px\">";
+            var output = await _imgSvc.ProcessResponsiveImageAsync(input);
+
+            Assert.Equal(expected, output);
+        }
+
+        [Fact]
+        public async void ProcessRepsonsiveImageAsync_on_tiny_90x90_square_picture()
+        {
+            // Setup media
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+                .Returns(Task.FromResult(new Media
+                {
+                    FileName = "sq-90x90.png",
+                    ResizeCount = 0,
+                    Width = 90,
+                    Height = 90,
+                    UploadedOn = new DateTimeOffset(2019, 4, 3, 0, 0, 0, TimeSpan.Zero),
+                }));
+
+            var input = "<img src=\"https://localhost:44381/media/blog/2019/04/sq-90x90.png\" alt=\"sq 90x90\">";
+            var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/sq-90x90.png\" alt=\"sq 90x90\">";
+            var output = await _imgSvc.ProcessResponsiveImageAsync(input);
+
+            Assert.Equal(expected, output);
         }
 
         /// <summary>
@@ -42,7 +120,7 @@ namespace Fan.Blog.UnitTests.Services
             _media.ResizeCount = 0;
 
             // Regardless which size you ask it'll return original
-            var origUrl = $"{path}/{FILENAME}";
+            var origUrl = $"{_absPath}/{FILENAME}";
 
             // original -> original
             var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
@@ -77,7 +155,7 @@ namespace Fan.Blog.UnitTests.Services
             _media.ResizeCount = 1;
 
             // You will get small unless you ask for original
-            var origUrl = $"{path}/{FILENAME}";
+            var origUrl = $"{_absPath}/{FILENAME}";
 
             // original -> original
             var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
@@ -92,7 +170,7 @@ namespace Fan.Blog.UnitTests.Services
             Assert.Equal(origUrl, actualUrl);
 
             // small -> small
-            var smallUrl = $"{path}/sm/{FILENAME}";
+            var smallUrl = $"{_absPath}/sm/{FILENAME}";
             actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Small);
             Assert.Equal(smallUrl, actualUrl);
         }
@@ -108,9 +186,9 @@ namespace Fan.Blog.UnitTests.Services
             // Given a media with 2 resize counts
             _media.ResizeCount = 2;
 
-            var origUrl = $"{path}/{FILENAME}";
-            var smallUrl = $"{path}/sm/{FILENAME}";
-            var mediumUrl = $"{path}/md/{FILENAME}";
+            var origUrl = $"{_absPath}/{FILENAME}";
+            var smallUrl = $"{_absPath}/sm/{FILENAME}";
+            var mediumUrl = $"{_absPath}/md/{FILENAME}";
 
             // original -> original
             var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);
@@ -137,10 +215,10 @@ namespace Fan.Blog.UnitTests.Services
         {
             _media.ResizeCount = 3;
 
-            var origUrl = $"{path}/{FILENAME}";
-            var smallUrl = $"{path}/sm/{FILENAME}";
-            var mediumUrl = $"{path}/md/{FILENAME}";
-            var largeUrl = $"{path}/lg/{FILENAME}";
+            var origUrl = $"{_absPath}/{FILENAME}";
+            var smallUrl = $"{_absPath}/sm/{FILENAME}";
+            var mediumUrl = $"{_absPath}/md/{FILENAME}";
+            var largeUrl = $"{_absPath}/lg/{FILENAME}";
 
             // original -> original
             var actualUrl = _imgSvc.GetAbsoluteUrl(_media, EImageSize.Original);

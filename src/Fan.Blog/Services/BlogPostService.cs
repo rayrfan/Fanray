@@ -28,6 +28,7 @@ namespace Fan.Blog.Services
     {
         private readonly IPostRepository _postRepo;
         private readonly ISettingService _settingSvc;
+        private readonly IImageService _imageService;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogPostService> _logger;
         private readonly IMapper _mapper;
@@ -36,6 +37,7 @@ namespace Fan.Blog.Services
 
         public BlogPostService(
             ISettingService settingService,
+            IImageService imageService,
             IPostRepository postRepo,
             IDistributedCache cache,
             ILogger<BlogPostService> logger,
@@ -44,6 +46,7 @@ namespace Fan.Blog.Services
             IMediator mediator)
         {
             _settingSvc = settingService;
+            _imageService = imageService;
             _postRepo = postRepo;
             _cache = cache;
             _mapper = mapper;
@@ -168,7 +171,7 @@ namespace Fan.Blog.Services
         {
             var post = await QueryPostAsync(id, EPostType.BlogPost);
             if (post == null) throw new FanException("Blog post not found.");
-            return await GetBlogPostAsync(post, parseShortcode: false);
+            return await GetBlogPostAsync(post);
         }
 
         /// <summary>
@@ -188,7 +191,9 @@ namespace Fan.Blog.Services
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
             if (post == null) throw new FanException("Blog post not found.");
-            return await GetBlogPostAsync(post, parseShortcode: true);
+            var blogPost = await GetBlogPostAsync(post);
+            blogPost = await PreRenderAsync(blogPost);
+            return blogPost;
         }
 
         /// <summary>
@@ -338,7 +343,9 @@ namespace Fan.Blog.Services
             };
             foreach (var post in posts)
             {
-                blogPostList.Posts.Add(await GetBlogPostAsync(post, parseShortcode: true));
+                var blogPost = await GetBlogPostAsync(post);
+                blogPost = await PreRenderAsync(blogPost);
+                blogPostList.Posts.Add(blogPost);
             }
 
             return blogPostList;
@@ -415,12 +422,11 @@ namespace Fan.Blog.Services
         /// Gets a <see cref="BlogPost"/> for display to client from a <see cref="Post"/>.
         /// </summary>
         /// <param name="post"></param>
-        /// <param name="parseShortcode">True will parse shortcode into html, false otherwise.</param>
         /// <returns></returns>
         /// <remarks>
         /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
-        private async Task<BlogPost> GetBlogPostAsync(Post post, bool parseShortcode)
+        private async Task<BlogPost> GetBlogPostAsync(Post post)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
@@ -453,12 +459,6 @@ namespace Fan.Blog.Services
                 blogPost.Tags.Add(postTag.Tag);
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
-
-            // Shortcodes
-            blogPost.Body = parseShortcode ? _shortcodeSvc.Parse(post.Body) : post.Body;
-
-            // Embeds
-            blogPost.Body = parseShortcode ? OembedParser.Parse(blogPost.Body) : blogPost.Body;
 
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
@@ -522,6 +522,22 @@ namespace Fan.Blog.Services
             await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
             await _cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
             await _cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+        }
+
+        /// <summary>
+        /// Pre render processing of a blog post.
+        /// </summary>
+        /// <param name="blogPost"></param>
+        /// <returns></returns>
+        private async Task<BlogPost> PreRenderAsync(BlogPost blogPost)
+        {
+            if (blogPost == null) return blogPost;
+
+            blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
+            blogPost.Body = OembedParser.Parse(blogPost.Body);
+            blogPost.Body = await _imageService.ProcessResponsiveImageAsync(blogPost.Body);
+
+            return blogPost;
         }
     }
 }

@@ -4,6 +4,7 @@ using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Medias;
 using Fan.Settings;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -304,7 +305,108 @@ namespace Fan.Blog.Services
                 uploadedOn, EAppType.Blog, userId, uploadFrom);
         }
 
+        /// <summary>
+        /// Given a blog post's body html, it replaces all img tags with one that is updated for Repsonsive Images.
+        /// </summary>
+        /// <param name="body">A blog post's body html.</param>
+        /// <returns></returns>
+        public async Task<string> ProcessResponsiveImageAsync(string body)
+        {
+            if (body.IsNullOrEmpty()) return body;
+
+            try
+            {
+                var doc = new HtmlDocument();
+                doc.LoadHtml(body);
+
+                var imgNodes = doc.DocumentNode.SelectNodes("//img");
+                if (imgNodes == null || imgNodes.Count <= 0) return body;
+
+                bool changed = false;
+                foreach (var imgNode in imgNodes)
+                {
+                    var imgNodeNew = await GetResponsiveImgNodeAsync(imgNode);
+                    if (imgNodeNew != null)
+                    {
+                        imgNode.ParentNode.ReplaceChild(imgNodeNew, imgNode);
+                        changed = true;
+                    }
+                }
+
+                return changed ? doc.DocumentNode.OuterHtml : body;
+            }
+            catch (Exception e)
+            {
+                return body;
+            }
+        }
+
         // -------------------------------------------------------------------- private methods
+
+        /// <summary>
+        /// Returns a img node that is enhanced for Responsive Images.
+        /// </summary>
+        /// <param name="imgNode"></param>
+        /// <returns></returns>
+        private async Task<HtmlNode> GetResponsiveImgNodeAsync(HtmlNode imgNode)
+        {
+            var src = imgNode.Attributes["src"]?.Value;
+            if (src.IsNullOrEmpty()) return null;
+
+            // e.g. src="https://localhost:44381/media/blog/2019/04/md/pic.png"
+            var strAppType = $"{EAppType.Blog.ToString().ToLower()}/";
+            var idxLastSlash = src.LastIndexOf('/');
+            var fileName = src.Substring(idxLastSlash + 1, src.Length - idxLastSlash - 1);
+            if (fileName.IsNullOrEmpty()) return null;
+
+            var idxAppType = src.IndexOf(strAppType) + strAppType.Length;
+            var strTimeSize = src.Substring(idxAppType, idxLastSlash - idxAppType); //2019/04/md
+            var year = Convert.ToInt32(strTimeSize.Substring(0, 4));
+            var month = Convert.ToInt32(strTimeSize.Substring(5, 2));
+
+            var uploadedOn = new DateTimeOffset(year, month, DateTimeOffset.Now.Day,
+                DateTimeOffset.Now.Hour, DateTimeOffset.Now.Minute, DateTimeOffset.Now.Second, TimeSpan.Zero);
+            var media = await _mediaSvc.GetMediaAsync(fileName, uploadedOn);
+            var resizeCount = media.ResizeCount;
+            if (resizeCount <= 0) return null;
+
+            var srcset = "";
+            if (resizeCount == 1)
+            {
+                srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Original)} {media.Width}w";
+            }
+            else if (resizeCount == 2)
+            {
+                srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Medium)} {MEDIUM_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Original)} {media.Width}w";
+            }
+            else if (resizeCount == 3)
+            {
+                srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Medium)} {MEDIUM_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} {MEDIUM_LARGE_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Original)} {media.Width}w";
+            }
+            else if (resizeCount == 4)
+            {
+                srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Medium)} {MEDIUM_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} {MEDIUM_LARGE_IMG_SIZE}w, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Large)} 2x"; // cap it at lg, so no orig here
+            }
+
+            // use media width to calc maxWidth and defaultWidth, height is not involved
+            var maxWidth = media.Width < MEDIUM_LARGE_IMG_SIZE ? media.Width : MEDIUM_LARGE_IMG_SIZE;
+            var defaultWidth = media.Width < MEDIUM_LARGE_IMG_SIZE ? media.Width : MEDIUM_LARGE_IMG_SIZE;
+            var sizes = $"(max-width: {maxWidth}px) 100vw, {defaultWidth}px";
+
+            imgNode.Attributes.Add("srcset", srcset);
+            imgNode.Attributes.Add("sizes", sizes);
+
+            return imgNode;
+        }
 
         /// <summary>
         /// Deletes an image file from storage.

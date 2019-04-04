@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services.Interfaces
 {
+    /// <summary>
+    /// The interface for blog image service.
+    /// </summary>
     public interface IImageService
     {
         /// <summary>
@@ -34,5 +37,12 @@ namespace Fan.Blog.Services.Interfaces
         /// <see cref="Media"/> that represents the image.
         /// </returns>
         Task<Media> UploadAsync(Stream source, int userId, string fileName, string contentType, EUploadedFrom uploadFrom);
+
+        /// <summary>
+        /// Given a blog post's body html, it replaces all img tags with one that is updated for Repsonsive Images.
+        /// </summary>
+        /// <param name="body">A blog post's body html.</param>
+        /// <returns></returns>
+        Task<string> ProcessResponsiveImageAsync(string body);
     }
 }

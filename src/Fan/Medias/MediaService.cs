@@ -75,14 +75,20 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns the media by id.
+        /// Returns <see cref="Media"/> by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Media> GetMediaAsync(int id)
-        {
-            return await _mediaRepo.GetAsync(id);
-        }
+        public async Task<Media> GetMediaAsync(int id) => await _mediaRepo.GetAsync(id);
+
+        /// <summary>
+        /// Returns <see cref="Media"/> by filename and upload datetime.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="uploadedOn"></param>
+        /// <returns></returns>
+        public async Task<Media> GetMediaAsync(string fileName, DateTimeOffset uploadedOn) =>
+            await _mediaRepo.GetAsync(fileName, uploadedOn);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
@@ -92,10 +98,9 @@ namespace Fan.Medias
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
-        {
-            return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
-        }
+        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, 
+            int pageNumber, int pageSize) => 
+            await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
 
         /// <summary>
         /// Updates media title and description.
