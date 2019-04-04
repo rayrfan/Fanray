@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Fan.Blog.Helpers;
-using Fan.Blog.Services.Interfaces;
+using Fan.Blog.Models;
 using Fan.Data;
 using Fan.Membership;
 using Fan.Settings;
@@ -97,9 +97,9 @@ namespace Fan.Web
             // Shortcodes
             services.AddShortcodes();
 
-            // Fan and Fan.Blog services and repos, see https://bit.ly/2AtPmLn
+            // Scrutor scans Fan, Fan.Blog and Mediatr, see https://bit.ly/2AtPmLn and https://bit.ly/2FIJOhw
             services.Scan(scan => scan
-              .FromAssembliesOf(typeof(ISettingService), typeof(IBlogPostService))
+              .FromAssembliesOf(typeof(ISettingService), typeof(IMediator), typeof(BlogPost))
               .AddClasses()
               .UsingRegistrationStrategy(RegistrationStrategy.Skip) // prevent added to add again
               .AsImplementedInterfaces()
