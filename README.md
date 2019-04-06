@@ -20,14 +20,9 @@
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
 	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
 	</a>
-  </p>
-  <p align="center">
-    <a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
-	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="Gitter">
-    </a>
-    <a href="https://github.com/FanrayMedia/Fanray/contributors/">
-      <img src="https://img.shields.io/github/contributors/FanrayMedia/Fanray.svg" alt="Contributors" />
-    </a>
+	<a href="https://github.com/996icu/996.ICU/blob/master/LICENSE">
+	  <img src="https://img.shields.io/badge/license-Anti%20996-blue.svg" alt="Anti 996">
+	</a>
   </p>
 </p>
 
