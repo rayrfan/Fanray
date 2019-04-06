@@ -1,40 +1,52 @@
 ﻿# Clarity 
 
-The Clarity is the default Fanray theme.  All Fanray themes must provide the following 2 css files
+Clarity is the default Fanray theme, use it as an example to create your theme.
 
-- **style.css**: the theme styles for client site.
-- **content.css**: the content styles for the editor, it includes **typography** and the **content width** from the theme styles. It's used in Compose.cshtml, this css file enables user to see the exact post styling while the user is still composing the post.
+## dist
 
-## Scss
+The **dist** folder contains client side artifacts such as minified css and js, theme.png etc. The entire content of this folder will be copied into the wwwroot/themes folder for this theme during theme installation.
 
-Clarity theme uses scss, on Windows do the following
+## theme.png
 
-1. run [RubyInstaller](https://rubyinstaller.org/)
-2. run `gem install sass`
-3. cd into `Fan.Web\Themes\Clarity`
-4. run sass
+Theme's cover, a 1200px by 900px .png file, placed right under the **dist** folder.
 
-  ```bash
-  sass --update scss:../../wwwroot/themes/Clarity/css --style compressed
-  ```
-5. optionally run sass with --watch
+## style.css and content.css
 
-  ```bash
-  sass --watch scss:../../wwwroot/themes/Clarity/css --style compressed
-  ```
+All themes must provide these 2 css files
 
-### Fonts
+- **style.css**: theme styles for client site.
+- **content.css**: content styles for the editor. It includes _typography_ and _content width_ styles from **style.css**, it allows user to see post styles while composing the post.
 
-The fonts are stored in `Clarity/scss/fonts`, they are referenced in `_font.scss`.
+## Views
+
+The **Views** folder contains razor view files.
+
+## theme.json
+
+A **theme.json** file descibes your theme.
+
+## Clarity specific notes
+
+### scss
+
+Clarity theme uses scss.
+
+- To install sass on Windows download [RubyInstaller](https://rubyinstaller.org/), then run `gem install sass`.
+- To build `npm run build`
+- To watch `npm run scss:watch`
+
+### fonts
+
+The `dist/css/fonts` folder contains fonts referenced by `_font.scss`. To get the fonts
 
 1. go to https://icomoon.io/ and click on `IcoMoon App`
 2. add any icon lib necessary, select exact icons
 3. click on Generate Font to download zip
-4. copy files inside `/fonts` folder to `Themes/Clarity/scss/fonts` and `wwwroot/themes/Clarity/css/fonts`
+4. copy files inside `/fonts` folder to `Themes/Clarity/dist/css/fonts`
 5. copy the content of `style.css` to _fonts.scss
 6. recompile to produce sytle.css
 
-### Syntax
+### syntaxhighlighter.js
 
-Due to current editor does not support `pre` tag, I'm using shortcode to post code which is
+To post source code shortcode is used (till editor could support it natively) which is
 based on [syntaxhighlighter](https://github.com/syntaxhighlighter/syntaxhighlighter).
