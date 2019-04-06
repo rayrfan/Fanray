@@ -20,9 +20,7 @@
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
 	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
 	</a>
-	<a href="https://github.com/996icu/996.ICU/blob/master/LICENSE">
-	  <img src="https://img.shields.io/badge/license-Anti%20996-blue.svg" alt="Anti 996">
-	</a>
+    <a href="https://996.icu/#/en_US"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
   </p>
 </p>
 
@@ -87,3 +85,5 @@ Please refer to [Contributing Guide](CONTRIBUTING.md).
 ## License
 
 [Apache 2.0](LICENSE)
+
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE) The [996.icu repo](https://github.com/996icu/996.ICU) is a campaign against the [996 working hour system](https://en.wikipedia.org/wiki/996_working_hour_system) started in Mainland China. I support my fellow software developers over there and elsewhere for this matter on defending their labor rights and improving their labor conditions. As such any entity, whether individual or corporation, that is in violation of the local labor laws against their employees shall not use my repo.
