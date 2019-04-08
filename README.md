@@ -14,23 +14,13 @@
 	<a href="#license">License</a>
   </p>
   <p align="center">
-	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/master">
-	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/master?svg=true&passingText=master%20-%20passing&failingText=master%20-%20failing&pendingText=master%20-%20pending" alt="master branch status">
-	</a>
-	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray/branch/dev">
-	  <img src="https://ci.appveyor.com/api/projects/status/25ifr0ahvcxn48f5/branch/dev?svg=true&passingText=dev%20-%20passing&failingText=dev%20-%20failing&pendingText=dev%20-%20pending" alt="dev branch status">
+	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
+	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
 	</a>
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="feature branch status">
+	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
 	</a>
-  </p>
-  <p align="center">
-    <a href="https://gitter.im/Fanray-project/Fanray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
-	  <img src="https://badges.gitter.im/Fanray-project/Fanray.svg" alt="feature branch status">
-    </a>
-    <a href="https://github.com/FanrayMedia/Fanray/contributors/">
-      <img src="https://img.shields.io/github/contributors/FanrayMedia/Fanray.svg" alt="Contributors" />
-    </a>
+    <a href="https://996.icu/#/en_US"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
   </p>
 </p>
 
@@ -45,20 +35,19 @@
 
 Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for details.
 
-| Blog | Infrastructure | Libs / Frameworks
+| Blog | | Infrastructure |
 | --- | --- |  --- | 
-| Autosave draft    | Caching                                   | ASP.NET Core
-| Categories, Tags  | Error Handling						    | Bootstrap4
-| Comments (Disqus) | Events									| CKEditor5
-| Google Analytics  | Image Resizing                            | Entity Framework Core
-| Media Gallery     | Logging (File, Seq, ApplicationInsights)  | HtmlAgilityPack
-| Open Live Writer  | MetaWeblog API                            | Magick.NET
-| Preferred Domain  | Settings                                  | Mediatr
-| RSS               | Storage (File System, Azure Blob Storage) | Moq
-| SEO-Friendly URLs | Testing (Unit, Integration)               | Serilog
-| Shortcodes		| Validation								| Vue.js 
-| Site Setup        |                                           | Vuetify.js
-| Widgets           |											| xUnit
+| Autosave Draft    | Shortcodes		| Caching                                   
+| Categories		| Site Installation	| Error Handling						    
+| Comments (Disqus) | Tags				| Events									
+| Google Analytics  | Users				| Image Resizing                            
+| Media Gallery     | Widgets			| Logging (File, Seq, ApplicationInsights)  
+| Open Live Writer  |					| MetaWeblog API                            
+| Preferred Domain  |					| Settings                                  
+| Responsive Images |					| Storage (File System, Azure Blob Storage) 
+| RSS				|					| Testing (Unit, Integration)               
+| SEO-Friendly URLs |					| Validation								
+
  
 ## Quick Start
 
@@ -96,3 +85,5 @@ Please refer to [Contributing Guide](CONTRIBUTING.md).
 ## License
 
 [Apache 2.0](LICENSE)
+
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE) The [996.icu repo](https://github.com/996icu/996.ICU) is a campaign against the [996 working hour system](https://en.wikipedia.org/wiki/996_working_hour_system) started in Mainland China. I support my fellow software developers over there and elsewhere for this matter on defending their labor rights and improving their labor conditions. As such any entity, whether individual or corporation, that is in violation of the local labor laws against their employees shall not use my repo.

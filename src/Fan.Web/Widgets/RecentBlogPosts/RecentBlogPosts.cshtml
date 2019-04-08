@@ -1,0 +1,37 @@
+﻿@model Tuple<List<Fan.Web.Widgets.RecentBlogPosts.RecentPostViewModel>, Fan.Web.Widgets.RecentBlogPosts.RecentBlogPostsWidget>
+@{
+    var posts = Model.Item1;
+    var widget = Model.Item2;
+}
+
+<div class="widget">
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h4 class="widget-header">@widget.Title</h4>
+    }
+    <div class="widget-body">
+        <ul class="recent-blog-posts">
+            @foreach (var p in posts)
+            {
+                <li>
+                    <h2><a href="@p.Link">@p.Title</a></h2>
+                    <div class="recent-post-info">
+                        @if (widget.ShowPostAuthor)
+                        {
+                        <i class="icon-user" aria-hidden="true"></i><span class="recent-post-info-item">@p.Author</span>
+                        }
+                        @if (widget.ShowPostDate)
+                        {
+                        <i class="icon-calendar" aria-hidden="true"></i><span class="recent-post-info-item">@p.Date</span>
+                        }
+                    </div>
+                    @if(widget.ShowPostExcerpt)
+                    {
+                        <p>@p.Excerpt</p>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+

@@ -1,8 +1,9 @@
-﻿using Fan.Exceptions;
-using Fan.Helpers;
-using Fan.Settings;
-using ImageMagick;
+﻿using Fan.Settings;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,14 +75,20 @@ namespace Fan.Medias
         }
 
         /// <summary>
-        /// Returns the media by id.
+        /// Returns <see cref="Media"/> by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Media> GetMediaAsync(int id)
-        {
-            return await _mediaRepo.GetAsync(id);
-        }
+        public async Task<Media> GetMediaAsync(int id) => await _mediaRepo.GetAsync(id);
+
+        /// <summary>
+        /// Returns <see cref="Media"/> by filename and upload datetime.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="uploadedOn"></param>
+        /// <returns></returns>
+        public async Task<Media> GetMediaAsync(string fileName, DateTimeOffset uploadedOn) =>
+            await _mediaRepo.GetAsync(fileName, uploadedOn);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
@@ -91,10 +98,9 @@ namespace Fan.Medias
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
-        {
-            return await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
-        }
+        public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, 
+            int pageNumber, int pageSize) => 
+            await _mediaRepo.GetMediasAsync(mediaType, pageNumber, pageSize);
 
         /// <summary>
         /// Updates media title and description.
@@ -145,100 +151,27 @@ namespace Fan.Medias
                                                   int userId,
                                                   EUploadedFrom uploadFrom = EUploadedFrom.Browser)
         {
-            int widthOrig;
-            int heightOrig;
             int resizeCount = 0;
+            var (widthOrig, heightOrig) = GetOriginalSize(source);
 
-            if (contentType.Equals("image/gif"))
+            foreach (var resize in resizes)
             {
-                using (var imageColl = new MagickImageCollection(source))
+                using (var dest = new MemoryStream())
                 {
-                    widthOrig = imageColl[0].Width;
-                    heightOrig = imageColl[0].Height;
+                    // each time source is read, it needs reset
+                    source.Position = 0;
 
-                    // currently for gif I only save original so there is no resizing
-                    // TODO: with ImageMagick resizing a gif take a long time 
-                    // plus the resized gif has a larger file size than original
-                    // I tried limit gif length to 800px, but even resizing to small has these issues
-
-                    // resize and store
-                    foreach (var resize in resizes)
+                    // don't resize original png and gif may output large file size, save it as is
+                    if (resize.TargetSize == int.MaxValue)
                     {
-                        // save original without resizing
-                        if (resize.TargetSize == int.MaxValue)
-                        {
-                            source.Position = 0;
-                            await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
-                        }
-                        //else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
-                        //{
-                        //    resizeCount++;
-                        //    var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
-
-                        //    imageColl.Coalesce();
-                        //    foreach (var image in imageColl)
-                        //    {
-                        //        var colors = image.TotalColors;
-                        //        image.Resize(width, height); // resize will make # of colors higher
-                        //        image.Quantize(new QuantizeSettings
-                        //        {
-                        //            Colors = colors, // set it back to the smaller original colors
-                        //            DitherMethod = DitherMethod.No
-                        //        });
-                        //    }
-
-                        //    imageColl.Optimize();
-                        //    await _storageProvider.SaveFileAsync(imageColl.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
-                        //}
+                        await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
                     }
-                }
-            }
-            else if (contentType.Equals("image/png"))
-            {
-                using (var image = new MagickImage(source))
-                {
-                    widthOrig = image.Width;
-                    heightOrig = image.Height;
-
-                    foreach (var resize in resizes)
+                    else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize) // only resize and save when it's larger than target
                     {
-                        // save original without resizing for png
-                        if (resize.TargetSize == int.MaxValue)
-                        {
-                            source.Position = 0;
-                            await _storageProvider.SaveFileAsync(source, fileName, resize.Path, resize.PathSeparator);
-                        }
-                        else if (Math.Max(widthOrig, heightOrig) > resize.TargetSize)
-                        {
-                            resizeCount++;
-                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
-                            //image.Quality = 75; // does not seem to affect output file size, so commented out
-                            image.Resize(width, height);
-
-                            await _storageProvider.SaveFileAsync(image.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
-                        }
-                    }
-                }
-            }
-            else // jpg
-            {
-                using (var image = new MagickImage(source))
-                {
-                    widthOrig = image.Width;
-                    heightOrig = image.Height;
-
-                    foreach (var resize in resizes)
-                    {
-                        if (resize.TargetSize == int.MaxValue || Math.Max(widthOrig, heightOrig) > resize.TargetSize)
-                        {
-                            if (resize.TargetSize != int.MaxValue) resizeCount++;
-                            var (width, height) = GetNewSize(widthOrig, heightOrig, resize.TargetSize);
-                            // setting the Quality is needed for having it here makes a difference for a smaller output file size!
-                            image.Quality = 85; // 75 is default
-                            image.Resize(width, height);
-
-                            await _storageProvider.SaveFileAsync(image.ToByteArray(), fileName, resize.Path, resize.PathSeparator);
-                        }
+                        resizeCount++;
+                        Resize(source, dest, resize.TargetSize);
+                        dest.Position = 0;
+                        await _storageProvider.SaveFileAsync(dest, fileName, resize.Path, resize.PathSeparator);
                     }
                 }
             }
@@ -269,6 +202,41 @@ namespace Fan.Medias
         }
 
         // -------------------------------------------------------------------- private
+
+        /// <summary>
+        /// Resizes source into dest with target size.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="dest"></param>
+        /// <param name="targetSize"></param>
+        private void Resize(Stream source, Stream dest, int targetSize)
+        {
+            using (var image = Image.Load(source, out IImageFormat format))
+            {
+                var (width, height) = GetNewSize(image.Width, image.Height, targetSize);
+
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(width, height),
+                    Mode = ResizeMode.Crop
+                }));
+
+                image.Save(dest, format);
+            }
+        }
+
+        /// <summary>
+        /// Returns the original image's width and height.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        private (int widthOrig, int heightOrig) GetOriginalSize(Stream stream)
+        {
+            using (var image = Image.Load(stream))
+            {
+                return (widthOrig: image.Width, heightOrig: image.Height);
+            }
+        }
 
         /// <summary>
         /// Returns new width and height to be resized while keeping aspect ratio.

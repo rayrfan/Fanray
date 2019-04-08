@@ -1,5 +1,5 @@
 ﻿using Fan.Settings;
-using Fan.Web.Infrastructure;
+using Fan.Web.Infrastructure.Middlewares;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using System.Collections.Generic;

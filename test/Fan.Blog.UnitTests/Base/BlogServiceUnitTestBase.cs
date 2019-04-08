@@ -31,14 +31,15 @@ namespace Fan.Blog.UnitTests.Base
         protected IDistributedCache _cache;
         protected ILogger<BlogPostService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
-        protected const string STORAGE_ENDPOINT = "https://www.fanray.com";
 
         protected Mock<ISettingService> _settingSvcMock;
         protected ICategoryService _catSvc;
         protected ILogger<CategoryService> _loggerCatSvc;
         protected ITagService _tagSvc;
         protected IImageService _imgSvc;
+        protected Mock<IMediaService> _mediaSvcMock;
         protected ILogger<TagService> _loggerTagSvc;
+        protected Mock<IStorageProvider> _storageProMock;
 
         /// <summary>
         /// Base constructor which will be called first for each test in derived test classes, thus
@@ -63,7 +64,7 @@ namespace Fan.Blog.UnitTests.Base
             _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
             // services (must be after _cache)
-            var mediaSvcMock = new Mock<IMediaService>();
+            _mediaSvcMock = new Mock<IMediaService>();
 
             // settings
             _settingSvcMock = new Mock<ISettingService>();
@@ -75,23 +76,12 @@ namespace Fan.Blog.UnitTests.Base
             appSettingsMock.Setup(o => o.Value).Returns(new AppSettings());
 
             // storage
-            var storageProviderMock = new Mock<IStorageProvider>();
-            storageProviderMock.Setup(pro => pro.StorageEndpoint).Returns(STORAGE_ENDPOINT);
+            _storageProMock = new Mock<IStorageProvider>();
 
             // mapper, shortcode, mediator
             var mapper = BlogUtil.Mapper;
             var shortcodeSvc = new Mock<IShortcodeService>();
             var mediatorMock = new Mock<IMediator>();
-
-            // post service
-            _blogPostSvc = new BlogPostService(
-                _settingSvcMock.Object, 
-                _postRepoMock.Object, 
-                _cache, 
-                _loggerBlogSvc, 
-                mapper,
-                shortcodeSvc.Object,
-                mediatorMock.Object);
 
             // cat service
             _loggerCatSvc = loggerFactory.CreateLogger<CategoryService>();
@@ -102,7 +92,18 @@ namespace Fan.Blog.UnitTests.Base
             _tagSvc = new TagService(_tagRepoMock.Object, mediatorMock.Object, _cache, _loggerTagSvc);
 
             // image service
-            _imgSvc = new ImageService(mediaSvcMock.Object, storageProviderMock.Object, appSettingsMock.Object);
+            _imgSvc = new ImageService(_mediaSvcMock.Object, _storageProMock.Object, appSettingsMock.Object);
+
+            // post service
+            _blogPostSvc = new BlogPostService(
+                _settingSvcMock.Object,
+                _imgSvc,
+                _postRepoMock.Object,
+                _cache,
+                _loggerBlogSvc,
+                mapper,
+                shortcodeSvc.Object,
+                mediatorMock.Object);
         }
     }
 }

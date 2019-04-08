@@ -188,12 +188,12 @@ namespace Fan.Blog.Data
                     posts = await q.OrderByDescending(p => p.UpdatedOn).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsByCategory:
-                    var cat = await _db.Set<Category>().FirstAsync(t => t.Slug.Equals(query.CategorySlug, StringComparison.CurrentCultureIgnoreCase));
+                    var cat = await _db.Set<Category>().FirstAsync(t => t.Slug == query.CategorySlug);
                     q = q.Where(p => p.CategoryId == cat.Id && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Skip(skip).Take(take).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsByTag:
-                    var tag = await _db.Set<Tag>().FirstAsync(t => t.Slug.Equals(query.TagSlug, StringComparison.CurrentCultureIgnoreCase));
+                    var tag = await _db.Set<Tag>().FirstAsync(t => t.Slug == query.TagSlug);
                     q = from p in q
                         from pt in p.PostTags
                         where p.Id == pt.PostId &&

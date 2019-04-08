@@ -103,6 +103,7 @@ namespace Fan.Blog.IntegrationTests.Base
             // the blog service
             _blogSvc = new BlogPostService(
                 _settingSvcMock.Object, 
+                _imgSvc,
                 postRepo, 
                 cache, 
                 loggerBlogSvc, 

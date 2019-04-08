@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Fan.Blog.Helpers;
-using Fan.Blog.Services.Interfaces;
+using Fan.Blog.Models;
 using Fan.Data;
 using Fan.Membership;
 using Fan.Settings;
-using Fan.Web.Infrastructure;
+using Fan.Web.Infrastructure.Middlewares;
+using Fan.Web.Infrastructure.Theming;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -54,8 +56,10 @@ namespace Fan.Web
              * 1. It interferes with dbcontext implicit transactions when events are raised and event handlers call SaveChangesAsync
              * 2. Multiple dbcontexts will fail https://github.com/aspnet/EntityFrameworkCore/issues/9433
              * 3. To use AddDbContextPool, FanDbContext can only have a single public constructor accepting a single parameter of type DbContextOptions
+             * 4. I'm ignoring the IncludeIgnoredWarning, see https://github.com/aspnet/EntityFrameworkCore/issues/12662
              */
-            services.AddDbContext<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<FanDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning)));
 
             // Identity
             services.AddIdentity<User, Role>(options =>
@@ -93,9 +97,9 @@ namespace Fan.Web
             // Shortcodes
             services.AddShortcodes();
 
-            // Fan and Fan.Blog services and repos, see https://bit.ly/2AtPmLn
+            // Scrutor scans Fan, Fan.Blog and Mediatr, see https://bit.ly/2AtPmLn and https://bit.ly/2FIJOhw
             services.Scan(scan => scan
-              .FromAssembliesOf(typeof(ISettingService), typeof(IBlogPostService))
+              .FromAssembliesOf(typeof(ISettingService), typeof(IMediator), typeof(BlogPost))
               .AddClasses()
               .UsingRegistrationStrategy(RegistrationStrategy.Skip) // prevent added to add again
               .AsImplementedInterfaces()
@@ -130,6 +134,7 @@ namespace Fan.Web
                 })
                 .AddRazorPagesOptions(options =>
                 {
+                    options.RootDirectory = "/Manage";
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
                     options.Conventions.AuthorizeFolder("/Widgets", "AdminRoles");
                 });

@@ -30,12 +30,6 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task<IEnumerable<WidgetInfo>> GetInstalledWidgetsInfoAsync();
         /// <summary>
-        /// Returns a <see cref="WidgetInfo"/> based on a given widget type.
-        /// </summary>
-        /// <param name="widgetType"></param>
-        /// <returns></returns>
-        Task<WidgetInfo> GetWidgetInfoAsync(string widgetType);
-        /// <summary>
         /// Returns a <see cref="Widget"/> by id for update.
         /// </summary>
         /// <param name="id"></param>
@@ -78,23 +72,23 @@ namespace Fan.Widgets
         /// <returns></returns>
         Task OrderWidgetInAreaAsync(int widgetId, string areaId, int index);
         /// <summary>
-        /// Creates a widget instance by type. 
+        /// Creates a widget instance. 
         /// </summary>
-        /// <param name="widgetType"></param>
+        /// <param name="folder"></param>
         /// <returns></returns>
         /// <remarks>
         /// The newly created instance has the widget's default values.
         /// </remarks>
-        Task<int> CreateWidgetAsync(string widgetType);
+        Task<int> CreateWidgetAsync(string folder);
         /// <summary>
         /// Creates a widget instance by a given widget object.
         /// </summary>
         /// <param name="widget"></param>
-        /// <param name="widgetType"></param>
+        /// <param name="folder"></param>
         /// <remarks>
         /// The widget object has the widget's seed values.
         /// </remarks>
-        Task<int> CreateWidgetAsync(Widget widget, string widgetType);
+        Task<int> CreateWidgetAsync(Widget widget, string folder);
         /// <summary>
         /// Deletes a widget instance.
         /// </summary>

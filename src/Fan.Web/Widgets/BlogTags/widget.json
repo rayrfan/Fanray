@@ -1,0 +1,8 @@
+{
+  "name": "Blog Tags",
+  "description": "A list of blog tags.",
+  "type": "Fan.Web.Widgets.BlogTags.BlogTagsWidget, Fan.Web",
+  "version": "1.0.0",
+  "author": "Ray Fan",
+  "url": "https://www.fanray.com"
+}
