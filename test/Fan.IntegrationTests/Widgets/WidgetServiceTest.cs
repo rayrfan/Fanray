@@ -17,7 +17,7 @@ namespace Fan.IntegrationTests.Widgets
 {
     public class WidgetServiceTest : IntegrationTestBase, IAsyncLifetime
     {     
-        private const string MY_WIDGET_TYPE = "Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests";
+        private const string MY_WIDGET_FOLDER = "MyWidget";
         private WidgetService _svc;
         private IThemeService themeService;
         private SqlMetaRepository _metaRepo;
@@ -44,11 +44,7 @@ namespace Fan.IntegrationTests.Widgets
             // theme service
             themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
 
-            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc)
-            {
-                // set widget dir
-                WidgetDirectoryName = "Widgets"
-            };
+            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc);
         }
 
         /// <summary>
@@ -119,7 +115,7 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_drag_a_widget_from_widget_infos_section_to_an_area()
         {
             // When user drags a widget from the widget infos section to an area
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // Then the area would contain the widget
@@ -135,7 +131,7 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_drag_a_widget_from_an_area_to_another_area()
         {
             // Given a widget in area blog sidebar1
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user drags the widget from area sidebar1 to area sidebar2
@@ -164,7 +160,7 @@ namespace Fan.IntegrationTests.Widgets
         public async void When_user_drops_a_widget_from_info_section_to_area_widget_has_initial_default_values()
         {
             // When a widget is dropped to area from infos
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             var widget = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // Then widget instance has the default val
@@ -178,9 +174,9 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_drop_same_widget_multiple_times_to_an_area()
         {
             // Given two widget instances in blog sidebar1
-            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
-            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w2Id, WidgetService.BlogSidebar1.Id, 1);
 
             // When we retrieve a widget area
@@ -199,20 +195,21 @@ namespace Fan.IntegrationTests.Widgets
         public async void A_widget_is_instantiated_from_json_and_type_info_strings()
         {
             // Given a widget in the area blog sidebar1
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When the meta record is retrieved
             var widgetMeta = await _metaRepo.GetAsync(widgetId);
 
-            // I'm able to get the widget type
+            // I'm able to get the widget folder
             var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
-            Assert.Equal(MY_WIDGET_TYPE, widget.Type);
+            Assert.Equal(MY_WIDGET_FOLDER, widget.Folder);
 
             // Given a json string that represent an instance of MyWidget
-            string json = @"{""age"":10,""title"":""Tags"",""id"":0, ""type"":""Fan.IntegrationTests.Widgets.MyWidget, Fan.IntegrationTests""}";
+            string json = @"{""age"":10,""title"":""Tags"",""id"":0, ""folder"":""MyWidget""}";
             // And the widget type I got from above
-            var type = Type.GetType(widget.Type);
+            var widgetType = await _svc.GetWidgetTypeByFolderAsync(widget.Folder);
+            var type = Type.GetType(widgetType);
 
             // When I deserialize it
             var myWidget = (MyWidget) JsonConvert.DeserializeObject(json, type);
@@ -229,7 +226,7 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_delete_a_widget_from_an_area()
         {
             // Given a widget in blog sidebar1
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             var widgetInst = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user deletes the widget
@@ -248,9 +245,9 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_order_widgets_in_an_area()
         {
             // Given two widgets w1 and w2 in blog-sidebar1 area
-            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
-            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var w2Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w2Id, WidgetService.BlogSidebar1.Id, 1);
 
             // When user moves w1 below w2
@@ -266,7 +263,7 @@ namespace Fan.IntegrationTests.Widgets
         public async void User_can_update_instance_properties()
         {
             // Given a widget in blog sidebar1
-            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_TYPE);
+            var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user udpates the widget instance

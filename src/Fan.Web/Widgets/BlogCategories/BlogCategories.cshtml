@@ -1,0 +1,32 @@
+﻿@model Tuple<IEnumerable<Fan.Blog.Models.Category>, Fan.Web.Widgets.BlogCategories.BlogCategoriesWidget>
+@{ 
+    var categories = Model.Item1;
+    var widget = Model.Item2;
+}
+
+<div class="widget">
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h4 class="widget-header">@widget.Title</h4>
+    }
+    <div class="widget-body">
+        <ul class="blog-categories">
+            @foreach (var c in categories)
+            {
+                <li>
+                    <a href="@c.RssRelativeLink">
+                        <i class="icon-rss" aria-hidden="true" style="color:orange"></i>
+                    </a>
+                    @if (widget.ShowPostCount)
+                    {
+                        <a title="@c.Description" href="@c.RelativeLink">@c.Title (@c.Count)</a>
+                    }
+                    else
+                    {
+                        <a title="@c.Description" href="@c.RelativeLink">@c.Title</a>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+</div>

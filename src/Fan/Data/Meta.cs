@@ -6,14 +6,17 @@ namespace Fan.Data
     /// A key value pair record.
     /// </summary>
     /// <remarks>
-    /// It's used to store settings or any other kind of data.  For example a plugin could save 
-    /// data in a json serialized string here.
+    /// The Meta table stores settings and other json strings. It has a unique constrain on Type and Key pair.
     /// </remarks>
     public class Meta : Entity
     {
         /// <summary>
-        /// The key upon which to get the value, it must be unique.
+        /// The key is case sensitive, "key" and "Key" are considered two different values.
         /// </summary>
+        /// <remarks>
+        /// For all my records from settings, themes to widgets I use lower case for keys to overcome 
+        /// case being sensitive.
+        /// </remarks>
         [Required]
         [StringLength(maximumLength: 256)]
         public string Key { get; set; }

@@ -7,6 +7,7 @@
     {
         Original,
         Large,
+        MediumLarge,
         Medium,
         Small,
     }

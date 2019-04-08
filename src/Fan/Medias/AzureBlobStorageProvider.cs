@@ -83,8 +83,6 @@ namespace Fan.Medias
             blob.Properties.CacheControl = "public, max-age=31536000"; // 1 yr
 
             await blob.UploadFromStreamAsync(source);
-
-            source.Close();
         }
 
         /// <summary>

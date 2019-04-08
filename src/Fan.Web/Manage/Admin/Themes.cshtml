@@ -1,0 +1,59 @@
+﻿@page
+@model ThemesModel
+@{
+    ViewData["Title"] = "Themes";
+}
+@section Styles
+{
+    <style>
+    .disable-events {
+        pointer-events: none
+    }
+    </style>
+}
+<site-themes inline-template>
+    <v-container grid-list-xl fluid>
+        <v-layout row wrap>
+            <v-flex sm6 lg4 d-flex v-for="t in themes" :key="t.folder">
+                <v-hover>
+                    <v-card slot-scope="{ hover }"
+                            :class="`elevation-${hover ? 12 : 2}`">
+                        <v-img :aspect-ratio="4/3"
+                               :src="t.screenshot"></v-img>
+                        <v-card-actions>
+                            <div>
+                                <span class="subheading font-weight-bold">{{ t.name }}</span>
+                            </div>
+                            <v-spacer></v-spacer>
+                            <v-btn v-if="t.isActive" small color="success"
+                                   :class="{'disable-events': t.isActive}">
+                                <v-icon left dark>check</v-icon>
+                                Active
+                            </v-btn>
+                            <v-btn v-else small color="primary">Activate</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-hover>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</site-themes>
+
+@section ComponentScripts {
+    <script>
+        let themesMixin = {
+            data: function () {
+                return {
+                    themes: @Html.Raw(Model.ThemesJson),
+                }
+            },
+        }
+
+        Vue.component('site-themes', {
+            mixins: [themesMixin],
+            data: () => ({
+               
+            }),
+        });
+    </script>
+}
