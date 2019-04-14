@@ -1,0 +1,51 @@
+﻿@using Fan.Blog.Models
+@using Fan.WebApp.Widgets.BlogArchives
+@model Tuple<Dictionary<int, List<MonthItem>>, BlogArchivesWidget>
+@{
+    var years = Model.Item1;
+    var widget = Model.Item2;
+}
+
+<div class="widget">
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h4 class="widget-header">@widget.Title</h4>
+    }
+    <div class="widget-body">
+        <ul class="blog-archives">
+            @foreach (var year in years)
+            {
+                <li class="archive-node">
+                    <a class="archive-year">@year.Key</a>
+                    <ul class="archive-months">
+                        @foreach (var item in year.Value)
+                        {
+                        <li>
+                            @if (widget.ShowPostCount)
+                            {
+                                <a href="@item.Url">@item.Title</a> <text>(@item.Count)</text>
+                            }
+                            else
+                            {
+                                <a href="@item.Url">@item.Title</a>
+                            }
+                        </li>
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+@* https://www.w3schools.com/howto/howto_js_accordion.asp *@
+<script>
+    var acc = document.getElementsByClassName("archive-year");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var me = this.nextElementSibling;
+            me.style.display = (me.style.display === "block") ? "none" : "block";
+        });
+    }
+</script>

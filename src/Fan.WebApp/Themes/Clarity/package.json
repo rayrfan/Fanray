@@ -1,0 +1,13 @@
+{
+  "name": "clarity",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run scss && cpx dist/** ../../wwwroot/themes/clarity",
+    "scss": "sass --update scss:dist/css --style compressed",
+    "scss:watch": "sass --watch scss:../../wwwroot/themes/clarity/css --style compressed"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0"
+  }
+}

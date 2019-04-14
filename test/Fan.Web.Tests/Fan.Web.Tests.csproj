@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fan.Web\Fan.Web.csproj" />
+    <ProjectReference Include="..\..\src\Fan.WebApp\Fan.WebApp.csproj" />
   </ItemGroup>
 
 </Project>

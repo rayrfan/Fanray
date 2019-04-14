@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Fan.WebApp;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Fan.Web.Tests
