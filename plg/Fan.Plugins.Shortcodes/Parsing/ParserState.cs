@@ -1,8 +1,7 @@
-﻿using Fan.Helpers;
-using System;
+﻿using System;
 using System.Linq;
 
-namespace Fan.Shortcodes.Parsing
+namespace Fan.Plugins.Shortcodes.Parsing
 {
     public abstract class ParserState
     {

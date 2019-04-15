@@ -4,7 +4,7 @@ using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Settings;
-using Fan.Shortcodes;
+using Fan.Web.Attributes;
 using Fan.Web.Models.Blog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -28,7 +28,6 @@ namespace Fan.Web.Controllers
         private readonly ISettingService _settingSvc;
         private readonly ILogger<BlogController> _logger;
         private readonly IDistributedCache _cache;
-        private readonly IShortcodeService _shortcodeSvc;
 
         public BlogController(
             IBlogPostService blogService,
@@ -36,7 +35,6 @@ namespace Fan.Web.Controllers
             ITagService tagService,
             ISettingService settingService,
             IDistributedCache cache,
-            IShortcodeService shortcodeService,
             ILogger<BlogController> logger)
         {
             _blogSvc = blogService;
@@ -44,7 +42,6 @@ namespace Fan.Web.Controllers
             _tagSvc = tagService;
             _settingSvc = settingService;
             _cache = cache;
-            _shortcodeSvc = shortcodeService;
             _logger = logger;
         }
 
@@ -52,6 +49,7 @@ namespace Fan.Web.Controllers
         /// Blog index page, redirect to home setup on initial launch.
         /// </summary>
         /// <returns></returns>
+        [ModelPreRender]
         public async Task<IActionResult> Index(int? page)
         {
             if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
@@ -83,6 +81,7 @@ namespace Fan.Web.Controllers
         /// <param name="day"></param>
         /// <param name="slug"></param>
         /// <returns></returns>
+        [ModelPreRender]
         public async Task<IActionResult> Post(int year, int month, int day, string slug)
         {
             var blogPost = await _blogSvc.GetAsync(slug, year, month, day);
@@ -99,6 +98,7 @@ namespace Fan.Web.Controllers
         /// <param name="day"></param>
         /// <param name="slug"></param>
         /// <returns></returns>
+        [ModelPreRender]
         public async Task<IActionResult> Preview(int year, int month, int day, string slug)
         {
             try
@@ -109,7 +109,6 @@ namespace Fan.Web.Controllers
                 var blogPost = TempData.Get<BlogPost>(link);
 
                 // Prep it
-                blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
                 blogPost.Body = OembedParser.Parse(blogPost.Body);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
                 blogSettings.DisqusShortname = ""; // when preview turn off disqus

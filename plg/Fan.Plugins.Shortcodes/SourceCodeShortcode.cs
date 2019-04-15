@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Fan.Shortcodes
+namespace Fan.Plugins.Shortcodes
 {
     /// <summary>
     /// Shortcode that allows user to paste in source code, like [code lang="lang of choice"]paste your code here[/code].

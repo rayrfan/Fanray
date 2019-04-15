@@ -1,12 +1,11 @@
-﻿using Fan.Helpers;
-using Fan.Shortcodes.Parsing;
+﻿using Fan.Plugins.Shortcodes.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Fan.Shortcodes
+namespace Fan.Plugins.Shortcodes
 {
     /// <summary>
     /// The shortcode service.

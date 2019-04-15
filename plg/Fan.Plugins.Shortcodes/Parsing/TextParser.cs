@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fan.Helpers
+namespace Fan.Plugins.Shortcodes.Parsing
 {
     /// <summary>
     /// A parsing approach that scans the input text character by character.

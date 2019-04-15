@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Fan.Shortcodes.Parsing
+namespace Fan.Plugins.Shortcodes.Parsing
 {
     public class ShortcodeParseInfo
     {

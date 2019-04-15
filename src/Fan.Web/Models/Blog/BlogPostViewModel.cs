@@ -69,7 +69,7 @@ namespace Fan.Web.Models.Blog
         /// The title of the blog post.
         /// </summary>
         public string Title { get; }
-        public string Body { get; }
+        public string Body { get; set; }
         public string Excerpt { get; }
         /// <summary>
         /// Display name of the user who authored the post.

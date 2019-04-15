@@ -8,7 +8,6 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Settings;
-using Fan.Shortcodes;
 using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -32,7 +31,6 @@ namespace Fan.Blog.Services
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogPostService> _logger;
         private readonly IMapper _mapper;
-        private readonly IShortcodeService _shortcodeSvc;
         private readonly IMediator _mediator;
 
         public BlogPostService(
@@ -42,7 +40,6 @@ namespace Fan.Blog.Services
             IDistributedCache cache,
             ILogger<BlogPostService> logger,
             IMapper mapper,
-            IShortcodeService shortcodeService,
             IMediator mediator)
         {
             _settingSvc = settingService;
@@ -51,7 +48,6 @@ namespace Fan.Blog.Services
             _cache = cache;
             _mapper = mapper;
             _logger = logger;
-            _shortcodeSvc = shortcodeService;
             _mediator = mediator;
         }
 
@@ -533,7 +529,6 @@ namespace Fan.Blog.Services
         {
             if (blogPost == null) return blogPost;
 
-            blogPost.Body = _shortcodeSvc.Parse(blogPost.Body);
             blogPost.Body = OembedParser.Parse(blogPost.Body);
             blogPost.Body = await _imageService.ProcessResponsiveImageAsync(blogPost.Body);
 

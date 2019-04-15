@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Web;
 
-namespace Fan.Shortcodes
+namespace Fan.Plugins.Shortcodes
 {
     /// <summary>
     /// YouTube shortcode, current supports only two url formats, https://www.youtube.com/watch?v=MNor4dYXa6U

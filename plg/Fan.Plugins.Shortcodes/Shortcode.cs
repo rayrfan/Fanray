@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Fan.Shortcodes
+namespace Fan.Plugins.Shortcodes
 {
     /// <summary>
     /// The base class all shortcodes inherit from.

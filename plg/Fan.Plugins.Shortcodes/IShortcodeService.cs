@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Fan.Shortcodes
+namespace Fan.Plugins.Shortcodes
 {
     /// <summary>
     /// The shortcode service.
