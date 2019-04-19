@@ -288,5 +288,5 @@ __pycache__/
 *.xsd.cs
 
 # My ignores
-src/fan.web/logs/
-src/fan.web/wwwroot/media/
+src/fan.webapp/logs/
+src/fan.webapp/wwwroot/media/
