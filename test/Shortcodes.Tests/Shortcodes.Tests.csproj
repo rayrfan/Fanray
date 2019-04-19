@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\plg\Fan.Plugins.Shortcodes\Fan.Plugins.Shortcodes.csproj" />
+    <ProjectReference Include="..\..\plugins\Shortcodes\Shortcodes.csproj" />
   </ItemGroup>
 
 </Project>

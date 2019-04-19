@@ -1,6 +1,8 @@
-﻿using Xunit;
+﻿using Shortcodes;
+using Shortcodes.Services;
+using Xunit;
 
-namespace Fan.Plugins.Shortcodes.Tests
+namespace Shortcodes.Tests
 {
     /// <summary>
     /// Tests for <see cref="YouTubeShortcode"/> class.

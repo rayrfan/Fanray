@@ -1,6 +1,7 @@
-﻿using Xunit;
+﻿using Shortcodes.Services;
+using Xunit;
 
-namespace Fan.Plugins.Shortcodes.Tests
+namespace Shortcodes.Tests
 {
     /// <summary>
     /// Unit tests for <see cref="SourceCodeShortcode"/> class.
