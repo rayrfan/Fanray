@@ -11,18 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan", "src\Fan\Fan.csproj",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Web.Tests", "test\Fan.Web.Tests\Fan.Web.Tests.csproj", "{7E23F735-1911-42CB-914E-AF5BDFB31418}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{596A1022-8E0A-4705-BAAA-4217759203D1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".sln", ".sln", "{596A1022-8E0A-4705-BAAA-4217759203D1}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		azure-pipelines.yml = azure-pipelines.yml
 		CONTRIBUTING.md = CONTRIBUTING.md
 		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{36CBCC5A-2BEC-415A-97E2-09A4AC8A0872}"
-	ProjectSection(SolutionItems) = preProject
-		sql\1.0-1.1.sql = sql\1.0-1.1.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.UnitTests", "test\Fan.UnitTests\Fan.UnitTests.csproj", "{DB82A852-A913-4AEE-AD16-B62472F29092}"
@@ -43,7 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plg", "plg", "{C43613E5-3F4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Plugins.Shortcodes", "plg\Fan.Plugins.Shortcodes\Fan.Plugins.Shortcodes.csproj", "{318ACF93-6C87-47B3-94A3-6F412620CA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fan.Plugins.Shortcodes.Tests", "test\Fan.Plugins.Shortcodes.Tests\Fan.Plugins.Shortcodes.Tests.csproj", "{DEF39D64-9975-4B37-9512-9A66F5F6B62A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Plugins.Shortcodes.Tests", "test\Fan.Plugins.Shortcodes.Tests\Fan.Plugins.Shortcodes.Tests.csproj", "{DEF39D64-9975-4B37-9512-9A66F5F6B62A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
