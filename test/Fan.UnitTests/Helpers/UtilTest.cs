@@ -153,5 +153,11 @@ namespace Fan.UnitTests.Helpers
         {
             Assert.Equal(expected, Util.IsValidEmail(email));
         }
+
+        [Fact]
+        public void IsRunningFromTestHost_Test()
+        {
+            Assert.True(Util.IsRunningFromTestHost());
+        }
     }
 }

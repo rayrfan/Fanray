@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using TimeZoneConverter;
@@ -284,6 +285,13 @@ namespace Fan.Helpers
             var userTimeZone = TZConvert.GetTimeZoneInfo(timeZoneId);
             return TimeZoneInfo.ConvertTime(serverTime, userTimeZone);
         }
+
+        /// <summary>
+        /// Returns true if running from a test project.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsRunningFromTestHost() =>
+            Assembly.GetEntryAssembly().FullName.StartsWith("testhost", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// A util that uses regular expression to verify if a string is in valid email format.
