@@ -1,44 +1,17 @@
-﻿using Fan.Widgets;
+﻿using Fan.Extensibility;
+using Fan.Widgets;
 
 namespace Fan.Themes
 {
     /// <summary>
     /// Information from a theme's theme.json file.
     /// </summary>
-    public class ThemeInfo
+    public class ThemeInfo : ManifestInfo
     {
-        /// <summary>
-        /// Name of the theme.
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// Description of the theme.
-        /// </summary>
-        public string Description { get; set; }
-        /// <summary>
-        /// Version of the theme.
-        /// </summary>
-        public string Version { get; set; }
         /// <summary>
         /// URL of the theme.
         /// </summary>
         public string ThemeUrl { get; set; }
-        /// <summary>
-        /// Name of the author.
-        /// </summary>
-        public string Author { get; set; }
-        /// <summary>
-        /// URL of the author.
-        /// </summary>
-        public string AuthorUrl { get; set; }
-        /// <summary>
-        /// Theme license.
-        /// </summary>
-        public string License { get; set; }
-        /// <summary>
-        /// URL to the license.
-        /// </summary>
-        public string LicenseUrl { get; set; }
         /// <summary>
         /// Comma separated strings that describes the theme's characteristics like layout, column,
         /// color, image, text etc. For example, "responsive", "fluid", "fixed", "grid", "one-column", 
