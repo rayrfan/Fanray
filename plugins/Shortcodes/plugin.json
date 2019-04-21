@@ -1,0 +1,12 @@
+{
+  "name": "Shortcodes",
+  "description": "Simple codes to render complex visual components.",
+  "dll": "Shortcodes.dll",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0-preview3",
+  "pluginUrl": "https://www.fanray.com",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com",
+  "license": "Apache 2.0",
+  "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0"
+}

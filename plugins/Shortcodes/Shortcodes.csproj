@@ -11,4 +11,22 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CopyArtifacts" AfterTargets="Build">
+    <PropertyGroup>
+      <CopyToDir>..\..\src\Fan.WebApp\Plugins\Shortcodes</CopyToDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PluginJsonToCopy Include="$(OutputPath)\plugin.json" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(CopyToDir);$(CopyToWwwrootDir)" />
+    <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
+    <Copy SourceFiles="@(PluginJsonToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+  </Target>
 </Project>
