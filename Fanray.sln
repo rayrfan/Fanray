@@ -36,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Web", "src\Fan.Web\Fan.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{2D12DDB4-7E18-49AF-82E3-D44EBC507C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shortcodes", "plugins\Shortcodes\Shortcodes.csproj", "{5BA252B6-DA58-4279-909B-E833E2D1D099}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shortcodes", "plugins\Shortcodes\Shortcodes.csproj", "{5BA252B6-DA58-4279-909B-E833E2D1D099}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shortcodes.Tests", "test\Shortcodes.Tests\Shortcodes.Tests.csproj", "{0A1D7C25-2B33-47BE-B549-7CD8AE3AB15C}"
 EndProject

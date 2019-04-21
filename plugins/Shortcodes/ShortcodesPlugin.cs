@@ -20,7 +20,7 @@ namespace Shortcodes
             services.AddSingleton<IShortcodeService>(shortcodeService);
         }
 
-        public override string GetInfoUrl()
+        public override string GetDetailsUrl()
         {
             throw new System.NotImplementedException();
         }

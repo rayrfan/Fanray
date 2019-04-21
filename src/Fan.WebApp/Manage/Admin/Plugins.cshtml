@@ -1,0 +1,66 @@
+﻿@page
+@model PluginsModel
+@{
+    ViewData["Title"] = "Plugins";
+}
+
+<site-plugins inline-template>
+    <v-container>
+        <v-data-table :headers="headers"
+                      :items="pluginInfos"
+                      :total-items="totalPlugins"
+                      :rows-per-page-items="rowsPerPageItems"
+                      rows-per-page-text=""
+                      class="elevation-1">
+            <template slot="items" slot-scope="props">
+                <td>
+                    <h3>{{ props.item.name }}</h3>
+                </td>
+                <td>
+                    <div>{{ props.item.description }}</div>
+                    <div>
+                        <span>Version {{ props.item.version }}</span> |
+                        <span>By <a :href="props.item.authorUrl">{{ props.item.author }}</a></span> |
+                        <span><a>View details</a></span>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <v-btn small color="primary">Activate</v-btn>
+                    </div>
+                </td>
+            </template>
+            <template slot="no-data">
+                <div>You have no plugins.</div>
+            </template>
+        </v-data-table>
+    </v-container>
+</site-plugins>
+
+@section ComponentScripts {
+    <script>
+        let pluginsMixin = {
+            data: function () {
+                return {
+                    pluginInfos: @Html.Raw(Model.PluginInfosJson),
+                    totalPlugins: 1,
+                    rowsPerPageItems: @PluginsModel.DEFAULT_ROW_PER_PAGE_ITEMS,
+                }
+            },
+        }
+
+        Vue.component('site-plugins', {
+            mixins: [pluginsMixin],
+            data: () => ({
+                headers: [
+                  { text: 'Plugin', value: 'plugin' },
+                  { text: 'Description', value: 'description', sortable: false },
+                  { text: '', value: 'actions', sortable: false }
+                ],
+            }),
+            methods: {
+            }
+        });
+    </script>
+
+}

@@ -9,7 +9,7 @@ namespace Shortcodes.Controllers
     [Authorize(Roles = "Administrator")]
     public partial class ShortcodesController : Controller
     {
-        public IActionResult Info()
+        public IActionResult Details()
         {
             return View();
         }

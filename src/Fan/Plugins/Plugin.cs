@@ -7,7 +7,7 @@ namespace Fan.Plugins
     public class Plugin
     {
         public virtual string GetEditUrl() => null;
-        public virtual string GetInfoUrl() => null;
+        public virtual string GetDetailsUrl() => null;
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
