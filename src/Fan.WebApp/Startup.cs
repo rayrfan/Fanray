@@ -144,6 +144,7 @@ namespace Fan.WebApp
                 {
                     options.RootDirectory = "/Manage";
                     options.Conventions.AuthorizeFolder("/Admin", "AdminRoles");
+                    options.Conventions.AuthorizeFolder("/Plugins", "AdminRoles");
                     options.Conventions.AuthorizeFolder("/Widgets", "AdminRoles");
                 });
 
