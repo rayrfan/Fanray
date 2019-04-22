@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fan.Extensibility;
 
 namespace Fan.Plugins
 {
-    public interface IPluginService
+    public interface IPluginService : IExtensibleService<PluginInfo>
     {
-        /// <summary>
-        /// Returns all the installed plugins info.
-        /// </summary>
-        /// <returns></returns>
-        Task<IEnumerable<PluginInfo>> GetInstalledPluginsInfoAsync();
     }
 }

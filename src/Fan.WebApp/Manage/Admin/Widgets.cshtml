@@ -229,11 +229,7 @@
                     this.dialogTitle = widget.name;
                     this.dialogVisible = true;
 
-                    let dto = {
-                        folder: widget.folder,
-                        widgetId: widget.id,
-                    };
-                    axios.post('/admin/widgets?handler=edit', dto, this.$root.headers)
+                    axios.get('/admin/widgets?handler=edit', { params: { widgetId: widget.id } })
                         .then(resp => {
                             this.widgetEditUrl = resp.data;
                             console.log('widget edit url: ', this.widgetEditUrl);

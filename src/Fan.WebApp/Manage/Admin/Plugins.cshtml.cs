@@ -24,7 +24,7 @@ namespace Fan.WebApp.Manage.Admin
 
         public async Task OnGet()
         {
-            var pluginInfos = await pluginService.GetInstalledPluginsInfoAsync();
+            var pluginInfos = await pluginService.GetInstalledManifestInfosAsync();
             PluginInfosJson = JsonConvert.SerializeObject(pluginInfos);
         }
     }

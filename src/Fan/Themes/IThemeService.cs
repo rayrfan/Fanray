@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Fan.Extensibility;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Themes
 {
-    public interface IThemeService
+    public interface IThemeService : IExtensibleService<ThemeInfo>
     {
         /// <summary>
         /// Activates a theme.
@@ -14,10 +15,5 @@ namespace Fan.Themes
         /// It registers theme and the widget areas used by the theme.
         /// </remarks>
         Task ActivateThemeAsync(string folderName);
-        /// <summary>
-        /// Returns a list of <see cref="ThemeInfo"/> of the installed themes.
-        /// </summary>
-        /// <returns></returns>
-        Task<List<ThemeInfo>> GetInstalledThemesInfoAsync();     
     }
 }

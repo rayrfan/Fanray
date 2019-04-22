@@ -29,7 +29,7 @@ namespace Fan.WebApp.Manage.Admin
 
         private async Task<IList<ThemeViewModel>> GetThemeViewModelsAsync()
         {
-            var infos = await themeService.GetInstalledThemesInfoAsync();
+            var infos = await themeService.GetInstalledManifestInfosAsync();
             var list = new List<ThemeViewModel>();
             var settings = await settingService.GetSettingsAsync<CoreSettings>();
             var currentTheme = settings.Theme;

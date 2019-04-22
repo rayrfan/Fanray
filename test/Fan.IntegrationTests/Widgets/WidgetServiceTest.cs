@@ -98,7 +98,7 @@ namespace Fan.IntegrationTests.Widgets
         {
             // Given I have MyWidget installed in this test project
             // When Admin Panel Widgets page is requested
-            var widgetInfos = await _svc.GetInstalledWidgetsInfoAsync();
+            var widgetInfos = await _svc.GetInstalledManifestInfosAsync();
 
             // Then widget's info will displayed
             Assert.Single(widgetInfos);

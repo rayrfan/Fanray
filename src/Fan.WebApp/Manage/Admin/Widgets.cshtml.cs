@@ -25,7 +25,7 @@ namespace Fan.WebApp.Manage.Admin
         public async Task OnGet()
         {
             // widget infos
-            var widgetInfos = await _widgetService.GetInstalledWidgetsInfoAsync();
+            var widgetInfos = await _widgetService.GetInstalledManifestInfosAsync();
             WidgetInfosJson = JsonConvert.SerializeObject(widgetInfos);
 
             // areas
@@ -62,13 +62,11 @@ namespace Fan.WebApp.Manage.Admin
         /// <summary>
         /// Returns the widget edit page url.
         /// </summary>
-        /// <param name="dto"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// The edit files are in /Manage/Widgets folder.
-        /// </remarks>
-        public JsonResult OnPostEdit([FromBody]EditWidgetDto dto) =>
-            new JsonResult($"{Request.Scheme}://{Request.Host}/widgets/{dto.Folder}Edit?widgetId={dto.WidgetId}");
+        public async Task<JsonResult> OnGetEditAsync(int widgetId)
+        {
+            var widget = await _widgetService.GetWidgetAsync(widgetId);
+            return new JsonResult(widget.EditUrl);
+        }
 
         /// <summary>
         /// DELETE a widget instance from an area.
@@ -118,11 +116,5 @@ namespace Fan.WebApp.Manage.Admin
         public int Index { get; set; }
         public int WidgetId { get; set; }
         public string AreaId { get; set; }
-    }
-
-    public class EditWidgetDto
-    {
-        public string Folder { get; set; }
-        public int WidgetId { get; set; }
     }
 }

@@ -1,10 +1,11 @@
 ﻿using Fan.Data;
+using Fan.Extensibility;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Widgets
 {
-    public interface IWidgetService
+    public interface IWidgetService : IExtensibleService<WidgetInfo>
     {
         /// <summary>
         /// Registers a widget area by its id and type.
@@ -24,11 +25,6 @@ namespace Fan.Widgets
         /// each area contains its a list of <see cref="WidgetInstance"/>.
         /// </summary>
         Task<IEnumerable<WidgetAreaInstance>> GetCurrentThemeAreasAsync();
-        /// <summary>
-        /// Returns all the installed widget infos.
-        /// </summary>
-        /// <returns></returns>
-        Task<IEnumerable<WidgetInfo>> GetInstalledWidgetsInfoAsync();
         /// <summary>
         /// Returns a <see cref="Widget"/> by id for update.
         /// </summary>

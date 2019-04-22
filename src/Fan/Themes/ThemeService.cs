@@ -74,7 +74,7 @@ namespace Fan.Themes
             }
 
             // register theme-defined widget areas
-            var installedThemes = await GetInstalledThemesInfoAsync();
+            var installedThemes = await GetInstalledManifestInfosAsync();
             var themeToActivate = installedThemes.Single(t => t.Name.Equals(folderName, StringComparison.OrdinalIgnoreCase));
 
             // check if there is any empty area ids
@@ -106,7 +106,7 @@ namespace Fan.Themes
         /// <remarks>
         /// The ids of the list of <see cref="WidgetAreaInfo"/> are distinct and lower case.
         /// </remarks>
-        public async Task<List<ThemeInfo>> GetInstalledThemesInfoAsync()
+        public async Task<IEnumerable<ThemeInfo>> GetInstalledManifestInfosAsync()
         {
             var list = new List<ThemeInfo>();
             var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIRECTORY_NAME);

@@ -17,7 +17,7 @@ namespace Fan.Plugins
             this.hostingEnvironment = hostingEnvironment;
         }
 
-        public async Task<IEnumerable<PluginInfo>> GetInstalledPluginsInfoAsync()
+        public async Task<IEnumerable<PluginInfo>> GetInstalledManifestInfosAsync()
         {
             var list = new List<PluginInfo>();
             var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "Plugins");

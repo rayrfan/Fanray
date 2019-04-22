@@ -43,14 +43,21 @@ namespace Fan.Widgets
             Footer3,
         };
 
+        /// <summary>
+        /// The widget info file name.
+        /// </summary>
         public const string WIDGET_INFO_FILE_NAME = "widget.json";
-        public const string WIDGET_INFO_DIR_NAME = "Widgets";
+        /// <summary>
+        /// The widgets directory inside the web app.
+        /// </summary>
+        public const string WIDGETS_DIR = "Widgets";
+
         /// <summary>
         /// Returns the path to widget view file which is located in Fan.Web/Widgets folder.
         /// </summary>
         /// <param name="widgetName"></param>
         /// <returns></returns>
-        public static string GetWidgetViewPath(string widgetName) => $"~/Widgets/{widgetName}/{widgetName}.cshtml";
+        public static string GetWidgetViewPath(string widgetName) => $"~/{WIDGETS_DIR}/{widgetName}/{widgetName}.cshtml";
 
         private readonly IMetaRepository metaRepository;
         private readonly IThemeService themeService;
@@ -133,7 +140,7 @@ namespace Fan.Widgets
             {
                 var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
-                var currentTheme = (await themeService.GetInstalledThemesInfoAsync())
+                var currentTheme = (await themeService.GetInstalledManifestInfosAsync())
                                    .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
                 foreach (var areaInfo in currentTheme.WidgetAreas)
                 {
@@ -183,12 +190,12 @@ namespace Fan.Widgets
         /// This method scans the "Fan.Web.Widgets" folder and reads all the "widget.json" files for each widget.
         /// Currently I don't save these data to db till download working.
         /// </remarks>
-        public async Task<IEnumerable<WidgetInfo>> GetInstalledWidgetsInfoAsync()
+        public async Task<IEnumerable<WidgetInfo>> GetInstalledManifestInfosAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_INFO, Cache_Time_Installed_Widgets_Info, async () =>
             { 
                 var list = new List<WidgetInfo>();
-                var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGET_INFO_DIR_NAME);
+                var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGETS_DIR);
 
                 foreach (var dir in Directory.GetDirectories(widgetsFolder))
                 {
@@ -416,7 +423,7 @@ namespace Fan.Widgets
         /// <returns></returns>
         private async Task<WidgetInfo> GetWidgetInfoByFolderAsync(string folder)
         {
-            var widgetInfos = await GetInstalledWidgetsInfoAsync();
+            var widgetInfos = await GetInstalledManifestInfosAsync();
             return widgetInfos.Single(wi => wi.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
         }
 

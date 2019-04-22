@@ -1,9 +1,13 @@
-﻿namespace Fan.Widgets
+﻿using Fan.Extensibility;
+using Newtonsoft.Json;
+using System;
+
+namespace Fan.Widgets
 {
     /// <summary>
     /// Widget base class.
     /// </summary>
-    public class Widget
+    public class Widget : Extension
     {
         /// <summary>
         /// Id of the widget instance.
@@ -24,5 +28,20 @@
         /// Folder name, <see cref="WidgetInfo.Folder"/>.
         /// </summary>
         public string Folder { get; set; }
+        /// <summary>
+        /// Url to details page of the widget.
+        /// </summary>
+        /// <remarks>
+        /// TODO there should an info icon on each of the Available Widgets, when user clicks on
+        /// the icon a widget details page should popup and give detailed info on the widget.
+        /// </remarks>
+        [JsonIgnore]
+        public override string DetailsUrl => "";
+        /// <summary>
+        /// Url to edit page of the widget.
+        /// </summary>
+        [JsonIgnore]
+        public override string EditUrl =>
+            (Folder.IsNullOrEmpty() || Id <= 0) ? "" : $"/{WidgetService.WIDGETS_DIR}/{Folder}Edit?widgetId={Id}";
     }
 }
