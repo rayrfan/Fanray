@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Fan.Blog\Fan.Blog.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="widget.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CopyArtifacts" AfterTargets="Build">
+    <PropertyGroup>
+      <CopyToDir>..\..\src\Fan.WebApp\Widgets\BlogTags</CopyToDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ManifestJsonToCopy Include="$(OutputPath)\widget.json" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(CopyToDir);$(CopyToWwwrootDir)" />
+    <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
+    <Copy SourceFiles="@(ManifestJsonToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+  </Target>
+
+</Project>

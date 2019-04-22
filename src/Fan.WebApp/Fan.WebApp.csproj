@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\plugins\Shortcodes\Shortcodes.csproj" />
+    <ProjectReference Include="..\..\widgets\BlogTags\BlogTags.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
 

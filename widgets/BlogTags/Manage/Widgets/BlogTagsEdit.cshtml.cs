@@ -1,11 +1,10 @@
-﻿using Fan.WebApp.Widgets.BlogTags;
-using Fan.Widgets;
+﻿using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Manage.Widgets
+namespace BlogTags.Manage.Widgets
 {
     public class BlogTagsEditModel : PageModel
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Widgets.BlogTags
+namespace BlogTags.Components
 {
     /// <summary>
     /// The BlogTags view component.
@@ -25,7 +25,7 @@ namespace Fan.WebApp.Widgets.BlogTags
             var blogTagsWidget = (BlogTagsWidget)widget;
             var tags = (await _tagSvc.GetAllAsync()).Where(t => t.Count > 0).Take(blogTagsWidget.MaxTagsDisplayed);
 
-            return View(WidgetService.GetWidgetViewPath("BlogTags"), new Tuple<IEnumerable<Tag>, BlogTagsWidget>(tags, blogTagsWidget));
+            return View("~/Components/BlogTags.cshtml", new Tuple<IEnumerable<Tag>, BlogTagsWidget>(tags, blogTagsWidget));
         }
     }
 }

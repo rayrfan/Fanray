@@ -1,7 +1,7 @@
 ﻿using Fan.Widgets;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.WebApp.Widgets.BlogTags
+namespace BlogTags
 {
     /// <summary>
     /// Blog tags widget. 
