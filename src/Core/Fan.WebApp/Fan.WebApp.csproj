@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\plugins\Shortcodes\Shortcodes.csproj" />
-    <ProjectReference Include="..\..\themes\Clarity\Clarity.csproj" />
-    <ProjectReference Include="..\..\widgets\BlogTags\BlogTags.csproj" />
+    <ProjectReference Include="..\..\Plugins\Shortcodes\Shortcodes.csproj" />
+    <ProjectReference Include="..\..\Themes\Clarity\Clarity.csproj" />
+    <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
 

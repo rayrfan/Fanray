@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fan.Blog\Fan.Blog.csproj" />
+    <ProjectReference Include="..\..\src\Core\Fan.Blog\Fan.Blog.csproj" />
     <ProjectReference Include="..\Fan.IntegrationTests\Fan.IntegrationTests.csproj" />
   </ItemGroup>
 

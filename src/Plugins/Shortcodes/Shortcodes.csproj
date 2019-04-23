@@ -9,20 +9,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fan.Web\Fan.Web.csproj" />
+    <ProjectReference Include="..\..\Core\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="theme.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
-      <CopyToDir>..\..\src\Fan.WebApp\Themes\Clarity</CopyToDir>
+      <CopyToDir>..\..\Core\Fan.WebApp\Plugins\Shortcodes</CopyToDir>
     </PropertyGroup>
 
     <ItemGroup>
-      <ManifestToCopy Include="$(OutputPath)\theme.json" />
+      <ManifestToCopy Include="$(OutputPath)\plugin.json" />
     </ItemGroup>
 
     <RemoveDir Directories="$(CopyToDir)" />

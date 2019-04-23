@@ -9,25 +9,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fan.Blog\Fan.Blog.csproj" />
+    <ProjectReference Include="..\..\Core\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="widget.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="theme.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
-      <CopyToDir>..\..\src\Fan.WebApp\Widgets\BlogTags</CopyToDir>
+      <CopyToDir>..\..\Core\Fan.WebApp\Themes\Clarity</CopyToDir>
     </PropertyGroup>
 
     <ItemGroup>
-      <ManifestToCopy Include="$(OutputPath)\widget.json" />
+      <ManifestToCopy Include="$(OutputPath)\theme.json" />
     </ItemGroup>
 
     <RemoveDir Directories="$(CopyToDir)" />
     <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
     <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
   </Target>
-
+  
 </Project>
