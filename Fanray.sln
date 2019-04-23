@@ -44,6 +44,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "widgets", "widgets", "{7316
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogTags", "widgets\BlogTags\BlogTags.csproj", "{CB83C0C1-2CA6-4EFB-9B6F-8989AC1E1D27}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "themes", "themes", "{4D7C4860-4BCC-47C6-BA81-BD920E6171F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clarity", "themes\Clarity\Clarity.csproj", "{59D22FE2-B17F-43BA-9ABE-3FF9000E0208}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +102,10 @@ Global
 		{CB83C0C1-2CA6-4EFB-9B6F-8989AC1E1D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB83C0C1-2CA6-4EFB-9B6F-8989AC1E1D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB83C0C1-2CA6-4EFB-9B6F-8989AC1E1D27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59D22FE2-B17F-43BA-9ABE-3FF9000E0208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59D22FE2-B17F-43BA-9ABE-3FF9000E0208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59D22FE2-B17F-43BA-9ABE-3FF9000E0208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59D22FE2-B17F-43BA-9ABE-3FF9000E0208}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +123,7 @@ Global
 		{5BA252B6-DA58-4279-909B-E833E2D1D099} = {2D12DDB4-7E18-49AF-82E3-D44EBC507C7B}
 		{0A1D7C25-2B33-47BE-B549-7CD8AE3AB15C} = {81A32817-2BDD-4F54-A41E-E8B2015D0184}
 		{CB83C0C1-2CA6-4EFB-9B6F-8989AC1E1D27} = {7316D697-6A35-4290-9AD1-046FDD332E0D}
+		{59D22FE2-B17F-43BA-9ABE-3FF9000E0208} = {4D7C4860-4BCC-47C6-BA81-BD920E6171F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1FC29A1-2BF1-46BD-9169-3C33C1C4494F}
