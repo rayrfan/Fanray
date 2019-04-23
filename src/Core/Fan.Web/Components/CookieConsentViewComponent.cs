@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Components
+namespace Fan.Web.Components
 {
     public class CookieConsentViewComponent : ViewComponent
     {
@@ -30,7 +30,7 @@ namespace Fan.WebApp.Components
                 CookieString = consentFeature?.CreateConsentCookie(),
             };
 
-            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/CookieConsent.cshtml", vm);
+            return View("CookieConsent.cshtml", vm);
         }
     }
 }

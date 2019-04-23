@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Components
+namespace Fan.Web.Components
 {
     public class HeaderViewComponent : ViewComponent
     {
@@ -37,7 +37,7 @@ namespace Fan.WebApp.Components
                 IsSignedIn = isSignedIn,
             };
 
-            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Header.cshtml", vm);
+            return View("Header.cshtml", vm);
         }
     }
 }

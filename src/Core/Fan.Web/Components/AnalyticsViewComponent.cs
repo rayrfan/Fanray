@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Components
+namespace Fan.Web.Components
 {
     /// <summary>
     /// The view component for Google Analytics and Application Insights.
@@ -47,7 +47,7 @@ namespace Fan.WebApp.Components
             if (vm.AppInsightsFullScript.IsNullOrEmpty() && vm.GoogleAnalyticsTrackingID.IsNullOrEmpty())
                 return Content(string.Empty);
 
-            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Analytics.cshtml", vm);
+            return View("Analytics.cshtml", vm);
         }
     }
 }

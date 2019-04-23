@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Components
+namespace Fan.Web.Components
 {
     public class FooterViewComponent : ViewComponent
     {
@@ -16,7 +16,7 @@ namespace Fan.WebApp.Components
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            return View($"~/Themes/{coreSettings.Theme}/Views/Shared/Footer.cshtml", coreSettings);
+            return View("Footer.cshtml", coreSettings);
         }
     }
 }
