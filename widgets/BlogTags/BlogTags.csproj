@@ -22,12 +22,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ManifestJsonToCopy Include="$(OutputPath)\widget.json" />
+      <ManifestToCopy Include="$(OutputPath)\widget.json" />
     </ItemGroup>
 
-    <RemoveDir Directories="$(CopyToDir);$(CopyToWwwrootDir)" />
+    <RemoveDir Directories="$(CopyToDir)" />
     <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
-    <Copy SourceFiles="@(ManifestJsonToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
   </Target>
 
 </Project>
