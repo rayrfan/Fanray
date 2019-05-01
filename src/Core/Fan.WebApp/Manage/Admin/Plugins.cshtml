@@ -8,6 +8,7 @@
     <v-container>
         <v-data-table :headers="headers"
                       :items="pluginInfos"
+                      item-key="folder"
                       :total-items="totalPlugins"
                       :rows-per-page-items="rowsPerPageItems"
                       rows-per-page-text=""
@@ -21,12 +22,16 @@
                     <div>
                         <span>Version {{ props.item.version }}</span> |
                         <span>By <a :href="props.item.authorUrl">{{ props.item.author }}</a></span> |
-                        <span><a>View details</a></span>
+                        <span><a @@click="viewDetails(props.item)">View details</a></span>
                     </div>
                 </td>
                 <td>
-                    <div>
-                        <v-btn small color="primary">Activate</v-btn>
+                    <div v-if="props.item.active">
+                        <v-btn fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
+                        <v-btn fab small color="primary" @@click="editSettings(props.item)"><v-icon>build</v-icon></v-btn>
+                    </div>
+                    <div v-else>
+                        <v-btn fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
                     </div>
                 </td>
             </template>
@@ -55,10 +60,41 @@
                 headers: [
                   { text: 'Plugin', value: 'plugin' },
                   { text: 'Description', value: 'description', sortable: false },
-                  { text: '', value: 'actions', sortable: false }
+                  { text: 'Actions', value: 'actions', sortable: false }
                 ],
             }),
             methods: {
+                activate(plugin) {
+                    console.log('activate: ', plugin);
+                    axios.post('/admin/plugins?handler=activate', { folder: plugin.folder }, this.$root.headers)
+                        .then(resp => {
+                            console.log('activated: ', resp.data);
+                            plugin.active = true;
+                            plugin.id = resp.data;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.$root.toastError('Activate plugin failed.');
+                        });
+                },
+                deactivate(plugin) {
+                    console.log('deactivate: ', plugin);
+                    axios.post('/admin/plugins?handler=deactivate', { id: plugin.id }, this.$root.headers)
+                        .then(resp => {
+                            console.log('deactivated: ', resp.data);
+                            plugin.active = false;
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.$root.toastError('Deactivate plugin failed.');
+                        });
+                },
+                editSettings(plugin) {
+                    console.log('editSettings: ', plugin);
+                },
+                viewDetails(folder) {
+
+                },
             }
         });
     </script>

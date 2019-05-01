@@ -27,5 +27,33 @@ namespace Fan.WebApp.Manage.Admin
             var pluginInfos = await pluginService.GetInstalledManifestInfosAsync();
             PluginInfosJson = JsonConvert.SerializeObject(pluginInfos);
         }
+
+        public async Task<IActionResult> OnPostActivateAsync([FromBody]PluginDto dto)
+        {
+            var id = await pluginService.ActivatePluginAsync(dto.Folder);
+            return new JsonResult(id);
+        }
+
+        public async Task<IActionResult> OnPostDeactivateAsync([FromBody]PluginDto dto)
+        {
+            await pluginService.DeactivatePluginAsync(dto.Id);
+            return new JsonResult(true);
+        }
+
+        /// <summary>
+        /// Returns the plugin settings page url.
+        /// </summary>
+        //public async Task<JsonResult> OnGetEditAsync(int widgetId)
+        //{
+        //    var widget = await pluginService.GetPluginAsync(widgetId);
+        //    return new JsonResult(widget.SettingsUrl);
+        //}
+
+    }
+
+    public class PluginDto
+    {
+        public int Id { get; set; }
+        public string Folder { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
+using Fan.Plugins;
 using Fan.Settings;
 using Fan.Themes;
 using Fan.WebApp.Widgets.RecentBlogPosts;
@@ -33,6 +34,7 @@ namespace Fan.WebApp.Manage
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly IWidgetService _widgetSvc;
+        private readonly IPluginService pluginService;
         private readonly ILogger<SetupModel> _logger;
 
         public SetupModel(
@@ -45,6 +47,7 @@ namespace Fan.WebApp.Manage
             ISettingService settingService,
             IThemeService themeService,
             IWidgetService widgetService,
+            IPluginService pluginService,
             ILogger<SetupModel> logger)
         {
             _userManager = userManager;
@@ -56,6 +59,7 @@ namespace Fan.WebApp.Manage
             _settingSvc = settingService;
             _themeService = themeService;
             _widgetSvc = widgetService;
+            this.pluginService = pluginService;
             _logger = logger;
         }
 
@@ -183,7 +187,10 @@ namespace Fan.WebApp.Manage
                     await SetupBlogAsync();
 
                     // setup widgets
-                    await SetupThemeAndWidgets();
+                    await SetupThemeAndWidgetsAsync();
+
+                    // setup plugins
+                    await SetupPluginsAsync();
 
                     return new JsonResult(true);
                 }
@@ -279,7 +286,7 @@ namespace Fan.WebApp.Manage
         /// Activiates the default Clarity theme, registers system-defined widget areas, 
         /// then load some widgets.
         /// </summary>
-        private async Task SetupThemeAndWidgets()
+        private async Task SetupThemeAndWidgetsAsync()
         {
             // Clarity theme
             await _themeService.ActivateThemeAsync("Clarity");
@@ -320,6 +327,15 @@ namespace Fan.WebApp.Manage
             var recentBlogPostsWidget = new RecentBlogPostsWidget { ShowPostExcerpt = true };
             widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "RecentBlogPosts");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
+        }
+
+        /// <summary>
+        /// Activates Shortcodes plugin.
+        /// </summary>
+        /// <returns></returns>
+        private async Task SetupPluginsAsync()
+        {
+            await pluginService.ActivatePluginAsync("Shortcodes");
         }
     }
 
