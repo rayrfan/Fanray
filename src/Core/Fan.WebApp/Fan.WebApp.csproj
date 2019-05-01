@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Plugins\ForkMeRibbon\ForkMeRibbon.csproj" />
     <ProjectReference Include="..\..\Plugins\Shortcodes\Shortcodes.csproj" />
     <ProjectReference Include="..\..\Themes\Clarity\Clarity.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />

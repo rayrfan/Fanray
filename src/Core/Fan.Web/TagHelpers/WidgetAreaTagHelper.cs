@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 namespace Fan.Web.TagHelpers
 {
     /// <summary>
-    /// A Tag Helper that renders a widget area, requires a valid area id.
+    /// Renders a widget area, it requires a valid area id.
     /// </summary>
     /// <remarks>
-    /// TODO there should tag attributes that allow user to specify what html tag to surround the
+    /// TODO there should be tag attributes that allow user to specify what html tag to surround the
     /// area, right now I'm hard coding a div. Also a css class to attach to the area.
     /// </remarks>
     [HtmlTargetElement("widget-area", Attributes = "id")]
@@ -68,10 +68,9 @@ namespace Fan.Web.TagHelpers
 
             for (int i = 0; i < area.WidgetIds.Length; i++)
             {
-                var widgetIns = area.WidgetInstances[i];
                 var widget = area.Widgets[i];
 
-                var content = await viewComponentHelper.InvokeAsync(widgetIns.Folder, widget);
+                var content = await viewComponentHelper.InvokeAsync(widget.Folder, widget);
                 output.Content.AppendHtml(content.GetString());
             }
         }

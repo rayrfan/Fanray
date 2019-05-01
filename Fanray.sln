@@ -55,6 +55,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{27E759ED-9E6
 		sql\1.0-1.1.sql = sql\1.0-1.1.sql
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForkMeRibbon", "src\Plugins\ForkMeRibbon\ForkMeRibbon.csproj", "{22949558-4220-4879-8BB1-D03BCEFDD981}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,10 @@ Global
 		{153316E2-F584-4C7E-8090-F0D3E786378A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{153316E2-F584-4C7E-8090-F0D3E786378A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{153316E2-F584-4C7E-8090-F0D3E786378A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22949558-4220-4879-8BB1-D03BCEFDD981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22949558-4220-4879-8BB1-D03BCEFDD981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22949558-4220-4879-8BB1-D03BCEFDD981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22949558-4220-4879-8BB1-D03BCEFDD981}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -135,6 +141,7 @@ Global
 		{26AF1CE2-7F41-4894-87F9-E1871523BE07} = {1C66D1E7-72C6-4A76-A4C2-FDFDF43B17A3}
 		{B073FE71-0D11-406D-8BE3-CC8CBBA831A9} = {2982C754-FBE1-4793-8218-107E8BA0D33A}
 		{153316E2-F584-4C7E-8090-F0D3E786378A} = {B073FE71-0D11-406D-8BE3-CC8CBBA831A9}
+		{22949558-4220-4879-8BB1-D03BCEFDD981} = {7B70F90E-8DFB-4215-9455-C9357D5C1B3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1FC29A1-2BF1-46BD-9169-3C33C1C4494F}

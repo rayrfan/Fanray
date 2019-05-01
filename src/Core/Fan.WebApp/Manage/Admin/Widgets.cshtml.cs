@@ -65,7 +65,7 @@ namespace Fan.WebApp.Manage.Admin
         public async Task<JsonResult> OnGetEditAsync(int widgetId)
         {
             var widget = await _widgetService.GetWidgetAsync(widgetId);
-            return new JsonResult(widget.EditUrl);
+            return new JsonResult(widget.SettingsUrl);
         }
 
         /// <summary>
