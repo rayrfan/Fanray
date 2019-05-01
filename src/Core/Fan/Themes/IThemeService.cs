@@ -1,10 +1,12 @@
 ﻿using Fan.Extensibility;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fan.Themes
 {
-    public interface IThemeService : IExtensibleService<ThemeInfo>
+    /// <summary>
+    /// The theme service interface.
+    /// </summary>
+    public interface IThemeService : IExtensibleService<ThemeInfo, Theme>
     {
         /// <summary>
         /// Activates a theme.

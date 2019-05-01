@@ -27,18 +27,18 @@ namespace Microsoft.Extensions.DependencyInjection
                 try
                 {
                     // get plugin.json
-                    var pluginJson = Path.Combine(dir, "plugin.json");
+                    var pluginJson = Path.Combine(dir, PluginService.PLUGIN_MANIFEST);
                     if (!File.Exists(pluginJson))
                     {
-                        throw new FanException($"The plugin.json is not found.");
+                        throw new FanException($"The {PluginService.PLUGIN_MANIFEST} is not found.");
                     }
 
-                    // load plugin dlls
+                    // load plugin dll
                     var pluginInfo = JsonConvert.DeserializeObject<PluginInfo>(File.ReadAllText(pluginJson));
-                    var dll = Path.Combine(binDir, pluginInfo.Dll);                   
-                    var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll);
+                    var dllPath = Path.Combine(binDir, pluginInfo.GetDllFileName());                   
+                    var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
 
-                    // configure plugins
+                    // configure plugin
                     var plugin = assembly.GetTypes().FirstOrDefault(t => typeof(Plugin).IsAssignableFrom(t));
                     if ((plugin != null) && (plugin != typeof(Plugin)))
                     {

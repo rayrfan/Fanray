@@ -1,5 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
+using Fan.Extensibility;
 using Fan.Settings;
 using Fan.Widgets;
 using Microsoft.AspNetCore.Hosting;
@@ -16,19 +17,28 @@ using static MoreLinq.Extensions.DistinctByExtension;
 
 namespace Fan.Themes
 {
-    public class ThemeService : IThemeService
+    /// <summary>
+    /// The theme service.
+    /// </summary>
+    public class ThemeService : ExtensibleService<ThemeInfo, Theme>, IThemeService
     {
-        public const string THEME_INFO_FILE_NAME = "theme.json";
-        public const string THEME_DIRECTORY_NAME = "Themes";
+        /// <summary>
+        /// The manifest file name for themes "theme.json".
+        /// </summary>
+        public const string THEME_MANIFEST = "theme.json";
+        /// <summary>
+        /// The directory that contains themes "Themes".
+        /// </summary>
+        public const string THEME_DIR = "Themes";
         /// <summary>
         /// A theme's folder can only contain alphanumeric, dash and underscore.
         /// </summary>
         public const string THEME_FOLDER_REGEX = @"^[a-zA-Z0-9-_]+$";
 
+        private const string CACHE_KEY_INSTALLED_THEMES_MANIFESTS = "installed-theme-manifests";
+        private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
+
         private readonly ISettingService settingService;
-        private readonly IHostingEnvironment hostingEnvironment;
-        private readonly IDistributedCache distributedCache;
-        private readonly IMetaRepository metaRepository;
         private readonly ILogger<ThemeService> logger;
 
         public ThemeService(ISettingService settingService,
@@ -36,16 +46,11 @@ namespace Fan.Themes
             IDistributedCache distributedCache,
             IMetaRepository metaRepository,
             ILogger<ThemeService> logger)
+            : base(metaRepository, distributedCache, hostingEnvironment)
         {
             this.settingService = settingService;
-            this.hostingEnvironment = hostingEnvironment;
-            this.distributedCache = distributedCache;
-            this.metaRepository = metaRepository;
             this.logger = logger;
         }
-
-        private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
-        private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
 
         /// <summary>
         /// Activates a theme.
@@ -58,7 +63,7 @@ namespace Fan.Themes
         public async Task ActivateThemeAsync(string folderName)
         {
             // verify folderName 
-            if (!IsValidFolderName(folderName))
+            if (!IsValidExtensionFolder(folderName))
                 throw new FanException($"Theme {folderName} contains invalid characters.");
 
             // register theme if not exist
@@ -101,40 +106,43 @@ namespace Fan.Themes
         }
 
         /// <summary>
-        /// Returns a list of <see cref="ThemeInfo"/> of the installed themes.
+        /// Returns a list of <see cref="ThemeInfo"/> of the installed themes and their <see cref="WidgetAreaInfo"/>.
         /// </summary>
         /// <remarks>
-        /// The ids of the list of <see cref="WidgetAreaInfo"/> are distinct and lower case.
+        /// The ids of the widget area infos are distinct and lower case.
         /// </remarks>
-        public async Task<IEnumerable<ThemeInfo>> GetInstalledManifestInfosAsync()
+        public override async Task<IEnumerable<ThemeInfo>> GetInstalledManifestInfosAsync()
         {
-            var list = new List<ThemeInfo>();
-            var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIRECTORY_NAME);
-
-            foreach (var dir in Directory.GetDirectories(themesDir))
+            return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_THEMES_MANIFESTS, Cache_Time_Installed_Theme_Manifests, async () =>
             {
-                var dirTokens = dir.Split(Path.DirectorySeparatorChar);
-                var folder = dirTokens[dirTokens.Length - 1];
+                var list = new List<ThemeInfo>();
+                var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIR);
 
-                // load only valid folder name
-                if (!IsValidFolderName(folder)) continue;
+                foreach (var dir in Directory.GetDirectories(themesDir))
+                {
+                    var dirTokens = dir.Split(Path.DirectorySeparatorChar);
+                    var folder = dirTokens[dirTokens.Length - 1];
 
-                var file = Path.Combine(dir, THEME_INFO_FILE_NAME);
-                var themeInfo = JsonConvert.DeserializeObject<ThemeInfo>(await File.ReadAllTextAsync(file));
-                themeInfo.Folder = folder;
+                    // load only valid folder name
+                    if (!IsValidExtensionFolder(folder)) continue;
 
-                // make sure no duplicate areas based on id
-                themeInfo.WidgetAreas = themeInfo.WidgetAreas.DistinctBy(a => a.Id).ToArray();
-                
-                // make sure all area ids are lower case
-                foreach (var area in themeInfo.WidgetAreas) area.Id = area.Id.ToLower();
+                    var file = Path.Combine(dir, THEME_MANIFEST);
+                    var themeInfo = JsonConvert.DeserializeObject<ThemeInfo>(await File.ReadAllTextAsync(file));
+                    themeInfo.Folder = folder;
 
-                list.Add(themeInfo);
-            }
+                    // make sure no duplicate areas based on id
+                    themeInfo.WidgetAreas = themeInfo.WidgetAreas.DistinctBy(a => a.Id).ToArray();
 
-            return list;
+                    // make sure all area ids are lower case
+                    foreach (var area in themeInfo.WidgetAreas) area.Id = area.Id.ToLower();
+
+                    list.Add(themeInfo);
+                }
+
+                return list;
+            });
         }
 
-        private bool IsValidFolderName(string folder) => new Regex(THEME_FOLDER_REGEX).IsMatch(folder);
+        public override bool IsValidExtensionFolder(string folder) => new Regex(THEME_FOLDER_REGEX).IsMatch(folder);
     }
 }

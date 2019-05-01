@@ -4,12 +4,12 @@ using Fan.Widgets;
 namespace Fan.Themes
 {
     /// <summary>
-    /// Information from a theme's theme.json file.
+    /// The theme.json file.
     /// </summary>
     public class ThemeInfo : ManifestInfo
     {
         /// <summary>
-        /// URL of the theme.
+        /// The theme website.
         /// </summary>
         public string ThemeUrl { get; set; }
         /// <summary>
@@ -19,14 +19,6 @@ namespace Fan.Themes
         /// "featured-images", "rtl-language-support", "sticky-post" etc.
         /// </summary>
         public string[] Tags { get; set; }
-        /// <summary>
-        /// The folder name of the theme, obviously it has to be unique.
-        /// </summary>
-        /// <remarks>
-        /// Theme's folder name could be different from it's Name. 
-        /// Not part of theme.json, set during GetInstalledThemesInfoAsync
-        /// </remarks>
-        public string Folder { get; set; }
         /// <summary>
         /// Widget areas the theme uses.
         /// </summary>

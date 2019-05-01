@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 
 namespace Fan.Widgets
 {
-    public interface IWidgetService : IExtensibleService<WidgetInfo>
+    /// <summary>
+    /// The widget service interface.
+    /// </summary>
+    public interface IWidgetService : IExtensibleService<WidgetInfo, Widget>
     {
         /// <summary>
         /// Registers a widget area by its id and type.

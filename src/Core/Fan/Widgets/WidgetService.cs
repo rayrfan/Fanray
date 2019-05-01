@@ -1,5 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
+using Fan.Extensibility;
 using Fan.Helpers;
 using Fan.Settings;
 using Fan.Themes;
@@ -12,13 +13,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Fan.IntegrationTests")]
 
 namespace Fan.Widgets
 {
-    public class WidgetService : IWidgetService
+    /// <summary>
+    /// The widget service.
+    /// </summary>
+    public class WidgetService : ExtensibleService<WidgetInfo, Widget>, IWidgetService
     {
         public static WidgetAreaInfo BlogSidebar1 = new WidgetAreaInfo { Id = "blog-sidebar1", Name = "Blog - Sidebar1" };
         public static WidgetAreaInfo BlogSidebar2 = new WidgetAreaInfo { Id = "blog-sidebar2", Name = "Blog - Sidebar2" };
@@ -46,24 +51,26 @@ namespace Fan.Widgets
         /// <summary>
         /// The widget info file name.
         /// </summary>
-        public const string WIDGET_INFO_FILE_NAME = "widget.json";
+        public const string WIDGET_MANIFEST = "widget.json";
         /// <summary>
         /// The widgets directory inside the web app.
         /// </summary>
         public const string WIDGETS_DIR = "Widgets";
-
         /// <summary>
-        /// Returns the path to widget view file which is located in Fan.Web/Widgets folder.
+        /// A widget's folder must be in PascalCase.
         /// </summary>
-        /// <param name="widgetName"></param>
-        /// <returns></returns>
-        public static string GetWidgetViewPath(string widgetName) => $"~/{WIDGETS_DIR}/{widgetName}/{widgetName}.cshtml";
+        /// <remarks>
+        /// https://stackoverflow.com/a/2106423/32240
+        /// </remarks>
+        public const string WIDGET_FOLDER_REGEX = @"^[A-Z][a-z]+(?:[A-Z][a-z]+)*$";
 
-        private readonly IMetaRepository metaRepository;
+        private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
+        private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
+        private const string CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS = "installed-widgets-manifests";
+        private TimeSpan Cache_Time_Installed_Widgets_Manifests = new TimeSpan(0, 10, 0);
+
         private readonly IThemeService themeService;
-        private readonly IDistributedCache distributedCache;
         private readonly ISettingService settingService;
-        private readonly IHostingEnvironment hostingEnvironment;
         private readonly ILogger<WidgetService> logger;
 
         public WidgetService(IMetaRepository metaRepository,
@@ -72,19 +79,12 @@ namespace Fan.Widgets
             ISettingService settingService,
             IHostingEnvironment hostingEnvironment,
             ILogger<WidgetService> logger)
+            : base(metaRepository, distributedCache, hostingEnvironment)
         {
-            this.metaRepository = metaRepository;
             this.themeService = themeService;
-            this.distributedCache = distributedCache;
             this.settingService = settingService;
-            this.hostingEnvironment = hostingEnvironment;
             this.logger = logger;
         }
-
-        private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
-        private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
-        private const string CACHE_KEY_INSTALLED_WIDGETS_INFO = "installed-widgets-info";
-        private TimeSpan Cache_Time_Installed_Widgets_Info = new TimeSpan(0, 10, 0);
 
         // -------------------------------------------------------------------- widget areas
 
@@ -161,7 +161,7 @@ namespace Fan.Widgets
                     foreach (var id in widgetArea.WidgetIds)
                     {
                         var widget = await GetWidgetAsync(id);
-                        var widgetInfo = await GetWidgetInfoByFolderAsync(widget.Folder);
+                        var widgetInfo = await GetManifestInfoByFolderAsync(widget.Folder);
                         var widgetInstance = new WidgetInstance {
                             Id = id,
                             Title = widget.Title,
@@ -181,33 +181,45 @@ namespace Fan.Widgets
             }, includeTypeName: true);
         }
 
-        // -------------------------------------------------------------------- widget infos
+        // -------------------------------------------------------------------- manifests
 
         /// <summary>
-        /// Returns a list of widget info for all widgets found in "Fan.Web.Widgets" folder.
+        /// Returns a list of widget info of each widget found in webapp's "Widgets" folder.
         /// </summary>
         /// <remarks>
-        /// This method scans the "Fan.Web.Widgets" folder and reads all the "widget.json" files for each widget.
-        /// Currently I don't save these data to db till download working.
+        /// This method scans the Widgets folder and reads all the "widget.json" files for each widget.
+        /// A widget's folder must be in pascal casing.
         /// </remarks>
-        public async Task<IEnumerable<WidgetInfo>> GetInstalledManifestInfosAsync()
+        public override async Task<IEnumerable<WidgetInfo>> GetInstalledManifestInfosAsync()
         {
-            return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_INFO, Cache_Time_Installed_Widgets_Info, async () =>
+            return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS, Cache_Time_Installed_Widgets_Manifests, async () =>
             { 
                 var list = new List<WidgetInfo>();
                 var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGETS_DIR);
 
                 foreach (var dir in Directory.GetDirectories(widgetsFolder))
                 {
-                    var file = Path.Combine(dir, WIDGET_INFO_FILE_NAME);
+                    var file = Path.Combine(dir, WIDGET_MANIFEST);
                     var info = JsonConvert.DeserializeObject<WidgetInfo>(await File.ReadAllTextAsync(file));
-                    info.Folder = new DirectoryInfo(dir).Name; // set folder
-                    list.Add(info);
+                    info.Folder = new DirectoryInfo(dir).Name;
+
+                    if (!IsValidExtensionFolder(info.Folder)) continue;
+
+                    if (info.Type.IsNullOrEmpty())
+                    {
+                        logger.LogError($"Invalid {WIDGET_MANIFEST} in {info.Folder}, missing \"type\" information.");
+                    }
+                    else
+                    {
+                        list.Add(info);
+                    }
                 }
 
                 return list;
             });
         }
+
+        public override bool IsValidExtensionFolder(string folder) => new Regex(WIDGET_FOLDER_REGEX).IsMatch(folder);
 
         // -------------------------------------------------------------------- get / update
 
@@ -220,9 +232,7 @@ namespace Fan.Widgets
         {
             var widgetMeta = await metaRepository.GetAsync(id);
             var widgetBase = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
-            var widgetType = await GetWidgetTypeByFolderAsync(widgetBase.Folder);
-
-            var type = Type.GetType(widgetType);
+            var type = await GetManifestTypeByFolderAsync(widgetBase.Folder);
             var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
             widget.Id = id;
 
@@ -277,7 +287,7 @@ namespace Fan.Widgets
             // invalidate cache
             await InvalidAreaCacheAsync();
 
-            var widgetInfo = await GetWidgetInfoByFolderAsync(widget.Folder);
+            var widgetInfo = await GetManifestInfoByFolderAsync(widget.Folder);
             return new WidgetInstance
             {
                 Id = widgetId,
@@ -349,8 +359,7 @@ namespace Fan.Widgets
         /// </remarks>
         public async Task<int> CreateWidgetAsync(string folder)
         {
-            var widgetType = await GetWidgetTypeByFolderAsync(folder);
-            var type = Type.GetType(widgetType);
+            var type = await GetManifestTypeByFolderAsync(folder);
             var widget = (Widget)Activator.CreateInstance(type);
             return await CreateWidgetAsync(widget, folder);
         }
@@ -366,12 +375,7 @@ namespace Fan.Widgets
         /// </remarks>
         public async Task<int> CreateWidgetAsync(Widget widget, string folder)
         {
-            // add type info
             widget.Folder = folder;
-
-            // get widget info
-            var widgetInfo = await GetWidgetInfoByFolderAsync(folder);
-
             Meta metaWidget = null;
             while (metaWidget == null)
             {
@@ -380,7 +384,7 @@ namespace Fan.Widgets
                     // create widget meta record
                     metaWidget = await metaRepository.CreateAsync(new Meta
                     {
-                        Key = string.Format($"{widgetInfo.Folder}-{Util.RandomString(6)}").ToLower(),
+                        Key = string.Format($"{folder}-{Util.RandomString(6)}").ToLower(),
                         Value = JsonConvert.SerializeObject(widget),
                         Type = EMetaType.Widget,
                     });
@@ -404,28 +408,6 @@ namespace Fan.Widgets
         }
 
         // -------------------------------------------------------------------- private methods
-
-        /// <summary>
-        /// Returns widget type by folder.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        internal async Task<string> GetWidgetTypeByFolderAsync(string folder)
-        {
-            var info = await GetWidgetInfoByFolderAsync(folder); 
-            return info.Type;
-        }
-
-        /// <summary>
-        /// Returns <see cref="WidgetInfo"/> by folder.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        private async Task<WidgetInfo> GetWidgetInfoByFolderAsync(string folder)
-        {
-            var widgetInfos = await GetInstalledManifestInfosAsync();
-            return widgetInfos.Single(wi => wi.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
-        }
 
         /// <summary>
         /// Returns a <see cref="Meta"/> area record that is either by system or by theme.
@@ -495,5 +477,12 @@ namespace Fan.Widgets
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             await distributedCache.RemoveAsync(cacheKey);
         }
+
+        /// <summary>
+        /// Returns the path to widget view file which is located in Fan.Web/Widgets folder.
+        /// </summary>
+        /// <param name="widgetName"></param>
+        /// <returns></returns>
+        public static string GetWidgetViewPath(string widgetName) => $"~/{WIDGETS_DIR}/{widgetName}/{widgetName}.cshtml";
     }
 }

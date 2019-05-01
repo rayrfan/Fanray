@@ -25,10 +25,6 @@ namespace Fan.Widgets
         /// </remarks>
         public string Title { get; set; }
         /// <summary>
-        /// Folder name, <see cref="WidgetInfo.Folder"/>.
-        /// </summary>
-        public string Folder { get; set; }
-        /// <summary>
         /// Url to details page of the widget.
         /// </summary>
         /// <remarks>
@@ -41,7 +37,7 @@ namespace Fan.Widgets
         /// Url to edit page of the widget.
         /// </summary>
         [JsonIgnore]
-        public override string EditUrl =>
+        public override string SettingsUrl =>
             (Folder.IsNullOrEmpty() || Id <= 0) ? "" : $"/{WidgetService.WIDGETS_DIR}/{Folder}Edit?widgetId={Id}";
     }
 }

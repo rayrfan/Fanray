@@ -22,8 +22,12 @@
         /// </summary>
         WidgetAreaByTheme = 3,
         /// <summary>
-        /// A widget instance.
+        /// A widget.
         /// </summary>
         Widget = 4,
+        /// <summary>
+        /// A plugin.
+        /// </summary>
+        Plugin = 5,
     }
 }
