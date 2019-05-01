@@ -1,37 +1,32 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text.RegularExpressions;
 
 namespace Fan.Helpers
 {
+    /// <summary>
+    /// Finds a type in assembly.
+    /// </summary>
+    /// <remarks>
+    /// TODO needs a new strategy.
+    /// </remarks>
     public class TypeFinder
     {
         /// <summary>
-        /// Sln project dlls.
+        /// Skip dll file name regex.
         /// </summary>
-        private FileSystemInfo[] _dllInfos;
-        private readonly ILogger<TypeFinder> _logger;
-
-        public TypeFinder(ILoggerFactory loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<TypeFinder>();
-            
-            // https://github.com/aspnet/Announcements/issues/237
-            // the dir that contains dlls "...\bin\Debug\netcoreapp2.0\"
-            var dllDir = new DirectoryInfo(AppContext.BaseDirectory); 
-            _dllInfos = dllDir.GetFileSystemInfos("*.dll", SearchOption.AllDirectories);
-        }
+        public const string SKIP_DLL_REGEX = "^System|^Microsoft|^Newtonsoft|^AutoMapper|^Humanizer|^MediatR|^Scrutor|^Serilog|^HtmlAgilityPack|^SixLabors|^FluentValidation|^morelinq|^TimeZoneConverter|^WindowsAzure|^Moq|^xunit";
 
         /// <summary>
         /// Returns types that derive or implement type T from sln projects.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public IEnumerable<Type> Find<T>()
+        public static IEnumerable<Type> Find<T>()
         {
             return Find(typeof(T));
         }
@@ -41,19 +36,21 @@ namespace Fan.Helpers
         /// </summary>
         /// <param name="baseType"></param>
         /// <returns></returns>
-        public IEnumerable<Type> Find(Type baseType)
+        public static IEnumerable<Type> Find(Type baseType)
         {
             var types = new List<Type>();
-            foreach (var dll in _dllInfos)
+            var dlls = new DirectoryInfo(AppContext.BaseDirectory).GetFileSystemInfos("*.dll", SearchOption.TopDirectoryOnly);
+            foreach (var dll in dlls)
             {
                 Assembly assembly = null;
                 try
                 {
-                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+                    var fileName = Path.GetFileName(dll.FullName);
+                    if (IsDllMatch(fileName))
+                        assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
                 }
-                catch (BadImageFormatException ex)
+                catch (BadImageFormatException)
                 {
-                    _logger.LogCritical($"Unable to load dll {dll.FullName} - {ex.Message}");
                 }
 
                 if (assembly != null)
@@ -71,12 +68,20 @@ namespace Fan.Helpers
         }
 
         /// <summary>
+        /// Returns true if dll file name is a match.
+        /// </summary>
+        /// <param name="fileName">A dll file name.</param>
+        /// <returns></returns>
+        public static bool IsDllMatch(string fileName) =>
+            !Regex.IsMatch(fileName, SKIP_DLL_REGEX, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        /// <summary>
         /// Returns true if the type implements the genericType.
         /// </summary>
         /// <param name="type"></param>
         /// <param name="genericType">The base type that is a generic type.</param>
         /// <returns></returns>
-        private bool DoesTypeImplementGeneric(Type type, Type genericType)
+        private static bool DoesTypeImplementGeneric(Type type, Type genericType)
         {
             try
             {

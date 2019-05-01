@@ -12,12 +12,12 @@ namespace Fan.Data
     /// </summary>
     public class FanDbContext : IdentityDbContext<User, Role, int>
     {
-        ILoggerFactory _loggerFactory;
+        private readonly ILogger<FanDbContext> logger;
 
         public FanDbContext(DbContextOptions<FanDbContext> options, ILoggerFactory loggerFactory) 
             : base(options)
         {
-            _loggerFactory = loggerFactory;
+            logger = loggerFactory.CreateLogger<FanDbContext>();
         }
 
         /// <summary>
@@ -27,16 +27,13 @@ namespace Fan.Data
         /// <remarks>
         /// Having multiple DbContexts and still create database for user on app launch is a challenge,
         /// <see cref="https://stackoverflow.com/a/11198345/32240"/>. I get around this issue using 
-        /// reflection here to load everything dynamically.
+        /// reflection here to load everything dynamically. This method is called once on startup.
         /// </remarks>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var logger = _loggerFactory.CreateLogger<FanDbContext>();
-
             // find entities and model builders from app assemblies
-            var typeFinder = new TypeFinder(_loggerFactory);
-            var entityTypes = typeFinder.Find<Entity>();
-            var modelBuilderTypes = typeFinder.Find<IEntityModelBuilder>();
+            var entityTypes = TypeFinder.Find<Entity>();
+            var modelBuilderTypes = TypeFinder.Find<IEntityModelBuilder>();
 
             // add entity types to the model
             foreach (var type in entityTypes)
@@ -61,4 +58,3 @@ namespace Fan.Data
         }
     }
 }
-
