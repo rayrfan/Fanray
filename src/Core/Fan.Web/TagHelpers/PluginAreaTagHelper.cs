@@ -1,7 +1,6 @@
 ﻿using Fan.Plugins;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
@@ -14,29 +13,20 @@ namespace Fan.Web.TagHelpers
     /// Renders a plugin area to output plugin visual elements.
     /// </summary>
     [HtmlTargetElement("plugin-area", Attributes = nameof(Type))]
-    public class PluginAreaTagHelper : TagHelper
+    public class PluginAreaTagHelper : AreaTagHelper
     {
-        private readonly IViewComponentHelper viewComponentHelper;
         private readonly IPluginService pluginService;
 
-        public PluginAreaTagHelper(IViewComponentHelper viewComponentHelper,
-            IPluginService pluginService)
+        public PluginAreaTagHelper(IViewComponentHelper viewComponentHelper, IPluginService pluginService) 
+            : base(viewComponentHelper)
         {
-            this.viewComponentHelper = viewComponentHelper;
             this.pluginService = pluginService;
         }
 
         public EPluginAreaType Type { get; set; }
 
         /// <summary>
-        /// Initializes the ViewContext of the executing page.
-        /// </summary>
-        [ViewContext]
-        [HtmlAttributeNotBound]
-        public ViewContext ViewContext { get; set; }
-
-        /// <summary>
-        /// Outputs plugin area html.
+        /// Outputs plugin visual elements.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="output"></param>
