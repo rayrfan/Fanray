@@ -2,10 +2,6 @@
   <a href="https://www.fanray.com/">
     <img src="https://user-images.githubusercontent.com/633119/45599313-0d112980-b99e-11e8-9997-d2fcff65347f.png" alt="" width=72 height=72>
   </a>
-  <h3 align="center">Fanray</h3>
-  <p align="center">
-    A simple and elegant blog.
-  </p>
   <p align="center">
 	<a href="#screenshots">Screenshots</a> •
 	<a href="#features">Features</a> •
@@ -33,34 +29,35 @@
 
 ## Features
 
-Please check out the [Wiki](https://github.com/FanrayMedia/Fanray/wiki) for details.
+Fanray is a [blog](https://github.com/FanrayMedia/Fanray/wiki/Use-the-Blog) and web app starter kit. It has an [extensible design](https://github.com/FanrayMedia/Fanray/wiki/Architecture) that allows you to create [plugins](https://github.com/FanrayMedia/Fanray/wiki/Plugins), [themes](https://github.com/FanrayMedia/Fanray/wiki/Themes) and [widgets](https://github.com/FanrayMedia/Fanray/wiki/Widgets). It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
+
+![Architecture-Extensible-Design](https://user-images.githubusercontent.com/633119/56977708-a7d40800-6b2a-11e9-84ed-c941faadcfa3.png)
 
 | Blog | | Infrastructure |
 | --- | --- |  --- | 
-| Autosave Draft    | Shortcodes		| Caching                                   
-| Categories		| Site Installation	| Error Handling						    
-| Comments (Disqus) | Tags				| Events									
-| Google Analytics  | Users				| Image Resizing                            
-| Media Gallery     | Widgets			| Logging (File, Seq, ApplicationInsights)  
-| Open Live Writer  |					| MetaWeblog API                            
-| Preferred Domain  |					| Settings                                  
-| Responsive Images |					| Storage (File System, Azure Blob Storage) 
-| RSS				|					| Testing (Unit, Integration)               
-| SEO-Friendly URLs |					| Validation								
-
+| Autosave Draft    | Preferred Domain	| Caching                                   
+| Categories		| Responsive Images	| Error Handling
+| Comments (Disqus) | RSS				| Events									
+| Google Analytics  | SEO-Friendly URLs	| Image Resizing                            
+| Media Gallery     | Shortcodes		| Logging (File, Seq, ApplicationInsights)  
+| Navigation		| Site Installation	| Middlewares                           
+| Open Live Writer  | Tags				| Mini SPAs 
+| Pages				| Themes			| Settings                                  
+| Plugins			| Users				| Storage (File System, Azure Blob Storage) 
+| Posts				| Widgets			| Testing (Unit, Integration)              								
  
 ## Quick Start
 
 Fanray v1.1 runs on [.NET Core 2.2](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
 
-Clone the repo then run from either [VS2017](https://www.visualstudio.com/vs/community/) or command line.
+Clone the repo then run from either [VS2019](https://www.visualstudio.com/vs/community/) or command line.
 
-- VS2017: open `Fanray.sln`, make sure `Fan.Web` is the startup project, ctrl + F5
+- VS2019: open `Fanray.sln`, make sure `Fan.WebApp` is the startup project, Ctrl + F5
 - Command line: do the following, then go to https://localhost:5001
  ```
 cd <sln folder>
 dotnet restore
-cd src/Fan.Web
+cd src/Core/Fan.WebApp
 dotnet run
 ```
 
