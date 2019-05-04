@@ -12,10 +12,10 @@ namespace Fan.Extensibility
     /// <summary>
     /// The extensible service.
     /// </summary>
-    /// <typeparam name="TInfo"></typeparam>
+    /// <typeparam name="TManifest"></typeparam>
     /// <typeparam name="TExtension"></typeparam>
-    public abstract class ExtensibleService<TInfo, TExtension> : IExtensibleService<TInfo, TExtension> 
-        where TInfo : ManifestInfo
+    public abstract class ExtensibleService<TManifest, TExtension> : IExtensibleService<TManifest, TExtension> 
+        where TManifest : Manifest
         where TExtension : Extension
     {
         protected readonly IMetaRepository metaRepository;
@@ -32,10 +32,10 @@ namespace Fan.Extensibility
         }
 
         /// <summary>
-        /// Returns a list of manifest info.
+        /// Returns a list of manifests.
         /// </summary>
         /// <returns></returns>
-        public abstract Task<IEnumerable<TInfo>> GetInstalledManifestInfosAsync();
+        public abstract Task<IEnumerable<TManifest>> GetInstalledManifestsAsync();
 
         /// <summary>
         /// Returns an extension of the real derived type.
@@ -48,7 +48,6 @@ namespace Fan.Extensibility
             var baseType = JsonConvert.DeserializeObject<TExtension>(meta.Value);
             var actualType = await GetManifestTypeByFolderAsync(baseType.Folder);
             var extension = (TExtension)JsonConvert.DeserializeObject(meta.Value, actualType);
-            //extension.Id = id;
 
             return extension;
         }
@@ -71,14 +70,14 @@ namespace Fan.Extensibility
         public abstract bool IsValidExtensionFolder(string folder);
 
         /// <summary>
-        /// Returns extension manifest info by folder.
+        /// Returns extension manifest by folder.
         /// </summary>
         /// <param name="folder"></param>
         /// <returns></returns>
-        protected async Task<TInfo> GetManifestInfoByFolderAsync(string folder)
+        protected async Task<TManifest> GetManifestByFolderAsync(string folder)
         {
-            var infos = await GetInstalledManifestInfosAsync();
-            return infos.Single(wi => wi.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
+            var manifests = await GetInstalledManifestsAsync();
+            return manifests.Single(wi => wi.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -88,8 +87,8 @@ namespace Fan.Extensibility
         /// <returns></returns>
         internal protected async Task<Type> GetManifestTypeByFolderAsync(string folder)
         {
-            var info = await GetManifestInfoByFolderAsync(folder);
-            return Type.GetType(info.Type);
+            var manifest = await GetManifestByFolderAsync(folder);
+            return Type.GetType(manifest.Type);
         }
     }
 }

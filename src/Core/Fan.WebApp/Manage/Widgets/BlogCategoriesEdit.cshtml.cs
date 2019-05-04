@@ -23,7 +23,7 @@ namespace Fan.WebApp.Manage.Widgets
         /// <param name="widgetId"></param>
         public async Task OnGet(int widgetId)
         {
-            var widget = (BlogCategoriesWidget)await widgetService.GetWidgetAsync(widgetId);
+            var widget = (BlogCategoriesWidget)await widgetService.GetExtensionAsync(widgetId);
             WidgetJson = JsonConvert.SerializeObject(widget);
         }
 

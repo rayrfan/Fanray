@@ -6,7 +6,7 @@ namespace Fan.Themes
     /// <summary>
     /// The theme service interface.
     /// </summary>
-    public interface IThemeService : IExtensibleService<ThemeInfo, Theme>
+    public interface IThemeService : IExtensibleService<ThemeManifest, Theme>
     {
         /// <summary>
         /// Activates a theme.

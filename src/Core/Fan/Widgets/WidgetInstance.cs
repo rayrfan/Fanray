@@ -6,7 +6,7 @@
     public class WidgetInstance : Widget
     {
         /// <summary>
-        /// Display name, <see cref="WidgetInfo.Name"/>.
+        /// Display name, <see cref="WidgetManifest.Name"/>.
         /// </summary>
         public string Name { get; set; }
     }

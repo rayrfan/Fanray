@@ -20,7 +20,7 @@ namespace Fan.Extensibility
         public virtual string SettingsUrl => null;
 
         /// <summary>
-        /// Folder name, <see cref="ManifestInfo.Folder"/>.
+        /// Folder name, <see cref="Manifest.Folder"/>.
         /// </summary>
         public string Folder { get; set; }
     }

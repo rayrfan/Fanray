@@ -95,7 +95,7 @@ namespace Fan.IntegrationTests.Widgets
         {
             // Given I have MyWidget installed in this test project
             // When Admin Panel Widgets page is requested
-            var widgetInfos = await _svc.GetInstalledManifestInfosAsync();
+            var widgetInfos = await _svc.GetInstalledManifestsAsync();
 
             // Then widget's info will displayed
             Assert.Single(widgetInfos);
@@ -144,7 +144,7 @@ namespace Fan.IntegrationTests.Widgets
             Assert.Contains(widgetId, area2.WidgetIds);
 
             // and widget's areaId will be updated too
-            var widgetAgain = await _svc.GetWidgetAsync(widgetId);
+            var widgetAgain = await _svc.GetExtensionAsync(widgetId);
             Assert.Equal(WidgetService.BlogSidebar2.Id, widgetAgain.AreaId);
         }
 
@@ -263,12 +263,12 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user udpates the widget instance
-            MyWidget myWidget = (MyWidget) await _svc.GetWidgetAsync(widgetId);
+            MyWidget myWidget = (MyWidget) await _svc.GetExtensionAsync(widgetId);
             myWidget.Age = 20;
             await _svc.UpdateWidgetAsync(widgetId, myWidget);
 
             // Then the widget instance is updated
-            var myWidgetAgain = (MyWidget)await _svc.GetWidgetAsync(widgetId);
+            var myWidgetAgain = (MyWidget)await _svc.GetExtensionAsync(widgetId);
             Assert.Equal(20, myWidgetAgain.Age);
         }
     }

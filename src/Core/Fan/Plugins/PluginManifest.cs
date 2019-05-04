@@ -5,7 +5,7 @@ namespace Fan.Plugins
     /// <summary>
     /// The plugin.json file.
     /// </summary>
-    public class PluginInfo : ManifestInfo
+    public class PluginManifest : Manifest
     {
         /// <summary>
         /// The plugin meta id.

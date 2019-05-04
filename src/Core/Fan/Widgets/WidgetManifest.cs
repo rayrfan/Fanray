@@ -5,7 +5,7 @@ namespace Fan.Widgets
     /// <summary>
     /// The widget.json file.
     /// </summary>
-    public class WidgetInfo : ManifestInfo
+    public class WidgetManifest : Manifest
     {
         /// <summary>
         /// The widget website.

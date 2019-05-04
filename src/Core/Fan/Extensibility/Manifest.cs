@@ -6,7 +6,7 @@ namespace Fan.Extensibility
     /// <summary>
     /// Common properties of an extension's manifest file.
     /// </summary>
-    public class ManifestInfo
+    public class Manifest
     {
         /// <summary>
         /// Display name.

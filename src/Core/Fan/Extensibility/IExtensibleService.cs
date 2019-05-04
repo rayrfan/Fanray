@@ -6,17 +6,17 @@ namespace Fan.Extensibility
     /// <summary>
     /// The extensible service interface.
     /// </summary>
-    /// <typeparam name="TInfo"></typeparam>
+    /// <typeparam name="TManifest"></typeparam>
     /// <typeparam name="TExtension"></typeparam>
-    public interface IExtensibleService<TInfo, TExtension> 
-        where TInfo : class
+    public interface IExtensibleService<TManifest, TExtension> 
+        where TManifest : class
         where TExtension  : class
     {
         /// <summary>
-        /// Returns a list of manifest info.
+        /// Returns a list of manifests.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<TInfo>> GetInstalledManifestInfosAsync();
+        Task<IEnumerable<TManifest>> GetInstalledManifestsAsync();
 
         /// <summary>
         /// Returns an extension of the real derived type.

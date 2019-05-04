@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Fan.Plugins
 {
-    public interface IPluginService : IExtensibleService<PluginInfo, Plugin>
+    public interface IPluginService : IExtensibleService<PluginManifest, Plugin>
     {
         /// <summary>
         /// Activates a plugin.

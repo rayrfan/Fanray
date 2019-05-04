@@ -34,8 +34,8 @@ namespace Microsoft.Extensions.DependencyInjection
                     }
 
                     // load plugin dll
-                    var pluginInfo = JsonConvert.DeserializeObject<PluginInfo>(File.ReadAllText(pluginJson));
-                    var dllPath = Path.Combine(binDir, pluginInfo.GetDllFileName());                   
+                    var pluginManifest = JsonConvert.DeserializeObject<PluginManifest>(File.ReadAllText(pluginJson));
+                    var dllPath = Path.Combine(binDir, pluginManifest.GetDllFileName());                   
                     var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
 
                     // configure plugin

@@ -6,7 +6,7 @@ namespace Fan.Themes
     /// <summary>
     /// The theme.json file.
     /// </summary>
-    public class ThemeInfo : ManifestInfo
+    public class ThemeManifest : Manifest
     {
         /// <summary>
         /// The theme website.

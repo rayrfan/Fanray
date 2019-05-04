@@ -8,7 +8,7 @@ namespace Fan.Widgets
     /// <summary>
     /// The widget service interface.
     /// </summary>
-    public interface IWidgetService : IExtensibleService<WidgetInfo, Widget>
+    public interface IWidgetService : IExtensibleService<WidgetManifest, Widget>
     {
         /// <summary>
         /// Registers a widget area by its id and type.
@@ -33,7 +33,7 @@ namespace Fan.Widgets
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<Widget> GetWidgetAsync(int id);
+        //Task<Widget> GetWidgetAsync(int id);
         /// <summary>
         /// Updates a widget instance.
         /// </summary>

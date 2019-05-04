@@ -18,7 +18,7 @@ namespace BlogTags.Manage.Widgets
 
         public async Task OnGet(int widgetId)
         {
-            var widget = (BlogTagsWidget)await widgetService.GetWidgetAsync(widgetId);
+            var widget = (BlogTagsWidget)await widgetService.GetExtensionAsync(widgetId);
             WidgetJson = JsonConvert.SerializeObject(widget);
         }
 

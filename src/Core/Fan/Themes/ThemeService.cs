@@ -20,7 +20,7 @@ namespace Fan.Themes
     /// <summary>
     /// The theme service.
     /// </summary>
-    public class ThemeService : ExtensibleService<ThemeInfo, Theme>, IThemeService
+    public class ThemeService : ExtensibleService<ThemeManifest, Theme>, IThemeService
     {
         /// <summary>
         /// The manifest file name for themes "theme.json".
@@ -79,7 +79,7 @@ namespace Fan.Themes
             }
 
             // register theme-defined widget areas
-            var installedThemes = await GetInstalledManifestInfosAsync();
+            var installedThemes = await GetInstalledManifestsAsync();
             var themeToActivate = installedThemes.Single(t => t.Name.Equals(folderName, StringComparison.OrdinalIgnoreCase));
 
             // check if there is any empty area ids
@@ -106,16 +106,16 @@ namespace Fan.Themes
         }
 
         /// <summary>
-        /// Returns a list of <see cref="ThemeInfo"/> of the installed themes and their <see cref="WidgetAreaInfo"/>.
+        /// Returns a list of <see cref="ThemeManifest"/> of the installed themes and their <see cref="WidgetAreaInfo"/>.
         /// </summary>
         /// <remarks>
         /// The ids of the widget area infos are distinct and lower case.
         /// </remarks>
-        public override async Task<IEnumerable<ThemeInfo>> GetInstalledManifestInfosAsync()
+        public override async Task<IEnumerable<ThemeManifest>> GetInstalledManifestsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_THEMES_MANIFESTS, Cache_Time_Installed_Theme_Manifests, async () =>
             {
-                var list = new List<ThemeInfo>();
+                var list = new List<ThemeManifest>();
                 var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIR);
 
                 foreach (var dir in Directory.GetDirectories(themesDir))
@@ -127,16 +127,16 @@ namespace Fan.Themes
                     if (!IsValidExtensionFolder(folder)) continue;
 
                     var file = Path.Combine(dir, THEME_MANIFEST);
-                    var themeInfo = JsonConvert.DeserializeObject<ThemeInfo>(await File.ReadAllTextAsync(file));
-                    themeInfo.Folder = folder;
+                    var themeManifest = JsonConvert.DeserializeObject<ThemeManifest>(await File.ReadAllTextAsync(file));
+                    themeManifest.Folder = folder;
 
                     // make sure no duplicate areas based on id
-                    themeInfo.WidgetAreas = themeInfo.WidgetAreas.DistinctBy(a => a.Id).ToArray();
+                    themeManifest.WidgetAreas = themeManifest.WidgetAreas.DistinctBy(a => a.Id).ToArray();
 
                     // make sure all area ids are lower case
-                    foreach (var area in themeInfo.WidgetAreas) area.Id = area.Id.ToLower();
+                    foreach (var area in themeManifest.WidgetAreas) area.Id = area.Id.ToLower();
 
-                    list.Add(themeInfo);
+                    list.Add(themeManifest);
                 }
 
                 return list;

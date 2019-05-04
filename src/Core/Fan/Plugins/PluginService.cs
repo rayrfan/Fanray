@@ -16,7 +16,7 @@ namespace Fan.Plugins
     /// <summary>
     /// The plugin service.
     /// </summary>
-    public class PluginService : ExtensibleService<PluginInfo, Plugin>, IPluginService
+    public class PluginService : ExtensibleService<PluginManifest, Plugin>, IPluginService
     {
         /// <summary>
         /// The manifest file name for plugins "plugin.json".
@@ -69,8 +69,8 @@ namespace Fan.Plugins
             else
             {
                 // insert plugin meta
-                var info = await GetManifestInfoByFolderAsync(folder);
-                var type = Type.GetType(info.Type);
+                var manifest = await GetManifestByFolderAsync(folder);
+                var type = Type.GetType(manifest.Type);
                 var plugin = (Plugin)Activator.CreateInstance(type);
                 plugin.Folder = folder;
                 plugin.Active = true;
@@ -133,37 +133,37 @@ namespace Fan.Plugins
         }
 
         /// <summary>
-        /// Returns a list of plugin infos.
+        /// Returns a list of plugin manifests.
         /// </summary>
         /// <returns></returns>
-        public override async Task<IEnumerable<PluginInfo>> GetInstalledManifestInfosAsync()
+        public override async Task<IEnumerable<PluginManifest>> GetInstalledManifestsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_PLUGIN_MANIFESTS, Cache_Time_Installed_Plugin_Manifests, async () =>
             {
-                var list = new List<PluginInfo>();
+                var list = new List<PluginManifest>();
                 var pluginsFolder = Path.Combine(hostingEnvironment.ContentRootPath, PLUGIN_DIR);
 
                 foreach (var dir in Directory.GetDirectories(pluginsFolder))
                 {
                     var file = Path.Combine(dir, PLUGIN_MANIFEST);
-                    var info = JsonConvert.DeserializeObject<PluginInfo>(await File.ReadAllTextAsync(file));
-                    info.Folder = new DirectoryInfo(dir).Name;
-                    if (!IsValidExtensionFolder(info.Folder)) continue;
+                    var manifest = JsonConvert.DeserializeObject<PluginManifest>(await File.ReadAllTextAsync(file));
+                    manifest.Folder = new DirectoryInfo(dir).Name;
+                    if (!IsValidExtensionFolder(manifest.Folder)) continue;
 
-                    if (info.Type.IsNullOrEmpty())
+                    if (manifest.Type.IsNullOrEmpty())
                     {
-                        logger.LogError($"Invalid {PLUGIN_MANIFEST} in {info.Folder}, missing \"type\" information.");
+                        logger.LogError($"Invalid {PLUGIN_MANIFEST} in {manifest.Folder}, missing \"type\" information.");
                     }
                     else
                     {
-                        var meta = await GetPluginMetaAsync(info.Folder);
+                        var meta = await GetPluginMetaAsync(manifest.Folder);
                         if (meta != null)
                         {
                             var plugin = JsonConvert.DeserializeObject<Plugin>(meta.Value);
-                            info.Active = plugin.Active;
-                            info.Id = meta.Id;
+                            manifest.Active = plugin.Active;
+                            manifest.Id = meta.Id;
                         }
-                        list.Add(info);
+                        list.Add(manifest);
                     }
                 }
 

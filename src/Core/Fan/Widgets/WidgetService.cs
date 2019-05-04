@@ -23,7 +23,7 @@ namespace Fan.Widgets
     /// <summary>
     /// The widget service.
     /// </summary>
-    public class WidgetService : ExtensibleService<WidgetInfo, Widget>, IWidgetService
+    public class WidgetService : ExtensibleService<WidgetManifest, Widget>, IWidgetService
     {
         public static WidgetAreaInfo BlogSidebar1 = new WidgetAreaInfo { Id = "blog-sidebar1", Name = "Blog - Sidebar1" };
         public static WidgetAreaInfo BlogSidebar2 = new WidgetAreaInfo { Id = "blog-sidebar2", Name = "Blog - Sidebar2" };
@@ -49,7 +49,7 @@ namespace Fan.Widgets
         };
 
         /// <summary>
-        /// The widget info file name.
+        /// The widget manifest file name.
         /// </summary>
         public const string WIDGET_MANIFEST = "widget.json";
         /// <summary>
@@ -140,7 +140,7 @@ namespace Fan.Widgets
             {
                 var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
-                var currentTheme = (await themeService.GetInstalledManifestInfosAsync())
+                var currentTheme = (await themeService.GetInstalledManifestsAsync())
                                    .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
                 foreach (var areaInfo in currentTheme.WidgetAreas)
                 {
@@ -160,12 +160,12 @@ namespace Fan.Widgets
 
                     foreach (var id in widgetArea.WidgetIds)
                     {
-                        var widget = await GetWidgetAsync(id);
-                        var widgetInfo = await GetManifestInfoByFolderAsync(widget.Folder);
+                        var widget = await GetExtensionAsync(id);
+                        var widgetManifest = await GetManifestByFolderAsync(widget.Folder);
                         var widgetInstance = new WidgetInstance {
                             Id = id,
                             Title = widget.Title,
-                            Name = widgetInfo.Name,
+                            Name = widgetManifest.Name,
                             Folder = widget.Folder,
                             AreaId = areaInfo.Id,
                         };
@@ -184,74 +184,39 @@ namespace Fan.Widgets
         // -------------------------------------------------------------------- manifests
 
         /// <summary>
-        /// Returns a list of widget info of each widget found in webapp's "Widgets" folder.
+        /// Returns a list of widget manifests of each widget found in webapp's "Widgets" folder.
         /// </summary>
         /// <remarks>
         /// This method scans the Widgets folder and reads all the "widget.json" files for each widget.
         /// A widget's folder must be in pascal casing.
         /// </remarks>
-        public override async Task<IEnumerable<WidgetInfo>> GetInstalledManifestInfosAsync()
+        public override async Task<IEnumerable<WidgetManifest>> GetInstalledManifestsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS, Cache_Time_Installed_Widgets_Manifests, async () =>
             { 
-                var list = new List<WidgetInfo>();
+                var list = new List<WidgetManifest>();
                 var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGETS_DIR);
 
                 foreach (var dir in Directory.GetDirectories(widgetsFolder))
                 {
                     var file = Path.Combine(dir, WIDGET_MANIFEST);
-                    var info = JsonConvert.DeserializeObject<WidgetInfo>(await File.ReadAllTextAsync(file));
-                    info.Folder = new DirectoryInfo(dir).Name;
+                    var manifest = JsonConvert.DeserializeObject<WidgetManifest>(await File.ReadAllTextAsync(file));
+                    manifest.Folder = new DirectoryInfo(dir).Name;
 
-                    if (!IsValidExtensionFolder(info.Folder)) continue;
+                    if (!IsValidExtensionFolder(manifest.Folder)) continue;
 
-                    if (info.Type.IsNullOrEmpty())
+                    if (manifest.Type.IsNullOrEmpty())
                     {
-                        logger.LogError($"Invalid {WIDGET_MANIFEST} in {info.Folder}, missing \"type\" information.");
+                        logger.LogError($"Invalid {WIDGET_MANIFEST} in {manifest.Folder}, missing \"type\" information.");
                     }
                     else
                     {
-                        list.Add(info);
+                        list.Add(manifest);
                     }
                 }
 
                 return list;
             });
-        }
-
-        public override bool IsValidExtensionFolder(string folder) => new Regex(WIDGET_FOLDER_REGEX).IsMatch(folder);
-
-        // -------------------------------------------------------------------- get / update
-
-        /// <summary>
-        /// Returns a <see cref="Widget"/> for update.
-        /// </summary>
-        /// <param name="widgetType"></param>
-        /// <returns></returns>
-        public async Task<Widget> GetWidgetAsync(int id)
-        {
-            var widgetMeta = await metaRepository.GetAsync(id);
-            var widgetBase = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, typeof(Widget));
-            var type = await GetManifestTypeByFolderAsync(widgetBase.Folder);
-            var widget = (Widget)JsonConvert.DeserializeObject(widgetMeta.Value, type);
-            widget.Id = id;
-
-            // the actual widget is returned
-            return widget;
-        }
-
-        /// <summary>
-        /// Updates a widget instance.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="widget"></param>
-        /// <returns></returns>
-        public async Task UpdateWidgetAsync(int id, Widget widget)
-        {
-            var meta = await metaRepository.GetAsync(id);
-            meta.Value = JsonConvert.SerializeObject(widget);
-            await metaRepository.UpdateAsync(meta);
-            await InvalidAreaCacheAsync();
         }
 
         // -------------------------------------------------------------------- add / remove / order
@@ -275,7 +240,7 @@ namespace Fan.Widgets
             area.WidgetIds = widgetIdsList.ToArray();
 
             // update widget instance id and areaId
-            var widget = await GetWidgetAsync(widgetId);
+            var widget = await GetExtensionAsync(widgetId);
             widget.Id = widgetId;
             widget.AreaId = areaId;
             await UpdateWidgetAsync(widgetId, widget);
@@ -287,7 +252,7 @@ namespace Fan.Widgets
             // invalidate cache
             await InvalidAreaCacheAsync();
 
-            var widgetInfo = await GetManifestInfoByFolderAsync(widget.Folder);
+            var widgetInfo = await GetManifestByFolderAsync(widget.Folder);
             return new WidgetInstance
             {
                 Id = widgetId,
@@ -347,7 +312,7 @@ namespace Fan.Widgets
             await InvalidAreaCacheAsync();
         }
 
-        // -------------------------------------------------------------------- create / delete
+        // -------------------------------------------------------------------- create / delete / update
 
         /// <summary>
         /// Creates a widget instance. 
@@ -406,6 +371,24 @@ namespace Fan.Widgets
         {
             await metaRepository.DeleteAsync(widgetId);
         }
+
+        /// <summary>
+        /// Updates a widget instance.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="widget"></param>
+        /// <returns></returns>
+        public async Task UpdateWidgetAsync(int id, Widget widget)
+        {
+            var meta = await metaRepository.GetAsync(id);
+            meta.Value = JsonConvert.SerializeObject(widget);
+            await metaRepository.UpdateAsync(meta);
+            await InvalidAreaCacheAsync();
+        }
+
+        // -------------------------------------------------------------------- validate
+
+        public override bool IsValidExtensionFolder(string folder) => new Regex(WIDGET_FOLDER_REGEX).IsMatch(folder);
 
         // -------------------------------------------------------------------- private methods
 
