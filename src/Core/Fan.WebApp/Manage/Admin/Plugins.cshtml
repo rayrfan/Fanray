@@ -47,7 +47,7 @@
         let pluginsMixin = {
             data: function () {
                 return {
-                    pluginInfos: @Html.Raw(Model.PluginInfosJson),
+                    pluginInfos: @Html.Raw(Model.PluginManifestsJson),
                     totalPlugins: 1,
                     rowsPerPageItems: @PluginsModel.DEFAULT_ROW_PER_PAGE_ITEMS,
                 }

@@ -29,18 +29,18 @@ namespace Fan.WebApp.Manage.Admin
 
         private async Task<IList<ThemeViewModel>> GetThemeViewModelsAsync()
         {
-            var infos = await themeService.GetInstalledManifestInfosAsync();
+            var manifests = await themeService.GetInstalledManifestsAsync();
             var list = new List<ThemeViewModel>();
             var settings = await settingService.GetSettingsAsync<CoreSettings>();
             var currentTheme = settings.Theme;
 
-            foreach (var info in infos)
+            foreach (var manifest in manifests)
             {
                 var vm = new ThemeViewModel
                 {
-                    Name = info.Name,
-                    Screenshot = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/themes/{info.Name}/theme.png",
-                    IsActive = info.Folder.Equals(currentTheme, StringComparison.OrdinalIgnoreCase),
+                    Name = manifest.Name,
+                    Screenshot = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/themes/{manifest.Name}/theme.png",
+                    IsActive = manifest.Folder.Equals(currentTheme, StringComparison.OrdinalIgnoreCase),
                 };
 
                 list.Add(vm);

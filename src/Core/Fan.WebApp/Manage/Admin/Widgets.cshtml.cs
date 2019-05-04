@@ -10,26 +10,26 @@ namespace Fan.WebApp.Manage.Admin
 {
     public class WidgetsModel : PageModel
     {
-        private readonly IWidgetService _widgetService;
+        private readonly IWidgetService widgetService;
 
         public WidgetsModel(IWidgetService widgetService)
         {
-            _widgetService = widgetService;
+            this.widgetService = widgetService;
         }
 
         // -------------------------------------------------------------------- properties
 
-        public string WidgetInfosJson { get; private set; }
+        public string WidgetManifestsJson { get; private set; }
         public string WidgetAreasJson { get; private set; }
 
         public async Task OnGet()
         {
-            // widget infos
-            var widgetInfos = await _widgetService.GetInstalledManifestInfosAsync();
-            WidgetInfosJson = JsonConvert.SerializeObject(widgetInfos);
+            // manifests
+            var widgetManifests = await widgetService.GetInstalledManifestsAsync();
+            WidgetManifestsJson = JsonConvert.SerializeObject(widgetManifests);
 
             // areas
-            var widgetAreas = await _widgetService.GetCurrentThemeAreasAsync();
+            var widgetAreas = await widgetService.GetCurrentThemeAreasAsync();
             WidgetAreasJson = JsonConvert.SerializeObject(widgetAreas);
         }
 
@@ -44,27 +44,27 @@ namespace Fan.WebApp.Manage.Admin
             // user drags a widget from infos to an area
             if (dto.AreaFromId.IsNullOrEmpty())
             {
-                var widgetId = await _widgetService.CreateWidgetAsync(dto.Folder);
-                widgetInst = await _widgetService.AddWidgetToAreaAsync(widgetId, dto.AreaToId, dto.Index);
+                var widgetId = await widgetService.CreateWidgetAsync(dto.Folder);
+                widgetInst = await widgetService.AddWidgetToAreaAsync(widgetId, dto.AreaToId, dto.Index);
             }
             else // user drags a widget from area to another
             {
-                await _widgetService.RemoveWidgetFromAreaAsync(dto.WidgetId, dto.AreaFromId);
-                widgetInst = await _widgetService.AddWidgetToAreaAsync(dto.WidgetId, dto.AreaToId, dto.Index);
+                await widgetService.RemoveWidgetFromAreaAsync(dto.WidgetId, dto.AreaFromId);
+                widgetInst = await widgetService.AddWidgetToAreaAsync(dto.WidgetId, dto.AreaToId, dto.Index);
             }
 
             return new JsonResult(widgetInst);
         }
 
         public async Task OnPostReorderAsync([FromBody]OrderWidgetDto dto) =>
-            await _widgetService.OrderWidgetInAreaAsync(dto.WidgetId, dto.AreaId, dto.Index);
+            await widgetService.OrderWidgetInAreaAsync(dto.WidgetId, dto.AreaId, dto.Index);
 
         /// <summary>
         /// Returns the widget edit page url.
         /// </summary>
         public async Task<JsonResult> OnGetEditAsync(int widgetId)
         {
-            var widget = await _widgetService.GetWidgetAsync(widgetId);
+            var widget = await widgetService.GetExtensionAsync(widgetId);
             return new JsonResult(widget.SettingsUrl);
         }
 
@@ -76,8 +76,8 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task OnDeleteAsync(int widgetId, string areaId)
         {
-            await _widgetService.RemoveWidgetFromAreaAsync(widgetId, areaId);
-            await _widgetService.DeleteWidgetAsync(widgetId);
+            await widgetService.RemoveWidgetFromAreaAsync(widgetId, areaId);
+            await widgetService.DeleteWidgetAsync(widgetId);
         }
     }
 

@@ -19,13 +19,13 @@ namespace Fan.WebApp.Manage.Admin
             this.pluginService = pluginService;
         }
 
-        public string PluginInfosJson { get; private set; }
+        public string PluginManifestsJson { get; private set; }
 
 
         public async Task OnGet()
         {
-            var pluginInfos = await pluginService.GetInstalledManifestInfosAsync();
-            PluginInfosJson = JsonConvert.SerializeObject(pluginInfos);
+            var pluginManifests = await pluginService.GetInstalledManifestsAsync();
+            PluginManifestsJson = JsonConvert.SerializeObject(pluginManifests);
         }
 
         public async Task<IActionResult> OnPostActivateAsync([FromBody]PluginDto dto)
