@@ -23,10 +23,22 @@ namespace Fan.Plugins
         public bool Active { get; set; }
 
         /// <summary>
-        /// Return plugin's footer view name. Default is null.
+        /// Return plugin's foot content view name, default is null.
         /// </summary>
         /// <returns></returns>
-        public virtual string GetFooterViewName() => null;
+        public virtual string GetFootContentViewName() => null;
+
+        /// <summary>
+        /// Returns plugin's foot script view name, default is null.
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetFootScriptsViewName() => null;
+
+        /// <summary>
+        /// Returns plugin's styles view name, default is null.
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetStylesViewName() => null;
 
         /// <summary>
         /// Plugin's Configure startup method.

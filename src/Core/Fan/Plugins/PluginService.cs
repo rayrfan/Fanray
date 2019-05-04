@@ -129,7 +129,7 @@ namespace Fan.Plugins
                 }
 
                 return activePlugins;
-            });
+            }, includeTypeName: true);
         }
 
         /// <summary>

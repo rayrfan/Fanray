@@ -12,4 +12,12 @@ namespace ForkMeRibbon.Components
             return View("~/Components/Ribbon.cshtml", vm);
         }
     }
+
+    public class RibbonStylesViewComponent : ViewComponent
+    {
+        public async Task<IViewComponentResult> InvokeAsync(Plugin plugin)
+        {
+            return View("~/Components/RibbonStyles.cshtml");
+        }
+    }
 }
