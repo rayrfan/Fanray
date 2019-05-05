@@ -2,6 +2,7 @@
   <a href="https://www.fanray.com/">
     <img src="https://user-images.githubusercontent.com/633119/45599313-0d112980-b99e-11e8-9997-d2fcff65347f.png" alt="" width=72 height=72>
   </a>
+  <h3 align="center">Fanray</h3>
   <p align="center">
 	<a href="#screenshots">Screenshots</a> •
 	<a href="#features">Features</a> •
@@ -16,7 +17,7 @@
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
 	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
 	</a>
-    <a href="https://996.icu/#/en_US"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
+    <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
   </p>
 </p>
 
@@ -29,9 +30,9 @@
 
 ## Features
 
-Fanray is a [blog](https://github.com/FanrayMedia/Fanray/wiki/Use-the-Blog) and web app starter kit. It has an [extensible design](https://github.com/FanrayMedia/Fanray/wiki/Architecture) that allows you to create [plugins](https://github.com/FanrayMedia/Fanray/wiki/Plugins), [themes](https://github.com/FanrayMedia/Fanray/wiki/Themes) and [widgets](https://github.com/FanrayMedia/Fanray/wiki/Widgets). It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
+Fanray has an [extensible design](https://github.com/FanrayMedia/Fanray/wiki/Architecture) that allows you to create [plugins](https://github.com/FanrayMedia/Fanray/wiki/Plugins), [themes](https://github.com/FanrayMedia/Fanray/wiki/Themes) and [widgets](https://github.com/FanrayMedia/Fanray/wiki/Widgets). It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
 
-![Architecture-Extensible-Design](https://user-images.githubusercontent.com/633119/56977708-a7d40800-6b2a-11e9-84ed-c941faadcfa3.png)
+![Fanray-Extensible-Architecture](https://user-images.githubusercontent.com/633119/57195103-89dc1e00-6f03-11e9-96b8-678b90cc6004.png)
 
 | Blog | | Infrastructure |
 | --- | --- |  --- | 
@@ -82,5 +83,3 @@ Please refer to [Contributing Guide](CONTRIBUTING.md).
 ## License
 
 [Apache 2.0](LICENSE)
-
-[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE) The [996.icu repo](https://github.com/996icu/996.ICU) is a campaign against the [996 working hour system](https://en.wikipedia.org/wiki/996_working_hour_system) started in Mainland China. I support my fellow software developers over there and elsewhere for this matter on defending their labor rights and improving their labor conditions. As such any entity, whether individual or corporation, that is in violation of the local labor laws against their employees shall not use my repo.
