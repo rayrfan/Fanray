@@ -43,7 +43,7 @@ namespace Fan.IntegrationTests.Plugins
         [Fact]
         public async void Admin_panel_plugins_page_displays_all_installed_plugins_information()
         {
-            var plugins = await pluginService.GetInstalledManifestsAsync();
+            var plugins = await pluginService.GetManifestsAsync();
 
             Assert.Single(plugins);
             Assert.Equal("My Plugin", plugins.ToList()[0].Name);
@@ -77,7 +77,7 @@ namespace Fan.IntegrationTests.Plugins
             await pluginService.ActivatePluginAsync(MY_PLUGIN_FOLDER);
 
             // Then the manifest info show it as active
-            var list = await pluginService.GetInstalledManifestsAsync();
+            var list = await pluginService.GetManifestsAsync();
             Assert.True(list.ToList()[0].Active);
         }
 

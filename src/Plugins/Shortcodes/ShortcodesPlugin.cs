@@ -20,6 +20,6 @@ namespace Shortcodes
             services.AddSingleton<IShortcodeService>(shortcodeService);
         }
 
-        public override string DetailsUrl => "";
+        public override string DetailsUrl => "https://github.com/FanrayMedia/Fanray/wiki/Shortcodes";
     }
 }

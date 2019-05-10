@@ -71,7 +71,6 @@ namespace Fan.Widgets
 
         private readonly IThemeService themeService;
         private readonly ISettingService settingService;
-        private readonly ILogger<WidgetService> logger;
 
         public WidgetService(IMetaRepository metaRepository,
             IThemeService themeService,
@@ -79,12 +78,14 @@ namespace Fan.Widgets
             ISettingService settingService,
             IHostingEnvironment hostingEnvironment,
             ILogger<WidgetService> logger)
-            : base(metaRepository, distributedCache, hostingEnvironment)
+            : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
             this.themeService = themeService;
             this.settingService = settingService;
-            this.logger = logger;
         }
+
+        public override string ManifestName { get; } = WIDGET_MANIFEST;
+        public override string ManifestDirectory { get; } = WIDGETS_DIR;
 
         // -------------------------------------------------------------------- widget areas
 
@@ -140,7 +141,7 @@ namespace Fan.Widgets
             {
                 var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
-                var currentTheme = (await themeService.GetInstalledManifestsAsync())
+                var currentTheme = (await themeService.GetManifestsAsync())
                                    .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
                 foreach (var areaInfo in currentTheme.WidgetAreas)
                 {
@@ -184,38 +185,13 @@ namespace Fan.Widgets
         // -------------------------------------------------------------------- manifests
 
         /// <summary>
-        /// Returns a list of widget manifests of each widget found in webapp's "Widgets" folder.
+        /// Returns a list of widget manifests.
         /// </summary>
-        /// <remarks>
-        /// This method scans the Widgets folder and reads all the "widget.json" files for each widget.
-        /// A widget's folder must be in pascal casing.
-        /// </remarks>
-        public override async Task<IEnumerable<WidgetManifest>> GetInstalledManifestsAsync()
+        public override async Task<IEnumerable<WidgetManifest>> GetManifestsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS, Cache_Time_Installed_Widgets_Manifests, async () =>
-            { 
-                var list = new List<WidgetManifest>();
-                var widgetsFolder = Path.Combine(hostingEnvironment.ContentRootPath, WIDGETS_DIR);
-
-                foreach (var dir in Directory.GetDirectories(widgetsFolder))
-                {
-                    var file = Path.Combine(dir, WIDGET_MANIFEST);
-                    var manifest = JsonConvert.DeserializeObject<WidgetManifest>(await File.ReadAllTextAsync(file));
-                    manifest.Folder = new DirectoryInfo(dir).Name;
-
-                    if (!IsValidExtensionFolder(manifest.Folder)) continue;
-
-                    if (manifest.Type.IsNullOrEmpty())
-                    {
-                        logger.LogError($"Invalid {WIDGET_MANIFEST} in {manifest.Folder}, missing \"type\" information.");
-                    }
-                    else
-                    {
-                        list.Add(manifest);
-                    }
-                }
-
-                return list;
+            {
+                return await LoadManifestsAsync();
             });
         }
 

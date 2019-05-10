@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Fan.Plugins;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace Fan.WebApp.Manage.Admin
 {
@@ -21,10 +18,9 @@ namespace Fan.WebApp.Manage.Admin
 
         public string PluginManifestsJson { get; private set; }
 
-
         public async Task OnGet()
         {
-            var pluginManifests = await pluginService.GetInstalledManifestsAsync();
+            var pluginManifests = await pluginService.GetManifestsAsync();
             PluginManifestsJson = JsonConvert.SerializeObject(pluginManifests);
         }
 
@@ -39,16 +35,6 @@ namespace Fan.WebApp.Manage.Admin
             await pluginService.DeactivatePluginAsync(dto.Id);
             return new JsonResult(true);
         }
-
-        /// <summary>
-        /// Returns the plugin settings page url.
-        /// </summary>
-        //public async Task<JsonResult> OnGetEditAsync(int widgetId)
-        //{
-        //    var widget = await pluginService.GetPluginAsync(widgetId);
-        //    return new JsonResult(widget.SettingsUrl);
-        //}
-
     }
 
     public class PluginDto

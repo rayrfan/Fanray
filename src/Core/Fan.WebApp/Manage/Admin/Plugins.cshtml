@@ -21,14 +21,14 @@
                     <div>{{ props.item.description }}</div>
                     <div>
                         <span>Version {{ props.item.version }}</span> |
-                        <span>By <a :href="props.item.authorUrl">{{ props.item.author }}</a></span> |
-                        <span><a @@click="viewDetails(props.item)">View details</a></span>
+                        <span>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span> |
+                        <span><a :href="props.item.pluginUrl" target="_blank">View details</a></span>
                     </div>
                 </td>
                 <td>
                     <div v-if="props.item.active">
                         <v-btn fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
-                        <v-btn fab small color="primary" @@click="editSettings(props.item)"><v-icon>build</v-icon></v-btn>
+                        <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
                     </div>
                     <div v-else>
                         <v-btn fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
@@ -39,6 +39,31 @@
                 <div>You have no plugins.</div>
             </template>
         </v-data-table>
+        <v-dialog lazy
+                  v-model="dialogVisible"
+                  @@keydown.esc="closeDialog"
+                  content-class="widget-edit-dialog">
+            <v-card>
+                <v-card-title class="pl-4 pt-2 pb-0">
+                    <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn flat small fab @@click="closeDialog">
+                        <v-icon>close</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <iframe ref="settingsIframe"
+                            @@load="$root.initIframeHeight($refs.settingsIframe)"
+                            frameborder="0"
+                            scrolling="no"
+                            class="widget-edit-frame"
+                            v-if="settingsUrl"
+                            :src="settingsUrl"
+                            :title="dialogTitle"></iframe>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
     </v-container>
 </site-plugins>
 
@@ -62,7 +87,13 @@
                   { text: 'Description', value: 'description', sortable: false },
                   { text: 'Actions', value: 'actions', sortable: false }
                 ],
+                dialogVisible: false,
+                dialogTitle: '',
+                settingsUrl: null,
             }),
+            mounted() {
+                this.initSettingsUpdatedHandler();
+            },
             methods: {
                 activate(plugin) {
                     console.log('activate: ', plugin);
@@ -89,14 +120,24 @@
                             this.$root.toastError('Deactivate plugin failed.');
                         });
                 },
-                editSettings(plugin) {
-                    console.log('editSettings: ', plugin);
+                viewSettings(plugin) {
+                    this.dialogTitle = plugin.name;
+                    this.dialogVisible = true;
+                    this.settingsUrl = plugin.settingsUrl;
                 },
-                viewDetails(folder) {
-
+                viewDetails(plugin) {
+                },
+                closeDialog() {
+                    this.dialogVisible = false;
+                },
+                initSettingsUpdatedHandler() {
+                    var self = this;
+                    window.document.addEventListener('ExtSetingsUpdated', e => {
+                        self.$root.toast(e.detail.msg);
+                        self.closeDialog();
+                    });
                 },
             }
         });
     </script>
-
 }

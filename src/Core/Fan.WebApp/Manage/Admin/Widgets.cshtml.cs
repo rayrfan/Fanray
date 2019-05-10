@@ -25,7 +25,7 @@ namespace Fan.WebApp.Manage.Admin
         public async Task OnGet()
         {
             // manifests
-            var widgetManifests = await widgetService.GetInstalledManifestsAsync();
+            var widgetManifests = await widgetService.GetManifestsAsync();
             WidgetManifestsJson = JsonConvert.SerializeObject(widgetManifests);
 
             // areas

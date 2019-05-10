@@ -31,21 +31,21 @@ namespace Fan.Plugins
         /// </summary>
         public const string PLUGIN_FOLDER_REGEX = @"^[A-Z][a-z]+(?:[A-Z][a-z]+)*$";
 
-        private const string CACHE_KEY_INSTALLED_PLUGIN_MANIFESTS = "installed-plugin-manifests";
-        private TimeSpan Cache_Time_Installed_Plugin_Manifests = new TimeSpan(0, 10, 0);
+        private const string CACHE_KEY_PLUGIN_MANIFESTS = "plugin-manifests";
+        private TimeSpan Cache_Time_Plugin_Manifests = new TimeSpan(0, 10, 0);
         private const string CACHE_KEY_ACTIVE_PLUGINS = "active-plugins";
         private TimeSpan Cache_Time_Active_Plugins = new TimeSpan(0, 10, 0);
-
-        private readonly ILogger<PluginService> logger;
 
         public PluginService(IHostingEnvironment hostingEnvironment,
                         IDistributedCache distributedCache,
                         IMetaRepository metaRepository,
                         ILogger<PluginService> logger) 
-            : base(metaRepository, distributedCache, hostingEnvironment)
+            : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
-            this.logger = logger;
         }
+
+        public override string ManifestName { get; } = PLUGIN_MANIFEST;
+        public override string ManifestDirectory { get; } = PLUGIN_DIR;
 
         // -------------------------------------------------------------------- public methods
 
@@ -62,7 +62,7 @@ namespace Fan.Plugins
             var meta = await GetPluginMetaAsync(folder);
             if (meta != null)
             {
-                var plugin = JsonConvert.DeserializeObject<Plugin>(meta.Value);
+                var plugin = await GetExtensionAsync(meta.Id);
                 plugin.Active = true;
                 await UpdatePluginAsync(plugin);
             }
@@ -84,7 +84,7 @@ namespace Fan.Plugins
             }
 
             await distributedCache.RemoveAsync(CACHE_KEY_ACTIVE_PLUGINS);
-            await distributedCache.RemoveAsync(CACHE_KEY_INSTALLED_PLUGIN_MANIFESTS);
+            await distributedCache.RemoveAsync(CACHE_KEY_PLUGIN_MANIFESTS);
 
             return meta.Id;
         }
@@ -104,7 +104,7 @@ namespace Fan.Plugins
             await UpdatePluginAsync(plugin);
 
             await distributedCache.RemoveAsync(CACHE_KEY_ACTIVE_PLUGINS);
-            await distributedCache.RemoveAsync(CACHE_KEY_INSTALLED_PLUGIN_MANIFESTS);
+            await distributedCache.RemoveAsync(CACHE_KEY_PLUGIN_MANIFESTS);
         }
 
         /// <summary>
@@ -136,39 +136,40 @@ namespace Fan.Plugins
         /// Returns a list of plugin manifests.
         /// </summary>
         /// <returns></returns>
-        public override async Task<IEnumerable<PluginManifest>> GetInstalledManifestsAsync()
+        public override async Task<IEnumerable<PluginManifest>> GetManifestsAsync()
         {
-            return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_PLUGIN_MANIFESTS, Cache_Time_Installed_Plugin_Manifests, async () =>
+            return await distributedCache.GetAsync(CACHE_KEY_PLUGIN_MANIFESTS, Cache_Time_Plugin_Manifests, async () =>
             {
                 var list = new List<PluginManifest>();
-                var pluginsFolder = Path.Combine(hostingEnvironment.ContentRootPath, PLUGIN_DIR);
-
-                foreach (var dir in Directory.GetDirectories(pluginsFolder))
+                var manifests = await LoadManifestsAsync();
+                foreach (var manifest in manifests)
                 {
-                    var file = Path.Combine(dir, PLUGIN_MANIFEST);
-                    var manifest = JsonConvert.DeserializeObject<PluginManifest>(await File.ReadAllTextAsync(file));
-                    manifest.Folder = new DirectoryInfo(dir).Name;
-                    if (!IsValidExtensionFolder(manifest.Folder)) continue;
+                    var meta = await GetPluginMetaAsync(manifest.Folder);
+                    if (meta != null)
+                    {
+                        var plugin = await GetExtensionAsync(meta.Id);
+                        manifest.Id = meta.Id;
+                        manifest.Active = plugin.Active;
+                        manifest.SettingsUrl = plugin.SettingsUrl;
+                    }
 
-                    if (manifest.Type.IsNullOrEmpty())
-                    {
-                        logger.LogError($"Invalid {PLUGIN_MANIFEST} in {manifest.Folder}, missing \"type\" information.");
-                    }
-                    else
-                    {
-                        var meta = await GetPluginMetaAsync(manifest.Folder);
-                        if (meta != null)
-                        {
-                            var plugin = JsonConvert.DeserializeObject<Plugin>(meta.Value);
-                            manifest.Active = plugin.Active;
-                            manifest.Id = meta.Id;
-                        }
-                        list.Add(manifest);
-                    }
+                    list.Add(manifest);
                 }
 
                 return list;
-            });
+            });            
+        }
+
+        /// <summary>
+        /// Returns a plugin by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public override async Task<Plugin> GetExtensionAsync(int id)
+        {
+            var plugin = await base.GetExtensionAsync(id);
+            plugin.Id = id;
+            return plugin;
         }
 
         /// <summary>

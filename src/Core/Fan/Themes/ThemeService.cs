@@ -39,18 +39,19 @@ namespace Fan.Themes
         private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
 
         private readonly ISettingService settingService;
-        private readonly ILogger<ThemeService> logger;
 
         public ThemeService(ISettingService settingService,
             IHostingEnvironment hostingEnvironment,
             IDistributedCache distributedCache,
             IMetaRepository metaRepository,
             ILogger<ThemeService> logger)
-            : base(metaRepository, distributedCache, hostingEnvironment)
+            : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
             this.settingService = settingService;
-            this.logger = logger;
         }
+
+        public override string ManifestName { get; } = THEME_MANIFEST;
+        public override string ManifestDirectory { get; } = THEME_DIR;
 
         /// <summary>
         /// Activates a theme.
@@ -79,7 +80,7 @@ namespace Fan.Themes
             }
 
             // register theme-defined widget areas
-            var installedThemes = await GetInstalledManifestsAsync();
+            var installedThemes = await GetManifestsAsync();
             var themeToActivate = installedThemes.Single(t => t.Name.Equals(folderName, StringComparison.OrdinalIgnoreCase));
 
             // check if there is any empty area ids
@@ -111,7 +112,7 @@ namespace Fan.Themes
         /// <remarks>
         /// The ids of the widget area infos are distinct and lower case.
         /// </remarks>
-        public override async Task<IEnumerable<ThemeManifest>> GetInstalledManifestsAsync()
+        public override async Task<IEnumerable<ThemeManifest>> GetManifestsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_THEMES_MANIFESTS, Cache_Time_Installed_Theme_Manifests, async () =>
             {

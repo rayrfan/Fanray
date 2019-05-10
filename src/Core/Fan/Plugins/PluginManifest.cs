@@ -3,10 +3,18 @@
 namespace Fan.Plugins
 {
     /// <summary>
-    /// The plugin.json file.
+    /// The plugin manifest.
     /// </summary>
+    /// <remarks>
+    /// Contains properties from plugin.json and properties for view.
+    /// </remarks>
     public class PluginManifest : Manifest
     {
+        /// <summary>
+        /// The plugin website.
+        /// </summary>
+        public string PluginUrl { get; set; }
+
         /// <summary>
         /// The plugin meta id.
         /// </summary>
@@ -18,8 +26,8 @@ namespace Fan.Plugins
         public bool Active { get; set; }
 
         /// <summary>
-        /// The plugin website.
+        /// URL to extension settings on Admin Panel.
         /// </summary>
-        public string PluginUrl { get; set; }
+        public string SettingsUrl { get; set; }
     }
 }

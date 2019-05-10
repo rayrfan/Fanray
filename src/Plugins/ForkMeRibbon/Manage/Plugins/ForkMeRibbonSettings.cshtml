@@ -1,0 +1,51 @@
+﻿@page
+@model ForkMeRibbon.Manage.Plugins.ForkMeRibbonSettingsModel
+@{
+    ViewData["Title"] = "ForkMeRibbon Plugin Settings";
+    Layout = "_SettingsLayout";
+}
+
+<ext-settings inline-template>
+    <v-form v-model="valid">
+        <v-text-field label="Dispaly Text" v-model="ext.text" required :rules="textRules"></v-text-field>
+        <v-layout row wrap style="margin: 5px 0 -12px 0">
+            <v-flex style="font-size:smaller">Display Position</v-flex>
+        </v-layout>
+        <v-layout row wrap style="margin-bottom: -8px">
+            <v-flex>
+                <v-radio-group v-model="selectedPos" row>
+                    <v-radio v-for="(pos, index) in positions"
+                             :key="index"
+                             :label="pos"
+                             :value="pos"></v-radio>
+                </v-radio-group>
+            </v-flex>
+        </v-layout>
+        <v-btn @@click="save" :disabled="!valid">Save</v-btn>
+    </v-form>
+</ext-settings>
+
+@section Scripts{
+    <script>
+        Vue.component('ext-settings', {
+            data: () => ({
+                ext: @Html.Raw(Model.ExtJson),
+                valid: false,
+                selectedPos: '@Model.Position',
+                positions: @Html.Raw(Model.PositionsJson),
+                textRules: [
+                    v => !!v.trim() || 'Dispaly text is required',
+                ],
+            }),
+            methods: {
+                save() {
+                    this.ext.position = this.selectedPos;
+                    axios.post('/plugins/ForkMeRibbonSettings', this.ext, this.$root.headers)
+                        .then(resp => this.$root.onExtSettingsUpdated({ msg: resp.data }))
+                        .catch(err => this.$root.onExtSettingsUpdateErr(err));
+                }
+            },
+        });
+    </script>
+}
+

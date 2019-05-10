@@ -55,10 +55,10 @@ namespace Fan.Extensibility
         /// The value must be unique, it is used as the key to lookup an extension. Each extension 
         /// type may have different requirement on folder naming, for example plugin and widget 
         /// requires folder name to be pascal casing.  See implementation of each
-        /// <see cref="IExtensibleService{TInfo, TExtension}.IsValidExtensionFolder(string)"/>
+        /// <see cref="IExtensibleService{TManifest, TExtension}.IsValidExtensionFolder(string)"/>
         /// method for detail. After you deploy your extension the folder name value cannot altered.
         /// </remarks>
-        public string Folder { get; set; }
+        public string Folder { get; set; }      
 
         /// <summary>
         /// Returns the dll filename based on <see cref="Type"/> property.

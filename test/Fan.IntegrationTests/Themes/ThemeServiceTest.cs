@@ -78,7 +78,7 @@ namespace Fan.IntegrationTests.Themes
         public async void Admin_panel_themes_page_displays_all_installed_themes()
         {
             // When I have only 1 installed theme
-            var themes = await _svc.GetInstalledManifestsAsync();
+            var themes = await _svc.GetManifestsAsync();
 
             // Then 1 theme will be available
             Assert.Single(themes);
@@ -88,7 +88,7 @@ namespace Fan.IntegrationTests.Themes
         public async void A_default_theme_named_clarity_is_always_available()
         {
             // When system retrieves installed themes
-            var themes = await _svc.GetInstalledManifestsAsync();
+            var themes = await _svc.GetManifestsAsync();
 
             // Then the default Clarity theme should be available
             Assert.Contains(themes, t => t.Name == "Clarity");
@@ -104,7 +104,7 @@ namespace Fan.IntegrationTests.Themes
         {
             // Given a "Themes/Clarity" directory that contains a "theme.json" file
             // When Admin Panel Themes page retrieves themes info
-            var themes = await _svc.GetInstalledManifestsAsync();
+            var themes = await _svc.GetManifestsAsync();
 
             // Then the theme contains 3 areas 
             var areas = themes.ToList()[0].WidgetAreas;

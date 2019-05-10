@@ -13,10 +13,20 @@ namespace Fan.Extensibility
         where TExtension  : class
     {
         /// <summary>
+        /// The manifest file name.
+        /// </summary>
+        string ManifestName { get; }
+
+        /// <summary>
+        /// The manifest file containing directory.
+        /// </summary>
+        string ManifestDirectory { get; }
+
+        /// <summary>
         /// Returns a list of manifests.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<TManifest>> GetInstalledManifestsAsync();
+        Task<IEnumerable<TManifest>> GetManifestsAsync();
 
         /// <summary>
         /// Returns an extension of the real derived type.
