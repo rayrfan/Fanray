@@ -38,12 +38,14 @@
     text-decoration: none;
 }
 
-// widgets
-.widget-edit-dialog {
+/*
+    Extensions
+*/
+.ext-settings-dialog {
     width: 600px;
     max-width: 71%;
 }
-.widget-edit-frame {
+.ext-settings-frame {
     border: 0;
     opacity: 1;
     pointer-events: all;

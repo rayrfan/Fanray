@@ -11,7 +11,8 @@
     }
     </style>
 }
-<site-themes inline-template>
+
+<themes inline-template ref="exts">
     <v-container grid-list-xl fluid>
         <v-layout row wrap>
             <v-flex sm6 lg4 d-flex v-for="t in themes" :key="t.folder">
@@ -37,7 +38,7 @@
             </v-flex>
         </v-layout>
     </v-container>
-</site-themes>
+</themes>
 
 @section ComponentScripts {
     <script>
@@ -49,10 +50,9 @@
             },
         }
 
-        Vue.component('site-themes', {
+        Vue.component('themes', {
             mixins: [themesMixin],
             data: () => ({
-               
             }),
         });
     </script>

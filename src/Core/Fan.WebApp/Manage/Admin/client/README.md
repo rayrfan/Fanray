@@ -1,45 +1,54 @@
-﻿# Admin Console
+﻿# Fanray Admin Panel Client
 
-This folder contains the client for Fanray Admin Console. All npx commands below assume you open a bash in this folder `Fan.WebApp/Manage/Admin/client`.
+```bash
+cd src/Core/Fan.WebApp/Manage/Admin/client
+npm install
+```
 
 ## JavaScript
 
-First to get ready by `npm install`
-
 ### Develop
 
-Individual file
+Develop individual file with watch
+
 ```bash
-npx babel js/admin.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/blog-categories.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/blog-compose.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/blog-media.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/blog-settings.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/blog-tags.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
-npx babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/admin.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/plugins.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/widgets.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-categories.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-compose.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-media.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-settings.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-tags.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 ```
 
-Entire folder
+Develop all files with watch
+
 ```bash
-npx babel js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 ```
 
 ### Release
 
-Individual file
+Release individual file
+
 ```bash
-npx babel js/admin.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/blog-categories.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/blog-compose.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/blog-media.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/blog-settings.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/blog-tags.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
-npx babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/admin.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/plugins.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/widgets.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-categories.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-compose.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-media.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-settings.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-tags.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 ```
 
-Entire folder
+Release all files
+
 ```bash
 babel js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 ```
@@ -52,8 +61,6 @@ babel js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-r
 2. run `gem install sass`
 
 ### Develop
-
-cd into /admin/client
 
 ```bash
 sass --watch scss/admin.scss:../../../wwwroot/admin/css/admin.css
