@@ -6,16 +6,22 @@ namespace Fan.Extensibility
     /// The base of all extensible items.
     /// </summary>
     public class Extension
-    {        
+    {
         /// <summary>
         /// Url to extension details page.
         /// </summary>
+        /// <remarks>
+        /// When this property is null the extension will not display details.
+        /// </remarks>
         [JsonIgnore]
         public virtual string DetailsUrl => null;
 
         /// <summary>
         /// Url to extension settings page.
         /// </summary>
+        /// <remarks>
+        /// When this property is null the extension will not display settings.
+        /// </remarks>
         [JsonIgnore]
         public virtual string SettingsUrl => null;
 

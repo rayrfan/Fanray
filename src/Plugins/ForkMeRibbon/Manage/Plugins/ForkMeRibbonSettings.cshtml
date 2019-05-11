@@ -7,7 +7,11 @@
 
 <ext-settings inline-template>
     <v-form v-model="valid">
-        <v-text-field label="Dispaly Text" v-model="ext.text" required :rules="textRules"></v-text-field>
+        <v-text-field label="Dispaly Text" 
+                      v-model="ext.text" 
+                      v-on:keydown.enter.prevent="save"
+                      required 
+                      :rules="textRules"></v-text-field>
         <v-layout row wrap style="margin: 5px 0 -12px 0">
             <v-flex style="font-size:smaller">Display Position</v-flex>
         </v-layout>
@@ -25,7 +29,7 @@
     </v-form>
 </ext-settings>
 
-@section Scripts{
+@section Scripts {
     <script>
         Vue.component('ext-settings', {
             data: () => ({

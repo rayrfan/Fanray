@@ -4,7 +4,7 @@
     ViewData["Title"] = "Plugins";
 }
 
-<site-plugins inline-template>
+<plugins inline-template ref="exts">
     <v-container>
         <v-data-table :headers="headers"
                       :items="pluginInfos"
@@ -65,7 +65,7 @@
             </v-card>
         </v-dialog>
     </v-container>
-</site-plugins>
+</plugins>
 
 @section ComponentScripts {
     <script>
@@ -79,7 +79,7 @@
             },
         }
 
-        Vue.component('site-plugins', {
+        Vue.component('plugins', {
             mixins: [pluginsMixin],
             data: () => ({
                 headers: [
@@ -125,14 +125,12 @@
                     this.dialogVisible = true;
                     this.settingsUrl = plugin.settingsUrl;
                 },
-                viewDetails(plugin) {
-                },
                 closeDialog() {
                     this.dialogVisible = false;
                 },
                 initSettingsUpdatedHandler() {
                     var self = this;
-                    window.document.addEventListener('ExtSetingsUpdated', e => {
+                    window.document.addEventListener('ExtSettingsUpdated', e => {
                         self.$root.toast(e.detail.msg);
                         self.closeDialog();
                     });

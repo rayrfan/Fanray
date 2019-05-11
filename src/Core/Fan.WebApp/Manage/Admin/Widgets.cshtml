@@ -4,7 +4,7 @@
     ViewData["Title"] = "Widgets";
 }
 
-<site-widgets inline-template>
+<widgets inline-template ref="exts">
     <v-container fluid>
         <v-layout align-start>
             <v-flex xs6 md4 elevation-1 ma-2>
@@ -50,7 +50,7 @@
                                 </v-list-tile-content>
                                 <v-list-tile-action>
                                     <v-list-tile-action-text>
-                                        <v-btn flat icon class="mr-1" @@click="editWidget(widget)">
+                                        <v-btn flat icon class="mr-1" @@click="viewSettings(widget)">
                                             <v-icon>edit</v-icon>
                                         </v-btn>
                                         <v-btn flat icon @@click="deleteWidget(widget, area.id)">
@@ -78,19 +78,19 @@
                 </v-card-title>
                 <v-divider></v-divider>
                 <v-card-text>
-                    <iframe ref="editIframe"
-                            @@load="resizeIframe"
+                    <iframe ref="settingsIframe"
+                            @@load="$root.initIframeHeight($refs.settingsIframe)"
                             frameborder="0" 
                             scrolling="no"
                             class="widget-edit-frame"
-                            v-if="widgetEditUrl"
-                            :src="widgetEditUrl"
+                            v-if="settingsUrl"
+                            :src="settingsUrl"
                             :title="dialogTitle"></iframe>
                 </v-card-text>
             </v-card>
         </v-dialog>
     </v-container>    
-</site-widgets>
+</widgets>
 
 @section ComponentScripts {
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.3/Sortable.min.js"></script>
@@ -105,50 +105,22 @@
             },
         }
 
-        Vue.component('site-widgets', {
+        Vue.component('widgets', {
             mixins: [widgetsMixin],
             data: () => ({
                 dialogVisible: false,
                 dialogTitle: '',
-                widgetEditUrl: null,
+                settingsUrl: null,
             }),
             mounted() {
-                this.updateEditWidget();
+                this.initSettingsUpdatedHandler();
             },
             methods: {         
-                /**
-                 * When an edit-widget component clicks on save.
-                 */
-                updateEditWidget() {
-                    var self = this;
-                    window.document.addEventListener('widgetUpdated', e => {
-                        console.log('widget updated...', e.detail);
-
-                        // update the widget title
-                        let area = self.widgetAreas.find(a => a.id === e.detail.areaId);
-                        let widgetIns = area.widgetInstances.find(w => w.id === e.detail.widgetId);
-                        widgetIns.title = e.detail.title;
-
-                        // show toast and close dialog
-                        self.$root.toast('Widget updated.');
-                        self.closeDialog();
-                    });
-                    window.document.addEventListener('widgetUpdatedFailed', e => {
-                        console.log('widget update failed...', e.detail);
-                        self.$root.toastError('Widget update failed.');
-                    });
-                    window.document.addEventListener('updateIframeHeight', e => {
-                        console.log('update parent iframe height...', e.detail);
-                        self.updateIframeHeight(e.detail);
-                    });
-                },
                 /**
                  * When user drags a widget from info's section or an area to an area.
                  * @@param evt
                  */
                 add(evt) {
-                    console.log("adding... ");
-
                     let fromInfos = evt.from.id === 'widget-infos';
                     let dto = {
                         areaToId: evt.to.id,
@@ -224,20 +196,10 @@
                  * When user clicks on edit icon on an widget instance.
                  * @@param widget
                  */
-                editWidget(widget) {
-                    console.log("editing widget: ", widget);
+                viewSettings(widget) {
                     this.dialogTitle = widget.name;
                     this.dialogVisible = true;
-
-                    axios.get('/admin/widgets?handler=edit', { params: { widgetId: widget.id } })
-                        .then(resp => {
-                            this.widgetEditUrl = resp.data;
-                            console.log('widget edit url: ', this.widgetEditUrl);
-                        })
-                        .catch(err => {
-                            console.log(err);
-                            this.$root.toastError('Edit widget failed.');
-                        });
+                    this.settingsUrl = widget.settingsUrl;
                 },
                 /**
                  * When user clicks on delete icon on an widget instance.
@@ -259,20 +221,26 @@
                             });
                     }
                 },
-                /**
-                * A hack to make iframe height same as its content.
-                * https://stackoverflow.com/a/9976309/32240
-                */
-                resizeIframe() {
-                    let f = this.$refs.editIframe;
-                    f.style.height = f.contentWindow.document.body.scrollHeight + 'px';
-                },
-                updateIframeHeight(h) {
-                    let f = this.$refs.editIframe;
-                    f.style.height = h + 'px';
-                },
                 closeDialog() {
                     this.dialogVisible = false;
+                },
+                /**
+                 * Handles ExtSettingsUpdated event.
+                 */
+                initSettingsUpdatedHandler() {
+                    var self = this;
+                    window.document.addEventListener('ExtSettingsUpdated', e => {
+                        console.log('widget settings updated: ', e.detail);
+
+                        // update the widget title
+                        let area = self.widgetAreas.find(a => a.id === e.detail.areaId);
+                        let widgetIns = area.widgetInstances.find(w => w.id === e.detail.widgetId);
+                        widgetIns.title = e.detail.title;
+
+                        // show toast and close dialog
+                        self.$root.toast(e.detail.msg);
+                        self.closeDialog();
+                    });
                 },
             }
         });

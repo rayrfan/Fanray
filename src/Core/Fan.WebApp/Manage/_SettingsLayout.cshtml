@@ -57,7 +57,7 @@
             },
             methods: {
                 onExtSettingsUpdated(data) {
-                    window.parent.document.dispatchEvent(new CustomEvent('ExtSetingsUpdated', { detail: data }));
+                    window.parent.document.dispatchEvent(new CustomEvent('ExtSettingsUpdated', { detail: data }));
                 },
                 onExtSettingsUpdateErr(err) {
                     window.parent.document.dispatchEvent(new CustomEvent('ExtSettingsUpdateErr', { detail: err }));

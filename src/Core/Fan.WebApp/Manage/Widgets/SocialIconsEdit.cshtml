@@ -1,13 +1,13 @@
 ﻿@page
 @model SocialIconsEditModel
 @{
-    ViewData["Title"] = "Edit Social Icons Widget";
-    Layout = "_EditLayout.cshtml";
+    ViewData["Title"] = "SocialIcons Widget Settings";
+    Layout = "_SettingsLayout";
 }
 
 <edit-widget inline-template>
     <v-form style="width:100%">
-        <v-text-field label="Title" v-model="widget.title"></v-text-field>
+        <v-text-field label="Title" v-model="widget.title" v-on:keydown.enter.prevent="save"></v-text-field>
         <label>Links</label>
         <v-list>
             <draggable v-model="widget.links"
@@ -45,7 +45,7 @@
     </v-form>
 </edit-widget>
 
-@section Scripts{
+@section Scripts {
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.3/Sortable.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.17.0/vuedraggable.min.js"></script>
     <script>
@@ -71,24 +71,25 @@
                                 this.widget.links.push(resp.data);
                                 this.newUrl = '';
                                 let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-                                this.$root.updateIframeHeight(h + 60);
+                                this.$root.onExtSettingsIfrmHeightUpdate(h + 60);
                             }
                         })
                         .catch(err => console.log(err));
                 },
                 save() {
                     axios.post('/widgets/SocialIconsEdit', this.widget, this.$root.headers)
-                        .then(() => this.$root.updateParent({
+                        .then(resp => this.$root.onExtSettingsUpdated({
                             title: this.widget.title,
                             widgetId: this.widget.id,
                             areaId: this.widget.areaId,
+                            msg: resp.data
                         }))
-                        .catch(err => this.$root.updateParentErr(err));
+                        .catch(err => this.$root.onExtSettingsUpdateErr(err));
                 },
                 deleteLink(link) {
                     this.widget.links.splice(this.widget.links.indexOf(link), 1);
                     let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-                    this.$root.updateIframeHeight(h - 60);
+                    this.$root.onExtSettingsIfrmHeightUpdate(h - 60);
                 },
                 doneEdit(link) {
                     this.widget.links.splice(this.widget.links.indexOf(link), 1, link);

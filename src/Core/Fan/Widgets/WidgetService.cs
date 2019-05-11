@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -66,8 +65,8 @@ namespace Fan.Widgets
 
         private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
         private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
-        private const string CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS = "installed-widgets-manifests";
-        private TimeSpan Cache_Time_Installed_Widgets_Manifests = new TimeSpan(0, 10, 0);
+        private const string CACHE_KEY_WIDGETS_MANIFESTS = "installed-widgets-manifests";
+        private TimeSpan Cache_Time_Widgets_Manifests = new TimeSpan(0, 10, 0);
 
         private readonly IThemeService themeService;
         private readonly ISettingService settingService;
@@ -189,7 +188,7 @@ namespace Fan.Widgets
         /// </summary>
         public override async Task<IEnumerable<WidgetManifest>> GetManifestsAsync()
         {
-            return await distributedCache.GetAsync(CACHE_KEY_INSTALLED_WIDGETS_MANIFESTS, Cache_Time_Installed_Widgets_Manifests, async () =>
+            return await distributedCache.GetAsync(CACHE_KEY_WIDGETS_MANIFESTS, Cache_Time_Widgets_Manifests, async () =>
             {
                 return await LoadManifestsAsync();
             });

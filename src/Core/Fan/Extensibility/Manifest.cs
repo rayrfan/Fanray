@@ -4,7 +4,7 @@ using System;
 namespace Fan.Extensibility
 {
     /// <summary>
-    /// Common properties of an extension's manifest file.
+    /// The extension's manifest file.
     /// </summary>
     public class Manifest
     {
@@ -21,7 +21,7 @@ namespace Fan.Extensibility
         /// e.g. "BlogTags.BlogTagsWidget, BlogTags". 
         /// </summary>
         /// <remarks>
-        /// This property is used to instantiate the plugin/widget/theme.
+        /// This property is used to instantiate the extension.
         /// </remarks>
         public string Type { get; set; }
         /// <summary>
@@ -49,16 +49,16 @@ namespace Fan.Extensibility
         /// </summary>
         public string LicenseUrl { get; set; }
         /// <summary>
-        /// The name of the folder that contains the manifest file.
+        /// The name of the folder that contains the manifest file and extension.
         /// </summary>
         /// <remarks>
-        /// The value must be unique, it is used as the key to lookup an extension. Each extension 
+        /// This value must be unique, it is used as the key to lookup an extension. Each extension 
         /// type may have different requirement on folder naming, for example plugin and widget 
-        /// requires folder name to be pascal casing.  See implementation of each
+        /// requires folder name to be pascal casing.  See individual implementation of
         /// <see cref="IExtensibleService{TManifest, TExtension}.IsValidExtensionFolder(string)"/>
         /// method for detail. After you deploy your extension the folder name value cannot altered.
         /// </remarks>
-        public string Folder { get; set; }      
+        public string Folder { get; set; }
 
         /// <summary>
         /// Returns the dll filename based on <see cref="Type"/> property.

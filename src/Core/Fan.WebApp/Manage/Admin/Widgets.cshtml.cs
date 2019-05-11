@@ -17,8 +17,6 @@ namespace Fan.WebApp.Manage.Admin
             this.widgetService = widgetService;
         }
 
-        // -------------------------------------------------------------------- properties
-
         public string WidgetManifestsJson { get; private set; }
         public string WidgetAreasJson { get; private set; }
 
@@ -58,15 +56,6 @@ namespace Fan.WebApp.Manage.Admin
 
         public async Task OnPostReorderAsync([FromBody]OrderWidgetDto dto) =>
             await widgetService.OrderWidgetInAreaAsync(dto.WidgetId, dto.AreaId, dto.Index);
-
-        /// <summary>
-        /// Returns the widget edit page url.
-        /// </summary>
-        public async Task<JsonResult> OnGetEditAsync(int widgetId)
-        {
-            var widget = await widgetService.GetExtensionAsync(widgetId);
-            return new JsonResult(widget.SettingsUrl);
-        }
 
         /// <summary>
         /// DELETE a widget instance from an area.

@@ -27,7 +27,7 @@ namespace BlogTags.Manage.Widgets
             if (ModelState.IsValid)
             {
                 await widgetService.UpdateWidgetAsync(widget.Id, widget);
-                return new JsonResult(true);
+                return new JsonResult("Widget settings updated.");
             }
 
             return BadRequest("Invalid form values submitted.");
