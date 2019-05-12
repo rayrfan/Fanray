@@ -32,4 +32,8 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\plugins\shortcodes\" />
+  </ItemGroup>
+
 </Project>

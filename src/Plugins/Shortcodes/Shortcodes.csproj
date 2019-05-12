@@ -20,7 +20,7 @@
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Plugins\Shortcodes</CopyToDir>
-      <CopyToWwwrootDir>..\..\Core\Fan.WebApp\wwwroot\plugins\shortcodes</CopyToWwwrootDir>
+      <CopyToWwwrootDir>..\..\Core\Fan.WebApp\wwwroot\plugins\shortcodes\dist</CopyToWwwrootDir>
     </PropertyGroup>
 
     <ItemGroup>
