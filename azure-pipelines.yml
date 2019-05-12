@@ -14,12 +14,6 @@ jobs:
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
-      dotnet test --no-build .\test\Fan.UnitTests\Fan.UnitTests.csproj
-      dotnet test --no-build .\test\Fan.IntegrationTests\Fan.IntegrationTests.csproj
-      dotnet test --no-build .\test\Fan.Blog.UnitTests\Fan.Blog.UnitTests.csproj
-      dotnet test --no-build .\test\Fan.Blog.IntegrationTests\Fan.Blog.IntegrationTests.csproj
-      dotnet test --no-build .\test\Fan.Web.Tests\Fan.Web.Tests.csproj
-      dotnet test --no-build .\test\Shortcodes.Tests\Shortcodes.Tests.csproj
 
 - job: macOS
   pool:
