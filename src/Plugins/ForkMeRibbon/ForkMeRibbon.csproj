@@ -14,20 +14,25 @@
 
   <ItemGroup>
     <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="client\dist\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Plugins\ForkMeRibbon</CopyToDir>
+      <CopyToWwwrootDir>..\..\Core\Fan.WebApp\wwwroot\plugins\forkmeribbon\dist</CopyToWwwrootDir>
     </PropertyGroup>
 
     <ItemGroup>
       <ManifestToCopy Include="$(OutputPath)\plugin.json" />
+      <WwwrootToCopy Include="$(OutputPath)\client\dist\**\*" />
     </ItemGroup>
 
-    <RemoveDir Directories="$(CopyToDir)" />
+    <RemoveDir Directories="$(CopyToDir);$(CopyToWwwrootDir)" />
     <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
+    <MakeDir Directories="$(CopyToWwwrootDir)" Condition="!Exists('$(CopyToWwwrootDir)')" />
     <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="@(WwwrootToCopy)" DestinationFiles="$(CopyToWwwrootDir)\%(RecursiveDir)%(FileName)%(Extension)" />
   </Target>
   
 </Project>

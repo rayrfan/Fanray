@@ -1,12 +1,11 @@
 ﻿using Fan.Plugins;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace ForkMeRibbon.Components
 {
     public class RibbonViewComponent : ViewComponent
     {
-        public async Task<IViewComponentResult> InvokeAsync(Plugin plugin)
+        public IViewComponentResult Invoke(Plugin plugin)
         {
             var vm = (ForkMeRibbonPlugin)plugin;
             return View("~/Components/Ribbon.cshtml", vm);
@@ -15,7 +14,7 @@ namespace ForkMeRibbon.Components
 
     public class RibbonStylesViewComponent : ViewComponent
     {
-        public async Task<IViewComponentResult> InvokeAsync(Plugin plugin)
+        public IViewComponentResult Invoke(Plugin plugin)
         {
             return View("~/Components/RibbonStyles.cshtml");
         }
