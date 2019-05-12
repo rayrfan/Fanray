@@ -45,8 +45,3 @@ The `dist/css/fonts` folder contains fonts referenced by `_font.scss`. To get th
 4. copy files inside `/fonts` folder to `Themes/Clarity/dist/css/fonts`
 5. copy the content of `style.css` to _fonts.scss
 6. recompile to produce sytle.css
-
-### syntaxhighlighter.js
-
-To post source code shortcode is used (till editor could support it natively) which is
-based on [syntaxhighlighter](https://github.com/syntaxhighlighter/syntaxhighlighter).

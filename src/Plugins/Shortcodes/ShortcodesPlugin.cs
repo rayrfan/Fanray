@@ -21,5 +21,7 @@ namespace Shortcodes
         }
 
         public override string DetailsUrl => "https://github.com/FanrayMedia/Fanray/wiki/Shortcodes";
+        public override string GetFootScriptsViewName() => "ShortcodesScripts";
+        public override string GetStylesViewName() => "ShortcodesStyles";
     }
 }
