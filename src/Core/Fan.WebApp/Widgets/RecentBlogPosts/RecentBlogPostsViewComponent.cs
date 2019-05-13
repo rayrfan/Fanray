@@ -24,7 +24,7 @@ namespace Fan.WebApp.Widgets.RecentBlogPosts
         public async Task<IViewComponentResult> InvokeAsync(Widget widget)
         {
             var recentBlogPostsWidget = (RecentBlogPostsWidget)widget;
-            var posts = await blogPostService.GetRecentPostsAsync(recentBlogPostsWidget.NumberOfPostsToShow);
+            var posts = await blogPostService.GetListAsync(1, recentBlogPostsWidget.NumberOfPostsToShow);
 
             // must have at least 2 posts 
             if (posts.PostCount < 2)
