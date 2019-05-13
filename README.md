@@ -4,6 +4,9 @@
   </a>
   <h3 align="center">Fanray</h3>
   <p align="center">
+    A simple and elegant blog.
+  </p>
+  <p align="center">
 	<a href="#screenshots">Screenshots</a> •
 	<a href="#features">Features</a> •
 	<a href="#quick-start">Quick Start</a> •
@@ -15,7 +18,7 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
 	</a>
 	<a href="https://fanray.visualstudio.com/Fanray/_build/latest?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI" alt="Azure Pipelines">
+	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=v1.1.0-preview3" alt="Azure Pipelines">
 	</a>
     <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
   </p>

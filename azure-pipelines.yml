@@ -7,13 +7,14 @@ jobs:
     vmImage: 'Ubuntu 16.04'  
   
   steps:
-#  - task: DotNetCoreInstaller@0
-#    displayName: 'Use .NET Core sdk 2.2.101'
-#    inputs:
-#      version: 2.2.101
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 2.2.203'
+    inputs:
+      version: 2.2.203
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
+      dotnet test --configuration $(buildConfiguration)
 
 - job: macOS
   pool:
