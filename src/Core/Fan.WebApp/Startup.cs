@@ -88,11 +88,11 @@ namespace Fan.WebApp
             services.AddDistributedMemoryCache();
 
             // Mapper
-            services.AddAutoMapper();
+            services.AddAutoMapper(typeof(BlogPost));
             services.AddSingleton(BlogUtil.Mapper);
 
             // Mediatr
-            services.AddMediatR();
+            services.AddMediatR(typeof(BlogPost));
 
             // Storage
             services.AddStorageProvider(Configuration);
