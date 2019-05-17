@@ -214,13 +214,7 @@ namespace Fan.Medias
             using (var image = Image.Load(source, out IImageFormat format))
             {
                 var (width, height) = GetNewSize(image.Width, image.Height, targetSize);
-
-                image.Mutate(x => x.Resize(new ResizeOptions
-                {
-                    Size = new Size(width, height),
-                    Mode = ResizeMode.Crop
-                }));
-
+                image.Mutate(x => x.Resize(width, height));
                 image.Save(dest, format);
             }
         }
