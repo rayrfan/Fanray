@@ -55,8 +55,8 @@ namespace Fan.Blog.UnitTests.Services
             var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg\" alt=\"painting 2200x1650\" " +
                            "srcset=\"https://localhost:44381/media/blog/2019/04/sm/painting-2200x1650.jpg 400w, " +
                            "https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg 800w, " + 
-                           "https://localhost:44381/media/blog/2019/04/ml/painting-2200x1650.jpg 1200w, " +
-                           "https://localhost:44381/media/blog/2019/04/lg/painting-2200x1650.jpg 2x\" " +
+                           "https://localhost:44381/media/blog/2019/04/ml/painting-2200x1650.jpg 2x, " +
+                           "https://localhost:44381/media/blog/2019/04/lg/painting-2200x1650.jpg 3x\" " +
                            "sizes=\"(max-width: 1200px) 100vw, 1200px\">";
             var output = await _imgSvc.ProcessResponsiveImageAsync(input);
 
@@ -81,8 +81,8 @@ namespace Fan.Blog.UnitTests.Services
             var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg\" alt=\"nightsky 960x1440\" "+
                            "srcset=\"https://localhost:44381/media/blog/2019/04/sm/nightsky-960x1440.jpg 400w, "+
                            "https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg 800w, "+
-                           "https://localhost:44381/media/blog/2019/04/ml/nightsky-960x1440.jpg 1200w, "+
-                           "https://localhost:44381/media/blog/2019/04/nightsky-960x1440.jpg 960w\" "+
+                           "https://localhost:44381/media/blog/2019/04/ml/nightsky-960x1440.jpg 2x, "+
+                           "https://localhost:44381/media/blog/2019/04/nightsky-960x1440.jpg 3x\" "+
                            "sizes=\"(max-width: 960px) 100vw, 960px\">";
             var output = await _imgSvc.ProcessResponsiveImageAsync(input);
 

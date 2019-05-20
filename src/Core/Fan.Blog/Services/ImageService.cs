@@ -348,6 +348,9 @@ namespace Fan.Blog.Services
         /// </summary>
         /// <param name="imgNode"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// To understand the logic here <seealso cref="https://github.com/FanrayMedia/responsive-images"/>.
+        /// </remarks>
         private async Task<HtmlNode> GetResponsiveImgNodeAsync(HtmlNode imgNode)
         {
             var src = imgNode.Attributes["src"]?.Value;
@@ -386,15 +389,15 @@ namespace Fan.Blog.Services
             {
                 srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
                          $"{GetAbsoluteUrl(media, EImageSize.Medium)} {MEDIUM_IMG_SIZE}w, " +
-                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} {MEDIUM_LARGE_IMG_SIZE}w, " +
-                         $"{GetAbsoluteUrl(media, EImageSize.Original)} {media.Width}w";
+                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} 2x, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Original)} 3x";
             }
             else if (resizeCount == 4)
             {
                 srcset = $"{GetAbsoluteUrl(media, EImageSize.Small)} {SMALL_IMG_SIZE}w, " +
                          $"{GetAbsoluteUrl(media, EImageSize.Medium)} {MEDIUM_IMG_SIZE}w, " +
-                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} {MEDIUM_LARGE_IMG_SIZE}w, " +
-                         $"{GetAbsoluteUrl(media, EImageSize.Large)} 2x"; // cap it at lg, so no orig here
+                         $"{GetAbsoluteUrl(media, EImageSize.MediumLarge)} 2x, " +
+                         $"{GetAbsoluteUrl(media, EImageSize.Large)} 3x"; // cap it at lg, so no orig here
             }
 
             // use media width to calc maxWidth and defaultWidth, height is not involved
