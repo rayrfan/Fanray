@@ -119,6 +119,8 @@ namespace Fan.Themes
                 var list = new List<ThemeManifest>();
                 var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIR);
 
+                logger.LogInformation($"ThemesDir {themesDir}");
+
                 foreach (var dir in Directory.GetDirectories(themesDir))
                 {
                     var dirTokens = dir.Split(Path.DirectorySeparatorChar);
