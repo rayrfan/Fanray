@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{596A1022-8E0
 		azure-pipelines.yml = azure-pipelines.yml
 		CONTRIBUTING.md = CONTRIBUTING.md
 		README.md = README.md
+		run-tests.sh = run-tests.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.UnitTests", "test\Fan.UnitTests\Fan.UnitTests.csproj", "{DB82A852-A913-4AEE-AD16-B62472F29092}"
