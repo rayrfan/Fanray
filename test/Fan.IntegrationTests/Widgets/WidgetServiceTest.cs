@@ -30,30 +30,33 @@ namespace Fan.IntegrationTests.Widgets
             // meta repo
             _metaRepo = new SqlMetaRepository(_db);
 
+            _output = new LoggerConfiguration()
+               .MinimumLevel.Verbose()
+               .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
+               .CreateLogger()
+               .ForContext<WidgetServiceTest>();
+
             // setup CoreSettings
             var settingSvcMock = new Mock<ISettingService>();
             settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
 
-            // set ContentRootPath to "Fan.IntegrationTests"
-            var workingDirectory = Environment.CurrentDirectory;
-            var projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
-            var env = new Mock<IHostingEnvironment>();
-            env.Setup(m => m.ContentRootPath).Returns(projectDirectory);
+            //// set ContentRootPath to "Fan.IntegrationTests"
+            //var workingDirectory = Environment.CurrentDirectory;
+            //var projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
+            //_output.Information($"workingDirectory {workingDirectory}");
+            //_output.Information($"projectDirectory {projectDirectory}");
+
+            //var env = new Mock<IHostingEnvironment>();
+            //env.Setup(m => m.ContentRootPath).Returns(projectDirectory);
 
             // logger
             var loggerWidgetSvc = _loggerFactory.CreateLogger<WidgetService>();
             var loggerThemeSvc = _loggerFactory.CreateLogger<ThemeService>();
 
-            _output = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
-                .CreateLogger()
-                .ForContext<WidgetServiceTest>();
+            //// theme service
+            //themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
 
-            // theme service
-            themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
-
-            _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc);
+            //_svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc);
         }
 
         /// <summary>
@@ -62,9 +65,9 @@ namespace Fan.IntegrationTests.Widgets
         /// <returns></returns>
         public async Task InitializeAsync()
         {
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
-            await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2.Id);
-            await themeService.ActivateThemeAsync("Clarity");
+            //await _svc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
+            //await _svc.RegisterAreaAsync(WidgetService.BlogSidebar2.Id);
+            //await themeService.ActivateThemeAsync("Clarity");
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
