@@ -176,8 +176,12 @@ namespace Fan.Medias
                 }
             }
 
+            // if already exists return it
+            var media = await _mediaRepo.GetAsync(fileName, uploadedOn);
+            if (media != null) return media;
+
             // create record in db
-            var media = new Media
+            media = new Media
             {
                 UserId = userId,
                 AppType = appType,
@@ -196,8 +200,7 @@ namespace Fan.Medias
                 ResizeCount = resizeCount,
             };
 
-            if ((await _mediaRepo.GetAsync(fileName, uploadedOn)) == null)
-                await _mediaRepo.CreateAsync(media);
+            await _mediaRepo.CreateAsync(media);
 
             return media;
         }
