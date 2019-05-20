@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
+using Serilog;
 using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Fan.IntegrationTests.Plugins
 {
@@ -18,8 +20,9 @@ namespace Fan.IntegrationTests.Plugins
 
         private readonly PluginService pluginService;
         private readonly SqlMetaRepository metaRepository;
+        Serilog.ILogger _output;
 
-        public PluginServiceTest()
+        public PluginServiceTest(ITestOutputHelper output)
         {
             // repo
             metaRepository = new SqlMetaRepository(_db);
@@ -33,6 +36,13 @@ namespace Fan.IntegrationTests.Plugins
             // logger
             var loggerPluginSvc = _loggerFactory.CreateLogger<PluginService>();
 
+            // Pass the ITestOutputHelper object to the TestOutput sink
+            _output = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
+                .CreateLogger()
+                .ForContext<PluginServiceTest>();
+
             // svc
             pluginService = new PluginService(env.Object, _cache, metaRepository, loggerPluginSvc);
         }
@@ -43,6 +53,8 @@ namespace Fan.IntegrationTests.Plugins
         [Fact]
         public async void Admin_panel_plugins_page_displays_all_installed_plugins_information()
         {
+            _output.Information("The admin plugins page display all installed plugins.");
+
             var plugins = await pluginService.GetManifestsAsync();
 
             Assert.Single(plugins);
@@ -55,6 +67,8 @@ namespace Fan.IntegrationTests.Plugins
         [Fact]
         public async void When_user_activates_a_plugin_two_meta_records_could_be_created()
         {
+            _output.Information("When a user activates a plugin, there will be a plugin meta and its Active prop is true.");
+
             // Given a plugin and when user activates it
             var id = await pluginService.ActivatePluginAsync(MY_PLUGIN_FOLDER);
 
@@ -73,6 +87,8 @@ namespace Fan.IntegrationTests.Plugins
         [Fact]
         public async void Plugin_settings_link_is_only_shown_on_active_plugins()
         {
+            _output.Information("Plugin settings link is only shown on active plugins.");
+
             // Given a plugin and when user activates it 
             await pluginService.ActivatePluginAsync(MY_PLUGIN_FOLDER);
 
@@ -84,6 +100,8 @@ namespace Fan.IntegrationTests.Plugins
         [Fact]
         public async void User_can_update_plugin_settings()
         {
+            _output.Information("User can update plugin settings.");
+
             // Given an active plugin
             var plugin = new MyPlugin
             {
