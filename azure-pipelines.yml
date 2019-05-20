@@ -3,7 +3,7 @@ variables:
 
 jobs:
 - job: Linux
-  timeoutInMinutes: 0
+  #timeoutInMinutes: 0
   pool:
     vmImage: 'Ubuntu 16.04'  
   
@@ -16,7 +16,7 @@ jobs:
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet test $(buildConfiguration)'
-    timeoutInMinutes: 0
+    #timeoutInMinutes: 0
     inputs:
       command: test
       projects: '**/*Tests/*.csproj'
