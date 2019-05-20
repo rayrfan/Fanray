@@ -134,7 +134,7 @@ namespace Fan.Medias
         /// </summary>
         /// <param name="source"></param>
         /// <param name="resizes"></param>
-        /// <param name="fileName"></param>
+        /// <param name="fileName">Unique filename.</param>
         /// <param name="contentType"></param>
         /// <param name="uploadedOn"></param>
         /// <param name="appType"></param>
@@ -196,7 +196,8 @@ namespace Fan.Medias
                 ResizeCount = resizeCount,
             };
 
-            await _mediaRepo.CreateAsync(media);
+            if ((await _mediaRepo.GetAsync(fileName, uploadedOn)) == null)
+                await _mediaRepo.CreateAsync(media);
 
             return media;
         }

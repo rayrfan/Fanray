@@ -15,10 +15,16 @@ namespace Fan.Medias
             _db = db;
         }
 
+        /// <summary>
+        /// Returns <see cref="Media"/> by filename and upload date, returns null if not found.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="uploadedOn"></param>
+        /// <returns></returns>
         public async Task<Media> GetAsync(string fileName, DateTimeOffset uploadedOn)
         {
             return await _entities.SingleOrDefaultAsync(m =>
-                        m.FileName.Equals(fileName, StringComparison.InvariantCultureIgnoreCase) &&
+                        m.FileName == fileName &&
                         m.UploadedOn.Year == uploadedOn.Year &&
                         m.UploadedOn.Month == uploadedOn.Month);
         }

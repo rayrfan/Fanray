@@ -22,7 +22,7 @@ namespace Fan.Medias
         Task DeleteAsync(int id);
 
         /// <summary>
-        /// Returns <see cref="Media"/> by filename and upload date.
+        /// Returns <see cref="Media"/> by filename and upload date, returns null if not found.
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="uploadedOn"></param>
