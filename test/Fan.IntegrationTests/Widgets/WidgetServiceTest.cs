@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
+using Serilog;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Fan.IntegrationTests.Widgets
 {
@@ -21,8 +23,9 @@ namespace Fan.IntegrationTests.Widgets
         private readonly WidgetService _svc;
         private readonly IThemeService themeService;
         private readonly SqlMetaRepository _metaRepo;
+        private readonly Serilog.ILogger _output;
 
-        public WidgetServiceTest()
+        public WidgetServiceTest(ITestOutputHelper output)
         {
             // meta repo
             _metaRepo = new SqlMetaRepository(_db);
@@ -40,6 +43,12 @@ namespace Fan.IntegrationTests.Widgets
             // logger
             var loggerWidgetSvc = _loggerFactory.CreateLogger<WidgetService>();
             var loggerThemeSvc = _loggerFactory.CreateLogger<ThemeService>();
+
+            _output = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
+                .CreateLogger()
+                .ForContext<WidgetServiceTest>();
 
             // theme service
             themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
@@ -66,6 +75,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void System_defined_widget_areas_are_registered_at_setup_thus_available_from_start()
         {
+            _output.Debug("System_defined_widget_areas_are_registered_at_setup_thus_available_from_start");
+
             // Given system defined areas already exist
             // Then the system would have widget areas avaiable for retrival
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
@@ -79,6 +90,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void Admin_panel_widgets_page_displays_all_areas_in_the_current_theme()
         {
+            _output.Debug("Admin_panel_widgets_page_displays_all_areas_in_the_current_theme");
+
             // When the Admin Panel Widgets page is requested
             var areas = await _svc.GetCurrentThemeAreasAsync();
 
@@ -93,6 +106,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void Admin_panel_widgets_page_displays_all_installed_widgets_information()
         {
+            _output.Debug("Admin_panel_widgets_page_displays_all_installed_widgets_information");
+
             // Given I have MyWidget installed in this test project
             // When Admin Panel Widgets page is requested
             var widgetInfos = await _svc.GetManifestsAsync();
@@ -111,6 +126,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drag_a_widget_from_widget_infos_section_to_an_area()
         {
+            _output.Debug("User_can_drag_a_widget_from_widget_infos_section_to_an_area");
+
             // When user drags a widget from the widget infos section to an area
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -127,6 +144,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drag_a_widget_from_an_area_to_another_area()
         {
+            _output.Debug("User_can_drag_a_widget_from_an_area_to_another_area");
+
             // Given a widget in area blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -156,6 +175,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void When_user_drops_a_widget_from_info_section_to_area_widget_has_initial_default_values()
         {
+            _output.Debug("When_user_drops_a_widget_from_info_section_to_area_widget_has_initial_default_values");
+
             // When a widget is dropped to area from infos
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             var widget = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -170,6 +191,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_drop_same_widget_multiple_times_to_an_area()
         {
+            _output.Debug("User_can_drop_same_widget_multiple_times_to_an_area");
+
             // Given two widget instances in blog sidebar1
             var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
@@ -191,6 +214,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void A_widget_is_instantiated_from_json_and_type_info_strings()
         {
+            _output.Debug("A_widget_is_instantiated_from_json_and_type_info_strings");
+
             // Given a widget in the area blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -221,6 +246,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_delete_a_widget_from_an_area()
         {
+            _output.Debug("User_can_delete_a_widget_from_an_area");
+
             // Given a widget in blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             var widgetInst = await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
@@ -240,6 +267,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_order_widgets_in_an_area()
         {
+            _output.Debug("User_can_order_widgets_in_an_area");
+
             // Given two widgets w1 and w2 in blog-sidebar1 area
             var w1Id = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(w1Id, WidgetService.BlogSidebar1.Id, 0);
@@ -258,6 +287,8 @@ namespace Fan.IntegrationTests.Widgets
         [Fact]
         public async void User_can_update_instance_properties()
         {
+            _output.Debug("User_can_update_instance_properties");
+
             // Given a widget in blog sidebar1
             var widgetId = await _svc.CreateWidgetAsync(MY_WIDGET_FOLDER);
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);

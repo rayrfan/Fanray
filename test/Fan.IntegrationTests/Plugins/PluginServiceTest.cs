@@ -20,7 +20,7 @@ namespace Fan.IntegrationTests.Plugins
 
         private readonly PluginService pluginService;
         private readonly SqlMetaRepository metaRepository;
-        Serilog.ILogger _output;
+        private readonly Serilog.ILogger _output;
 
         public PluginServiceTest(ITestOutputHelper output)
         {
@@ -36,7 +36,6 @@ namespace Fan.IntegrationTests.Plugins
             // logger
             var loggerPluginSvc = _loggerFactory.CreateLogger<PluginService>();
 
-            // Pass the ITestOutputHelper object to the TestOutput sink
             _output = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
