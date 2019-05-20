@@ -16,7 +16,7 @@ jobs:
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet test $(buildConfiguration)'
-    timeoutInMinutes: 5
+    timeoutInMinutes: 10
     inputs:
       command: test
       projects: '**/*Tests/*.csproj'

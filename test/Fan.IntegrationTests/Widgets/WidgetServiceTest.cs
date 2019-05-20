@@ -69,35 +69,35 @@ namespace Fan.IntegrationTests.Widgets
 
         public Task DisposeAsync() => Task.CompletedTask;
 
-        /// <summary>
-        /// During site setup system-defined areas will be registered.
-        /// </summary>
-        [Fact]
-        public async void System_defined_widget_areas_are_registered_at_setup_thus_available_from_start()
-        {
-            _output.Debug("System_defined_widget_areas_are_registered_at_setup_thus_available_from_start");
+        ///// <summary>
+        ///// During site setup system-defined areas will be registered.
+        ///// </summary>
+        //[Fact]
+        //public async void System_defined_widget_areas_are_registered_at_setup_thus_available_from_start()
+        //{
+        //    _output.Debug("System_defined_widget_areas_are_registered_at_setup_thus_available_from_start");
 
-            // Given system defined areas already exist
-            // Then the system would have widget areas avaiable for retrival
-            var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
-            Assert.NotNull(area);
-        }
+        //    // Given system defined areas already exist
+        //    // Then the system would have widget areas avaiable for retrival
+        //    var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
+        //    Assert.NotNull(area);
+        //}
 
-        /// <summary>
-        /// On the admin widgets page, you will see a list of all areas available in the current
-        /// theme displayed on the right hand side.
-        /// </summary>
-        [Fact]
-        public async void Admin_panel_widgets_page_displays_all_areas_in_the_current_theme()
-        {
-            _output.Debug("Admin_panel_widgets_page_displays_all_areas_in_the_current_theme");
+        ///// <summary>
+        ///// On the admin widgets page, you will see a list of all areas available in the current
+        ///// theme displayed on the right hand side.
+        ///// </summary>
+        //[Fact]
+        //public async void Admin_panel_widgets_page_displays_all_areas_in_the_current_theme()
+        //{
+        //    _output.Debug("Admin_panel_widgets_page_displays_all_areas_in_the_current_theme");
 
-            // When the Admin Panel Widgets page is requested
-            var areas = await _svc.GetCurrentThemeAreasAsync();
+        //    // When the Admin Panel Widgets page is requested
+        //    var areas = await _svc.GetCurrentThemeAreasAsync();
 
-            // Then it will display all areas in the current theme
-            Assert.Equal(3, areas.ToList().Count());
-        }
+        //    // Then it will display all areas in the current theme
+        //    Assert.Equal(3, areas.ToList().Count());
+        //}
 
         ///// <summary>
         ///// On the admin widgets page, you will see a list of all installed widgets information
