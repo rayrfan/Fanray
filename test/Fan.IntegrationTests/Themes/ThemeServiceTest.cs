@@ -40,6 +40,12 @@ namespace Fan.IntegrationTests.Themes
             _svc = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, logger);
         }
 
+        [Fact]
+        public async void Test_Dir()
+        {
+
+        }
+
         ///// <summary>
         ///// Activating a theme will register the theme and the theme defined widget areas.
         ///// </summary>
