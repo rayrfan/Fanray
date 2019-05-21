@@ -24,26 +24,26 @@ namespace Fan.IntegrationTests.Plugins
 
         public PluginServiceTest(ITestOutputHelper output)
         {
-            // repo
-            metaRepository = new SqlMetaRepository(_db);
+            //// repo
+            //metaRepository = new SqlMetaRepository(_db);
 
-            // IHostingEnvironment
-            var workingDirectory = Environment.CurrentDirectory;
-            var projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
-            var env = new Mock<IHostingEnvironment>();
-            env.Setup(m => m.ContentRootPath).Returns(projectDirectory);
+            //// IHostingEnvironment
+            //var workingDirectory = Environment.CurrentDirectory;
+            //var projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
+            //var env = new Mock<IHostingEnvironment>();
+            //env.Setup(m => m.ContentRootPath).Returns(projectDirectory);
 
-            // logger
-            var loggerPluginSvc = _loggerFactory.CreateLogger<PluginService>();
+            //// logger
+            //var loggerPluginSvc = _loggerFactory.CreateLogger<PluginService>();
 
-            _output = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
-                .CreateLogger()
-                .ForContext<PluginServiceTest>();
+            //_output = new LoggerConfiguration()
+            //    .MinimumLevel.Verbose()
+            //    .WriteTo.TestOutput(output, Serilog.Events.LogEventLevel.Verbose)
+            //    .CreateLogger()
+            //    .ForContext<PluginServiceTest>();
 
-            // svc
-            pluginService = new PluginService(env.Object, _cache, metaRepository, loggerPluginSvc);
+            //// svc
+            //pluginService = new PluginService(env.Object, _cache, metaRepository, loggerPluginSvc);
         }
 
         ///// <summary>
