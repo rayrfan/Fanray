@@ -40,12 +40,6 @@ namespace Fan.IntegrationTests.Themes
             _svc = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, logger);
         }
 
-        [Fact]
-        public async void Test_Dir()
-        {
-
-        }
-
         ///// <summary>
         ///// Activating a theme will register the theme and the theme defined widget areas.
         ///// </summary>
@@ -101,22 +95,22 @@ namespace Fan.IntegrationTests.Themes
         //    Assert.Contains(themes, t => t.Folder.Equals("clarity", StringComparison.CurrentCultureIgnoreCase));
         //}
 
-        ///// <summary>
-        ///// A "theme.json" file at the root of each theme's folder will provide
-        ///// widget areas the theme uses.
-        ///// </summary>
-        //[Fact]
-        //public async void Themes_will_provide_widget_areas_information_they_use()
-        //{
-        //    // Given a "Themes/Clarity" directory that contains a "theme.json" file
-        //    // When Admin Panel Themes page retrieves themes info
-        //    var themes = await _svc.GetManifestsAsync();
+        /// <summary>
+        /// A "theme.json" file at the root of each theme's folder will provide
+        /// widget areas the theme uses.
+        /// </summary>
+        [Fact]
+        public async void Themes_will_provide_widget_areas_information_they_use()
+        {
+            // Given a "Themes/Clarity" directory that contains a "theme.json" file
+            // When Admin Panel Themes page retrieves themes info
+            var themes = await _svc.GetManifestsAsync();
 
-        //    // Then the theme contains 3 areas 
-        //    var areas = themes.ToList()[0].WidgetAreas;
-        //    Assert.Equal(3, areas.Length);
-        //    Assert.True(areas[0].Id == "blog-sidebar1");
-        //    Assert.True(areas[1].Id == "blog-sidebar2");
-        //}
+            // Then the theme contains 3 areas 
+            var areas = themes.ToList()[0].WidgetAreas;
+            Assert.Equal(3, areas.Length);
+            Assert.True(areas[0].Id == "blog-sidebar1");
+            Assert.True(areas[1].Id == "blog-sidebar2");
+        }
     }
 }
