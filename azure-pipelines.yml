@@ -6,7 +6,7 @@ jobs:
   #timeoutInMinutes: 0
   pool:
     vmImage: 'Ubuntu 16.04'  
-  
+ 
   steps:
   - script: dotnet restore
     displayName: 'dotnet restore'
@@ -14,13 +14,13 @@ jobs:
   - script: dotnet build --configuration $(buildConfiguration)
     displayName: 'dotnet build $(buildConfiguration)'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet test $(buildConfiguration)'
-    timeoutInMinutes: 5
-    inputs:
-      command: test
-      projects: '**/*Tests/*.csproj'
-      arguments: '--configuration $(buildConfiguration)'
+#  - task: DotNetCoreCLI@2
+#    displayName: 'dotnet test $(buildConfiguration)'
+#    timeoutInMinutes: 5
+#    inputs:
+#      command: test
+#      projects: '**/*Tests/*.csproj'
+#      arguments: '--configuration $(buildConfiguration)'
 
 - job: macOS
   pool:
