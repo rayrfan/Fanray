@@ -119,16 +119,9 @@ namespace Fan.Themes
                 var list = new List<ThemeManifest>();
                 var themesDir = Path.Combine(hostingEnvironment.ContentRootPath, THEME_DIR);
 
-                // /home/vsts/work/1/s/test/Fan.IntegrationTests/Fan.IntegrationTests.csproj
-                logger.LogInformation($"ThemesDir {themesDir}");
-
                 foreach (var dir in Directory.GetDirectories(themesDir))
                 {
-                    //var dirTokens = dir.Split(Path.DirectorySeparatorChar);
-                    //var folder = dirTokens[dirTokens.Length - 1];
                     var folder = dir.Substring(dir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-
-                    logger.LogInformation($"folder {folder}");
 
                     // load only valid folder name
                     if (!IsValidExtensionFolder(folder)) continue;
