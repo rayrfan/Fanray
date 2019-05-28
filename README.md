@@ -36,7 +36,7 @@
 
 ## Features
 
-Fanray has an [extensible design](https://github.com/FanrayMedia/Fanray/wiki/Architecture) that allows you to create plugins, themes and widgets. It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
+Fanray has an _extensible design_ that allows you to create _plugins_, _themes_ and _widgets_. It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
 
 ![Fanray-Extensible-Architecture](https://user-images.githubusercontent.com/633119/57195103-89dc1e00-6f03-11e9-96b8-678b90cc6004.png)
 
