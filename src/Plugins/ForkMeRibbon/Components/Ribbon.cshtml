@@ -1,6 +1,7 @@
 ﻿@model ForkMeRibbon.ForkMeRibbonPlugin
 @{ 
     var position = Model.GetPositionString();
+    var fix_ed = Model.Fixed ? "fixed" : "";
 }
-<a class="github-fork-ribbon @position fixed" href="https://github.com/FanrayMedia/Fanray"
+<a class="github-fork-ribbon @position @fix_ed" href="@Model.Url"
    data-ribbon="@Model.Text" title="@Model.Text">@Model.Text</a>

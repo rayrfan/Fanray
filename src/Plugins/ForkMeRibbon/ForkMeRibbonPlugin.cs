@@ -14,7 +14,10 @@ namespace ForkMeRibbon
     {
         [Required]
         public string Text { get; set; } = "Fork me on GitHub";
+        [Required]
+        public string Url { get; set; } = "https://github.com/FanrayMedia/Fanray";
         public ERibbonPosition Position { get; set; } = ERibbonPosition.RightBottom;
+        public bool Fixed { get; set; } = true;
 
         public string GetPositionString()
         {
