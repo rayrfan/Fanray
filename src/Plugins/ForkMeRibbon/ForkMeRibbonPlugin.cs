@@ -17,7 +17,7 @@ namespace ForkMeRibbon
         [Required]
         public string Url { get; set; } = "https://github.com/FanrayMedia/Fanray";
         public ERibbonPosition Position { get; set; } = ERibbonPosition.RightBottom;
-        public bool Fixed { get; set; } = true;
+        public bool Sticky { get; set; } = true;
 
         public string GetPositionString()
         {
