@@ -1,11 +1,10 @@
-﻿using Fan.WebApp.Widgets.BlogCategories;
-using Fan.Widgets;
+﻿using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Manage.Widgets
+namespace BlogCategories.Manage.Widgets
 {
     public class BlogCategoriesEditModel : PageModel
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Widgets.BlogCategories
+namespace BlogCategories.Components
 {
     /// <summary>
     /// The BlogCategories view component.
@@ -25,7 +25,7 @@ namespace Fan.WebApp.Widgets.BlogCategories
             var blogCategoriesWidget = (BlogCategoriesWidget)widget;
             var categories = (await _catSvc.GetAllAsync()).Where(t => t.Count > 0);
 
-            return View(WidgetService.GetWidgetViewPath("BlogCategories"), 
+            return View("~/Components/BlogCategories.cshtml", 
                 new Tuple<IEnumerable<Category>, BlogCategoriesWidget>(categories, blogCategoriesWidget));
         }
     }

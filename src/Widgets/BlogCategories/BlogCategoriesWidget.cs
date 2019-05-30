@@ -1,6 +1,6 @@
 ﻿using Fan.Widgets;
 
-namespace Fan.WebApp.Widgets.BlogCategories
+namespace BlogCategories
 {
     public class BlogCategoriesWidget : Widget
     {
