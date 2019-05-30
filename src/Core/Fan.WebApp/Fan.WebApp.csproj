@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\Plugins\ForkMeRibbon\ForkMeRibbon.csproj" />
     <ProjectReference Include="..\..\Plugins\Shortcodes\Shortcodes.csproj" />
     <ProjectReference Include="..\..\Themes\Clarity\Clarity.csproj" />
+    <ProjectReference Include="..\..\Widgets\BlogArchives\BlogArchives.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>

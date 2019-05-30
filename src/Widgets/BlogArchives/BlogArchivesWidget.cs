@@ -1,6 +1,6 @@
 ﻿using Fan.Widgets;
 
-namespace Fan.WebApp.Widgets.BlogArchives
+namespace BlogArchives
 {
     public class BlogArchivesWidget : Widget
     {

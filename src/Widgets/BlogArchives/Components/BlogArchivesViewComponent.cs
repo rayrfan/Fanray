@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Widgets.BlogArchives
+namespace BlogArchives.Components
 {
     /// <summary>
     /// The BlogArchives view component.
@@ -24,7 +24,7 @@ namespace Fan.WebApp.Widgets.BlogArchives
             var blogArchivesWidget = (BlogArchivesWidget)widget;
             var years = await _statsSvc.GetArchivesAsync();
 
-            return View(WidgetService.GetWidgetViewPath("BlogArchives"), 
+            return View("~/Components/BlogArchives.cshtml", 
                 new Tuple<Dictionary<int, List<MonthItem>>, BlogArchivesWidget>(years, blogArchivesWidget));
         }
     }
