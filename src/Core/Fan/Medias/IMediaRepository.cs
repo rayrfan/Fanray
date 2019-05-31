@@ -1,5 +1,4 @@
 ﻿using Fan.Data;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,19 +14,13 @@ namespace Fan.Medias
     public interface IMediaRepository : IRepository<Media>
     {
         /// <summary>
-        /// Deletes a media by id.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task DeleteAsync(int id);
-
-        /// <summary>
         /// Returns <see cref="Media"/> by filename and upload date, returns null if not found.
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="uploadedOn"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
         /// <returns></returns>
-        Task<Media> GetAsync(string fileName, DateTimeOffset uploadedOn);
+        Task<Media> GetAsync(string fileName, int year, int month);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> based on media type page number and page size, 

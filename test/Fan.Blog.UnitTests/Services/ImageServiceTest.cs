@@ -41,7 +41,7 @@ namespace Fan.Blog.UnitTests.Services
         public async void ProcessResponsiveImageAsync_on_large_2200x1650_landscape_picture()
         {
             // Setup media
-            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(Task.FromResult(new Media
                 {
                     FileName = "painting-2200x1650.jpg",
@@ -67,7 +67,7 @@ namespace Fan.Blog.UnitTests.Services
         public async void ProcessRepsonsiveImageAsync_on_medium_large_960x1440_portrait_picture()
         {
             // Setup media
-            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(Task.FromResult(new Media
                 {
                     FileName = "nightsky-960x1440.jpg",
@@ -93,7 +93,7 @@ namespace Fan.Blog.UnitTests.Services
         public async void ProcessRepsonsiveImageAsync_on_tiny_90x90_square_picture()
         {
             // Setup media
-            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<DateTimeOffset>()))
+            _mediaSvcMock.Setup(svc => svc.GetMediaAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(Task.FromResult(new Media
                 {
                     FileName = "sq-90x90.png",

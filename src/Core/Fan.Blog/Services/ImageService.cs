@@ -367,9 +367,7 @@ namespace Fan.Blog.Services
             var year = Convert.ToInt32(strTimeSize.Substring(0, 4));
             var month = Convert.ToInt32(strTimeSize.Substring(5, 2));
 
-            var uploadedOn = new DateTimeOffset(year, month, DateTimeOffset.Now.Day,
-                DateTimeOffset.Now.Hour, DateTimeOffset.Now.Minute, DateTimeOffset.Now.Second, TimeSpan.Zero);
-            var media = await _mediaSvc.GetMediaAsync(fileName, uploadedOn);
+            var media = await _mediaSvc.GetMediaAsync(fileName, year, month);
             var resizeCount = media.ResizeCount;
             if (resizeCount <= 0) return null;
 

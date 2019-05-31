@@ -85,10 +85,11 @@ namespace Fan.Medias
         /// Returns <see cref="Media"/> by filename and upload datetime.
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="uploadedOn"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
         /// <returns></returns>
-        public async Task<Media> GetMediaAsync(string fileName, DateTimeOffset uploadedOn) =>
-            await _mediaRepo.GetAsync(fileName, uploadedOn);
+        public async Task<Media> GetMediaAsync(string fileName, int year, int month) =>
+            await _mediaRepo.GetAsync(fileName, year, month);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> based on media type page number and page size, 
@@ -177,7 +178,7 @@ namespace Fan.Medias
             }
 
             // if already exists return it
-            var media = await _mediaRepo.GetAsync(fileName, uploadedOn);
+            var media = await _mediaRepo.GetAsync(fileName, uploadedOn.Year, uploadedOn.Month);
             if (media != null) return media;
 
             // create record in db

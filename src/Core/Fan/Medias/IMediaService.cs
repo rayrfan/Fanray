@@ -47,9 +47,10 @@ namespace Fan.Medias
         /// Returns <see cref="Media"/> by filename and upload datetime.
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="uploadedOn"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
         /// <returns></returns>
-        Task<Media> GetMediaAsync(string fileName, DateTimeOffset uploadedOn);
+        Task<Media> GetMediaAsync(string fileName, int year, int month);
 
         /// <summary>
         /// Returns a list of <see cref="Media"/> based on media type page number and page size, 

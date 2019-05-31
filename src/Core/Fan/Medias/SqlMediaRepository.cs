@@ -19,14 +19,15 @@ namespace Fan.Medias
         /// Returns <see cref="Media"/> by filename and upload date, returns null if not found.
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="uploadedOn"></param>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
         /// <returns></returns>
-        public async Task<Media> GetAsync(string fileName, DateTimeOffset uploadedOn)
+        public async Task<Media> GetAsync(string fileName, int year, int month)
         {
             return await _entities.SingleOrDefaultAsync(m =>
                         m.FileName == fileName &&
-                        m.UploadedOn.Year == uploadedOn.Year &&
-                        m.UploadedOn.Month == uploadedOn.Month);
+                        m.UploadedOn.Year == year &&
+                        m.UploadedOn.Month == month);
         }
 
         public async Task<(List<Media> medias, int count)> GetMediasAsync(EMediaType mediaType, int pageNumber, int pageSize)
@@ -41,7 +42,7 @@ namespace Fan.Medias
                                 .ToListAsync();
             var count = await q.CountAsync();
 
-            return (medias: medias, count: count);
+            return (medias, count);
         }
     }
 }

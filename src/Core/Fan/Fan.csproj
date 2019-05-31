@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.4.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.4" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.6" />
     <PackageReference Include="Humanizer" Version="2.6.2" />
     <PackageReference Include="MediatR" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.2.0" />
