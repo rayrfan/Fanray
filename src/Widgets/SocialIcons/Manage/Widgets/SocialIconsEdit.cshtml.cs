@@ -1,11 +1,10 @@
-﻿using Fan.WebApp.Widgets.SocialIcons;
-using Fan.Widgets;
+﻿using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Manage.Widgets
+namespace SocialIcons.Manage.Widgets
 {
     public class SocialIconsEditModel : PageModel
     {

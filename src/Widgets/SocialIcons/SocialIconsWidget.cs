@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Fan.WebApp.Widgets.SocialIcons
+namespace SocialIcons
 {
     /// <summary>
     /// Add social-media icons to your site.

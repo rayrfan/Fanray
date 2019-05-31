@@ -435,12 +435,5 @@ namespace Fan.Widgets
             var cacheKey = string.Format(CACHE_KEY_CURRENT_THEME_AREAS, coreSettings.Theme);
             await distributedCache.RemoveAsync(cacheKey);
         }
-
-        /// <summary>
-        /// Returns the path to widget view file which is located in Fan.Web/Widgets folder.
-        /// </summary>
-        /// <param name="widgetName"></param>
-        /// <returns></returns>
-        public static string GetWidgetViewPath(string widgetName) => $"~/{WIDGETS_DIR}/{widgetName}/{widgetName}.cshtml";
     }
 }

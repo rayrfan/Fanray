@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\Widgets\BlogCategories\BlogCategories.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
     <ProjectReference Include="..\..\Widgets\RecentBlogPosts\RecentBlogPosts.csproj" />
+    <ProjectReference Include="..\..\Widgets\SocialIcons\SocialIcons.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
   </ItemGroup>
 
@@ -37,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Widgets\RecentBlogPosts\" />
+    <Folder Include="Widgets\SocialIcons\" />
     <Folder Include="wwwroot\plugins\shortcodes\" />
   </ItemGroup>
 
