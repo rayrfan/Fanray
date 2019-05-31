@@ -62,6 +62,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogArchives", "src\Widgets
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogCategories", "src\Widgets\BlogCategories\BlogCategories.csproj", "{84328837-CF2B-4AD3-A6FC-5D2D171996FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecentBlogPosts", "src\Widgets\RecentBlogPosts\RecentBlogPosts.csproj", "{527E0FCD-58F4-4194-A3AF-75887E0ECB70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{84328837-CF2B-4AD3-A6FC-5D2D171996FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84328837-CF2B-4AD3-A6FC-5D2D171996FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84328837-CF2B-4AD3-A6FC-5D2D171996FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{527E0FCD-58F4-4194-A3AF-75887E0ECB70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{527E0FCD-58F4-4194-A3AF-75887E0ECB70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{527E0FCD-58F4-4194-A3AF-75887E0ECB70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{527E0FCD-58F4-4194-A3AF-75887E0ECB70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +163,7 @@ Global
 		{22949558-4220-4879-8BB1-D03BCEFDD981} = {7B70F90E-8DFB-4215-9455-C9357D5C1B3A}
 		{7BE27F20-9232-470F-ABC1-F0FCD54BD17D} = {B073FE71-0D11-406D-8BE3-CC8CBBA831A9}
 		{84328837-CF2B-4AD3-A6FC-5D2D171996FA} = {B073FE71-0D11-406D-8BE3-CC8CBBA831A9}
+		{527E0FCD-58F4-4194-A3AF-75887E0ECB70} = {B073FE71-0D11-406D-8BE3-CC8CBBA831A9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1FC29A1-2BF1-46BD-9169-3C33C1C4494F}

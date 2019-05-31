@@ -6,7 +6,6 @@ using Fan.Membership;
 using Fan.Plugins;
 using Fan.Settings;
 using Fan.Themes;
-using Fan.WebApp.Widgets.RecentBlogPosts;
 using Fan.WebApp.Widgets.SocialIcons;
 using Fan.Widgets;
 using FluentValidation;
@@ -324,8 +323,7 @@ namespace Fan.WebApp.Manage
             // Area: BlogAfterPost
 
             // Recent Blog Posts
-            var recentBlogPostsWidget = new RecentBlogPostsWidget { ShowPostExcerpt = true };
-            widgetInstId = await _widgetSvc.CreateWidgetAsync(recentBlogPostsWidget, "RecentBlogPosts");
+            widgetInstId = await _widgetSvc.CreateWidgetAsync("RecentBlogPosts");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
         }
 

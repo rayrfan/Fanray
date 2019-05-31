@@ -1,7 +1,7 @@
 ﻿using Fan.Widgets;
 using System.ComponentModel.DataAnnotations;
 
-namespace Fan.WebApp.Widgets.RecentBlogPosts
+namespace RecentBlogPosts
 {
     public class RecentBlogPostsWidget : Widget
     {
@@ -29,6 +29,6 @@ namespace Fan.WebApp.Widgets.RecentBlogPosts
         /// <summary>
         /// Whether to display post excerpt.
         /// </summary>
-        public bool ShowPostExcerpt { get; set; } = false;
+        public bool ShowPostExcerpt { get; set; } = true;
     }
 }

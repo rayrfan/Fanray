@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Widgets.RecentBlogPosts
+namespace RecentBlogPosts.Components
 {
     public class RecentBlogPostsViewComponent : ViewComponent
     {
@@ -49,17 +49,8 @@ namespace Fan.WebApp.Widgets.RecentBlogPosts
                 });
             }
 
-            return View(WidgetService.GetWidgetViewPath("RecentBlogPosts"),
+            return View("~/Components/RecentBlogPosts.cshtml",
                 new Tuple<List<RecentPostViewModel>, RecentBlogPostsWidget>(list, recentBlogPostsWidget));
         }
-    }
-
-    public class RecentPostViewModel
-    {
-        public string Title { get; set; }
-        public string Link { get; set; } 
-        public string Author { get; set; }
-        public string Date { get; set; }
-        public string Excerpt { get; set; }
     }
 }
