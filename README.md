@@ -18,10 +18,10 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
 	</a>
 	<a href="https://fanray.visualstudio.com/Fanray/_build?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=v1.1.0-preview3" alt="Azure Pipelines">
+	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=master" alt="Azure Pipelines">
 	</a>
 	<a href="https://travis-ci.org/FanrayMedia/Fanray">
-	  <img src="https://travis-ci.org/FanrayMedia/Fanray.svg?branch=v1.1.0-preview3" alt="Travis CI">
+	  <img src="https://travis-ci.org/FanrayMedia/Fanray.svg?branch=master" alt="Travis CI">
 	</a>
     <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-blue.svg" alt="996.icu" /></a>
   </p>
