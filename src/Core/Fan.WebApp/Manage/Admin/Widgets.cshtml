@@ -14,7 +14,7 @@
                     </v-subheader>
                     <draggable id="widget-infos"
                                v-model="widgetInfos"
-                               :options="{group: {name:'widgets', pull:'clone', put: false}, sort: false}"
+                               v-bind="infoOptions"
                                style="cursor:pointer">
                         <template v-for="info in widgetInfos">
                             <v-list-tile :key="info.id" avatar style="border:1px solid #eee;margin:5px">
@@ -36,7 +36,7 @@
                     </v-subheader>
                     <draggable :id="area.id"
                                v-model="area.widgets"
-                               :options="{group:'widgets', ghostClass:'sortable-ghost'}"
+                               v-bind="areaOptions"
                                @@add="add"
                                @@sort="sort"
                                style="min-height: 10px;cursor:move">
@@ -94,13 +94,21 @@
 
 @section ComponentScripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.20.0/dist/vuedraggable.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.21.0/dist/vuedraggable.umd.min.js"></script>
     <script>
         let widgetsMixin = {
             data: function () {
                 return {
                     widgetInfos: @Html.Raw(Model.WidgetManifestsJson),
                     widgetAreas: @Html.Raw(Model.WidgetAreasJson),
+                    infoOptions: {
+                        group: { name:'widgets', pull:'clone', put: false },
+                        sort: false
+                    },
+                    areaOptions: {
+                        group: 'widgets',
+                        ghostClass: 'sortable-ghost'
+                    }
                 }
             },
         }

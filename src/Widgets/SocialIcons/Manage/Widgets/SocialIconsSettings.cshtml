@@ -11,7 +11,7 @@
         <label>Links</label>
         <v-list>
             <draggable v-model="widget.links"
-                       :options="{group: 'social-icons', sort: true, ghostClass: 'ghost'}"
+                       v-bind="dragOptions"
                        style="cursor:move">
                 <template v-for="(link, index) in widget.links">
                     <v-list-tile :key="index" avatar style="border:1px solid #eee;margin:5px">
@@ -47,13 +47,18 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.20.0/dist/vuedraggable.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.21.0/dist/vuedraggable.umd.min.js"></script>
     <script>
         Vue.component('edit-widget', {
             data: () => ({
                 newUrl: '',
                 widget: @Html.Raw(Model.WidgetJson),
                 changed: false,
+                dragOptions: {
+                    group: 'social-icons',
+                    sort: true,
+                    ghostClass: 'ghost'
+                }
             }),
             watch: {
                 widget: {
