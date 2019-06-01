@@ -1,7 +1,7 @@
 ﻿@page
-@model BlogCategories.Manage.Widgets.BlogCategoriesEditModel
+@model BlogArchives.Manage.Widgets.BlogArchivesSettingsModel
 @{
-    ViewData["Title"] = "BlogCategories Widget Settings";
+    ViewData["Title"] = "BlogArchives Widget Settings";
     Layout = "_SettingsLayout";
 }
 
@@ -21,7 +21,7 @@
             }),
             methods: {
                 save() {
-                    axios.post('/widgets/BlogCategoriesEdit', this.widget, this.$root.headers)
+                    axios.post('/widgets/BlogArchivesEdit', this.widget, this.$root.headers)
                         .then(resp => this.$root.onExtSettingsUpdated({
                             title: this.widget.title,
                             widgetId: this.widget.id,

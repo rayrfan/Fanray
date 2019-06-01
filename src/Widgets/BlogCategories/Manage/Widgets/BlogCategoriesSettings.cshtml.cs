@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace BlogArchives.Manage.Widgets
+namespace BlogCategories.Manage.Widgets
 {
-    public class BlogArchivesEditModel : PageModel
+    public class BlogCategoriesSettingsModel : PageModel
     {
         protected readonly IWidgetService widgetService;
-        public BlogArchivesEditModel(IWidgetService widgetService)
+        public BlogCategoriesSettingsModel(IWidgetService widgetService)
         {
             this.widgetService = widgetService;
         }
@@ -22,7 +22,7 @@ namespace BlogArchives.Manage.Widgets
         /// <param name="widgetId"></param>
         public async Task OnGet(int widgetId)
         {
-            var widget = (BlogArchivesWidget)await widgetService.GetExtensionAsync(widgetId);
+            var widget = (BlogCategoriesWidget)await widgetService.GetExtensionAsync(widgetId);
             WidgetJson = JsonConvert.SerializeObject(widget);
         }
 
@@ -30,7 +30,7 @@ namespace BlogArchives.Manage.Widgets
         /// Updates widget properties. 
         /// </summary>
         /// <param name="widget"></param>
-        public async Task<IActionResult> OnPostAsync([FromBody]BlogArchivesWidget widget)
+        public async Task<IActionResult> OnPostAsync([FromBody]BlogCategoriesWidget widget)
         {
             if (ModelState.IsValid)
             {

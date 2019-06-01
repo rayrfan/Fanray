@@ -27,6 +27,6 @@ namespace Fan.Widgets
         /// All widgets have settings.
         /// </remarks>
         public new string SettingsUrl =>
-            (Folder.IsNullOrEmpty() || Id <= 0) ? "" : $"/{WidgetService.WIDGETS_DIR}/{Folder}Edit?widgetId={Id}";
+            (Folder.IsNullOrEmpty() || Id <= 0) ? "" : $"/{WidgetService.WIDGETS_DIR}/{Folder}Settings?widgetId={Id}";
     }
 }

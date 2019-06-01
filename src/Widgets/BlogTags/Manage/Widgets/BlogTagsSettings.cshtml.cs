@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 
-namespace RecentBlogPosts.Manage.Widgets
+namespace BlogTags.Manage.Widgets
 {
-    public class RecentBlogPostsEditModel : PageModel
+    public class BlogTagsSettingsModel : PageModel
     {
         protected readonly IWidgetService widgetService;
-        public RecentBlogPostsEditModel(IWidgetService widgetService)
+        public BlogTagsSettingsModel(IWidgetService widgetService)
         {
             this.widgetService = widgetService;
         }
@@ -18,11 +18,11 @@ namespace RecentBlogPosts.Manage.Widgets
 
         public async Task OnGet(int widgetId)
         {
-            var widget = (RecentBlogPostsWidget)await widgetService.GetExtensionAsync(widgetId);
+            var widget = (BlogTagsWidget)await widgetService.GetExtensionAsync(widgetId);
             WidgetJson = JsonConvert.SerializeObject(widget);
         }
 
-        public async Task<IActionResult> OnPostAsync([FromBody]RecentBlogPostsWidget widget)
+        public async Task<IActionResult> OnPostAsync([FromBody]BlogTagsWidget widget)
         {
             if (ModelState.IsValid)
             {
