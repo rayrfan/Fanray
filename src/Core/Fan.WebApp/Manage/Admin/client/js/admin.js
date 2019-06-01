@@ -69,6 +69,7 @@
         * https://stackoverflow.com/a/9976309/32240
         */
         initIframeHeight(ifrm) {
+            ifrm.style.height = 0; // first reset ifrm to start fresh
             ifrm.style.height = ifrm.contentWindow.document.body.scrollHeight + 'px';
         },
         /**
