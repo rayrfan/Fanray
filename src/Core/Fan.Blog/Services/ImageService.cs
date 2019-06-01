@@ -250,8 +250,10 @@ namespace Fan.Blog.Services
             var container = endpoint.EndsWith('/') ? _appSettings.MediaContainerName : $"/{_appSettings.MediaContainerName}";
 
             if ((size == EImageSize.Original || media.ResizeCount <= 0) ||
-                (media.ResizeCount == 1 && size != EImageSize.Small) ||
-                (media.ResizeCount == 2 && size == EImageSize.Large))
+                (media.ResizeCount == 1 && size != EImageSize.Small) || // small
+                (media.ResizeCount == 2 && size == EImageSize.MediumLarge) || // small, medium
+                (media.ResizeCount == 2 && size == EImageSize.Large) || // small, medium
+                (media.ResizeCount == 3 && size == EImageSize.Large)) // small, medium, medium large
             {
                 size = EImageSize.Original;
             }

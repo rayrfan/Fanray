@@ -42,6 +42,7 @@ namespace Fan.WebApp.Manage.Admin
             public string FileType { get; set; }
             public string UploadDate { get; set; }
             public string UploadVia { get; set; }
+            public string UploadBy { get; set; }
             /// <summary>
             /// The gallery image dialog shows small image as thumbs.
             /// </summary>
@@ -217,7 +218,6 @@ namespace Fan.WebApp.Manage.Admin
         private async Task<ImageVM> MapImageVMAsync(Media m)
         {
             var user = await _userManager.GetUserAsync(HttpContext.User);
-            var appName = EAppType.Blog.ToString().ToLowerInvariant();
             return new ImageVM
             {
                 Id = m.Id,
@@ -228,6 +228,7 @@ namespace Fan.WebApp.Manage.Admin
                 FileType = m.ContentType,
                 UploadDate = m.UploadedOn.ToString("yyyy-MM-dd"),
                 UploadVia = m.UploadedFrom.ToString(),
+                UploadBy = user.DisplayName,
                 Width = m.Width,
                 Height = m.Height,
                 UrlSmall = _imgSvc.GetAbsoluteUrl(m, EImageSize.Small),
