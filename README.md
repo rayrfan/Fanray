@@ -23,15 +23,15 @@
 	<a href="https://travis-ci.org/FanrayMedia/Fanray">
 	  <img src="https://travis-ci.org/FanrayMedia/Fanray.svg?branch=v1.1.0-preview3" alt="Travis CI">
 	</a>
-    <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" /></a>
+    <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-blue.svg" alt="996.icu" /></a>
   </p>
 </p>
 
 ## Screenshots
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/633119/54874702-c87fa400-4dad-11e9-86e5-54de38b3319e.png" title="Composer" />
-  <img src="https://user-images.githubusercontent.com/633119/54874701-c87fa400-4dad-11e9-8147-1f54ccd0dab4.png" title="Clarity theme" />
+  <img src="https://user-images.githubusercontent.com/633119/58754168-7d55d180-847f-11e9-9f81-69578ef1936d.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/58754174-8fd00b00-847f-11e9-9655-9edc8f9bc2ba.png" title="Clarity theme" />
 </p>
 
 ## Features
