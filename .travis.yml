@@ -23,9 +23,9 @@ before_script:
 
 script:
   - dotnet build ./Fanray.sln
-#  - dotnet test ./test/Fan.UnitTests/Fan.UnitTests.csproj
+  - dotnet test ./test/Fan.UnitTests/Fan.UnitTests.csproj
 #  - dotnet test ./test/Fan.IntegrationTests/Fan.IntegrationTests.csproj
-#  - dotnet test ./test/Fan.Blog.UnitTests/Fan.Blog.UnitTests.csproj
-#  - dotnet test ./test/Fan.Blog.IntegrationTests/Fan.Blog.IntegrationTests.csproj
-#  - dotnet test ./test/Fan.Web.Tests/Fan.Web.Tests.csproj
-#  - dotnet test ./test/Shortcodes.Tests/Shortcodes.Tests.csproj
+  - dotnet test ./test/Fan.Blog.UnitTests/Fan.Blog.UnitTests.csproj
+  - dotnet test ./test/Fan.Blog.IntegrationTests/Fan.Blog.IntegrationTests.csproj
+  - dotnet test ./test/Fan.Web.Tests/Fan.Web.Tests.csproj
+  - dotnet test ./test/Shortcodes.Tests/Shortcodes.Tests.csproj
