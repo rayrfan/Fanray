@@ -70,7 +70,7 @@
             },
             methods: {
                 add() {
-                    axios.post('/widgets/SocialIconsEdit?handler=add', { url: this.newUrl }, this.$root.headers)
+                    axios.post('/widgets/SocialIconsSettings?handler=add', { url: this.newUrl }, this.$root.headers)
                         .then(resp => {
                             if (resp.data) {
                                 this.widget.links.push(resp.data);
@@ -82,7 +82,7 @@
                         .catch(err => console.log(err));
                 },
                 save() {
-                    axios.post('/widgets/SocialIconsEdit', this.widget, this.$root.headers)
+                    axios.post('/widgets/SocialIconsSettings', this.widget, this.$root.headers)
                         .then(resp => this.$root.onExtSettingsUpdated({
                             title: this.widget.title,
                             widgetId: this.widget.id,

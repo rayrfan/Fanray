@@ -32,7 +32,7 @@
             }),
             methods: {
                 save() {
-                    axios.post('/widgets/RecentBlogPostsEdit', this.widget, this.$root.headers)
+                    axios.post('/widgets/RecentBlogPostsSettings', this.widget, this.$root.headers)
                         .then(resp => this.$root.onExtSettingsUpdated({
                             title: this.widget.title,
                             widgetId: this.widget.id,
