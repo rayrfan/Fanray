@@ -30,7 +30,7 @@
 ## Screenshots
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/633119/58754168-7d55d180-847f-11e9-9f81-69578ef1936d.png" title="Composer" />
+  <img src="https://user-images.githubusercontent.com/633119/58754242-b5a9df80-8480-11e9-8fac-6808b1895163.png" title="Composer" />
   <img src="https://user-images.githubusercontent.com/633119/58754174-8fd00b00-847f-11e9-9655-9edc8f9bc2ba.png" title="Clarity theme" />
 </p>
 
