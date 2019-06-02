@@ -328,11 +328,16 @@ namespace Fan.WebApp.Manage
         }
 
         /// <summary>
-        /// Activates Shortcodes plugin.
+        /// Activates plugins.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// Currently since I don't have the installation step for plugins yet, unactivated plugins
+        /// that have a settings page when you activate it for the first time, the settings icon is 
+        /// not shown immediately.
+        /// </remarks>
         private async Task SetupPluginsAsync()
         {
+            await pluginService.ActivatePluginAsync("ForkMeRibbon");
             await pluginService.ActivatePluginAsync("Shortcodes");
         }
     }

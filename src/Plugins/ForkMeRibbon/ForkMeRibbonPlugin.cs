@@ -30,7 +30,6 @@ namespace ForkMeRibbon
         public override string GetStylesViewName() => "RibbonStyles";
 
         public override string DetailsUrl => "https://github.com/FanrayMedia/Fanray/wiki/ForkMeRibbon-Plugin";
-        public override string SettingsUrl =>
-            (Folder.IsNullOrEmpty()) ? "" : $"/{PluginService.PLUGIN_DIR}/{Folder}Settings?pluginId={Id}";
+        public override string SettingsUrl => $"/{PluginService.PLUGIN_DIR}/ForkMeRibbonSettings?pluginId={Id}";
     }
 }
