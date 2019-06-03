@@ -39,28 +39,33 @@ namespace Fan.Helpers
         public static IEnumerable<Type> Find(Type baseType)
         {
             var types = new List<Type>();
-            var dlls = new DirectoryInfo(AppContext.BaseDirectory).GetFileSystemInfos("*.dll", SearchOption.AllDirectories);
+            var dlls = new DirectoryInfo(AppContext.BaseDirectory).GetFileSystemInfos("*.dll", SearchOption.TopDirectoryOnly);
             foreach (var dll in dlls)
             {
-                Assembly assembly = null;
                 try
                 {
+                    Assembly assembly = null;
                     var fileName = Path.GetFileName(dll.FullName);
                     if (IsDllMatch(fileName))
                         assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+
+                    if (assembly != null)
+                    {
+                        if (baseType.IsInterface)
+                            types.AddRange(assembly.DefinedTypes.Where(t =>
+                                (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
+                                && !t.IsInterface));
+                        else
+                            types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                    }
                 }
                 catch (BadImageFormatException)
                 {
+                    // non .net dll
                 }
-
-                if (assembly != null)
+                catch (ReflectionTypeLoadException)
                 {
-                    if (baseType.IsInterface)
-                        types.AddRange(assembly.DefinedTypes.Where(t =>
-                            (baseType.IsAssignableFrom(t) || (baseType.IsGenericTypeDefinition && DoesTypeImplementGeneric(t, baseType)))
-                            && !t.IsInterface));
-                    else
-                        types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
+                    // missing a referenced dll
                 }
             }
 
