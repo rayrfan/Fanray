@@ -39,7 +39,7 @@ namespace Fan.Helpers
         public static IEnumerable<Type> Find(Type baseType)
         {
             var types = new List<Type>();
-            var dlls = new DirectoryInfo(AppContext.BaseDirectory).GetFileSystemInfos("*.dll", SearchOption.TopDirectoryOnly);
+            var dlls = new DirectoryInfo(AppContext.BaseDirectory).GetFileSystemInfos("*.dll", SearchOption.AllDirectories);
             foreach (var dll in dlls)
             {
                 Assembly assembly = null;
