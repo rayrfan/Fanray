@@ -24,7 +24,7 @@ namespace RecentBlogPosts.Components
         public async Task<IViewComponentResult> InvokeAsync(Widget widget)
         {
             var recentBlogPostsWidget = (RecentBlogPostsWidget)widget;
-            var posts = await blogPostService.GetListAsync(1, recentBlogPostsWidget.NumberOfPostsToShow);
+            var posts = await blogPostService.GetListAsync(1, recentBlogPostsWidget.NumberOfPostsToShow + 1, cacheable: false);
 
             // must have at least 2 posts 
             if (posts.PostCount < 2)
