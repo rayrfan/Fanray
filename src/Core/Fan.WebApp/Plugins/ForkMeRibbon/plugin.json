@@ -1,0 +1,10 @@
+{
+  "name": "ForkMeRibbon",
+  "description": "Displays a Fork Me on GitHub ribbon at a corner of your website.",
+  "type": "ForkMeRibbon.ForkMeRibbonPlugin, ForkMeRibbon",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0-preview3",
+  "pluginUrl": "https://github.com/FanrayMedia/Fanray/wiki/ForkMeRibbon-Plugin",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com"
+}

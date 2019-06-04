@@ -6,7 +6,6 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
-using Fan.Shortcodes;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -80,7 +79,6 @@ namespace Fan.Blog.UnitTests.Base
 
             // mapper, shortcode, mediator
             var mapper = BlogUtil.Mapper;
-            var shortcodeSvc = new Mock<IShortcodeService>();
             var mediatorMock = new Mock<IMediator>();
 
             // cat service
@@ -102,7 +100,6 @@ namespace Fan.Blog.UnitTests.Base
                 _cache,
                 _loggerBlogSvc,
                 mapper,
-                shortcodeSvc.Object,
                 mediatorMock.Object);
         }
     }

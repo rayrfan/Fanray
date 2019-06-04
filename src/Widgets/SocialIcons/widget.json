@@ -1,0 +1,10 @@
+{
+  "name": "Social Icons",
+  "description": "Add social-media icons to your site.",
+  "type": "SocialIcons.SocialIconsWidget, SocialIcons",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0-preview3",
+  "widgetUrl": "https://github.com/FanrayMedia/Fanray",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com"
+}

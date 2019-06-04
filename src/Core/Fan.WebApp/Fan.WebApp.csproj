@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
+    <PackageReference Include="Scrutor" Version="3.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Plugins\ForkMeRibbon\ForkMeRibbon.csproj" />
+    <ProjectReference Include="..\..\Plugins\Shortcodes\Shortcodes.csproj" />
+    <ProjectReference Include="..\..\Themes\Clarity\Clarity.csproj" />
+    <ProjectReference Include="..\..\Widgets\BlogArchives\BlogArchives.csproj" />
+    <ProjectReference Include="..\..\Widgets\BlogCategories\BlogCategories.csproj" />
+    <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
+    <ProjectReference Include="..\..\Widgets\RecentBlogPosts\RecentBlogPosts.csproj" />
+    <ProjectReference Include="..\..\Widgets\SocialIcons\SocialIcons.csproj" />
+    <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Widgets\RecentBlogPosts\" />
+    <Folder Include="Widgets\SocialIcons\" />
+    <Folder Include="wwwroot\plugins\shortcodes\" />
+  </ItemGroup>
+
+</Project>

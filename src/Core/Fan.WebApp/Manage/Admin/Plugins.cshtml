@@ -1,0 +1,84 @@
+﻿@page
+@model PluginsModel
+@{
+    ViewData["Title"] = "Plugins";
+}
+
+<plugins inline-template ref="exts">
+    <v-container>
+        <v-data-table :headers="headers"
+                      :items="pluginInfos"
+                      item-key="folder"
+                      :total-items="totalPlugins"
+                      :rows-per-page-items="rowsPerPageItems"
+                      rows-per-page-text=""
+                      class="elevation-1">
+            <template slot="items" slot-scope="props">
+                <td>
+                    <h3>{{ props.item.name }}</h3>
+                </td>
+                <td>
+                    <div>{{ props.item.description }}</div>
+                    <div>
+                        <span>Version {{ props.item.version }}</span> |
+                        <span>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span> |
+                        <span><a :href="props.item.pluginUrl" target="_blank">View details</a></span>
+                    </div>
+                </td>
+                <td>
+                    <div v-if="props.item.active">
+                        <v-btn fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
+                        <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
+                    </div>
+                    <div v-else>
+                        <v-btn fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
+                    </div>
+                </td>
+            </template>
+            <template slot="no-data">
+                <div>You have no plugins.</div>
+            </template>
+        </v-data-table>
+        <v-dialog lazy
+                  v-model="dialogVisible"
+                  @@keydown.esc="closeDialog"
+                  persistent
+                  content-class="ext-settings-dialog">
+            <v-card>
+                <v-card-title class="pl-4 pt-2 pb-0">
+                    <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn flat small fab @@click="closeDialog">
+                        <v-icon>close</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <iframe ref="settingsIframe"
+                            @@load="$root.initIframeHeight($refs.settingsIframe)"
+                            frameborder="0"
+                            scrolling="no"
+                            class="ext-settings-frame"
+                            v-if="settingsUrl"
+                            :src="settingsUrl"
+                            :title="dialogTitle"></iframe>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </v-container>
+</plugins>
+
+@section ComponentScripts {
+    <script>
+        let pluginsMixin = {
+            data: function () {
+                return {
+                    pluginInfos: @Html.Raw(Model.PluginManifestsJson),
+                    totalPlugins: 1,
+                    rowsPerPageItems: @PluginsModel.DEFAULT_ROW_PER_PAGE_ITEMS,
+                }
+            },
+        }
+    </script>
+    <script src="~/admin/js/plugins.js" asp-append-version="true"></script>
+}

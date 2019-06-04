@@ -1,0 +1,72 @@
+﻿@* Layout for extension Settings pages *@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.css" rel="stylesheet">
+    <style>
+        .theme--light.application {
+            background-color: #fff
+        }
+
+        [v-cloak] {
+            display: none
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    @Html.AntiForgeryToken()
+    <v-app id="ext-settings-app" v-cloak>
+        <v-content>
+            <v-container fill-height>
+                <v-layout align-top>
+                    <v-flex xs12>
+                        @RenderBody()
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-content>
+    </v-app>
+
+    <environment include="Development">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
+    </environment>
+    @RenderSection("Scripts", required: false)
+    <script>
+        new Vue({
+            el: '#ext-settings-app',
+            computed: {
+                tok() {
+                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
+                },
+                headers() {
+                    return { headers: { 'XSRF-TOKEN': this.tok } };
+                },
+            },
+            methods: {
+                onExtSettingsUpdated(data) {
+                    window.parent.document.dispatchEvent(new CustomEvent('ExtSettingsUpdated', { detail: data }));
+                },
+                onExtSettingsUpdateErr(err) {
+                    window.parent.document.dispatchEvent(new CustomEvent('ExtSettingsUpdateErr', { detail: err }));
+                },
+                onExtSettingsIfrmHeightUpdate(h) {
+                    window.parent.document.dispatchEvent(new CustomEvent('ExtSettingsIfrmHeightUpdate', { detail: h }));
+                },
+            }
+        })
+    </script>
+</body>
+</html>

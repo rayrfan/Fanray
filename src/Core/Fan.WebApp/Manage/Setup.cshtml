@@ -1,0 +1,83 @@
+﻿@page
+@model Fan.WebApp.Manage.SetupModel
+@{
+    Layout = "_Layout.cshtml";
+    ViewData["Title"] = "Setup";
+}
+
+<div id="app" v-cloak>
+    <v-app id="inspire">
+        <v-content>
+            <v-container fluid fill-height>
+                <v-layout align-center justify-center>
+                    <v-flex xs12 sm8 md4>
+                        <v-card class="elevation-12">
+                            <v-toolbar dark color="primary">
+                                <v-toolbar-title>Fanray Blog Setup</v-toolbar-title>
+                            </v-toolbar>
+                            <v-card-text>
+                                <v-alert :value="errMsg.length" type="error">{{ errMsg }}</v-alert>
+
+                                <v-form v-model="valid">
+                                    <v-text-field label="Site Name"
+                                                  v-model="title"
+                                                  :rules="titleRules"></v-text-field>
+                                    <v-select label="Time Zone"
+                                              v-model="selectedTimeZoneId"
+                                              :items="timezones"
+                                              item-value="value"
+                                              dense></v-select>
+                                    <v-text-field label="Email"
+                                                  v-model="email"
+                                                  :rules="emailRules"
+                                                  hint="Not shown to public, used for gravatar"
+                                                  persistent-hint></v-text-field>
+                                    <v-text-field label="Username"
+                                                  v-model="userName"
+                                                  :rules="userNameRules"
+                                                  hint="Unique, no space, short"
+                                                  persistent-hint></v-text-field>
+                                    <v-text-field label="Display Name"
+                                                  v-model="displayName"
+                                                  :rules="displayNameRules"
+                                                  hint="Name public will see when you post"
+                                                  persistent-hint></v-text-field>
+                                    <v-text-field label="Password"
+                                                  v-model="password"
+                                                  :rules="[passwordRules.required, passwordRules.min]"
+                                                  hint="At least 8 characters"
+                                                  counter
+                                                  persistent-hint
+                                                  :append-icon="passwordVisible ? 'visibility_off' : 'visibility'"
+                                                  @@click:append="passwordVisible = !passwordVisible"
+                                                  :type="passwordVisible ? 'text' : 'password'"></v-text-field>
+                                </v-form>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="primary"
+                                       @@click="createBlog"
+                                       :disabled="!valid">Create My Blog</v-btn>
+                                <v-spacer></v-spacer>
+                            </v-card-actions>
+                        </v-card>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </v-content>
+    </v-app>
+</div>
+
+@section Scripts {
+    <script>
+         let setupMixin = {
+            data: function () {
+                return {
+                    timezones: @Html.Raw(Model.TimeZonesJson),
+                    selectedTimeZoneId: '@Model.TimeZoneId'
+                }
+            }
+        }
+    </script>
+    <script src="~/admin/js/setup.js" asp-append-version="true"></script>
+}

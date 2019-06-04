@@ -16,11 +16,11 @@ using Xunit;
 namespace Fan.IntegrationTests.Widgets
 {
     public class WidgetServiceTest : IntegrationTestBase, IAsyncLifetime
-    {     
+    {
         private const string MY_WIDGET_FOLDER = "MyWidget";
-        private WidgetService _svc;
-        private IThemeService themeService;
-        private SqlMetaRepository _metaRepo;
+        private readonly WidgetService _svc;
+        private readonly IThemeService themeService;
+        private readonly SqlMetaRepository _metaRepo;
 
         public WidgetServiceTest()
         {
@@ -58,10 +58,7 @@ namespace Fan.IntegrationTests.Widgets
             await themeService.ActivateThemeAsync("Clarity");
         }
 
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public Task DisposeAsync() => Task.CompletedTask;
 
         /// <summary>
         /// During site setup system-defined areas will be registered.
@@ -74,7 +71,7 @@ namespace Fan.IntegrationTests.Widgets
             var area = await _svc.GetAreaAsync(WidgetService.BlogSidebar1.Id);
             Assert.NotNull(area);
         }
-       
+
         /// <summary>
         /// On the admin widgets page, you will see a list of all areas available in the current
         /// theme displayed on the right hand side.
@@ -98,7 +95,7 @@ namespace Fan.IntegrationTests.Widgets
         {
             // Given I have MyWidget installed in this test project
             // When Admin Panel Widgets page is requested
-            var widgetInfos = await _svc.GetInstalledWidgetsInfoAsync();
+            var widgetInfos = await _svc.GetManifestsAsync();
 
             // Then widget's info will displayed
             Assert.Single(widgetInfos);
@@ -147,7 +144,7 @@ namespace Fan.IntegrationTests.Widgets
             Assert.Contains(widgetId, area2.WidgetIds);
 
             // and widget's areaId will be updated too
-            var widgetAgain = await _svc.GetWidgetAsync(widgetId);
+            var widgetAgain = await _svc.GetExtensionAsync(widgetId);
             Assert.Equal(WidgetService.BlogSidebar2.Id, widgetAgain.AreaId);
         }
 
@@ -208,11 +205,10 @@ namespace Fan.IntegrationTests.Widgets
             // Given a json string that represent an instance of MyWidget
             string json = @"{""age"":10,""title"":""Tags"",""id"":0, ""folder"":""MyWidget""}";
             // And the widget type I got from above
-            var widgetType = await _svc.GetWidgetTypeByFolderAsync(widget.Folder);
-            var type = Type.GetType(widgetType);
+            var type = await _svc.GetManifestTypeByFolderAsync(widget.Folder);
 
             // When I deserialize it
-            var myWidget = (MyWidget) JsonConvert.DeserializeObject(json, type);
+            var myWidget = (MyWidget)JsonConvert.DeserializeObject(json, type);
 
             // Then we get the actual instance
             Assert.Equal(10, myWidget.Age);
@@ -267,12 +263,12 @@ namespace Fan.IntegrationTests.Widgets
             await _svc.AddWidgetToAreaAsync(widgetId, WidgetService.BlogSidebar1.Id, 0);
 
             // When user udpates the widget instance
-            MyWidget myWidget = (MyWidget) await _svc.GetWidgetAsync(widgetId);
+            MyWidget myWidget = (MyWidget)await _svc.GetExtensionAsync(widgetId);
             myWidget.Age = 20;
             await _svc.UpdateWidgetAsync(widgetId, myWidget);
 
             // Then the widget instance is updated
-            var myWidgetAgain = (MyWidget)await _svc.GetWidgetAsync(widgetId);
+            var myWidgetAgain = (MyWidget)await _svc.GetExtensionAsync(widgetId);
             Assert.Equal(20, myWidgetAgain.Age);
         }
     }

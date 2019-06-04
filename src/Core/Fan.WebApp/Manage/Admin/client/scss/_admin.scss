@@ -1,0 +1,62 @@
+﻿/*
+    styles for admin
+*/
+[v-cloak] {
+    display: none
+}
+
+.admin-active-nav {
+    color: #2a56c6;
+    background-color: #f5f5f5;
+    height: 100%;
+}
+
+/**
+    dropdown menu icon used in _Layout, Categories and Tags
+*/
+.menu-action-icon {
+    padding-right: 8px;
+}
+
+.cat-tabs-bar {
+    margin-bottom: 18px;
+}
+
+.cat-dialog {
+    max-width: 40vw;
+    background-color: white;
+}
+
+/*
+    Posts.cshtml post title link
+*/
+.post-title-link {
+    color: #2e4453;
+    display: block;
+    padding-bottom: 2px;
+    padding-right: 8px;
+    text-decoration: none;
+}
+
+/*
+    Extensions
+*/
+.ext-settings-dialog {
+    width: 600px;
+    max-width: 71%;
+}
+.ext-settings-frame {
+    border: 0;
+    opacity: 1;
+    pointer-events: all;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    margin: 0 auto;
+}
+// https://github.com/SortableJS/Sortable#ghostclass-option
+.sortable-ghost {
+    opacity: .5;
+    background: #C8EBFB;
+}

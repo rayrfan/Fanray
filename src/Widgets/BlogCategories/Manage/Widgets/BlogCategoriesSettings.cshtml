@@ -1,0 +1,36 @@
+﻿@page
+@model BlogCategories.Manage.Widgets.BlogCategoriesSettingsModel
+@{
+    ViewData["Title"] = "BlogCategories Widget Settings";
+    Layout = "_SettingsLayout";
+}
+
+<edit-widget inline-template>
+    <v-form>
+        <v-text-field label="Title" v-model="widget.title" v-on:keydown.enter.prevent="save"></v-text-field>
+        <v-checkbox label="Show post counts" v-model="widget.showPostCount"></v-checkbox>
+        <v-btn @@click="save">Save</v-btn>
+    </v-form>
+</edit-widget>
+
+@section Scripts {
+    <script>
+        Vue.component('edit-widget', {
+            data: () => ({
+                widget: @Html.Raw(Model.WidgetJson),
+            }),
+            methods: {
+                save() {
+                    axios.post('/widgets/BlogCategoriesSettings', this.widget, this.$root.headers)
+                        .then(resp => this.$root.onExtSettingsUpdated({
+                            title: this.widget.title,
+                            widgetId: this.widget.id,
+                            areaId: this.widget.areaId,
+                            msg: resp.data
+                        }))
+                        .catch(err => this.$root.onExtSettingsUpdateErr(err));
+                }
+            },
+        });
+    </script>
+}

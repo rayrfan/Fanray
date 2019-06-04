@@ -1,0 +1,7 @@
+﻿@model ForkMeRibbon.ForkMeRibbonPlugin
+@{ 
+    var position = Model.GetPositionString();
+    var sticky = Model.Sticky ? "fixed" : "";
+}
+<a class="github-fork-ribbon @position @sticky" href="@Model.Url"
+   data-ribbon="@Model.Text" title="@Model.Text">@Model.Text</a>
