@@ -59,13 +59,9 @@ namespace Fan.Helpers
                             types.AddRange(assembly.DefinedTypes.Where(t => t.BaseType == baseType && !t.GetTypeInfo().IsAbstract));
                     }
                 }
-                catch (BadImageFormatException)
+                catch (Exception)
                 {
-                    // non .net dll
-                }
-                catch (ReflectionTypeLoadException)
-                {
-                    // missing a referenced dll
+
                 }
             }
 
