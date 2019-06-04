@@ -1,0 +1,10 @@
+{
+  "name": "Blog Categories",
+  "description": "A list of blog categories.",
+  "type": "BlogCategories.BlogCategoriesWidget, BlogCategories",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0-preview3",
+  "widgetUrl": "https://github.com/FanrayMedia/Fanray",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com"
+}

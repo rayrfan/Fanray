@@ -6,7 +6,6 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Data;
 using Fan.Medias;
 using Fan.Settings;
-using Fan.Shortcodes;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -29,7 +28,6 @@ namespace Fan.Blog.IntegrationTests.Base
         protected IImageService _imgSvc;
         protected Mock<ISettingService> _settingSvcMock;
         protected Mock<IMediaService> _mediaSvcMock;
-        protected ILoggerFactory _loggerFactory;
         private readonly IMediaService _mediaSvc;
         protected Mock<IStorageProvider> _storageProviderMock;
 
@@ -72,15 +70,14 @@ namespace Fan.Blog.IntegrationTests.Base
 
             // ---------------------------------------------------------------- LoggerFactory
 
-            _loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var loggerBlogSvc = _loggerFactory.CreateLogger<BlogPostService>();
-            var loggerCatSvc = _loggerFactory.CreateLogger<CategoryService>();
-            var loggerTagSvc = _loggerFactory.CreateLogger<TagService>();
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var loggerBlogSvc = loggerFactory.CreateLogger<BlogPostService>();
+            var loggerCatSvc = loggerFactory.CreateLogger<CategoryService>();
+            var loggerTagSvc = loggerFactory.CreateLogger<TagService>();
 
             // ---------------------------------------------------------------- Mapper, Shortcode
 
             var mapper = BlogUtil.Mapper;
-            var shortcodeSvc = new Mock<IShortcodeService>();
 
             // ---------------------------------------------------------------- MediatR and Services
 
@@ -108,7 +105,6 @@ namespace Fan.Blog.IntegrationTests.Base
                 cache, 
                 loggerBlogSvc, 
                 mapper, 
-                shortcodeSvc.Object, 
                 mediator);
         }
     }

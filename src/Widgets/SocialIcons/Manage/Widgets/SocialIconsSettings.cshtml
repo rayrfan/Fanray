@@ -1,0 +1,120 @@
+﻿@page
+@model SocialIcons.Manage.Widgets.SocialIconsSettingsModel
+@{
+    ViewData["Title"] = "SocialIcons Widget Settings";
+    Layout = "_SettingsLayout";
+}
+
+<edit-widget inline-template>
+    <v-form style="width:100%">
+        <v-text-field label="Title" v-model="widget.title" v-on:keydown.enter.prevent="save"></v-text-field>
+        <label>Links</label>
+        <v-list>
+            <draggable v-model="widget.links"
+                       v-bind="dragOptions"
+                       style="cursor:move">
+                <template v-for="(link, index) in widget.links">
+                    <v-list-tile :key="index" avatar style="border:1px solid #eee;margin:5px">
+                        <img v-if="link.icon !== 'link'"
+                             class="svg-icon" 
+                             :src="`https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/${link.icon}.svg`" />
+                        <img v-else class="svg-icon" src="~/img/icons/link.svg" />
+                        <v-text-field placeholder="Your URL"
+                                      v-model="link.url"
+                                      @@blur="doneEdit(link)"
+                                      @@keyup.enter="doneEdit(link)"
+                                      @@keyup.esc="doneEdit(link)"></v-text-field>
+                        <v-btn flat icon @@click="deleteLink(link)" style="margin-right:0">
+                            <v-icon>delete</v-icon>
+                        </v-btn>
+                    </v-list-tile>
+                </template>
+            </draggable>
+        </v-list>
+
+        <v-layout>
+            <v-text-field label="New URL"
+                          autofocus
+                          autocomplete="off"
+                          v-model="newUrl"
+                          @@keyup.enter="add">
+            </v-text-field>
+            <v-btn @@click="add" :disabled="!newUrl">Add</v-btn>
+        </v-layout>
+        <v-btn @@click="save" :disabled="!changed" color="primary">Save</v-btn>
+    </v-form>
+</edit-widget>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.21.0/dist/vuedraggable.umd.min.js"></script>
+    <script>
+        Vue.component('edit-widget', {
+            data: () => ({
+                newUrl: '',
+                widget: @Html.Raw(Model.WidgetJson),
+                changed: false,
+                dragOptions: {
+                    group: 'social-icons',
+                    sort: true,
+                    ghostClass: 'ghost'
+                }
+            }),
+            watch: {
+                widget: {
+                    handler() {
+                        this.changed = true;
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                add() {
+                    axios.post('/widgets/SocialIconsSettings?handler=add', { url: this.newUrl }, this.$root.headers)
+                        .then(resp => {
+                            if (resp.data) {
+                                this.widget.links.push(resp.data);
+                                this.newUrl = '';
+                                let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                                this.$root.onExtSettingsIfrmHeightUpdate(h + 60);
+                            }
+                        })
+                        .catch(err => console.log(err));
+                },
+                save() {
+                    axios.post('/widgets/SocialIconsSettings', this.widget, this.$root.headers)
+                        .then(resp => this.$root.onExtSettingsUpdated({
+                            title: this.widget.title,
+                            widgetId: this.widget.id,
+                            areaId: this.widget.areaId,
+                            msg: resp.data
+                        }))
+                        .catch(err => this.$root.onExtSettingsUpdateErr(err));
+                },
+                deleteLink(link) {
+                    this.widget.links.splice(this.widget.links.indexOf(link), 1);
+                    let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                    this.$root.onExtSettingsIfrmHeightUpdate(h - 60);
+                },
+                doneEdit(link) {
+                    this.widget.links.splice(this.widget.links.indexOf(link), 1, link);
+                },
+            },
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .svg-icon {
+            text-decoration: none;
+            padding-right: 15px;
+            height: 18px;
+            filter: invert(.5);
+        }
+        .ghost {
+            opacity: .5;
+            background: #C8EBFB;
+        }
+    </style>
+}

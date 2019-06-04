@@ -1,0 +1,207 @@
+﻿aside .widgets {
+    padding-top: 5rem;
+}
+
+.blog-afterpost {
+    margin: 15px 0 0 -10px;
+}
+
+.widget {
+    /*border:1px red solid;*/
+    font-size: .875rem;
+    padding-bottom: 2rem;
+
+    a {
+        border-bottom: 1px dotted rgba(255, 255, 255, 0.6);
+
+        &:hover {
+            border-color: #fff;
+            text-decoration: none;
+        }
+    }
+
+    .widget-header {
+        margin: 0;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: .0625rem;
+        font-size: 1rem;
+        padding: 0 1.5rem;
+    }
+
+    .widget-body {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem 1.5rem;
+        font-size: .875rem;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        > li {
+            margin-bottom: .5rem;
+
+            a {
+                border-bottom: none;
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        ul li {
+            border: none;
+        }
+    }
+
+    @media screen and (max-width: 64rem) {
+        margin-bottom: 1rem;
+    }
+}
+
+/**
+ * Blog Tags Widget
+ */
+.blog-tags {
+    .tag {
+        padding: 3px 12px 5px 12px;
+        text-decoration: none;
+        line-height: 2;
+        white-space: nowrap;
+        color: white;
+    }
+    // tag post count will be prefixed with "x"
+    .tag-post-count:before {
+        content: "×";
+    }
+
+    .tag-post-count {
+        color: #666;
+        margin-right: 4px;
+        font-size: 12px;
+    }
+}
+
+// tags after a blog post will flow hori
+.blog-afterpost .blog-tags {
+    li {
+        display: inline;
+    }
+}
+
+/**
+ * Blog Archives Widget
+ */
+.blog-archives {
+    li {
+        font-weight: normal;
+    }
+
+    .archive-node {
+        cursor: pointer;
+        color: #555;
+        font-weight: bold;
+
+        li {
+            margin: 0 1rem;
+            padding: 0;
+            font-weight: bold;
+        }
+    }
+    // hide months under year that is not on the very top
+    .archive-year-node:not(:first-child) .archive-months {
+        display: none
+    }
+
+    ul ul {
+        display: none;
+    }
+}
+
+/**
+ * Recent Blog Posts Widget
+ */
+.recent-blog-posts {
+    h2 a {
+        color: #222325;
+    }
+
+    h2 a:hover {
+        color: #0174CE;
+    }
+
+    .recent-post-info {
+        font-size: smaller;
+        color: #777;
+    }
+
+    .icon-user:before {
+        font-size: small;
+        content: "by ";
+    }
+
+    .icon-calendar:before {
+        font-size: small;
+        content: "on ";
+    }
+}
+
+aside .recent-blog-posts {
+    padding: 0 6px 0 16px;
+
+    h2 {
+        font-weight: normal;
+        line-height: 0.9;
+    }
+
+    h2 a {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    li {
+        list-style: square;
+    }
+
+    p {
+        font-size: smaller;
+    }
+}
+
+.blog-afterpost .recent-blog-posts {
+    display: flex;
+
+    li {
+        width: 100%;
+        margin: 0 13px 0 0;
+    }
+
+    h2 a {
+        font-size: 18px;
+    }
+
+    p {
+        font-size: medium;
+    }
+}
+
+/**
+ * Social Icons Widget
+ */
+.social-icons {
+    .svg-icon {
+        text-decoration: none;
+        padding-right: 5px;
+        height: 28px; // size of the icon
+        width: 28px;
+        filter: invert(.5);
+    }
+
+    .svg-icon:hover {
+        cursor: pointer;
+        filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
+    }
+}
