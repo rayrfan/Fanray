@@ -1,4 +1,4 @@
-﻿# ForkMeRibbon Plugin client
+﻿# ForkMeRibbon Plugin
 
 This plugin uses [github-fork-ribbon-css](https://github.com/simonwhitaker/github-fork-ribbon-css).
 
