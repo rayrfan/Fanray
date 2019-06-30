@@ -3,10 +3,10 @@ using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Data;
 using Fan.Membership;
-using Fan.Plugins;
 using Fan.Settings;
 using Fan.Web.Controllers;
 using Fan.Web.Middlewares;
+using Fan.Web.Options;
 using Fan.Web.Theming;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -99,10 +99,9 @@ namespace Fan.WebApp
 
             // Plugins
             services.AddPlugins(HostingEnvironment);
-            foreach (var plugin in services.BuildServiceProvider().GetServices<Plugin>())
-            {
-                plugin.ConfigureServices(services);
-            }
+
+            // Extension projects' static files
+            services.ConfigureOptions(typeof(ExtensionStaticFileConfigureOptions));
 
             // Scrutor scans Fan, Fan.Blog and Mediatr, see https://bit.ly/2AtPmLn and https://bit.ly/2FIJOhw
             services.Scan(scan => scan
@@ -189,12 +188,7 @@ namespace Fan.WebApp
             app.UseCookiePolicy();
             app.UseSession(); // for TempData only
             app.UseMvc(routes => RegisterRoutes(routes, app));
-
-            // Plugins
-            foreach (var plugin in app.ApplicationServices.GetServices<Plugin>())
-            {
-                plugin.Configure(app, env);
-            }
+            app.UsePlugins(env);
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {

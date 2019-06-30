@@ -60,11 +60,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForkMeRibbon", "src\Plugins
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogArchives", "src\Widgets\BlogArchives\BlogArchives.csproj", "{7BE27F20-9232-470F-ABC1-F0FCD54BD17D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogCategories", "src\Widgets\BlogCategories\BlogCategories.csproj", "{84328837-CF2B-4AD3-A6FC-5D2D171996FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogCategories", "src\Widgets\BlogCategories\BlogCategories.csproj", "{84328837-CF2B-4AD3-A6FC-5D2D171996FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecentBlogPosts", "src\Widgets\RecentBlogPosts\RecentBlogPosts.csproj", "{527E0FCD-58F4-4194-A3AF-75887E0ECB70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecentBlogPosts", "src\Widgets\RecentBlogPosts\RecentBlogPosts.csproj", "{527E0FCD-58F4-4194-A3AF-75887E0ECB70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialIcons", "src\Widgets\SocialIcons\SocialIcons.csproj", "{31AB80A4-8740-4A40-A020-694FE5181DC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialIcons", "src\Widgets\SocialIcons\SocialIcons.csproj", "{31AB80A4-8740-4A40-A020-694FE5181DC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

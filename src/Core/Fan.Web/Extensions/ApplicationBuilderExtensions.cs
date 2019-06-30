@@ -1,5 +1,8 @@
 ﻿using Fan.Blog.MetaWeblog;
+using Fan.Plugins;
 using Fan.Web.Middlewares;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -32,6 +35,19 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder UseSetup(this IApplicationBuilder app)
         {
             return app.UseMiddleware<SetupMiddleware>();
+        }
+
+        /// <summary>
+        /// Setup plugins.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        public static void UsePlugins(this IApplicationBuilder app, IHostingEnvironment env)
+        {
+            foreach (var plugin in app.ApplicationServices.GetServices<Plugin>())
+            {
+                plugin.Configure(app, env);
+            }
         }
     }
 }

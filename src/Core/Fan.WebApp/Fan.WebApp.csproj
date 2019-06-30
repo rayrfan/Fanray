@@ -36,10 +36,4 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Widgets\RecentBlogPosts\" />
-    <Folder Include="Widgets\SocialIcons\" />
-    <Folder Include="wwwroot\plugins\shortcodes\" />
-  </ItemGroup>
-
 </Project>

@@ -16,6 +16,12 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
+        /// <summary>
+        /// Adds services plugins depend on.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="hostingEnvironment"></param>
+        /// <returns></returns>
         public static IServiceCollection AddPlugins(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
         {
             var pluginsDir = Path.Combine(hostingEnvironment.ContentRootPath, "Plugins");
@@ -49,6 +55,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     continue;
                 }
+            }
+
+            // configure services
+            foreach (var plugin in services.BuildServiceProvider().GetServices<Plugin>())
+            {
+                plugin.ConfigureServices(services);
             }
 
             return services;
