@@ -1,0 +1,102 @@
+﻿@page
+@model EditorMdSettingsModel
+@{
+    ViewData["Title"] = "Editor.md Plugin Settings";
+    Layout = "_SettingsLayout";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/plugins/editor.md/css/editormd.min.css" asp-append-version="true" />
+}
+
+<ext-settings inline-template>
+    <v-form v-model="valid">
+        <v-select label="Language"
+                  v-model="language"
+                  :items="languages"
+                  item-text="displayName"
+                  item-value="id"
+                  return-object
+                  dense></v-select>
+        <v-checkbox label="Dark Theme" v-model="ext.darkTheme" v-on:change="changeDark"></v-checkbox>
+        <v-select label="Light Themes"
+                  style="z-index:1000"
+                  v-if="!ext.darkTheme"
+                  v-model="theme"
+                  :items="lightThemes"
+                  v-on:change="changeTheme(`${theme}`)"
+                  dense></v-select>
+        <v-select label="Dark Themes"
+                  style="z-index:1000"
+                  v-if="ext.darkTheme"
+                  v-model="theme"
+                  :items="darkThemes"
+                  v-on:change="changeTheme(`${theme}`)"
+                  dense></v-select>
+
+        <div id="editor-md">
+            <textarea style="display:none">### Themes
+
+```javascript
+// some comments
+let i = { test: "Hi!" };
+```</textarea>
+        </div>
+        <v-btn @@click="save" :disabled="!valid">Save</v-btn>
+    </v-form>
+</ext-settings>
+
+@section Scripts {
+    <script src="~/plugins/editor.md/lib/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/plugins/editor.md/js/editormd.min.js" asp-append-version="true"></script>
+    <script>
+        Vue.component('ext-settings', {
+            data: () => ({
+                ext: @Html.Raw(Model.ExtJson),
+                valid: false,
+                editor: null,
+                language: JSON.parse('@Html.Raw(Model.LanguageJson)'),
+                languages: JSON.parse('@Html.Raw(Model.LanguagesJson)'),
+                theme: '@Model.Theme',
+                lightThemes: JSON.parse('@Html.Raw(Model.LightThemesJson)'),
+                darkThemes: JSON.parse('@Html.Raw(Model.DarkThemesJson)'),
+            }),
+            mounted() {
+                this.editor = editormd("editor-md", {
+                    path: '/plugins/editor.md/lib/',
+                    height: 200,
+                    theme: this.ext.darkTheme ? 'dark' : 'default',
+                    previewTheme: this.ext.darkTheme ? 'dark' : 'default',
+                    editorTheme: this.theme,
+                    toolbarIcons: function () {
+                        return ["h1", "h2", "h3", "bold", "del", "italic", "quote", "list-ul", "list-ol", "watch"]
+                    },
+                });
+            },
+            methods: {
+                changeDark() {
+                    if (this.ext.darkTheme) {
+                        this.theme = this.darkThemes.includes(this.ext.codeMirrorTheme) ? this.ext.codeMirrorTheme : 'pastel-on-dark';
+                        this.editor.setTheme('dark');
+                        this.editor.setPreviewTheme('dark');
+                    }
+                    else {
+                        this.theme = this.lightThemes.includes(this.ext.codeMirrorTheme) ? this.ext.codeMirrorTheme : 'default';
+                        this.editor.setTheme('default');
+                        this.editor.setPreviewTheme('default');
+                    }
+                    this.editor.setCodeMirrorTheme(this.theme); 
+                },
+                save() {
+                    this.ext.language = this.language.id;
+                    this.ext.codeMirrorTheme = this.theme;
+                    axios.post('/plugins/EditorMdSettings', this.ext, this.$root.headers)
+                        .then(resp => this.$root.onExtSettingsUpdated({ msg: resp.data }))
+                        .catch(err => this.$root.onExtSettingsUpdateErr(err));
+                },
+                changeTheme(theme) {
+                    this.editor.setCodeMirrorTheme(theme); 
+                },
+            },
+        });
+    </script>
+}
