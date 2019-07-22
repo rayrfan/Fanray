@@ -1,0 +1,10 @@
+{
+  "name": "My System Plugin",
+  "description": "My testing system plugin.",
+  "type": "Fan.IntegrationTests.SysPlugins.MySysPlugin, Fan.IntegrationTests",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0-preview4",
+  "pluginUrl": "https://github.com/FanrayMedia/Fanray",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com"
+}

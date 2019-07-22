@@ -1,0 +1,58 @@
+﻿@{
+    var plugin = (EditorMdPlugin)await pluginService.GetPluginAsync("Editor.md");
+    var theme = plugin.DarkTheme ? "dark" : "default";
+    var previewTheme = plugin.DarkTheme ? "dark" : "default";
+}
+<script src="~/plugins/editor.md/lib/jquery.min.js" asp-append-version="true"></script>
+<script src="~/plugins/editor.md/js/editormd.min.js" asp-append-version="true"></script>
+@if (plugin.Language == "en")
+{
+    <script src="~/plugins/editor.md/languages/en.js" asp-append-version="true"></script>
+}
+else if (plugin.Language == "zh-tw")
+{
+    <script src="~/plugins/editor.md/languages/zh-tw.js" asp-append-version="true"></script>
+}
+<script>
+    let editorMdMixin = {
+        methods: {
+            initEditor() {
+                let typingTimer;
+                let self = this;
+                this.editor = editormd("editor-md", {
+                    path: '/plugins/editor.md/lib/',
+                    height: window.innerHeight - 79,
+                    placeholder: "",
+                    codeFold: true,
+                    searchReplace: true,
+                    theme: '@theme',
+                    previewTheme: '@previewTheme',
+                    editorTheme: '@plugin.CodeMirrorTheme',
+                    toolbarIcons: function () {
+                        return [
+                            "undo", "redo", "|",
+                            "h1", "h2", "h3", "h4", "h5", "h6", "|",
+                            "bold", "del", "italic", "quote", "|",
+                            "list-ul", "list-ol", "hr", "|",
+                            "link", "faicon", "code", "code-block", "table", "html-entities", "|",
+                            "watch", "preview", "fullscreen", "search", "goto-line", "|",
+                            "help", "info"
+                        ]
+                    },
+                    toolbarCustomIcons: {
+                        faicon: '<i class="fa fa-image" onclick="app.mediaDialogVisible = true;"></i>',
+                    },
+                    onchange: function () {
+                        clearTimeout(typingTimer);
+                        if (!self.post.published) {
+                            self.saveVisible = true;
+                            self.saveDisabled = false;
+                            self.saveText = 'Save';
+                            typingTimer = setTimeout(self.saveDraft, self.autosaveInterval);
+                        }
+                    }
+                });
+            },
+        }
+    };
+</script>

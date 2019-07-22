@@ -188,9 +188,6 @@ namespace Fan.WebApp.Manage
                     // setup widgets
                     await SetupThemeAndWidgetsAsync();
 
-                    // setup plugins
-                    await SetupPluginsAsync();
-
                     return new JsonResult(true);
                 }
 
@@ -325,20 +322,6 @@ namespace Fan.WebApp.Manage
             // Recent Blog Posts
             widgetInstId = await _widgetSvc.CreateWidgetAsync("RecentBlogPosts");
             await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
-        }
-
-        /// <summary>
-        /// Activates plugins.
-        /// </summary>
-        /// <remarks>
-        /// Currently since I don't have the installation step for plugins yet, unactivated plugins
-        /// that have a settings page when you activate it for the first time, the settings icon is 
-        /// not shown immediately.
-        /// </remarks>
-        private async Task SetupPluginsAsync()
-        {
-            await pluginService.ActivatePluginAsync("ForkMeRibbon");
-            await pluginService.ActivatePluginAsync("Shortcodes");
         }
     }
 

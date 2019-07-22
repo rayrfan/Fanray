@@ -32,10 +32,17 @@ namespace Fan.Plugins
         Task<IEnumerable<Plugin>> GetActivePluginsAsync();
 
         /// <summary>
-        /// Updates a plugin settings.
+        /// Returns a plugin by name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        Task<Plugin> GetPluginAsync(string name);
+
+        /// <summary>
+        /// Upserts a plugin settings.
         /// </summary>
         /// <param name="plugin"></param>
         /// <returns></returns>
-        Task UpdatePluginAsync(Plugin plugin);
+        Task<int> UpsertPluginAsync(Plugin plugin);
     }
 }

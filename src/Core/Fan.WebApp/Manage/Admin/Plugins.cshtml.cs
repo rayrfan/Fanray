@@ -2,6 +2,7 @@ using Fan.Plugins;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.WebApp.Manage.Admin
@@ -18,9 +19,9 @@ namespace Fan.WebApp.Manage.Admin
 
         public string PluginManifestsJson { get; private set; }
 
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
-            var pluginManifests = await pluginService.GetManifestsAsync();
+            var pluginManifests = (await pluginService.GetManifestsAsync()).ToList().OrderBy(p => p.Name);
             PluginManifestsJson = JsonConvert.SerializeObject(pluginManifests);
         }
 
