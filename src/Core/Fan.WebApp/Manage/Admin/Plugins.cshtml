@@ -20,18 +20,20 @@
                 <td>
                     <div>{{ props.item.description }}</div>
                     <div>
-                        <span>Version {{ props.item.version }}</span> |
-                        <span>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span> |
-                        <span><a :href="props.item.pluginUrl" target="_blank">View details</a></span>
+                        <span>Version {{ props.item.version }}  |</span>
+                        <span v-if="props.item.pluginUrl"><a :href="props.item.pluginUrl" target="_blank">View details</a>  |</span>
+                        <span v-if="props.item.isSysPlugin"  title="System plugin"><v-chip small label>System</v-chip></span>
+                        <span v-else>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span>
                     </div>
                 </td>
                 <td>
-                    <div v-if="props.item.active">
-                        <v-btn fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
+                    <div v-if="props.item.isSysPlugin">
                         <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
                     </div>
                     <div v-else>
-                        <v-btn fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
+                        <v-btn v-if="props.item.active" fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
+                        <v-btn v-else fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
+                        <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
                     </div>
                 </td>
             </template>

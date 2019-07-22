@@ -66,7 +66,7 @@ namespace Fan.Extensibility
             var baseType = JsonConvert.DeserializeObject<TExtension>(meta.Value);
             var actualType = await GetManifestTypeByFolderAsync(baseType.Folder);
             var extension = (TExtension)JsonConvert.DeserializeObject(meta.Value, actualType);
-            
+
             return extension;
         }
 
@@ -117,7 +117,7 @@ namespace Fan.Extensibility
         /// This method serves as a default implementation to support GetManifestsAsync method.
         /// It scans a particular extension folder and reads all the manifest json files for each extension.
         /// </remarks>
-        protected async Task<IEnumerable<TManifest>> LoadManifestsAsync()
+        protected virtual async Task<IEnumerable<TManifest>> LoadManifestsAsync()
         {
             var list = new List<TManifest>();
             var extPath = Path.Combine(hostingEnvironment.ContentRootPath, ManifestDirectory);

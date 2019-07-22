@@ -20,9 +20,9 @@ namespace ForkMeRibbon.Manage.Plugins
         public string PositionsJson { get; set; }
         public ERibbonPosition Position { get; set; }
 
-        public async Task OnGet(int pluginId)
+        public async Task OnGet(string name)
         {
-            var plugin = (ForkMeRibbonPlugin)await pluginService.GetExtensionAsync(pluginId);
+            var plugin = (ForkMeRibbonPlugin)await pluginService.GetPluginAsync(name);
             ExtJson = JsonConvert.SerializeObject(plugin);
 
             var positionList = new List<string>();
@@ -38,7 +38,7 @@ namespace ForkMeRibbon.Manage.Plugins
         {
             if (ModelState.IsValid)
             {
-                await pluginService.UpdatePluginAsync(plugin);
+                await pluginService.UpsertPluginAsync(plugin);
                 return new JsonResult("Plugin settings updated.");
             }
 

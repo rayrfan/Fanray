@@ -1,10 +1,10 @@
 ﻿using Fan.Data;
+using Fan.Exceptions;
 using Fan.IntegrationTests.Base;
 using Fan.Plugins;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,8 @@ namespace Fan.IntegrationTests.Plugins
 {
     public class PluginServiceTest : IntegrationTestBase
     {
-        private const string MY_PLUGIN_FOLDER = "MyPlugin";
+        private const string MY_PLUGIN = "MyPlugin";
+        private const string MY_SYSPLUGIN = "MySysPlugin";
 
         private readonly PluginService pluginService;
         private readonly SqlMetaRepository metaRepository;
@@ -38,25 +39,62 @@ namespace Fan.IntegrationTests.Plugins
         }
 
         /// <summary>
-        /// The admin plugins page display all installed plugins.
+        /// The admin plugins page display all installed plugins and system plugins.
         /// </summary>
         [Fact]
-        public async void Admin_panel_plugins_page_displays_all_installed_plugins_information()
+        public async void Admin_plugins_page_displays_all_installed_plugins_and_system_plugins()
         {
             var plugins = await pluginService.GetManifestsAsync();
 
-            Assert.Single(plugins);
+            Assert.Equal(2, plugins.Count());
             Assert.Equal("My Plugin", plugins.ToList()[0].Name);
+            Assert.Equal("My System Plugin", plugins.ToList()[1].Name);
+        }
+
+        /// <summary>
+        /// On the Plugins page user can update a plugin's settings without activate it.
+        /// </summary>
+        [Fact]
+        public async void User_can_modify_plugin_settings_without_activating_the_plugin()
+        {
+            // Given a plugin on the Plugins page
+            var plugin = new MyPlugin { Name = "Ray", Folder = MY_PLUGIN };
+
+            // When user updates it
+            var id = await pluginService.UpsertPluginAsync(plugin);
+
+            // Then plugin is not active but the settings have been updated
+            var pluginAgain = (MyPlugin) await pluginService.GetExtensionAsync(id);
+            Assert.False(pluginAgain.Active);
+            Assert.Equal("Ray", pluginAgain.Name);
+        }
+
+        /// <summary>
+        /// When user saves a plugin's settings that is never activated, a meta record is created.
+        /// </summary>
+        [Fact]
+        public async void Saving_plugin_that_is_never_activated_creates_a_meta_record()
+        {
+            // Given a plugin that has never been activated
+            var plugin = new MyPlugin { Name = "Ray", Folder = MY_PLUGIN };
+
+            // When user updates it
+            var id = await pluginService.UpsertPluginAsync(plugin);
+
+            // Then there will be a plugin meta
+            var pluginMeta = await metaRepository.GetAsync(id);
+            Assert.NotNull(pluginMeta);
         }
 
         /// <summary>
         /// When a user activates a plugin, there will be a plugin meta and its Active prop is true.
+        /// 
         /// </summary>
         [Fact]
-        public async void When_user_activates_a_plugin_two_meta_records_could_be_created()
+        public async void When_user_activates_plugin_a_meta_record_is_created_and_plugin_active_is_true()
         {
             // Given a plugin and when user activates it
-            var id = await pluginService.ActivatePluginAsync(MY_PLUGIN_FOLDER);
+            var id = await pluginService.ActivatePluginAsync(MY_PLUGIN);
 
             // Then there will be a plugin meta
             var pluginMeta = await metaRepository.GetAsync(id);
@@ -68,38 +106,13 @@ namespace Fan.IntegrationTests.Plugins
         }
 
         /// <summary>
-        /// Plugin settings link is only shown on active plugins.
+        /// System plugins are part of the system and thus cannot be activated. Activating one
+        /// will throw exception.
         /// </summary>
         [Fact]
-        public async void Plugin_settings_link_is_only_shown_on_active_plugins()
+        public async void System_plugin_cannot_be_activated()
         {
-            // Given a plugin and when user activates it 
-            await pluginService.ActivatePluginAsync(MY_PLUGIN_FOLDER);
-
-            // Then the manifest info show it as active
-            var list = await pluginService.GetManifestsAsync();
-            Assert.True(list.ToList()[0].Active);
-        }
-
-        [Fact]
-        public async void User_can_update_plugin_settings()
-        {
-            // Given an active plugin
-            var plugin = new MyPlugin
-            {
-                Folder = MY_PLUGIN_FOLDER
-            };
-            var id = await pluginService.ActivatePluginAsync(plugin.Folder);
-
-            // When user updates it
-            plugin.Name = "Ray";
-            await pluginService.UpdatePluginAsync(plugin);
-
-            // Then 
-            var meta = await metaRepository.GetAsync(id);
-            var pluginAgain = JsonConvert.DeserializeObject<MyPlugin>(meta.Value);
-
-            Assert.Equal("Ray", pluginAgain.Name);
+            await Assert.ThrowsAsync<FanException>(() => pluginService.ActivatePluginAsync(MY_SYSPLUGIN));
         }
     }
 }
