@@ -12,9 +12,6 @@ namespace Fan.Data
     /// <remarks>
     /// Common implementations of this interface could be sql or no-sql databases.
     /// See <see cref="EntityRepository{T}"/> for an Entity Framework implementation.
-    /// 
-    /// Only the common-denominator operations are here, for example Delete is not here due to the
-    /// fact deletion needs different logic for different entities.
     /// </remarks>
     public interface IRepository<T> where T : class 
     {
