@@ -1,0 +1,461 @@
+﻿@page "{pageId:int?}"
+@model Fan.WebApp.Manage.Admin.Compose.PageModel
+@{
+    ViewData["Title"] = "Compose Page";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/plugins/editor.md/css/editormd.min.css" asp-append-version="true" />
+    <style>
+        #content-area {
+            margin: auto;
+            width: 90%;
+        }
+        #post-title {
+            resize: none;
+            word-wrap: break-word;
+            font-family: "Noto Serif",Georgia,"Times New Roman",Times,serif;
+            font-size: 28px;
+            color: #2e4453;
+            font-weight: 600;
+            line-height: normal;
+        }
+        @@media (max-width: 767px) {
+            #content-area {
+                width: 98%;
+            }
+
+            #post-title {
+               font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    @Html.AntiForgeryToken()
+
+    <div id="app" v-cloak>
+        @* Dnd *@
+        <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
+            <span class="droptext">Drop files to upload</span>
+        </div>
+        <v-dialog v-model="composerUploadProgress" persistent width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Uploading ...
+                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-app style="background-color:white">
+            @* Drawer *@
+            <v-navigation-drawer fixed :clipped="$vuetify.breakpoint.mdAndUp" app v-model="drawer">
+                <v-expansion-panel v-model="panel" expand>
+                    <v-expansion-panel-content>
+                        <div slot="header">Status</div>
+                        <v-card>
+                            <div v-if="page.published">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>
+                                                    on
+                                                    {{ page.postDate }}
+                                                </span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                                <v-card-actions>
+                                    <v-btn small style="width:100%;color:#29B6F6" color="gray" @@click="revert">
+                                        <v-icon left dark>undo</v-icon>
+                                        Revert to draft
+                                    </v-btn>
+                                </v-card-actions>
+                            </div>
+                            <div v-if="page.isDraft">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span>
+                                                <span>saved on {{ page.draftDate }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                            </div>
+                            <v-card-text>
+                                <v-menu ref="menuDate" :close-on-content-click="false" v-model="menuDate"
+                                        :return-value.sync="page.postDate" lazy transition="scale-transition" offset-y
+                                        full-width @@input="onFieldsChange">
+                                    <v-text-field label="Post Date" slot="activator" v-model="page.postDate" readonly>
+                                    </v-text-field>
+                                    <v-date-picker v-model="page.postDate" no-title scrollable
+                                                   @@input="$refs.menuDate.save(page.postDate)"></v-date-picker>
+                                </v-menu>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <div slot="header">Page Attributes</div>
+                        <v-card>
+                            <v-card-text>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+            </v-navigation-drawer>
+            @* Topbar *@
+            <v-toolbar color="blue darken-3" dark app :clipped-left="$vuetify.breakpoint.mdAndUp" fixed>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
+                <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">
+                    {{ saveText }}
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn @@click="preview">Preview</v-btn>
+                <v-btn @@click="close">Close</v-btn>
+            </v-toolbar>
+            @* Editor *@
+            <v-content>
+                <div id="content-area">
+                    <v-textarea tabindex="1"
+                                id="post-title"
+                                label=""
+                                auto-grow
+                                placeholder="Title"
+                                aria-label="Edit title"
+                                rows="1"
+                                @@input="onFieldsChange"
+                                @@keyup.enter="titleEnter"
+                                v-model="page.title"></v-textarea>
+
+                    <div id="editor-md">
+                        <textarea name="content" id="editor" style="display:none;">{{ page.bodyMark }}</textarea>
+                    </div>
+                </div>
+            </v-content>
+            @* Image Dialog *@
+            <v-dialog v-model="mediaDialogVisible" lazy
+                      @@keydown.esc="closeMediaDialog"
+                      content-class="media-dialog">
+                <blog-media mode="editor"></blog-media>
+            </v-dialog>
+            @* Preview Dialog *@
+            <v-dialog lazy
+                      fullscreen
+                      scrollable
+                      v-model="previewDialogVisible"
+                      @@keydown.esc="closePreview"
+                      content-class="preview-dialog">
+                <v-card height="100%">
+                    <v-card-title>
+                        <span class="preview-title">Preview</span>
+                        <v-spacer></v-spacer>
+                        <span class="preview-title-url">{{ postUrl }}</span>
+                        <v-spacer></v-spacer>
+                        <v-btn @@click="closePreview">Close</v-btn>
+                    </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-text class="preview-body">
+                        <iframe class="preview-frame"
+                                v-if="previewUrl"
+                                :src="previewUrl"
+                                title="Preview"></iframe>
+                    </v-card-text>
+                </v-card>
+            </v-dialog>
+            @* Snackbar *@
+            <v-snackbar bottom right multi-line
+                        :timeout="snackbar.timeout"
+                        :color="snackbar.color"
+                        v-model="snackbar.show">
+                <span style="font-size:larger">{{ snackbar.text }}</span>
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
+        </v-app>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js"></script>
+    <partial name="_BlogMediaTemplate" />
+    <script>
+        let mediaMixin = {
+            data: function () {
+                return {
+                    images: [],
+                    count: 0,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                    maxImageFileSize: @ImageService.MAX_FILE_SIZE,
+                    validFileTypes: @Html.Raw(ImageService.ValidFileTypesJson),
+                    errFileType: '@ImageService.ERR_MSG_FILETYPE',
+                    errFileSize: '@ImageService.ERR_MSG_FILESIZE',
+                };
+            }
+        };
+        let composeMixin = {
+            data: function () {
+                return {
+                    page: @Html.Raw(Model.PageJson),
+                    autosaveInterval: @(PageModel.AUTOSAVE_INTERVAL * 1000),
+                }
+            }
+        };
+    </script>
+    <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
+    <partial name="EditorMd" />
+    <script>
+        let app = new Vue({
+            el: '#app',
+            store,
+            mixins: [composeMixin, editorMdMixin], // from plugin
+            data: () => ({
+                pubClicked: false,
+                pubText: '',
+                saveVisible: false,
+                saveDisabled: false,
+                saveText: 'Save',
+                closing: true,
+                fieldChanged: false,
+                drawer: null,
+                panel: [true, true, true],
+                menuDate: false,
+                mediaDialogVisible: false,
+                previewUrl: null,
+                postUrl: null,
+                previewDialogVisible: false,
+                editor: null,
+                snackbar: {
+                    show: false,
+                    text: '',
+                    color: '',
+                    timeout: 10000,
+                },
+                composerUploadProgress: false,
+            }),
+            computed: {
+                disablePubButton() {
+                    return this.page.title.trim().length <= 0 || this.pubClicked;
+                },
+                tok: function () {
+                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
+                },
+                headers() {
+                    return { headers: { 'XSRF-TOKEN': this.tok } };
+                },
+                payload: function () {
+                    return {
+                        id: this.page.id,
+                        parentId: this.page.parentId,
+                        postDate: this.page.postDate,
+                        title: this.page.title,
+                        bodyMark: this.editor.getMarkdown(),
+                    }
+                },
+                selectedImages() { // from store
+                    return this.$store.state.selectedImages;
+                },
+            },
+            mounted() {
+                this.pubText = this.page.published ? 'Update' : 'Publish';
+                this.initWindowDnd();
+                this.initEditor();
+            },
+            methods: {
+                /**
+                 * Initialize window drag drop events, dragFilesUpload and sendIMages.
+                 */
+                initWindowDnd() {
+                    console.log('initWindowDnd');
+                    window.addEventListener("dragenter", function (e) {
+                        document.querySelector("#dropzone").style.visibility = "";
+                        document.querySelector("#dropzone").style.opacity = 1;
+                    });
+
+                    window.addEventListener("dragleave", function (e) {
+                        e.preventDefault();
+                        document.querySelector("#dropzone").style.visibility = "hidden";
+                        document.querySelector("#dropzone").style.opacity = 0;
+                    });
+
+                    window.addEventListener("dragover", function (e) {
+                        e.preventDefault();
+                        document.querySelector("#dropzone").style.visibility = "";
+                        document.querySelector("#dropzone").style.opacity = 1;
+                    });
+
+                    let self = this;
+                    window.addEventListener("drop", function (e) {
+                        e.preventDefault();
+                        document.querySelector("#dropzone").style.visibility = "hidden";
+                        document.querySelector("#dropzone").style.opacity = 0;
+                        if (!self.mediaDialogVisible) self.dragFilesUpload(e.dataTransfer.files); // prevent gallery call this
+                    });
+                },
+                dragFilesUpload(files) {
+                    if (!files.length) return;
+                    this.composerUploadProgress = true; // open progress
+                    const formData = new FormData();
+                    Array.from(Array(files.length).keys()).map(x => formData.append('images', files[x]));
+                    this.sendImages(formData);
+                },
+                sendImages(formData) {
+                    axios.post('/admin/media?handler=image', formData, this.$root.headers)
+                        .then(resp => {
+                            if (resp.data.images.length > 0) {
+                                this.insertImagesToEditor(resp.data.images);
+                                this.$root.toast('Image uploaded.');
+                            }
+                            else {
+                                this.$root.toastError('Some files were not uploaded due to file type or size not supported.');
+                            }
+                            this.composerUploadProgress = false; // close progress
+                            this.$store.dispatch('emptyErrMsg');
+                        })
+                        .catch(err => {
+                            this.composerUploadProgress = false; // close progress
+                            this.$root.toastError('Image upload failed.');
+                            console.log(err);
+                        });
+                },
+                onFieldsChange() {
+                    this.fieldChanged = true;
+                    if (this.page.published) return;
+                    this.saveVisible = true;
+                    this.saveDisabled = false;
+                    this.saveText = 'Save';
+                },
+                saveDraft() {
+                    console.log('save draft');
+                    this.saveVisible = true;
+                    this.saveDisabled = true;
+                    this.saveText = 'Saving...';
+
+                    console.log('payload: ', this.payload);
+                    axios.post('/admin/compose/page?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(resp => {
+                            this.page.id = resp.data.id;
+                            this.page.draftDate = resp.data.draftDate;
+                            this.page.isDraft = true;
+
+                            let href = window.location.href;
+                            if (href.includes('/page?') || href.endsWith('/page')) {
+                                let pos = href.indexOf('?');
+                                if (pos == -1) {
+                                    history.replaceState({}, null, href + `/${this.page.id}`);
+                                }
+                                else {
+                                    history.replaceState({}, null, href.substring(0, pos) + `/${this.page.id}` + href.substring(pos));
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            this.saveVisible = false;
+                            this.toastError(err.response.data);
+                        });
+
+                    this.fieldChanged = false;
+                    this.saveText = 'Saved';
+                },
+                preview() {
+                    this.previewDialogVisible = true;
+                    this.payload.body = this.editor.getHTML();
+                    axios.post('/admin/compose/page?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(resp => {
+                            this.previewUrl = resp.data;
+                            this.postUrl = this.previewUrl.replace('preview/page/', '');
+                        })
+                        .catch(err => { console.log(err); });
+                },
+                closePreview() {
+                    this.previewDialogVisible = false;
+                    this.previewUrl = null;
+                    this.postUrl = null;
+                },
+                revert() {
+                    this.page.published = false;
+                    this.pubText = this.page.published ? 'Update' : 'Publish';
+                    this.saveDraft();
+                },
+                pub() {
+                    this.closing = false;
+                    this.pubClicked = true;
+                    this.pubText = this.page.published ? 'Updating...' : 'Publishing...';
+
+                    const url = this.page.published ? '/admin/compose/page?handler=update' : '/admin/compose/page?handler=publish';
+                    axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+                        .then(resp => {
+                            if (this.page.isParentDraft)
+                                this.close();
+                            else
+                                window.location.replace(resp.data);
+                        })
+                        .catch(err => {
+                            this.saveVisible = false;
+                            this.pubText = this.page.published ? 'Update' : 'Publish';
+                            this.pubClicked = false;
+                            this.toastError(err.response.data);
+                        });
+                },
+                close() {
+                    if (this.page.parentId && this.page.parentId > 0) 
+                        window.location.replace(`/admin/pages/${this.page.parentId}`);
+                    else
+                        window.location.replace('/admin/pages');
+                },
+                /**
+                 * Inserts selected images from gallery to editor.
+                 */
+                insertImages() {
+                    this.insertImagesToEditor(this.selectedImages);
+                    this.mediaDialogVisible = false;
+                    this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
+                    this.$store.dispatch('emptyErrMsg');
+                },
+                /**
+                 * Inserts images to editor.
+                 */
+                insertImagesToEditor(images) {
+                    let imgsHtml = '';
+                    images.forEach(img => {
+                        imgsHtml += `![${img.alt}](${img.urlMedium} "${img.title}")\n`;
+                        img.selected = false; // remove the checkmark
+                    });
+                    this.editor.insertValue(imgsHtml);
+                },
+                closeMediaDialog() {
+                    this.mediaDialogVisible = false;
+                    this.selectedImages.forEach(img => img.selected = false); // remove checkmarks
+                    this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
+                    this.$store.dispatch('emptyErrMsg');
+                },
+                titleEnter() {
+                    this.page.title = this.page.title.replace(/\n/g, ' ');
+                },
+                toastError(text) {
+                    this.snackbar.show = true;
+                    this.snackbar.text = text;
+                    this.snackbar.color = 'red';
+                    this.snackbar.timeout = 10000;
+                },
+            },
+        });
+    </script>
+</body>
+</html>

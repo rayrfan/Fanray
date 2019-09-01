@@ -1,0 +1,152 @@
+﻿@page "{parentId:int?}"
+@model Fan.WebApp.Manage.Admin.PagesModel
+@{
+    ViewData["Title"] = "Pages";
+}
+
+@section Styles {
+    <style>
+        .child {
+            padding-left:25px;
+        }
+        .btn-link {
+            color: #fff;
+            display: block;
+            padding-bottom: 2px;
+            padding-right: 8px;
+            text-decoration: none;
+        }
+    </style>
+}
+
+<pages inline-template>
+    <v-container>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-toolbar dense class="elevation-1 cat-tabs-bar" style="background-color: white">
+                    <v-toolbar-title style="font-size:100%">Pages</v-toolbar-title>
+                    <v-btn v-if="parentId > 0" href="/admin/pages" small icon><v-icon small>arrow_upward</v-icon></v-btn>
+                    <v-spacer></v-spacer>
+                    <v-chip small label color="pink" text-color="white" style="font-weight:bold;padding:15px 0">
+                        <a v-if="parentId > 0" :href="`/admin/compose/page?parentId=${parentId}`" class="btn-link"><v-icon small>add</v-icon> New Child Page</a>
+                        <a v-else href="/admin/compose/page" class="btn-link"><v-icon small>add</v-icon> New Page</a>
+                    </v-chip>
+                </v-toolbar>
+            </v-flex>
+        </v-layout>
+
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-list two-line class="elevation-1">
+                    <template v-for="(page, index) in pages">
+                        <v-list-tile>
+                            <v-list-tile-content v-bind:class="{'child':(page.isChild)}">
+                                <h4 v-if="page.title">
+                                    <a class="post-title-link" :href="page.editLink">{{ page.title }}</a>
+                                </h4>
+                                <h4 v-else style="font-style:italic;color:gray">
+                                    <a class="post-title-link" :href="page.editLink">Untitled</a>
+                                </h4>
+                                <span style="font-size:smaller">
+                                    <v-icon small>access_time</v-icon> {{ page.date }} &nbsp;
+                                    <v-icon small>person</v-icon> {{ page.author }} &nbsp;
+                                </span>
+                            </v-list-tile-content>
+                            <v-spacer></v-spacer>
+                            <v-chip v-if="page.childCount > 0" small label text-color="white" color="blue" class="hidden-sm-and-down">
+                                <a class="btn-link" :href="page.childrenLink" v-if="page.childrenLink">
+                                    <v-icon small>arrow_right</v-icon> Child pages: {{ page.childCount }}
+                                </a>
+                                <span v-else>
+                                    Child pages: {{ page.childCount }}
+                                </span>
+                            </v-chip>
+                            <span v-if="page.isDraft" style="color: red;font-size:small;padding: 0 5px">Draft</span>
+                            <v-list-tile-action>
+                                <v-menu bottom left @@click.native.stop>
+                                    <v-btn slot="activator"
+                                           icon>
+                                        <v-icon>more_vert</v-icon>
+                                    </v-btn>
+                                    <v-list dense>
+                                        <v-list-tile v-if="!page.isChild" :href="`/admin/compose/page?parentId=${page.id}`">
+                                            <v-icon class="menu-action-icon">add</v-icon>
+                                            <v-list-tile-title>New Child Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="page.childCount > 0">
+                                            <v-icon class="menu-action-icon">edit</v-icon>
+                                            <v-list-tile-title>Edit TOC</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile :href="page.editLink">
+                                            <v-icon class="menu-action-icon">edit</v-icon>
+                                            <v-list-tile-title>Edit Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile :href="page.pageLink" v-if="page.pageLink">
+                                            <v-icon class="menu-action-icon">visibility</v-icon>
+                                            <v-list-tile-title>View Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile @@click="deletePage(page)">
+                                            <v-icon class="menu-action-icon">delete</v-icon>
+                                            <v-list-tile-title>Delete</v-list-tile-title>
+                                        </v-list-tile>
+                                    </v-list>
+                                </v-menu>
+                            </v-list-tile-action>
+                        </v-list-tile>
+                        <v-divider v-if="index + 1 < pages.length"
+                                   :key="index"></v-divider>
+                    </template>
+                </v-list>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</pages>
+
+@section ComponentScripts {
+    <script>
+        let pagesMixin = {
+            data: function () {
+                return {
+                    pages: @Html.Raw(Model.PagesJson),
+                    parentId: @Model.ParentId,
+                }
+            }
+        }
+
+        Vue.component('pages', {
+            mixins: [pagesMixin],
+            data: () => ({
+                loading: false,
+            }),
+            methods: {
+                deletePage(page) {
+                    if (confirm('Are you sure to permanently delete this page and its child pages if any?')) {
+                        axios.delete(`/admin/pages?pageId=${page.id}`, { headers: { 'XSRF-TOKEN': this.$root.tok } })
+                            .then(resp => {
+                                let idx = this.pages.findIndex(p => p.id === page.id);
+                                this.pages.splice(idx, 1);
+
+                                if (this.parentId > 0) {
+                                    if (page.isChild) {
+                                        let pidx = this.pages.findIndex(p => p.id === this.parentId);
+                                        let parent = this.pages[pidx];
+                                        parent.childCount--;
+                                    }
+                                    else {
+                                         window.location.replace('/admin/pages');
+                                    }
+                                }
+
+                                this.$root.toast('Page deleted.');
+                            })
+                            .catch(function (err) {
+                                this.$root.toastError('Delete page failed.');
+                                console.log(err);
+                            });
+                    }
+                },
+            },
+        });
+
+    </script>
+}
