@@ -28,6 +28,8 @@ else if (plugin.Language == "zh-tw")
                     theme: '@theme',
                     previewTheme: '@previewTheme',
                     editorTheme: '@plugin.CodeMirrorTheme',
+                    htmlDecode: true,
+                    saveHTMLToTextarea: true,
                     toolbarIcons: function () {
                         return [
                             "undo", "redo", "|",
@@ -44,7 +46,7 @@ else if (plugin.Language == "zh-tw")
                     },
                     onchange: function () {
                         clearTimeout(typingTimer);
-                        if (!self.post.published) {
+                        if (!self.page.published) {
                             self.saveVisible = true;
                             self.saveDisabled = false;
                             self.saveText = 'Save';
