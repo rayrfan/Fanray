@@ -29,21 +29,12 @@
         BlogPostsByNumber,
 
         /// <summary>
-        /// All root pages.
+        /// All parent pages regardless status.
         /// </summary>
-        RootPages,
+        Pages,
         /// <summary>
-        /// All child pages for a root page.
+        /// All pages (parents and their children).
         /// </summary>
-        ChildPagesForRoot,
-        ChildPagesForParent,
-        /// <summary>
-        /// All draft pages.
-        /// </summary>
-        PageDrafts,
-        /// <summary>
-        /// Pages, used by metaweblog.
-        /// </summary>
-        PagesByNumber,
+        PagesWithChildren,
     }
 }

@@ -10,12 +10,17 @@ namespace Fan.Blog.Data
     /// <summary>
     /// Contract for a post repository.
     /// </summary>
+    /// <remarks>
+    /// Data operations for both blog posts and pages.
+    /// </remarks>
     public interface IPostRepository : IRepository<Post>
     {
         /// <summary>
         /// Creates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to create.</param>
+        /// <param name="categoryId">The category id is available when called from browser.</param>
+        /// <param name="categoryTitle">The category title is available when called from metaweblog.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
         /// <returns>
         /// The inserted post with id.
@@ -28,12 +33,6 @@ namespace Fan.Blog.Data
         /// <param name="post">The post to update.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
         Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
-
-        /// <summary>
-        /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
-        /// it will also delete all child pages.
-        /// </summary>
-        Task DeleteAsync(int id);
 
         /// <summary>
         /// Returns a <see cref="Post"/> by id. If it is a BlogPost it'll return together with its 
@@ -53,7 +52,7 @@ namespace Fan.Blog.Data
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        Task<(List<Post> posts, int totalCount)> GetListAsync(PostListQuery query);
+        Task<(IList<Post> posts, int totalCount)> GetListAsync(PostListQuery query);
 
         /// <summary>
         /// Returns CreatedOn of all published blog posts, used for archives.
