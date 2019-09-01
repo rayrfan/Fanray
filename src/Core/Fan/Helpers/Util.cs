@@ -30,12 +30,11 @@ namespace Fan.Helpers
         /// hand-tuned for speed, reflects performance refactoring contributed by John Gietzen (user otac0n) 
         /// http://stackoverflow.com/questions/25259/how-does-stackoverflow-generate-its-seo-friendly-urls
         /// </remarks>
-        public static string Slugify(string title, int randomCharCountOnEmpty = 0)
+        public static string Slugify(string title, int maxlen = 250, int randomCharCountOnEmpty = 0)
         {
             if (title == null)
                 return randomCharCountOnEmpty <= 0 ? "" : Util.RandomString(randomCharCountOnEmpty);
 
-            const int maxlen = 80;
             int len = title.Length;
             bool prevdash = false;
             var sb = new StringBuilder(len);
@@ -66,7 +65,7 @@ namespace Fan.Helpers
                     sb.Append(RemapInternationalCharToAscii(c));
                     if (prevlen != sb.Length) prevdash = false;
                 }
-                if (i == maxlen) break;
+                if (i == maxlen - 1) break;
             }
 
             var slug = prevdash ? sb.ToString().Substring(0, sb.Length - 1) : sb.ToString();
