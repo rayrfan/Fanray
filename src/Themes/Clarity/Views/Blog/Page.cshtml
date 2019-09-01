@@ -1,0 +1,23 @@
+﻿@model PageVM
+@inject SignInManager<User> SignInManager
+@{ 
+    Layout = "_PageLayout";
+}
+<article>
+    <header>
+        <h1>
+            @Model.Title
+        </h1>
+        <div class="post-info clearfix">
+            <i class="icon-user" aria-hidden="true"></i><span class="post-info-item">@Model.Author</span>
+            <i class="icon-calendar" aria-hidden="true"></i><span class="post-info-item">@Model.CreatedOnDisplay</span>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.EditLink">Edit</a></span>
+            }
+        </div>
+    </header>
+    <div class="post-body">
+        @Html.Raw(Model.Body)
+    </div>
+</article>

@@ -1,6 +1,7 @@
 @model BlogPostListViewModel
 
 @{
+    Layout = "_BlogPostLayout";
     var posts = Model.BlogPostViewModels;
     ViewData["Title"] = $"Latest '{Model.CategoryTitle}' Posts";
 }

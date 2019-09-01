@@ -16,6 +16,10 @@
     {
       "id": "blog-after-post",
       "name": "Blog After Post Content"
+    },
+    {
+      "id": "page-sidebar1",
+      "name": "Page Sidebar"
     }
   ]
 }

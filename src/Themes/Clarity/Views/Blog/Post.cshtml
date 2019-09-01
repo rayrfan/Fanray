@@ -1,5 +1,6 @@
 @model BlogPostViewModel
 @{
+    Layout = "_BlogPostLayout";
     var post = Model;
     ViewData["Title"] = post.Title;
     ViewData["Description"] = post.Excerpt;
