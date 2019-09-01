@@ -86,13 +86,17 @@ namespace Fan.Web.Tests
             db.Set<Meta>().AddRange(GetSettings()); // settings
             db.Users.Add(GetUser()); // user
             db.Set<Post>().Add(GetPostWith1Category2Tags()); // post with category and tags
+            db.Set<Post>().AddRange(GetPageWith1Child());
             db.SaveChanges();
         }
 
         /// <summary>
         /// Returns some settings.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// If you added new widget area in <see cref="Fan.Widgets.WidgetService"/> and used it in 
+        /// a view, you have to add them here or the razor view will fail and give you 500.
+        /// </remarks>
         private List<Meta> GetSettings()
         {
             var metas = new List<Meta>
@@ -119,8 +123,12 @@ namespace Fan.Web.Tests
                 new Meta { Id = 20, Key = "footer1", Value = "{ \"id\":\"footer1\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
                 new Meta { Id = 21, Key = "footer2", Value = "{ \"id\":\"footer2\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
                 new Meta { Id = 22, Key = "footer3", Value = "{ \"id\":\"footer3\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
-                new Meta { Id = 23, Key = "clarity", Value = "", Type = EMetaType.Theme },
-                new Meta { Id = 24, Key = "clarity-my-area", Value = "{\"id\":\"my-area\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaByTheme },
+                new Meta { Id = 23, Key = "page-sidebar1", Value = "{ \"id\":\"page-sidebar1\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 24, Key = "page-sidebar2", Value = "{ \"id\":\"page-sidebar2\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 25, Key = "page-before-content", Value = "{ \"id\":\"page-before-content\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 26, Key = "page-after-content", Value = "{ \"id\":\"page-after-content\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 27, Key = "clarity", Value = "", Type = EMetaType.Theme },
+                new Meta { Id = 28, Key = "clarity-my-area", Value = "{\"id\":\"my-area\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaByTheme },
             };
 
             return metas;
@@ -146,11 +154,11 @@ namespace Fan.Web.Tests
 
             var post = new Post
             {
+                Id = 1,
                 Body = "A post body.",
                 Category = cat,
                 UserId = USER_ID,
                 CreatedOn = new DateTimeOffset(POST_DATE), 
-                RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,
                 Type = EPostType.BlogPost,
@@ -163,6 +171,44 @@ namespace Fan.Web.Tests
                 };
 
             return post;
+        }
+
+        private List<Post> GetPageWith1Child()
+        {
+            var list = new List<Post>();
+
+            var parent = new Post
+            {
+                Id = 2,
+                ParentId = 0,
+                Title = "About",
+                Slug = "about",
+                Body = "<h1>About Page</h1>",
+                BodyMark = "# About",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+            };
+
+            var child = new Post
+            {
+                Id = 3,
+                ParentId = 2,
+                Title = "Ray",
+                Slug = "ray",
+                Body = "<h1>About Ray</h1>",
+                BodyMark = "# About Ray",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+            };
+
+            list.Add(parent);
+            list.Add(child);
+
+            return list;
         }
     }
 }

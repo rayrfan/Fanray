@@ -12,7 +12,7 @@ namespace Fan.Blog.UnitTests.Services
     /// <summary>
     /// Unit tests for <see cref="CategoryService"/>.
     /// </summary>
-    public class CategoryServiceTest : BlogServiceUnitTestBase
+    public class CategoryServiceTest : BlogUnitTestBase
     {
         /// <summary>
         /// Given the default category.

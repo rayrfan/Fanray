@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests
+namespace Fan.Blog.IntegrationTests.Data
 {
     /// <summary>
     /// Tests for <see cref="SqlCategoryRepository"/> class.
@@ -43,7 +43,7 @@ namespace Fan.Blog.IntegrationTests
         public async void DeleteCategory_Will_Recategorize_Its_Posts_To_Default_Category()
         {
             // Arrange: given a post with a category
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var existCat = _db.Set<Category>().Single(c => c.Slug == CAT_SLUG);
 
             // Act: when we delete the existing category

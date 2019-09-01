@@ -18,15 +18,16 @@ using System.Threading.Tasks;
 namespace Fan.Blog.UnitTests.Base
 {
     /// <summary>
-    /// Base class for <see cref="BlogPostService"/> unit tests.
+    /// Base class for blog unit tests.
     /// </summary>
-    public class BlogServiceUnitTestBase
+    public class BlogUnitTestBase
     {
         protected Mock<IPostRepository> _postRepoMock;
         protected Mock<IMetaRepository> _metaRepoMock;
         protected Mock<ICategoryRepository> _catRepoMock;
         protected Mock<ITagRepository> _tagRepoMock;
         protected BlogPostService _blogPostSvc; // we have test internal methods, thus not using IBlogPostService
+        protected PageService _pageSvc;
         protected IDistributedCache _cache;
         protected ILogger<BlogPostService> _loggerBlogSvc;
         protected ILogger<SettingService> _loggerSettingSvc;
@@ -44,7 +45,7 @@ namespace Fan.Blog.UnitTests.Base
         /// Base constructor which will be called first for each test in derived test classes, thus
         /// setting up mocked repos and components here.
         /// </summary>
-        public BlogServiceUnitTestBase()
+        public BlogUnitTestBase()
         {
             // repos
             _postRepoMock = new Mock<IPostRepository>();
@@ -60,6 +61,7 @@ namespace Fan.Blog.UnitTests.Base
             // logger
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             _loggerBlogSvc = loggerFactory.CreateLogger<BlogPostService>();
+            var loggerPageSvc = loggerFactory.CreateLogger<PageService>();
             _loggerSettingSvc = loggerFactory.CreateLogger<SettingService>();
 
             // services (must be after _cache)
@@ -101,6 +103,7 @@ namespace Fan.Blog.UnitTests.Base
                 _loggerBlogSvc,
                 mapper,
                 mediatorMock.Object);
+            _pageSvc = new PageService(_postRepoMock.Object, loggerPageSvc, mapper);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Fan.Blog.UnitTests.Services
     /// <summary>
     /// Unit tests for <see cref="TagService"/>.
     /// </summary>
-    public class TagServiceTest : BlogServiceUnitTestBase
+    public class TagServiceTest : BlogUnitTestBase
     {
         /// <summary>
         /// Setting up existing tags.

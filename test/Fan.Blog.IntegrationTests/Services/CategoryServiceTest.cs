@@ -1,9 +1,11 @@
 ﻿using Fan.Blog.IntegrationTests.Base;
+using Fan.Blog.Services;
 using Fan.Exceptions;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests
+namespace Fan.Blog.IntegrationTests.Services
 {
     /// <summary>
     /// Category related business rules for blog service.
@@ -24,6 +26,15 @@ namespace Fan.Blog.IntegrationTests
             Assert.Equal(0, cat.Count);
         }
 
+
+        [Fact]
+        public async void Category_title_will_be_trimmed_beyond_allowed_length()
+        {
+            var title = string.Join("", Enumerable.Repeat<char>('a', 251));
+            var cat = await _catSvc.CreateAsync(title);
+            Assert.Equal(CategoryService.TITLE_MAXLEN, cat.Title.Length);
+        }
+
         /// <summary>
         /// Delete the default category will throw exception.
         /// </summary>
@@ -40,7 +51,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Create_category_with_duplicate_title_throws_FanException()
         {
             // Given a category "Technology"
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // When create another category with the same title
             Task action() => _catSvc.CreateAsync(CAT_TITLE);
@@ -95,7 +106,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Update_category_title_will_generate_new_slug()
         {
             // Given a category "Technology"
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var cat = await _catSvc.GetAsync(CAT_SLUG);
             Assert.Equal(1, cat.Id);
             Assert.Equal("Technology", cat.Title);
@@ -133,7 +144,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Category_slug_is_guaranteed_to_be_unique()
         {
             // Given an existing category "Technology"
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // When user creates a different category "Technology!!!"
             var cat = await _catSvc.CreateAsync("Technology!!!");

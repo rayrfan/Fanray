@@ -5,7 +5,10 @@ using Xunit;
 
 namespace Fan.Blog.UnitTests.Helpers
 {
-    public class BlogUtilTest
+    /// <summary>
+    /// Unit tests for <see cref="BlogUtil.SlugifyTaxonomy(string, int, IEnumerable{string})"/>.
+    /// </summary>
+    public partial class BlogUtilTest
     {
         /// <summary>
         /// When user inputs a long title, it will result a long slug, <see cref="BlogUtil.SlugifyTaxonomy(string, int, IEnumerable{string})"/>

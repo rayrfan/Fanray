@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests
+namespace Fan.Blog.IntegrationTests.Services
 {
     /// <summary>
     /// Integration tests for <see cref="MetaWeblogService"/> class.
@@ -35,7 +35,7 @@ namespace Fan.Blog.IntegrationTests
             _svc = new MetaWeblogService(
                 userSvc,
                 new FakeSignInManager(contextAccessor.Object),
-                _blogSvc,
+                _blogPostSvc,
                 _catSvc,
                 _tagSvc,
                 _imgSvc,
@@ -55,7 +55,7 @@ namespace Fan.Blog.IntegrationTests
         public async void NewPostAsync_Test()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var metaPost = new MetaPost
             {
                 AuthorId = Actor.ADMIN_ID.ToString(),
@@ -83,7 +83,7 @@ namespace Fan.Blog.IntegrationTests
         public async void Author_Creates_NewPost_With_Existing_Tags()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var metaPost = new MetaPost
             {
                 AuthorId = Actor.ADMIN_ID.ToString(),
@@ -114,7 +114,7 @@ namespace Fan.Blog.IntegrationTests
         public async void EditPostAsync_Test()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var metaPost = new MetaPost
             {
                 AuthorId = Actor.ADMIN_ID.ToString(),
@@ -143,7 +143,7 @@ namespace Fan.Blog.IntegrationTests
         public async void DeletePostAsync_Test()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act
             await _svc.DeletePostAsync(APP_KEY, "1", USERNAME, PASSWORD);
@@ -156,7 +156,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetRecentPostsAsync_Test()
         {
             // Arrange
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             // Act
             var result = await _svc.GetRecentPostsAsync(BLOG_ID, USERNAME, PASSWORD, int.MaxValue, ROOT_URL);
@@ -171,7 +171,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetCategoriesAsync_Test()
         {
             // Arrange
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             // Act
             var metaCatList = await _svc.GetCategoriesAsync(BLOG_ID, USERNAME, PASSWORD, ROOT_URL);
@@ -186,7 +186,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetKeywordsAsync_Test()
         {
             // Arrange
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             // Act
             var result = await _svc.GetKeywordsAsync(BLOG_ID, USERNAME, PASSWORD);
@@ -203,7 +203,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetUsersBlogsAsync_Test()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act
             var result = await _svc.GetUsersBlogsAsync(APP_KEY, USERNAME, PASSWORD, ROOT_URL);

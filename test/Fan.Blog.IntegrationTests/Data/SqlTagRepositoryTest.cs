@@ -4,7 +4,7 @@ using Fan.Blog.Models;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests
+namespace Fan.Blog.IntegrationTests.Data
 {
     /// <summary>
     /// Tests for <see cref="SqlPostRepository"/> class.
@@ -42,7 +42,7 @@ namespace Fan.Blog.IntegrationTests
         public async void DeleteTag_Will_Delete_PostTag_Association_By_Cascade_Delete()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act
             await _tagRepo.DeleteAsync(1);
@@ -59,7 +59,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetTagList_Returns_PostCount_With_Tags()
         {
             // Arrange: tag2 are all labeled on drafts
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             // Act
             var list = await _tagRepo.GetListAsync();

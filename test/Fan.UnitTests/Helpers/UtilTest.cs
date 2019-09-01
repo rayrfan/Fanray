@@ -25,6 +25,15 @@ namespace Fan.UnitTests.Helpers
             Assert.Equal(expected, Util.Slugify(title));
         }
 
+        [Theory]
+        [InlineData("h12", 1, "h")]
+        [InlineData("h 2", 3, "h-2")]
+        [InlineData("h 21", 3, "h-2")]
+        public void Slugify_has_maxlen(string title, int maxlen, string expected)
+        {
+            Assert.Equal(expected, Util.Slugify(title, maxlen: maxlen));
+        }
+
         /// <summary>
         /// Test for <see cref="Util.GetExcerpt(string, int)"/> method.
         /// TODO should have a performance test on GetExcerpt.

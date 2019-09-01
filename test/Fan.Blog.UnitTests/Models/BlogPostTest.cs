@@ -1,18 +1,23 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Blog.UnitTests.Base;
+using Fan.Exceptions;
 using Moq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fan.Blog.UnitTests.Services
+namespace Fan.Blog.UnitTests.Models
 {
     /// <summary>
-    /// Unit tests post title and slug.
+    /// Unit tests for key <see cref="BlogPost"/> properties such as title, slug.
     /// </summary>
-    public class BlogPostSEOTest : BlogServiceUnitTestBase
+    public class BlogPostTest : BlogUnitTestBase
     {
+        // -------------------------------------------------------------------- Title / Slug
+
         /// <summary>
         /// This test is to make sure the following, <see cref="https://github.com/FanrayMedia/Fanray/issues/88"/>
         /// 
@@ -121,6 +126,96 @@ namespace Fan.Blog.UnitTests.Services
             var slugUpdated = await _blogPostSvc.GetBlogPostSlugAsync(slug, dt, ECreateOrUpdate.Update, postId);
 
             Assert.Equal("i-want-a-different-slug-for-this-post-2", slugUpdated);
+        }
+
+        // -------------------------------------------------------------------- Post Validation
+
+        /// <summary>
+        /// If your post is a draft, then the title can be empty.
+        /// </summary>
+        [Fact]
+        public async void BlogPost_draft_can_have_empty_title()
+        {
+            // When you have a draft with empty title
+            var blogPost = new BlogPost { Title = "", Status = EPostStatus.Draft };
+
+            // Then its validation will not fail
+            await blogPost.ValidateTitleAsync();
+        }
+
+        /// <summary>
+        /// When you publish a blog post the title cannot be empty.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="numberOfErrors"></param>
+        /// <param name="expectedMessages"></param>
+        [Theory]
+        [InlineData(null, EPostStatus.Published, 1, new string[] { "'Title' must not be empty." })]
+        [InlineData("", EPostStatus.Published, 1, new string[] { "'Title' must not be empty." })]
+        public async void Publish_BlogPost_does_not_allow_empty_title(string title, EPostStatus status, int numberOfErrors, string[] expectedMessages)
+        {
+            // Given a blog post to publish
+            var blogPost = new BlogPost { Title = title, Status = status };
+
+            // When validate it throws FanException
+            await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
+
+            // And with these number of errors and messages
+            try
+            {
+                await blogPost.ValidateTitleAsync();
+            }
+            catch (FanException ex)
+            {
+                Assert.Equal(numberOfErrors, ex.ValidationErrors.Count);
+                Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
+            }
+        }
+
+        /// <summary>
+        /// A blog post title cannot exceed 250 characters regardless whether it's published or draft.
+        /// </summary>
+        [Theory]
+        [InlineData(EPostStatus.Draft, new string[] { "The length of 'Title' must be 250 characters or fewer. You entered 251 characters." })]
+        [InlineData(EPostStatus.Published, new string[] { "The length of 'Title' must be 250 characters or fewer. You entered 251 characters." })]
+        public async void BlogPost_title_cannot_exceed_250_chars_regardless_status(EPostStatus status, string[] expectedMessages)
+        {
+            // Arrange: a blog post with a title of 251 chars
+            var title = string.Join("", Enumerable.Repeat<char>('a', 251));
+            var blogPost = new BlogPost { Title = title, Status = status };
+
+            // Act: validate
+            await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
+            try
+            {
+                await blogPost.ValidateTitleAsync();
+            }
+            catch (FanException ex)
+            {
+                // Assert: 1 error
+                Assert.Equal(1, ex.ValidationErrors.Count);
+                Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
+            }
+        }
+
+        /// <summary>
+        /// When you pass <see cref="BlogPostService.CreateAsync(BlogPost)"/> a null param
+        /// you get <see cref="ArgumentNullException"/>.
+        /// </summary>
+        [Fact]
+        public async void CreateAsync_throws_ArgumentNullException_if_param_passed_in_is_null()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _blogPostSvc.CreateAsync(null));
+        }
+
+        /// <summary>
+        /// When you pass <see cref="BlogPostService.UpdateAsync(BlogPost)"/> a null param
+        /// you get <see cref="ArgumentNullException"/>.
+        /// </summary>
+        [Fact]
+        public async void UpdateAsync_throws_ArgumentNullException_if_param_passed_in_is_null()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _blogPostSvc.UpdateAsync(null));
         }
     }
 }

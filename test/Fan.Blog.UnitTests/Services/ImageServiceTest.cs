@@ -11,7 +11,7 @@ namespace Fan.Blog.UnitTests.Services
     /// <summary>
     /// Unit tests for <see cref="ImageService"/>.
     /// </summary>
-    public class ImageServiceTest : BlogServiceUnitTestBase
+    public class ImageServiceTest : BlogUnitTestBase
     {
         readonly string _absPath;
         readonly Media _media;

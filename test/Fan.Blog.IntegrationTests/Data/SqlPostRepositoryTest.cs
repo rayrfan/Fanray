@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Fan.Blog.IntegrationTests
+namespace Fan.Blog.IntegrationTests.Data
 {
     /// <summary>
     /// Tests for <see cref="SqlPostRepository"/> class.
@@ -33,7 +33,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPost_By_Id_Will_Return_Category_And_Tags_For_BlogPost()
         {
             // Arrange: 1 post with 1 cat and 2 tags
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act: get
             var post = await _postRepo.GetAsync(1, EPostType.BlogPost);
@@ -66,7 +66,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPost_By_Slug_Will_Return_Category_And_Tags_For_BlogPost()
         {
             // Arrange: 1 blog post with 1 cat and 2 tags
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act: get
             var post = await _postRepo.GetAsync(1, EPostType.BlogPost);
@@ -99,7 +99,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPost_By_Slug_And_Date_Will_Return_BlogPost_If_Found()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act
             var blogPost = await _postRepo.GetAsync(POST_SLUG, 2017, 1, 1);
@@ -118,7 +118,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPostList_By_BlogPosts_Returns_Only_Published_Posts()
         {
             // Arrange: 5 drafts, 6 published
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             var query = new PostListQuery(EPostListQueryType.BlogPosts)
             {
@@ -143,7 +143,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPostList_By_Drafts_Returns_All_Drafts()
         {
             // Arrange: 11 drafts
-            SeedTestPosts(23);
+            Seed_N_BlogPosts(23);
 
             var query = new PostListQuery(EPostListQueryType.BlogDrafts); // draft returns all, so no need for page indx and size
 
@@ -163,7 +163,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPostList_By_Category_Returns_Posts_For_Category()
         {
             // Arrange
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             var query = new PostListQuery(EPostListQueryType.BlogPostsByCategory)
             {
@@ -190,7 +190,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPostList_By_Tag_Returns_Posts_For_Tag(string slug, int expectedPostCount)
         {
             // Arrange: given 11 posts
-            SeedTestPosts(11);
+            Seed_N_BlogPosts(11);
 
             var query = new PostListQuery(EPostListQueryType.BlogPostsByTag)
             {
@@ -216,7 +216,7 @@ namespace Fan.Blog.IntegrationTests
         public async void GetPostList_By_Number_Returns_All_Posts_Regardless_Status()
         {
             // Arrange: given 11 drafts, 12 published
-            SeedTestPosts(23);
+            Seed_N_BlogPosts(23);
 
             // Act: when query Max number of post by MetaWeblog
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = int.MaxValue };
@@ -238,7 +238,7 @@ namespace Fan.Blog.IntegrationTests
         public async void CreatePost_Will_Create_Its_Category_And_Tags_Automatically()
         {
             // Arrange: given brand new 1 post, 1 cat and 2 tags
-            SeedUser();
+            Seed_1User();
             var cat = new Category { Slug = "tech", Title = "Technology" };
             var tag1 = new Tag { Slug = "aspnet", Title = "ASP.NET" };
             var tag2 = new Tag { Slug = "cs", Title = "C#" };
@@ -248,7 +248,6 @@ namespace Fan.Blog.IntegrationTests
                 Body = "A post body.",
                 UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
-                RootId = null,
                 Title = "Hello World",
                 Slug = "hello-world",
                 Type = EPostType.BlogPost,
@@ -277,14 +276,13 @@ namespace Fan.Blog.IntegrationTests
         public async void CreatePost_With_Existing_Tags()
         {
             // Arrange: given 1 post, 1 cat and 2 tags
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             // a new post
             var post = new Post
             {
                 Body = "A post body.",
                 UserId = Actor.ADMIN_ID,
                 UpdatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
-                RootId = null,
                 Title = "Hello World",
                 Slug = "hello-world",
                 Type = EPostType.BlogPost,
@@ -318,7 +316,7 @@ namespace Fan.Blog.IntegrationTests
         public async void UpdatePost_With_Tags_Updated()
         {
             // Arrange: given 1 post with 2 tags
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             // and another new tag
             var tagRepo = new SqlTagRepository(_db);
             var tagJava = await tagRepo.CreateAsync(new Tag { Title = "Java", Slug = "java" });
@@ -360,7 +358,7 @@ namespace Fan.Blog.IntegrationTests
         public async void UpdatePost_Can_Add_None_Tracked_Tag()
         {
             // Arrange: given 1 post with 2 tags
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             // and a non-tracked tag
             var tagRepo = new SqlTagRepository(_db);
             await tagRepo.CreateAsync(new Tag { Title = "Java", Slug = "java" });
@@ -385,7 +383,7 @@ namespace Fan.Blog.IntegrationTests
         public async void UpdatePost_With_A_New_Category()
         {
             // Arrange a post with a category
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
             var post = await _db.Set<Post>().SingleAsync(p => p.Slug == POST_SLUG);
             Assert.Equal(1, post.Category.Id);
             Assert.Equal(1, post.CategoryId);
@@ -428,7 +426,7 @@ namespace Fan.Blog.IntegrationTests
         public async void DeletePost_Removes_Post_From_Db()
         {
             // Arrange
-            SeedTestPost();
+            Seed_1BlogPost_with_1Category_2Tags();
 
             // Act
             await _postRepo.DeleteAsync(1);
