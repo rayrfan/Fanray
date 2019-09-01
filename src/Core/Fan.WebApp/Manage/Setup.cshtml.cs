@@ -195,7 +195,7 @@ namespace Fan.WebApp.Manage
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures[0].ErrorMessage);
+                return BadRequest(ex.ValidationErrors[0].ErrorMessage);
             }
         }
 
@@ -294,6 +294,12 @@ namespace Fan.WebApp.Manage
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePostList.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPostList.Id);
+
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageSidebar1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageSidebar2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageBeforeContent.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageAfterContent.Id);
+
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3.Id);

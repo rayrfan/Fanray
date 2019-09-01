@@ -30,6 +30,12 @@ namespace Fan.Widgets
         public static WidgetAreaInfo BlogAfterPost = new WidgetAreaInfo { Id = "blog-after-post", Name = "Blog - After Post" };
         public static WidgetAreaInfo BlogBeforePostList = new WidgetAreaInfo { Id = "blog-before-post-list", Name = "Blog - Before Post List" };
         public static WidgetAreaInfo BlogAfterPostList = new WidgetAreaInfo { Id = "blog-after-post-list", Name = "Blog - After Post List" };
+
+        public static WidgetAreaInfo PageSidebar1 = new WidgetAreaInfo { Id = "page-sidebar1", Name = "Page - Sidebar1" };
+        public static WidgetAreaInfo PageSidebar2 = new WidgetAreaInfo { Id = "page-sidebar2", Name = "Page - Sidebar2" };
+        public static WidgetAreaInfo PageBeforeContent = new WidgetAreaInfo { Id = "page-before-content", Name = "Page - Before Content" };
+        public static WidgetAreaInfo PageAfterContent = new WidgetAreaInfo { Id = "page-after-content", Name = "Page - After Content" };
+
         public static WidgetAreaInfo Footer1 = new WidgetAreaInfo { Id = "footer1", Name = "Footer 1" };
         public static WidgetAreaInfo Footer2 = new WidgetAreaInfo { Id = "footer2", Name = "Footer 2" };
         public static WidgetAreaInfo Footer3 = new WidgetAreaInfo { Id = "footer3", Name = "Footer 3" };
@@ -42,6 +48,12 @@ namespace Fan.Widgets
             BlogAfterPost,
             BlogBeforePostList,
             BlogAfterPostList,
+
+            PageSidebar1,
+            PageSidebar2,
+            PageBeforeContent,
+            PageAfterContent,
+
             Footer1,
             Footer2,
             Footer3,
@@ -329,7 +341,7 @@ namespace Fan.Widgets
                         Type = EMetaType.Widget,
                     });
                 }
-                catch (FanException ex) when (ex.ExceptionType == EExceptionType.MetaDuplicate)
+                catch (FanException ex) when (ex.ExceptionType == EExceptionType.DuplicateRecord)
                 {
                 }
             }
