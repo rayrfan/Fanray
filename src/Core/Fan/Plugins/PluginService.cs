@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Fan.Plugins
@@ -31,13 +30,6 @@ namespace Fan.Plugins
         /// The system plugin directory, "SysPlugins".
         /// </summary>
         public const string SYS_PLUGIN_DIR = "SysPlugins";
-        /// <summary>
-        /// A plugin's folder allows "a-zA-Z", "_", "-", "." and numbers.
-        /// </summary>
-        /// <remarks>
-        /// https://stackoverflow.com/a/2988351/32240
-        /// </remarks>
-        public const string PLUGIN_FOLDER_REGEX = @"[\w.-]";
 
         private const string CACHE_KEY_PLUGIN_MANIFESTS = "plugin-manifests";
         private TimeSpan Cache_Time_Plugin_Manifests = new TimeSpan(0, 10, 0);
@@ -224,13 +216,6 @@ namespace Fan.Plugins
 
             return plugin;
         }
-
-        /// <summary>
-        /// Returns true if plugin folder name is valid.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        public override bool IsValidExtensionFolder(string folder) => new Regex(PLUGIN_FOLDER_REGEX).IsMatch(folder);
 
         /// <summary>
         /// Upserts a plugin settings.

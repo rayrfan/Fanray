@@ -58,12 +58,10 @@ namespace Fan.IntegrationTests.Themes
         }
 
         /// <summary>
-        /// A theme's folder name can only be alphanumeric, dash, underscore; it cannot contain
-        /// characters like '/', ' ', '.' etc.
+        /// An extension's folder allows "a-zA-Z", "_", "-", "." and numbers.
         /// </summary>
         /// <param name="folder"></param>
         [Theory]
-        [InlineData("test.")]
         [InlineData("test one")]
         [InlineData("/test")]
         public async void Invalid_theme_folder_name_cannot_be_activated(string folder)

@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Fan.IntegrationTests")]
@@ -67,13 +66,6 @@ namespace Fan.Widgets
         /// The widgets directory inside the web app.
         /// </summary>
         public const string WIDGETS_DIR = "Widgets";
-        /// <summary>
-        /// A widget's folder must be in PascalCase.
-        /// </summary>
-        /// <remarks>
-        /// https://stackoverflow.com/a/2106423/32240
-        /// </remarks>
-        public const string WIDGET_FOLDER_REGEX = @"^[A-Z][a-z]+(?:[A-Z][a-z]+)*$";
 
         private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
         private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
@@ -372,10 +364,6 @@ namespace Fan.Widgets
             await metaRepository.UpdateAsync(meta);
             await InvalidAreaCacheAsync();
         }
-
-        // -------------------------------------------------------------------- validate
-
-        public override bool IsValidExtensionFolder(string folder) => new Regex(WIDGET_FOLDER_REGEX).IsMatch(folder);
 
         // -------------------------------------------------------------------- private methods
 

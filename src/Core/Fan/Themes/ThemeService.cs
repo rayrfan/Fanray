@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static MoreLinq.Extensions.DistinctByExtension;
 
@@ -30,10 +29,6 @@ namespace Fan.Themes
         /// The directory that contains themes "Themes".
         /// </summary>
         public const string THEME_DIR = "Themes";
-        /// <summary>
-        /// A theme's folder can only contain alphanumeric, dash and underscore.
-        /// </summary>
-        public const string THEME_FOLDER_REGEX = @"^[a-zA-Z0-9-_]+$";
 
         private const string CACHE_KEY_INSTALLED_THEMES_MANIFESTS = "installed-theme-manifests";
         private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
@@ -142,7 +137,5 @@ namespace Fan.Themes
                 return list;
             });
         }
-
-        public override bool IsValidExtensionFolder(string folder) => new Regex(THEME_FOLDER_REGEX).IsMatch(folder);
     }
 }
