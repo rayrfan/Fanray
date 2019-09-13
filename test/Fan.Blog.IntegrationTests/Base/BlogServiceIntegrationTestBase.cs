@@ -99,7 +99,7 @@ namespace Fan.Blog.IntegrationTests.Base
             _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
             _imgSvc = new ImageService(_mediaSvc, _storageProviderMock.Object, appSettingsMock.Object);
             _blogPostSvc = new BlogPostService(_settingSvcMock.Object, _imgSvc, postRepo, cache, loggerBlogPostSvc, mapper, mediator);
-            _pageService = new PageService(postRepo, loggerPageSvc, mapper);
+            _pageService = new PageService(postRepo, cache, loggerPageSvc, mapper);
         }
     }
 }

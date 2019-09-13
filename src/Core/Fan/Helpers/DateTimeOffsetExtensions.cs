@@ -5,7 +5,8 @@ namespace System
 {
     public static class DateTimeOffsetExtensions
     {
-        public static string ToDisplayString(this DateTimeOffset dt, string timeZoneId, string format)
+        public static string ToDisplayString(this DateTimeOffset dt, string timeZoneId, 
+            string format = "dddd, MMMM dd, yyyy")
         {
             return (DateTimeOffset.UtcNow.Day - dt.Day) > 2 ?
                 Util.ConvertTime(dt, timeZoneId).ToString(format) :

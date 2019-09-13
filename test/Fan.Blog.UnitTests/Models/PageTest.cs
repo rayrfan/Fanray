@@ -1,8 +1,9 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Blog.UnitTests.Base;
 using Fan.Exceptions;
+using Markdig;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,30 +29,6 @@ namespace Fan.Blog.UnitTests.Models
         }
 
         /// <summary>
-        /// Unlike a blog post, user cannot specify a page slug because a parent page's TOC depends on 
-        /// its children's titles to calc their slugs.
-        /// </summary>
-        [Fact]
-        public async void Toc_is_calucated_based_on_child_page_titles()
-        {
-            // Given a post with TOC
-            var toc = "- [[Test Page 1]] \n- [[Test Page 2]]";
-            var post = new Post { Toc = toc, Type = EPostType.Page, Id = 1 };
-            _postRepoMock.Setup(repo => repo.GetAsync(It.IsAny<int>(), EPostType.Page)).Returns(Task.FromResult(post));
-
-            // When the page is retrieved
-            var page = await _pageSvc.GetAsync(1);
-
-            // Then the toc is transformed into html through the TocHtml prop
-            var expected = @"<ul>
-<li><a href=""/test-page-1"" title=""Test Page 1"">Test Page 1</a></li>
-<li><a href=""/test-page-2"" title=""Test Page 2"">Test Page 2</a></li>
-</ul>
-";
-            Assert.Equal(expected.Replace("\r", ""), page.TocHtml);
-        }
-
-        /// <summary>
         /// Slugs may get url encoded which may exceed max length, if that happens the slug is trimmed.
         /// </summary>
         [Fact]
@@ -70,7 +47,7 @@ namespace Fan.Blog.UnitTests.Models
             Assert.Equal(250, expectedSlug.Length);
 
             // Then the slug comes out to be 250 long
-            Assert.Equal(expectedSlug, BlogUtil.SlugifyPageTitle(page.Title));
+            Assert.Equal(expectedSlug, PageService.SlugifyPageTitle(page.Title));
         }
 
         /// <summary>
@@ -91,8 +68,41 @@ namespace Fan.Blog.UnitTests.Models
             // Then you get FanException
             var givenTitle = string.Join("", Enumerable.Repeat<char>('验', 30));
             var page = new Page { Title = givenTitle };
-            var slug2 = BlogUtil.SlugifyPageTitle(page.Title);
+            var slug2 = PageService.SlugifyPageTitle(page.Title);
             await Assert.ThrowsAsync<FanException>(() => _pageSvc.EnsurePageSlugAsync(slug2, page));
+        }
+
+        /// <summary>
+        /// Unlike a blog post, user cannot specify a page slug because a parent page's navigation depends on 
+        /// its children's titles to calc their slugs.
+        /// </summary>
+        [Fact]
+        public void Page_navigation_is_tranformed_to_HTML_based_on_child_page_titles()
+        {
+            var parentSlug = "docs";
+            var navMd = "- [[Getting Started]] \n- [[Deploy to Azure]]";
+
+            var actual = PageService.NavMdToHtml(navMd, parentSlug).Replace("\n", "");
+            var expected = @"<ul><li><a href=""/docs/getting-started"" title=""Getting Started"">Getting Started</a></li><li><a href=""/docs/deploy-to-azure"" title=""Deploy to Azure"">Deploy to Azure</a></li></ul>";
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// Test convert source code md to html by Markdig library.
+        /// </summary>
+        /// <remarks>
+        /// Currently this is not used as html is gotten directly from the editor preview.
+        /// TODO try https://github.com/pauldotknopf/Pek.Markdig.HighlightJs
+        /// </remarks>
+        [Fact]
+        public void SourceCode_markdown_is_tranformed_to_pre_code_html_by_Markdig()
+        {
+            var md = @"```cs
+var i = 5;
+```";
+            var actual = Markdown.ToHtml(md).Replace("\n", "");
+            var expected = @"<pre><code class=""language-cs"">var i = 5;</code></pre>";
+            Assert.Equal(expected, actual);
         }
     }
 }

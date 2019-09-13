@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Fan.Exceptions;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -31,27 +32,38 @@ namespace Microsoft.Extensions.Caching.Distributed
         public async static Task<T> GetAsync<T>(this IDistributedCache cache, string key,
            TimeSpan cacheTime, Func<Task<T>> acquire, bool includeTypeName = false) where T : class
         {
-            var str = await cache.GetStringAsync(key);
+            try
+            {
+                var str = await cache.GetStringAsync(key);
 
-            if (str != null)
-            {
-                return includeTypeName ?
-                    JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) :
-                    JsonConvert.DeserializeObject<T>(str);
-            }
-            else
-            {
-                var task = acquire();
-                if (task != null && task.Result != null)
+                if (str != null)
                 {
-                    str = includeTypeName ?
-                        await Task.Factory.StartNew(() => JsonConvert.SerializeObject(task.Result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })) :
-                        await Task.Factory.StartNew(() => JsonConvert.SerializeObject(task.Result));
-
-                    await cache.SetStringAsync(key, str, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = cacheTime });
+                    return includeTypeName ?
+                        JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto }) :
+                        JsonConvert.DeserializeObject<T>(str);
                 }
+                else
+                {
+                    var task = acquire();
+                    if (task != null && task.Result != null)
+                    {
+                        str = includeTypeName ?
+                            await Task.Factory.StartNew(() => JsonConvert.SerializeObject(task.Result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })) :
+                            await Task.Factory.StartNew(() => JsonConvert.SerializeObject(task.Result));
 
-                return await task;
+                        await cache.SetStringAsync(key, str, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = cacheTime });
+                    }
+
+                    return await task;
+                }
+            }
+            catch(AggregateException ex)
+            {
+                foreach (var e in ex.Flatten().InnerExceptions)
+                {
+                    if (e is FanException) throw e;
+                }
+                throw new FanException(ex.InnerException == null ? ex.Message : ex.InnerException.Message);
             }
         }       
     }

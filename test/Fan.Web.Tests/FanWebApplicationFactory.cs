@@ -2,6 +2,7 @@
 using Fan.Blog.Models;
 using Fan.Data;
 using Fan.Membership;
+using Fan.Themes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -86,7 +87,7 @@ namespace Fan.Web.Tests
             db.Set<Meta>().AddRange(GetSettings()); // settings
             db.Users.Add(GetUser()); // user
             db.Set<Post>().Add(GetPostWith1Category2Tags()); // post with category and tags
-            db.Set<Post>().AddRange(GetPageWith1Child());
+            db.Set<Post>().AddRange(GetPages());
             db.SaveChanges();
         }
 
@@ -173,13 +174,32 @@ namespace Fan.Web.Tests
             return post;
         }
 
-        private List<Post> GetPageWith1Child()
+        /// <summary>
+        /// Returns 2 parent pages "Home" and "About" and 1 child page hanging off of About.
+        /// </summary>
+        /// <returns></returns>
+        private List<Post> GetPages()
         {
             var list = new List<Post>();
 
-            var parent = new Post
+            var homePage = new Post
             {
                 Id = 2,
+                ParentId = 0,
+                Title = "Home",
+                Slug = "home",
+                Body = "<h1>Home Page</h1>",
+                BodyMark = "# Home",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout2,
+            };
+
+            var parent = new Post
+            {
+                Id = 3,
                 ParentId = 0,
                 Title = "About",
                 Slug = "about",
@@ -189,12 +209,13 @@ namespace Fan.Web.Tests
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 Type = EPostType.Page,
                 Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout3,
             };
 
             var child = new Post
             {
-                Id = 3,
-                ParentId = 2,
+                Id = 4,
+                ParentId = 3,
                 Title = "Ray",
                 Slug = "ray",
                 Body = "<h1>About Ray</h1>",
@@ -203,8 +224,10 @@ namespace Fan.Web.Tests
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 Type = EPostType.Page,
                 Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout3,
             };
 
+            list.Add(homePage);
             list.Add(parent);
             list.Add(child);
 

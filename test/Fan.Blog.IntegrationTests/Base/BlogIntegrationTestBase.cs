@@ -214,7 +214,7 @@ namespace Fan.Blog.IntegrationTests.Base
             child2.Id = 4;
             child2.ParentId = 2;
 
-            parent1.Toc = "- [[Test Page 1]] \n- [[Test Page 2]]";
+            parent1.Nav = "- [[Test Page 1]] \n- [[Test Page 2]]";
 
             list.Add(parent1);
             list.Add(parent2);

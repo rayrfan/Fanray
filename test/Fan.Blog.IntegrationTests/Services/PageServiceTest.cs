@@ -5,8 +5,6 @@ using Fan.Blog.Models;
 using Fan.Blog.Services;
 using Fan.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Fan.Blog.IntegrationTests.Services
@@ -31,6 +29,7 @@ namespace Fan.Blog.IntegrationTests.Services
             {
                 UserId = userId,
                 Title = "Test Page",
+                Body = "<h1>Test Page</h1>\n", // html comes directly from editor
                 BodyMark = "# Test Page",
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
                 Status = EPostStatus.Published,

@@ -1,10 +1,13 @@
 ﻿using Fan.Blog.Enums;
+using Fan.Blog.Validators;
 using Fan.Data;
+using Fan.Exceptions;
 using Fan.Membership;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace Fan.Blog.Models
 {
@@ -13,6 +16,20 @@ namespace Fan.Blog.Models
         public Post()
         {
             PostTags = new HashSet<PostTag>();
+        }
+
+        /// <summary>
+        /// Validates a post object and throws <see cref="FanException"/> if validation fails.
+        /// </summary>
+        /// <returns></returns>
+        public async Task ValidateTitleAsync()
+        {
+            var validator = new PostTitleValidator();
+            var result = await validator.ValidateAsync(this);
+            if (!result.IsValid)
+            {
+                throw new FanException($"{Type} title is not valid.", result.Errors);
+            }
         }
 
         /// <summary>
@@ -88,18 +105,25 @@ namespace Fan.Blog.Models
         public string Excerpt { get; set; }
 
         /// <summary>
-        /// Parent page id for child page, 0 for root page, null for blog post.
+        /// Parent page id, null for parent page.
         /// </summary>
         public int? ParentId { get; set; }
 
         /// <summary>
-        /// Root page id for child page, 0 for root page, null for blog post.
+        /// Root page id.
         /// </summary>
+        /// <remarks>
+        /// Not currently used.
+        /// </remarks>
         public int? RootId { get; set; }
 
         /// <summary>
         /// The post slug.
         /// </summary>
+        /// <remarks>
+        /// Slug is searched upon and thus has an index on it. Slug allows null and is not unique, 
+        /// the service layer ensures its uniqueness under their specific conditions.
+        /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Slug { get; set; }
 
@@ -112,7 +136,7 @@ namespace Fan.Blog.Models
         /// Post title.
         /// </summary>
         /// <remarks>
-        /// I decided not to make it required in db, though I implemented in BLL making it required.
+        /// TODO consider removing the maxlen requirement since there is no index on this field.
         /// </remarks>
         [StringLength(maximumLength: 256)]
         public string Title { get; set; }
@@ -143,5 +167,20 @@ namespace Fan.Blog.Models
         public int ViewCount { get; set; }
 
         public virtual ICollection<PostTag> PostTags { get; set; }
+
+        /// <summary>
+        /// The featured image id.
+        /// </summary>
+        //public int? FeaturedImageId { get; set; }
+
+        /// <summary>
+        /// A parent page's Table of Content.
+        /// </summary>
+        /// <remarks>
+        /// Saved in markdown and converted to HTML when displayed to public.
+        /// </remarks>
+        public string Nav { get; set; }
+
+        public byte? PageLayout { get; set; }
     }
 }
