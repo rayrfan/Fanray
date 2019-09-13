@@ -23,5 +23,9 @@ namespace Fan.Themes
         /// Widget areas the theme uses.
         /// </summary>
         public WidgetAreaInfo[] WidgetAreas { get; set; }
+        /// <summary>
+        /// Page layouts.
+        /// </summary>
+        public PageLayoutInfo[] PageLayouts { get; set; }
     }
 }

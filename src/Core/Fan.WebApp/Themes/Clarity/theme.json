@@ -8,6 +8,23 @@
   "license": "Apache 2.0",
   "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
   "tags": [ "responsive", "right-sidebar" ],
+  "pageLayouts": [
+    {
+      "id": "layout1",
+      "name": "Default",
+      "description": "Default layout with a right sidebar"
+    },
+    {
+      "id": "layout2",
+      "name": "Full",
+      "description": "For full page design with no sidebars, e.g. a home page"
+    },
+    {
+      "id": "layout3",
+      "name": "Multipage",
+      "description": "For pages with child pages, e.g. documentation pages"
+    }
+  ],
   "widgetAreas": [
     {
       "id": "blog-sidebar1",
@@ -16,6 +33,14 @@
     {
       "id": "blog-after-post",
       "name": "Blog After Post Content"
+    },
+    {
+      "id": "page-sidebar1",
+      "name": "Page Default Layout Sidebar"
+    },
+    {
+      "id": "page-sidebar2",
+      "name": "Page Docs Layout Sidebar"
     }
   ]
 }
