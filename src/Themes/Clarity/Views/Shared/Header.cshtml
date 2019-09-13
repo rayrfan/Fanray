@@ -6,16 +6,47 @@
     </h5>
     <nav class="navbar my-md-0 mr-md-3 mb-sm-0 p-0">
         <a class="p-2 text-dark" href="/">Home</a>
+        <a class="p-2 text-dark" href="/blog">Blog</a>
+        <a class="p-2 text-dark" href="/docs">Docs</a>
+        <a class="p-2 text-dark" href="/about">About</a>
         @if (Model.IsSignedIn)
         {
-            <a class="p-2 text-dark" href="/admin">Admin</a>
             <div class="dropdown">
-                <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="p-2 text-dark nav-link" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                    <a class="dropdown-item" href="/admin/posts">Posts</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/pages">Pages</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/media">Media</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/categories">Categories</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/tags">Tags</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/Navigation">Navigation</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/Themes">Themes</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/plugins">Plugins</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/Widgets">Widgets</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/users">Users</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/settings">Settings</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <a class="nav-link" href="#" id="avatarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img gravatar-email="@Model.CurrentUser.Email" title="@Model.CurrentUser.DisplayName" class="avatar" />
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="/admin/compose"><i class="icon-pencil-square-o" aria-hidden="true"></i> Write</a>
-                    <div class="dropdown-divider"></div>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="avatarDropdown">
+                    <a class="dropdown-item" href="/admin/compose"><i class="icon-pencil-square-o" aria-hidden="true"></i> Post</a>
+                    <div class="dropdown-divider m-0"></div>
+                    <a class="dropdown-item" href="/admin/compose/page"><i class="icon-pencil-square-o" aria-hidden="true"></i> Page</a>
+                    <div class="dropdown-divider m-0"></div>
                     <form asp-area="" asp-controller="Home" asp-action="Logout" method="post" id="logoutForm">
                         <button type="submit" class="dropdown-item btn btn-link navbar-btn navbar-link"><i class="icon-power-off" aria-hidden="true"></i> Logout</button>
                     </form>

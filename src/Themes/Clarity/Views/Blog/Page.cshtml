@@ -1,23 +1,46 @@
 ﻿@model PageVM
 @inject SignInManager<User> SignInManager
 @{ 
-    Layout = "_PageLayout";
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = Model.Excerpt;
+    switch (Model.PageLayout)
+    {
+        case EPageLayout.Layout2:
+            Layout = "_PageFullLayout";
+            break;
+        case EPageLayout.Layout3:
+            Layout = "_PageMultipageLayout";
+            break;
+        default:
+            Layout = "_PageLayout";
+            break;
+    }
 }
-<article>
-    <header>
-        <h1>
-            @Model.Title
-        </h1>
-        <div class="post-info clearfix">
-            <i class="icon-user" aria-hidden="true"></i><span class="post-info-item">@Model.Author</span>
-            <i class="icon-calendar" aria-hidden="true"></i><span class="post-info-item">@Model.CreatedOnDisplay</span>
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.EditLink">Edit</a></span>
-            }
+
+    <article>
+        @if (Layout != "_PageFullLayout")
+        {
+            <header>
+                <h1>
+                    @Model.Title
+                </h1>
+                <div class="post-info clearfix">
+                    <i class="icon-user" aria-hidden="true"></i><span class="post-info-item">@Model.Author</span>
+                    <i class="icon-calendar" aria-hidden="true"></i><span class="post-info-item">@Model.CreatedOnDisplay</span>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.EditLink">Edit</a></span>
+                    }
+                </div>
+            </header>
+        }
+        <div class="post-body">
+            @Html.Raw(Model.Body)
         </div>
-    </header>
-    <div class="post-body">
-        @Html.Raw(Model.Body)
-    </div>
-</article>
+        @if (SignInManager.IsSignedIn(User) && Layout == "_PageFullLayout")
+        {
+            <div class="text-center pt-4">
+                <a href="@Model.EditLink"><i class="icon-pencil" aria-hidden="true"></i></a>
+            </div>
+        }
+    </article>
