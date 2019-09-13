@@ -200,7 +200,7 @@ namespace Fan.WebApp
 
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
-            routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
+            //routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
             BlogRoutes.RegisterRoutes(routes);
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }

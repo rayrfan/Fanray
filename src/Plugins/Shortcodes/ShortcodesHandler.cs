@@ -1,4 +1,5 @@
-﻿using Fan.Plugins;
+﻿using Fan.Blog.Models.View;
+using Fan.Plugins;
 using Fan.Web.Events;
 using Fan.Web.Models.Blog;
 using MediatR;
@@ -9,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace Shortcodes
 {
-    public class ShortcodesHandler : INotificationHandler<ModelPreRender<BlogPostViewModel>>,
+    public class ShortcodesHandler : INotificationHandler<ModelPreRender<PageVM>>, 
+                                     INotificationHandler<ModelPreRender<BlogPostViewModel>>,
                                      INotificationHandler<ModelPreRender<BlogPostListViewModel>>
     {
         private readonly IShortcodeService shortcodeService;
@@ -19,6 +21,14 @@ namespace Shortcodes
         {
             this.shortcodeService = shortcodeService;
             this.pluginService = pluginService;
+        }
+
+        public async Task Handle(ModelPreRender<PageVM> notification, CancellationToken cancellationToken)
+        {
+            if (!await IsPluginActiveAsync() || !(notification.Model is PageVM)) return;
+
+            var body = ((PageVM)notification.Model).Body;
+            ((PageVM)notification.Model).Body = shortcodeService.Parse(body);
         }
 
         public async Task Handle(ModelPreRender<BlogPostViewModel> notification, CancellationToken cancellationToken)

@@ -36,7 +36,7 @@ namespace Fan.Web.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index => RedirectToAction(nameof(BlogController.Index), "Blog");
+        //public IActionResult Index => RedirectToAction(nameof(BlogController.Index), "Blog");
 
         /// <summary>
         /// 404 comes here.
@@ -69,7 +69,9 @@ namespace Fan.Web.Controllers
             // FanException occurred unhandled
             if (error !=null && error is FanException)
             {
-                return View("Error", error.Message);
+                return ((FanException)error).ExceptionType == EExceptionType.ResourceNotFound ? 
+                    View("404") :
+                    View("Error", error.Message);
             }
 
             // 500 or exception other than FanException occurred unhandled
@@ -83,7 +85,7 @@ namespace Fan.Web.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            return RedirectToAction(nameof(BlogController.Index), "Blog");
+            return RedirectToAction(nameof(BlogController.Page), "Blog");
         }
     }
 }
