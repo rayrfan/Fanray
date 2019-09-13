@@ -1,0 +1,22 @@
+﻿@using PageNavigation
+@inject SignInManager<User> SignInManager
+@model Tuple<string, string, PageNavigationWidget>
+@{
+    var nav = Model.Item1;
+    var navEditLink = Model.Item2;
+    var widget = Model.Item3;
+}
+
+<div class="widget">
+    @if (!widget.Title.IsNullOrEmpty())
+    {
+        <h1 class="widget-header">@widget.Title</h1>
+    }
+    <div class="widget-body page-navigation">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <a href="@navEditLink" class="page-nav-edit"><i class="icon-pencil" aria-hidden="true"></i></a>
+        }
+        @Html.Raw(nav)
+    </div>
+</div>
