@@ -5,6 +5,7 @@ using Fan.Blog.Events;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
+using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Settings;
@@ -68,8 +69,6 @@ namespace Fan.Blog.Services
         /// </summary>
         public const int EXCERPT_WORD_LIMIT = 55;
 
-        public const int TITLE_MAXLEN = 256;
-
         // -------------------------------------------------------------------- public methods 
 
         /// <summary>
@@ -83,7 +82,8 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> CreateAsync(BlogPost blogPost)
         {
             // validate
-            ValidatePost(blogPost);
+            if (blogPost == null) throw new ArgumentNullException(nameof(blogPost));
+            await blogPost.ValidateTitleAsync();
 
             // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
@@ -117,7 +117,8 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
         {
             // validate
-            ValidatePost(blogPost);
+            if (blogPost == null) throw new ArgumentNullException(nameof(blogPost));
+            await blogPost.ValidateTitleAsync();
 
             // prep
             var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
@@ -127,7 +128,7 @@ namespace Fan.Blog.Services
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
-                CurrentPost = await QueryPostAsync(blogPost.Id, EPostType.BlogPost),
+                CurrentPost = await QueryPostAsync(blogPost.Id),
             });
 
             // update
@@ -165,13 +166,13 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<BlogPost> GetAsync(int id)
         {
-            var post = await QueryPostAsync(id, EPostType.BlogPost);
-            if (post == null) throw new FanException("Blog post not found.");
+            var post = await QueryPostAsync(id);
             return await GetBlogPostAsync(post);
         }
 
         /// <summary>
         /// Returns a <see cref="BlogPost"/> by slug and date time, throws <see cref="FanException"/> if not found.
+        /// If the post is draft then it's considered not found.
         /// </summary>
         /// <param name="slug"></param>
         /// <param name="year"></param>
@@ -186,7 +187,7 @@ namespace Fan.Blog.Services
         {
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
-            if (post == null) throw new FanException("Blog post not found.");
+            if (post == null) throw new FanException(EExceptionType.ResourceNotFound);
             var blogPost = await GetBlogPostAsync(post);
             blogPost = await PreRenderAsync(blogPost);
             return blogPost;
@@ -306,19 +307,18 @@ namespace Fan.Blog.Services
         /// <summary>
         /// Returns a <see cref="Post"/> from data source, throws <see cref="FanException"/> if not found.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="type"></param>
+        /// <param name="id">A blog post id.</param>
         /// <returns></returns>
         /// <remarks>
-        /// This returns Post not a BlogPost, which would maintain tracking for <see cref="PrepPostAsync(BlogPost, string)"/>.
+        /// Returned post is tracked.
         /// </remarks>
-        private async Task<Post> QueryPostAsync(int id, EPostType type)
+        private async Task<Post> QueryPostAsync(int id)
         {
-            var post = await _postRepo.GetAsync(id, type);
+            var post = await _postRepo.GetAsync(id, EPostType.BlogPost);
 
             if (post == null)
             {
-                throw new FanException($"{type} with id {id} is not found.");
+                throw new FanException($"Blog post with id {id} is not found.");
             }
 
             return post;
@@ -348,21 +348,6 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Validates a blog post and throws exception if validation fails.
-        /// </summary>
-        /// <param name="blogPost"></param>
-        /// <returns></returns>
-        private void ValidatePost(BlogPost blogPost)
-        {
-            // validate
-            var errMsg = "";
-            if (blogPost == null) errMsg = "Invalid blog post.";
-            else if (blogPost.Status != EPostStatus.Draft && blogPost.Title.IsNullOrEmpty()) errMsg = "Blog post title cannot be empty.";
-            else if (!blogPost.Title.IsNullOrEmpty() && blogPost.Title.Length > TITLE_MAXLEN) errMsg = $"Blog post title cannot exceed {TITLE_MAXLEN} chars.";
-            if (!errMsg.IsNullOrEmpty()) throw new FanException(errMsg);
-        }
-
-        /// <summary>
         /// Prepares a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
         /// <param name="blogPost">The incoming post with user data.</param>
@@ -371,9 +356,7 @@ namespace Fan.Blog.Services
         private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
             // Get post
-            // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
-            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            //var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id);
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create)
@@ -426,7 +409,6 @@ namespace Fan.Blog.Services
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
             // Friendly post time if the post was published within 2 days
             // else show the actual date time in setting's timezone
@@ -477,14 +459,8 @@ namespace Fan.Blog.Services
         /// </remarks>
         internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId)
         {
-            // when user manually inputted a slug, it could exceed max len
-            if (input.Length > TITLE_MAXLEN)
-            {
-                input = input.Substring(0, TITLE_MAXLEN);
-            }
-
             // make slug
-            var slug = Util.Slugify(input, randomCharCountOnEmpty: 8);
+            var slug = Util.Slugify(input, maxlen: PostTitleValidator.TITLE_MAXLEN, randomCharCountOnEmpty: 8);
 
             // make sure slug is unique
             int i = 2;
