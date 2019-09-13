@@ -1,0 +1,119 @@
+﻿@page "{pageId:int?}"
+@model Fan.WebApp.Manage.Admin.Compose.PageNavModel
+@{
+    ViewData["Title"] = "Edit Page Navigation";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/plugins/editor.md/css/editormd.min.css" asp-append-version="true" />
+    <style>
+        #content-area {
+            margin: auto;
+            width: 90%;
+        }
+
+        @@media (max-width: 767px) {
+            #content-area {
+                width: 98%;
+            }
+        }
+    </style>
+</head>
+<body>
+    @Html.AntiForgeryToken()
+
+    <div id="app" v-cloak>
+        <v-app style="background-color:white">
+            @* Drawer *@
+            <v-navigation-drawer fixed :clipped="$vuetify.breakpoint.mdAndUp" app v-model="drawer">
+                <v-expansion-panel v-model="panel" expand>
+                    <v-expansion-panel-content>
+                        <div slot="header">Child Pages</div>
+                        <v-list dense>
+                            <template v-for="(title, index) in pages">
+                                <v-list-tile>
+                                    <v-icon small>description</v-icon> <span>{{ title }}</span>
+                                    <v-spacer></v-spacer>
+                                    <v-btn small flat icon color="pink" @@click="insertNav(title)">
+                                        <v-icon>double_arrow</v-icon>
+                                    </v-btn>
+                                </v-list-tile>
+                                <v-divider v-if="index + 1 < pages.length"
+                                           :key="index"></v-divider>
+                            </template>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content>
+                        <template v-slot:header>
+                            <div>Tips</div>
+                        </template>
+                        <v-card>
+                            <v-card-text class="grey lighten-3">
+                                <ul>
+                                    <li>Create navigation for page <strong>{{ parentTitle }}</strong>.</li>
+                                    <li>Use list and surround Page Title with square brackets like <strong>[[Page Title]]</strong>.</li>
+                                    <li>When making a sub list make sure to indent it with <strong>two</strong> spaces.</li>
+                                    <li>You can also mix in other Markdown elements, such as headings etc.</li>
+                                    <li>Note if a page is still a <strong>draft</strong>, the public won't be able to see it.</li>
+                                </ul>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+            </v-navigation-drawer>
+            @* Topbar *@
+            <v-toolbar color="blue darken-3" dark app :clipped-left="$vuetify.breakpoint.mdAndUp" fixed>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-toolbar-title>{{ parentTitle }}</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn @@click="save" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
+                <v-btn href="/admin/pages">Close</v-btn>
+            </v-toolbar>
+            @* Editor *@
+            <v-content>
+                <div id="content-area" style="padding-top: 10px">
+                    <div id="editor-md">
+                        <textarea name="content" id="editor" style="display:none;">{{ navMd }}</textarea>
+                    </div>
+                </div>
+            </v-content>
+            @* Snackbar *@
+            <v-snackbar bottom right
+                        :timeout="snackbar.timeout"
+                        :color="snackbar.color"
+                        v-model="snackbar.show">
+                <span style="font-size:larger">{{ snackbar.text }}</span>
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
+        </v-app>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js"></script>
+    <script>
+        let composeMixin = {
+            data: function () {
+                return {
+                    navMd: @Html.Raw(Model.NavJson),
+                    pages: @Html.Raw(Model.PagesJson),
+                    pageId: @Model.PageId,
+                    parentTitle: "@Model.ParentTitle",
+                }
+            }
+        };
+    </script>
+    <partial name="PageNavEditor" />
+    <script src="~/admin/js/compose-pagenav.js" asp-append-version="true"></script>
+</body>
+</html>

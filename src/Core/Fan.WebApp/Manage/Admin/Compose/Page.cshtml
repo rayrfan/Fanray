@@ -20,6 +20,7 @@
             margin: auto;
             width: 90%;
         }
+
         #post-title {
             resize: none;
             word-wrap: break-word;
@@ -29,14 +30,24 @@
             font-weight: 600;
             line-height: normal;
         }
+
         @@media (max-width: 767px) {
             #content-area {
                 width: 98%;
             }
 
             #post-title {
-               font-size: 24px;
+                font-size: 24px;
             }
+        }
+
+        p.form-field-hint {
+            display: block;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: 400;
+            color: #537994;
+            margin-top: -15px;
         }
     </style>
 </head>
@@ -62,7 +73,7 @@
             <v-navigation-drawer fixed :clipped="$vuetify.breakpoint.mdAndUp" app v-model="drawer">
                 <v-expansion-panel v-model="panel" expand>
                     <v-expansion-panel-content>
-                        <div slot="header">Status</div>
+                        <div slot="header">Options</div>
                         <v-card>
                             <div v-if="page.published">
                                 <v-container fill-height fluid pa-0>
@@ -105,18 +116,36 @@
                                     <v-date-picker v-model="page.postDate" no-title scrollable
                                                    @@input="$refs.menuDate.save(page.postDate)"></v-date-picker>
                                 </v-menu>
-                            </v-card-text>
-                        </v-card>
-                    </v-expansion-panel-content>
-                    <v-expansion-panel-content>
-                        <div slot="header">Page Attributes</div>
-                        <v-card>
-                            <v-card-text>
+                                <v-textarea label="Description"
+                                            style="font-size:14px"
+                                            v-model="page.excerpt"
+                                            auto-grow
+                                            @@input="onFieldsChange"></v-textarea>
+                                <p class="form-field-hint">
+                                    Page's meta description.
+                                </p>
+
+                                <v-radio-group v-model="page.pageLayout" @@change="onFieldsChange">
+                                    <template v-slot:label>
+                                        Layout
+                                    </template>
+                                    <v-radio v-for="(layout, index) in layouts"
+                                             :key="index"
+                                             :value="layout.id">
+                                        <template v-slot:label>
+                                            <div>
+                                                {{ layout.name }}
+                                                <span style="font-size:small;font-style: italic;color: #537994;">
+                                                    {{ layout.description }}
+                                                </span>
+                                            </div>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
                             </v-card-text>
                         </v-card>
                     </v-expansion-panel-content>
                 </v-expansion-panel>
-
             </v-navigation-drawer>
             @* Topbar *@
             <v-toolbar color="blue darken-3" dark app :clipped-left="$vuetify.breakpoint.mdAndUp" fixed>
@@ -143,7 +172,7 @@
                                 @@keyup.enter="titleEnter"
                                 v-model="page.title"></v-textarea>
 
-                    <div id="editor-md">
+                    <div id="editor-md" style="z-index:0">
                         <textarea name="content" id="editor" style="display:none;">{{ page.bodyMark }}</textarea>
                     </div>
                 </div>
@@ -179,9 +208,10 @@
                 </v-card>
             </v-dialog>
             @* Snackbar *@
-            <v-snackbar bottom right multi-line
+            <v-snackbar bottom right
                         :timeout="snackbar.timeout"
                         :color="snackbar.color"
+                        :multi-line="snackbar.mode === 'multi-line'"
                         v-model="snackbar.show">
                 <span style="font-size:larger">{{ snackbar.text }}</span>
                 <v-btn dark flat @@click.native="snackbar.show = false" icon>
@@ -195,6 +225,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js"></script>
     <partial name="_BlogMediaTemplate" />
+    <partial name="PageEditor" />
     <script>
         let mediaMixin = {
             data: function () {
@@ -212,6 +243,7 @@
         let composeMixin = {
             data: function () {
                 return {
+                    layouts: @Html.Raw(Model.LayoutsJson),
                     page: @Html.Raw(Model.PageJson),
                     autosaveInterval: @(PageModel.AUTOSAVE_INTERVAL * 1000),
                 }
@@ -219,243 +251,6 @@
         };
     </script>
     <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
-    <partial name="EditorMd" />
-    <script>
-        let app = new Vue({
-            el: '#app',
-            store,
-            mixins: [composeMixin, editorMdMixin], // from plugin
-            data: () => ({
-                pubClicked: false,
-                pubText: '',
-                saveVisible: false,
-                saveDisabled: false,
-                saveText: 'Save',
-                closing: true,
-                fieldChanged: false,
-                drawer: null,
-                panel: [true, true, true],
-                menuDate: false,
-                mediaDialogVisible: false,
-                previewUrl: null,
-                postUrl: null,
-                previewDialogVisible: false,
-                editor: null,
-                snackbar: {
-                    show: false,
-                    text: '',
-                    color: '',
-                    timeout: 10000,
-                },
-                composerUploadProgress: false,
-            }),
-            computed: {
-                disablePubButton() {
-                    return this.page.title.trim().length <= 0 || this.pubClicked;
-                },
-                tok: function () {
-                    return document.querySelector('input[name="__RequestVerificationToken"][type="hidden"]').value;
-                },
-                headers() {
-                    return { headers: { 'XSRF-TOKEN': this.tok } };
-                },
-                payload: function () {
-                    return {
-                        id: this.page.id,
-                        parentId: this.page.parentId,
-                        postDate: this.page.postDate,
-                        title: this.page.title,
-                        bodyMark: this.editor.getMarkdown(),
-                    }
-                },
-                selectedImages() { // from store
-                    return this.$store.state.selectedImages;
-                },
-            },
-            mounted() {
-                this.pubText = this.page.published ? 'Update' : 'Publish';
-                this.initWindowDnd();
-                this.initEditor();
-            },
-            methods: {
-                /**
-                 * Initialize window drag drop events, dragFilesUpload and sendIMages.
-                 */
-                initWindowDnd() {
-                    console.log('initWindowDnd');
-                    window.addEventListener("dragenter", function (e) {
-                        document.querySelector("#dropzone").style.visibility = "";
-                        document.querySelector("#dropzone").style.opacity = 1;
-                    });
-
-                    window.addEventListener("dragleave", function (e) {
-                        e.preventDefault();
-                        document.querySelector("#dropzone").style.visibility = "hidden";
-                        document.querySelector("#dropzone").style.opacity = 0;
-                    });
-
-                    window.addEventListener("dragover", function (e) {
-                        e.preventDefault();
-                        document.querySelector("#dropzone").style.visibility = "";
-                        document.querySelector("#dropzone").style.opacity = 1;
-                    });
-
-                    let self = this;
-                    window.addEventListener("drop", function (e) {
-                        e.preventDefault();
-                        document.querySelector("#dropzone").style.visibility = "hidden";
-                        document.querySelector("#dropzone").style.opacity = 0;
-                        if (!self.mediaDialogVisible) self.dragFilesUpload(e.dataTransfer.files); // prevent gallery call this
-                    });
-                },
-                dragFilesUpload(files) {
-                    if (!files.length) return;
-                    this.composerUploadProgress = true; // open progress
-                    const formData = new FormData();
-                    Array.from(Array(files.length).keys()).map(x => formData.append('images', files[x]));
-                    this.sendImages(formData);
-                },
-                sendImages(formData) {
-                    axios.post('/admin/media?handler=image', formData, this.$root.headers)
-                        .then(resp => {
-                            if (resp.data.images.length > 0) {
-                                this.insertImagesToEditor(resp.data.images);
-                                this.$root.toast('Image uploaded.');
-                            }
-                            else {
-                                this.$root.toastError('Some files were not uploaded due to file type or size not supported.');
-                            }
-                            this.composerUploadProgress = false; // close progress
-                            this.$store.dispatch('emptyErrMsg');
-                        })
-                        .catch(err => {
-                            this.composerUploadProgress = false; // close progress
-                            this.$root.toastError('Image upload failed.');
-                            console.log(err);
-                        });
-                },
-                onFieldsChange() {
-                    this.fieldChanged = true;
-                    if (this.page.published) return;
-                    this.saveVisible = true;
-                    this.saveDisabled = false;
-                    this.saveText = 'Save';
-                },
-                saveDraft() {
-                    console.log('save draft');
-                    this.saveVisible = true;
-                    this.saveDisabled = true;
-                    this.saveText = 'Saving...';
-
-                    console.log('payload: ', this.payload);
-                    axios.post('/admin/compose/page?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            this.page.id = resp.data.id;
-                            this.page.draftDate = resp.data.draftDate;
-                            this.page.isDraft = true;
-
-                            let href = window.location.href;
-                            if (href.includes('/page?') || href.endsWith('/page')) {
-                                let pos = href.indexOf('?');
-                                if (pos == -1) {
-                                    history.replaceState({}, null, href + `/${this.page.id}`);
-                                }
-                                else {
-                                    history.replaceState({}, null, href.substring(0, pos) + `/${this.page.id}` + href.substring(pos));
-                                }
-                            }
-                        })
-                        .catch(err => {
-                            this.saveVisible = false;
-                            this.toastError(err.response.data);
-                        });
-
-                    this.fieldChanged = false;
-                    this.saveText = 'Saved';
-                },
-                preview() {
-                    this.previewDialogVisible = true;
-                    this.payload.body = this.editor.getHTML();
-                    axios.post('/admin/compose/page?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            this.previewUrl = resp.data;
-                            this.postUrl = this.previewUrl.replace('preview/page/', '');
-                        })
-                        .catch(err => { console.log(err); });
-                },
-                closePreview() {
-                    this.previewDialogVisible = false;
-                    this.previewUrl = null;
-                    this.postUrl = null;
-                },
-                revert() {
-                    this.page.published = false;
-                    this.pubText = this.page.published ? 'Update' : 'Publish';
-                    this.saveDraft();
-                },
-                pub() {
-                    this.closing = false;
-                    this.pubClicked = true;
-                    this.pubText = this.page.published ? 'Updating...' : 'Publishing...';
-
-                    const url = this.page.published ? '/admin/compose/page?handler=update' : '/admin/compose/page?handler=publish';
-                    axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
-                        .then(resp => {
-                            if (this.page.isParentDraft)
-                                this.close();
-                            else
-                                window.location.replace(resp.data);
-                        })
-                        .catch(err => {
-                            this.saveVisible = false;
-                            this.pubText = this.page.published ? 'Update' : 'Publish';
-                            this.pubClicked = false;
-                            this.toastError(err.response.data);
-                        });
-                },
-                close() {
-                    if (this.page.parentId && this.page.parentId > 0) 
-                        window.location.replace(`/admin/pages/${this.page.parentId}`);
-                    else
-                        window.location.replace('/admin/pages');
-                },
-                /**
-                 * Inserts selected images from gallery to editor.
-                 */
-                insertImages() {
-                    this.insertImagesToEditor(this.selectedImages);
-                    this.mediaDialogVisible = false;
-                    this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
-                    this.$store.dispatch('emptyErrMsg');
-                },
-                /**
-                 * Inserts images to editor.
-                 */
-                insertImagesToEditor(images) {
-                    let imgsHtml = '';
-                    images.forEach(img => {
-                        imgsHtml += `![${img.alt}](${img.urlMedium} "${img.title}")\n`;
-                        img.selected = false; // remove the checkmark
-                    });
-                    this.editor.insertValue(imgsHtml);
-                },
-                closeMediaDialog() {
-                    this.mediaDialogVisible = false;
-                    this.selectedImages.forEach(img => img.selected = false); // remove checkmarks
-                    this.$store.dispatch('emptySelectedImages'); // clear selectedImages so gallery buttons could hide
-                    this.$store.dispatch('emptyErrMsg');
-                },
-                titleEnter() {
-                    this.page.title = this.page.title.replace(/\n/g, ' ');
-                },
-                toastError(text) {
-                    this.snackbar.show = true;
-                    this.snackbar.text = text;
-                    this.snackbar.color = 'red';
-                    this.snackbar.timeout = 10000;
-                },
-            },
-        });
-    </script>
+    <script src="~/admin/js/compose-page.js" asp-append-version="true"></script>
 </body>
 </html>

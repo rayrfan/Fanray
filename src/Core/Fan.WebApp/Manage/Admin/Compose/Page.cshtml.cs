@@ -3,18 +3,20 @@ using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Models.Input;
 using Fan.Blog.Models.View;
+using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Membership;
 using Fan.Settings;
-using Markdig;
+using Fan.Themes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.WebApp.Manage.Admin.Compose
@@ -27,17 +29,21 @@ namespace Fan.WebApp.Manage.Admin.Compose
         private const string DATE_FORMAT = "yyyy-MM-dd";
         private readonly UserManager<User> userManager;
         private readonly IPageService pageService;
+        private readonly IThemeService themeService;
         private readonly ISettingService settingService;
 
         public const int AUTOSAVE_INTERVAL = 10;
         public string PageJson { get; set; }
+        public string LayoutsJson { get; set; }
 
         public PageModel(UserManager<User> userManager,
                          IPageService pageService,
+                         IThemeService themeService,
                          ISettingService settingService)
         {
             this.userManager = userManager;
             this.pageService = pageService;
+            this.themeService = themeService;
             this.settingService = settingService;
         }
 
@@ -51,7 +57,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
         /// When <paramref name="pageId"/> is present (greater than 0), the user is updating an exisiting page,
         /// in this situation the <paramref name="parentId"/> is ignored as it is not part of the update.
         /// </remarks>
-        public async Task OnGetAsync(int pageId, int? parentId)
+        public async Task<IActionResult> OnGetAsync(int pageId, int? parentId)
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
             Blog.Models.Page parent = null;
@@ -70,12 +76,14 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     Id = page.Id,
                     BodyMark = page.BodyMark,
                     DraftDate = page.UpdatedOn.HasValue ? page.UpdatedOn.Value.ToString(DATE_FORMAT) : "",
+                    Excerpt = page.Excerpt,
                     IsDraft = page.Status == EPostStatus.Draft,
                     IsParentDraft = parent != null ? parent.Status == EPostStatus.Draft : false,
                     ParentId = page.ParentId,
                     PostDate = page.CreatedOn.ToString(DATE_FORMAT),
                     Published = page.Status == EPostStatus.Published,
                     Title = page.Title,
+                    PageLayout = (EPageLayout) page.PageLayout,
                 };
             }
             else // new post
@@ -83,6 +91,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 if (parentId.HasValue && parentId > 0)
                 {
                     parent = await pageService.GetAsync(parentId.Value);
+                    if (!parent.IsParent) return Redirect("/admin/pages"); // make sure parent is really parent
                 }
 
                 var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
@@ -95,9 +104,17 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     Published = false,
                     IsDraft = false,
                     IsParentDraft = parent != null ? parent.Status == EPostStatus.Draft : false,
+                    PageLayout = parent != null ? (EPageLayout) parent.PageLayout : EPageLayout.Layout1,
                 };
             }
             PageJson = JsonConvert.SerializeObject(pageIM);
+
+            // layouts
+            var currentTheme = (await themeService.GetManifestsAsync())
+                   .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
+            LayoutsJson = JsonConvert.SerializeObject(currentTheme.PageLayouts);
+
+            return Page();
         }
 
         /// <summary>
@@ -119,8 +136,11 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     ParentId = pageIM.ParentId,
                     CreatedOn = BlogUtil.GetCreatedOn(pageIM.PostDate),
                     Title = pageIM.Title,
+                    Body = pageIM.Body,
                     BodyMark = pageIM.BodyMark,
+                    Excerpt = pageIM.Excerpt,
                     Status = EPostStatus.Published,
+                    PageLayout = (byte) pageIM.PageLayout,
                 };
 
                 if (pageIM.Id <= 0)
@@ -158,8 +178,11 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     ParentId = pageIM.ParentId,
                     CreatedOn = BlogUtil.GetCreatedOn(pageIM.PostDate),
                     Title = pageIM.Title,
+                    Body = pageIM.Body,
                     BodyMark = pageIM.BodyMark,
+                    Excerpt = pageIM.Excerpt,
                     Status = EPostStatus.Published,
+                    PageLayout = (byte) pageIM.PageLayout,
                 };
 
                 page = await pageService.UpdateAsync(page);
@@ -184,16 +207,21 @@ namespace Fan.WebApp.Manage.Admin.Compose
         {
             try
             {
+                // get page
                 var page = new Blog.Models.Page
                 {
                     UserId = Convert.ToInt32(userManager.GetUserId(HttpContext.User)),
                     ParentId = pageIM.ParentId,
                     CreatedOn = BlogUtil.GetCreatedOn(pageIM.PostDate),
                     Title = pageIM.Title,
+                    Body = pageIM.Body,
                     BodyMark = pageIM.BodyMark,
+                    Excerpt = pageIM.Excerpt,
                     Status = EPostStatus.Draft,
+                    PageLayout = (byte) pageIM.PageLayout,
                 };
 
+                // create or update page
                 if (pageIM.Id <= 0)
                 {
                     page = await pageService.CreateAsync(page);
@@ -204,16 +232,20 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     page = await pageService.UpdateAsync(page);
                 }
 
+                // return page
+                var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
                 pageIM = new PageIM
                 {
                     Id = page.Id,
                     Title = page.Title,
                     BodyMark = page.BodyMark,
+                    Excerpt = page.Excerpt,
                     PostDate = page.CreatedOn.ToString(DATE_FORMAT),
                     ParentId = page.ParentId,
                     Published = page.Status == EPostStatus.Published,
                     IsDraft = page.Status == EPostStatus.Draft,
-                    DraftDate = page.UpdatedOn.HasValue ? page.UpdatedOnDisplay : "",
+                    DraftDate = page.UpdatedOn.HasValue ? page.UpdatedOn.Value.ToDisplayString(coreSettings.TimeZoneId) : "",
+                    PageLayout = (EPageLayout) page.PageLayout,
                 };
 
                 return new JsonResult(pageIM);
@@ -235,7 +267,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
             var title = pageIM.Title.IsNullOrEmpty() ? "Untitled" : pageIM.Title;
 
             // slug
-            var slug = BlogUtil.SlugifyPageTitle(pageIM.Title);
+            var slug = PageService.SlugifyPageTitle(pageIM.Title);
             if (slug.IsNullOrEmpty()) slug = "untitled";
 
             // parent slug
@@ -247,7 +279,8 @@ namespace Fan.WebApp.Manage.Admin.Compose
             }
 
             // body 
-            var body = Markdown.ToHtml(pageIM.BodyMark);
+            var body = pageIM.Body;
+                //Markdown.ToHtml(pageIM.BodyMark);
 
             // author
             var user = await userManager.GetUserAsync(HttpContext.User);
@@ -255,18 +288,23 @@ namespace Fan.WebApp.Manage.Admin.Compose
 
             // date
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
-            var date = DateTimeOffset.Parse(pageIM.PostDate).ToDisplayString(coreSettings.TimeZoneId, "dddd, MMMM dd, yyyy");
+            var date = DateTimeOffset.Parse(pageIM.PostDate).ToDisplayString(coreSettings.TimeZoneId);
 
             // TempData
             var prevRelLink = parentSlug.IsNullOrEmpty() ? BlogRoutes.GetPagePreviewRelativeLink(slug) :
                               BlogRoutes.GetPagePreviewRelativeLink(parentSlug, slug);
+
+            // hide
+            var pageLayout = pageIM.PageLayout;
+
             var pageVM = new PageVM
             {
                 Author = author,
-                Body = body,
+                Body = body,                
                 CreatedOnDisplay = date,
                 Slug = $"{parentSlug}/{slug}",
                 Title = title,
+                PageLayout = pageLayout,
             };
             TempData.Put(prevRelLink, pageVM);
 
