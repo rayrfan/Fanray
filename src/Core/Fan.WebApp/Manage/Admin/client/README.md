@@ -24,6 +24,8 @@ babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 babel js/compose-page.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 babel js/compose-pagenav.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-posts.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/blog-pages.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 ```
 
 Develop all files with watch
@@ -49,6 +51,8 @@ babel js/setup.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins tr
 babel js/site-users.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 babel js/compose-page.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 babel js/compose-pagenav.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-posts.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
+babel js/blog-pages.js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-remove-console
 ```
 
 Release all files
