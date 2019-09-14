@@ -1,6 +1,5 @@
 ﻿@* Layout for Admin Panel *@
 @{
-    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
     var currentUser = await userManager.GetUserAsync(Context.User);
 }
 <!DOCTYPE html>
@@ -38,43 +37,46 @@
                                 </v-list-tile-title>
                             </v-list-tile-content>
                             <v-list-tile-action v-show="nav.actionIcon">
-                                <a style="text-decoration:none" :href="nav.actionLink"><v-icon>{{ nav.actionIcon }}</v-icon></a>
+                                <v-btn flat icon small color="grey" :href="nav.actionLink">
+                                    <v-icon>{{ nav.actionIcon }}</v-icon>
+                                </v-btn>
                             </v-list-tile-action>
                         </v-list-tile>
                     </template>
                 </v-list>
             </v-navigation-drawer>
             @* Topbar *@
-            <v-toolbar :clipped-left="$vuetify.breakpoint.lgAndUp"
-                       color="blue darken-3"
-                       dark
-                       app
-                       dense
-                       fixed>
-                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                <v-toolbar-title class="hidden-sm-and-down">@coreSettings.Title</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-menu light offset-y left transition="scale-transition">
-                    <v-btn icon slot="activator">
-                        <v-avatar size="32px">
-                            <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" />
-                        </v-avatar>
-                    </v-btn>
-                    <v-list dense>
-                        <v-list-tile @@click="">
-                            <v-icon class="menu-action-icon">account_circle</v-icon>
-                            <v-list-tile-title>Profile</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile @@click="logout">
-                            <v-icon class="menu-action-icon">power_settings_new</v-icon>
-                            <v-list-tile-title>Logout</v-list-tile-title>
-                        </v-list-tile>
-                    </v-list>
-                </v-menu>
-                <v-btn icon href="/" title="View blog">
-                    <v-icon>public</v-icon>
+        <v-toolbar :clipped-left="$vuetify.breakpoint.lgAndUp"
+                   color="blue darken-3"
+                   dark
+                   app
+                   dense
+                   fixed>
+            <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+            <img style="margin-left:12px;background-color: white" src="~/admin/img/logo.png" />
+            <span class="title ml-2 mr-5 font-weight-light">FANRAY</span>
+            <v-spacer></v-spacer>
+            <v-menu light offset-y left transition="scale-transition">
+                <v-btn icon slot="activator">
+                    <v-avatar size="32px">
+                        <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" />
+                    </v-avatar>
                 </v-btn>
-            </v-toolbar>
+                <v-list dense>
+                    <v-list-tile @@click="">
+                        <v-icon class="menu-action-icon">account_circle</v-icon>
+                        <v-list-tile-title>Profile</v-list-tile-title>
+                    </v-list-tile>
+                    <v-list-tile @@click="logout">
+                        <v-icon class="menu-action-icon">power_settings_new</v-icon>
+                        <v-list-tile-title>Logout</v-list-tile-title>
+                    </v-list-tile>
+                </v-list>
+            </v-menu>
+            <v-btn icon href="/" title="View blog">
+                <v-icon>public</v-icon>
+            </v-btn>
+        </v-toolbar>
             @* Content *@
             <v-content>
                 @RenderBody()
@@ -106,11 +108,13 @@
             data: function () {
                 return {
                     adminNavs: [
-                        { icon: 'list', text: 'Posts', url: '/admin/posts', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose' },
+                        { icon: 'insert_drive_file', text: 'Posts', url: '/admin/posts', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose' },
+                        { icon: 'description', text: 'Pages', url: '/admin/pages', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose/page' },
                         { icon: 'insert_photo', text: 'Media', url: '/admin/media', active: false },
                         { icon: 'folder', text: 'Categories', url: '/admin/categories', active: false },
                         { icon: 'label', text: 'Tags', url: '/admin/tags', active: false },
-                        { icon: 'brush', text: 'Themes', url: '/admin/themes', active: false },
+                        { icon: 'navigation', text: 'Navigation', url: '/admin/navigation', active: false },
+                        { icon: 'palette', text: 'Themes', url: '/admin/themes', active: false },
                         { icon: 'settings_input_hdmi', text: 'Plugins', url: '/admin/plugins', active: false },
                         { icon: 'widgets', text: 'Widgets', url: '/admin/widgets', active: false },
                         { icon: 'supervisor_account', text: 'Users', url: '/admin/users', active: false },

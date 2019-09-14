@@ -28,14 +28,13 @@
                     <v-toolbar-title style="font-size:100%">Pages</v-toolbar-title>
                     <v-btn v-if="parentId > 0" href="/admin/pages" small icon><v-icon small>arrow_upward</v-icon></v-btn>
                     <v-spacer></v-spacer>
-                    <v-chip small label color="pink" text-color="white" style="font-weight:bold;padding:15px 0">
-                        <a v-if="parentId > 0" :href="`/admin/compose/page?parentId=${parentId}`" class="btn-link"><v-icon small>add</v-icon> New Child Page</a>
-                        <a v-else href="/admin/compose/page" class="btn-link"><v-icon small>add</v-icon> New Page</a>
-                    </v-chip>
+                    <v-btn v-if="parentId > 0" :href="`/admin/compose/page?parentId=${parentId}`"
+                           small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Child Page</v-btn>
+                    <v-btn v-else href="/admin/compose/page"
+                           small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Page</v-btn>
                 </v-toolbar>
             </v-flex>
         </v-layout>
-
         <v-layout row>
             <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
                 <v-list two-line class="elevation-1">
