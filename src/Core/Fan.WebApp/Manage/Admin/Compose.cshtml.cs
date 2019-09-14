@@ -105,7 +105,7 @@ namespace Fan.WebApp.Manage.Admin
         // -------------------------------------------------------------------- public methods
 
         /// <summary>
-        /// GET to return <see cref="ComposeVM"/> to initialize the page.
+        /// GET to return <see cref="PostVM"/> to initialize the page.
         /// </summary>
         /// <remarks>
         /// NOTE: the parameter cannot be named "page".
@@ -187,7 +187,7 @@ namespace Fan.WebApp.Manage.Admin
             {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 CategoryId = post.CategoryId,
-                CreatedOn = GetCreatedOn(post.PostDate),
+                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
                 TagTitles = post.Tags,
                 Slug = post.Slug,
                 Excerpt = post.Excerpt,
@@ -222,7 +222,7 @@ namespace Fan.WebApp.Manage.Admin
                 Id = post.Id,
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 CategoryId = post.CategoryId,
-                CreatedOn = GetCreatedOn(post.PostDate),
+                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
                 TagTitles = post.Tags,
                 Slug = post.Slug,
                 Excerpt = post.Excerpt,
@@ -249,7 +249,7 @@ namespace Fan.WebApp.Manage.Admin
             {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 CategoryId = post.CategoryId,
-                CreatedOn = GetCreatedOn(post.PostDate),
+                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
                 TagTitles = post.Tags,
                 Slug = post.Slug,
                 Excerpt = post.Excerpt,
@@ -305,7 +305,7 @@ namespace Fan.WebApp.Manage.Admin
                 User = await _userManager.GetUserAsync(HttpContext.User),
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
                 Category = await _catSvc.GetAsync(post.CategoryId),
-                CreatedOn = GetCreatedOn(post.PostDate),
+                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
                 Tags = tags,
                 Slug = post.Slug.IsNullOrEmpty() ? "untitled" : post.Slug,
                 Excerpt = post.Excerpt,
@@ -328,17 +328,5 @@ namespace Fan.WebApp.Manage.Admin
             var relativeUrl = BlogRoutes.GetPostRelativeLink(blogPost.CreatedOn, blogPost.Slug);
             return $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{relativeUrl}";
         }
-
-        /// <summary>
-        /// Returns a DateTimeOffset by appending current time to the given date string for example "2018-05-18".
-        /// </summary>
-        /// <param name="date">A date string for example "2018-05-18"</param>
-        /// <returns></returns>
-        private DateTimeOffset GetCreatedOn(string date)
-        {
-            var dt = DateTimeOffset.Parse(date);
-            return new DateTimeOffset(dt.Year, dt.Month, dt.Day, DateTimeOffset.Now.Hour, DateTimeOffset.Now.Minute, DateTimeOffset.Now.Second,
-                DateTimeOffset.Now.Offset);
-        }
-    }
+     }
 }
