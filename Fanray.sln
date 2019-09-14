@@ -70,7 +70,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SysPlugins", "SysPlugins", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor.md", "src\SysPlugins\Editor.md\Editor.md.csproj", "{654AB17A-FA2D-47DC-B665-AF98D01E3BF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PageNavigation", "src\Widgets\PageNavigation\PageNavigation.csproj", "{21400DD8-0BE9-4941-A27E-1BA154FFFF3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PageNavigation", "src\Widgets\PageNavigation\PageNavigation.csproj", "{21400DD8-0BE9-4941-A27E-1BA154FFFF3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

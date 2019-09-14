@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.1.0" />
-    <PackageReference Include="Markdig" Version="0.17.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" PrivateAssets="All" />
@@ -29,6 +28,7 @@
     <ProjectReference Include="..\..\Widgets\BlogArchives\BlogArchives.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogCategories\BlogCategories.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
+    <ProjectReference Include="..\..\Widgets\PageNavigation\PageNavigation.csproj" />
     <ProjectReference Include="..\..\Widgets\RecentBlogPosts\RecentBlogPosts.csproj" />
     <ProjectReference Include="..\..\Widgets\SocialIcons\SocialIcons.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />
