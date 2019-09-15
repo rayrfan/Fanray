@@ -1,7 +1,7 @@
 ﻿@page "{postId:int?}"
-@model ComposeModel
+@model PostModel
 @{
-    ViewData["Title"] = "Compose";
+    ViewData["Title"] = "Compose Post";
     Layout = null;
 }
 <!DOCTYPE html>
@@ -249,12 +249,12 @@
                     post: @Html.Raw(Model.PostJson),
                     cats: @Html.Raw(Model.CatsJson),
                     tags: @Html.Raw(Model.TagsJson),
-                    autosaveInterval: @(ComposeModel.AUTOSAVE_INTERVAL * 1000),
+                    autosaveInterval: @(PostModel.AUTOSAVE_INTERVAL * 1000),
                 }
             }
         };
     </script>
     <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
-    <script src="~/admin/js/blog-compose.js" asp-append-version="true"></script>
+    <script src="~/admin/js/compose-post.js" asp-append-version="true"></script>
 </body>
 </html>

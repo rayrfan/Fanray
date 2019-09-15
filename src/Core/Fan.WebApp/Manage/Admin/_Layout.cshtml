@@ -7,7 +7,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Fanray Admin Console</title>
+    <title>@ViewData["Title"] - Fanray Admin Panel</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.css" rel="stylesheet">
@@ -108,7 +108,7 @@
             data: function () {
                 return {
                     adminNavs: [
-                        { icon: 'insert_drive_file', text: 'Posts', url: '/admin/posts', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose' },
+                        { icon: 'insert_drive_file', text: 'Posts', url: '/admin/posts', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose/post' },
                         { icon: 'description', text: 'Pages', url: '/admin/pages', active: false, actionIcon: 'add_circle', actionLink: '/admin/compose/page' },
                         { icon: 'insert_photo', text: 'Media', url: '/admin/media', active: false },
                         { icon: 'folder', text: 'Categories', url: '/admin/categories', active: false },

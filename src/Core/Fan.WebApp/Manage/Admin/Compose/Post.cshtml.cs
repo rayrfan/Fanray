@@ -1,6 +1,7 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Models.Input;
 using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Medias;
@@ -9,83 +10,20 @@ using Fan.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fan.WebApp.Manage.Admin
+namespace Fan.WebApp.Manage.Admin.Compose
 {
     /// <summary>
-    /// Model to Compose.cshtml.
+    /// Post composer.
     /// </summary>
-    /// <remarks>
-    /// This handles get, publish, update and save draft for a post.
-    /// For image upload it calls the endpoint in Media.cshtml.cs.
-    /// </remarks>
-    public class ComposeModel : PageModel
+    public class PostModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
     {
-        private readonly IBlogPostService _blogSvc;
-        private readonly ICategoryService _catSvc;
-        private readonly ITagService _tagSvc;
-        private readonly ISettingService _settingSvc;
-        private readonly UserManager<User> _userManager;
-        private readonly IMediaService _mediaSvc;
-
-        // -------------------------------------------------------------------- constructor
-
-        public ComposeModel(
-            UserManager<User> userManager,
-            IBlogPostService blogService,
-            ICategoryService catService,
-            ITagService tagService,
-            IMediaService mediaSvc,
-            ISettingService settingService)
-        {
-            _userManager = userManager;
-            _blogSvc = blogService;
-            _catSvc = catService;
-            _tagSvc = tagService;
-            _mediaSvc = mediaSvc;
-            _settingSvc = settingService;
-        }
-
-        // -------------------------------------------------------------------- inner classes
-
-        /// <summary>
-        /// Post view model.
-        /// </summary>
-        public class PostVM
-        {
-            public int Id { get; set; }
-            [Required]
-            public string Title { get; set; }
-            public string Body { get; set; }
-            public string PostDate { get; set; }
-            public string Slug { get; set; }
-            public string Excerpt { get; set; }
-            public int CategoryId { get; set; }
-            public List<string> Tags { get; set; } // titles, not slugs
-            public bool Published { get; set; }
-            public bool IsDraft { get; set; }
-            public string DraftDate { get; set; }
-        }
-
-        /// <summary>
-        /// Category view model for Categories dropdown, property names must be "Value" and "Text".
-        /// </summary>
-        public class CatVM
-        {
-            public int Value { get; set; }
-            public string Text { get; set; }
-        }
-
-        // -------------------------------------------------------------------- consts & properties
-
         /// <summary>
         /// How many seconds to wait after user stops typing to auto save. Default 10 seconds.
         /// </summary>
@@ -102,10 +40,31 @@ namespace Fan.WebApp.Manage.Admin
         public string TagsJson { get; set; }
         public string Theme { get; set; }
 
-        // -------------------------------------------------------------------- public methods
+        private readonly IBlogPostService _blogSvc;
+        private readonly ICategoryService _catSvc;
+        private readonly ITagService _tagSvc;
+        private readonly ISettingService _settingSvc;
+        private readonly UserManager<User> _userManager;
+        private readonly IMediaService _mediaSvc;
+
+        public PostModel(
+            UserManager<User> userManager,
+            IBlogPostService blogService,
+            ICategoryService catService,
+            ITagService tagService,
+            IMediaService mediaSvc,
+            ISettingService settingService)
+        {
+            _userManager = userManager;
+            _blogSvc = blogService;
+            _catSvc = catService;
+            _tagSvc = tagService;
+            _mediaSvc = mediaSvc;
+            _settingSvc = settingService;
+        }
 
         /// <summary>
-        /// GET to return <see cref="PostVM"/> to initialize the page.
+        /// GET to return <see cref="PostIM"/> to initialize the page.
         /// </summary>
         /// <remarks>
         /// NOTE: the parameter cannot be named "page".
@@ -119,11 +78,11 @@ namespace Fan.WebApp.Manage.Admin
             Theme = coreSettings.Theme;
 
             // post
-            PostVM postVM;
+            PostIM postVM;
             if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetAsync(postId);
-                postVM = new PostVM
+                postVM = new PostIM
                 {
                     Id = post.Id,
                     Title = post.Title,
@@ -143,7 +102,7 @@ namespace Fan.WebApp.Manage.Admin
                 var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
 
-                postVM = new PostVM
+                postVM = new PostIM
                 {
                     Title = "",
                     Body = "",
@@ -159,7 +118,7 @@ namespace Fan.WebApp.Manage.Admin
             // cats
             var categories = await _catSvc.GetAllAsync();
             var allCats = from c in categories
-                          select new CatVM
+                          select new
                           {
                               Value = c.Id,
                               Text = c.Title,
@@ -181,7 +140,7 @@ namespace Fan.WebApp.Manage.Admin
         /// <remarks>
         /// The post could be new or previously published.
         /// </remarks>
-        public async Task<JsonResult> OnPostPublishAsync([FromBody]PostVM post)
+        public async Task<JsonResult> OnPostPublishAsync([FromBody]PostIM post)
         {
             var blogPost = new BlogPost
             {
@@ -215,7 +174,7 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns>
         /// Absolute URL to the post.
         /// </returns>
-        public async Task<JsonResult> OnPostUpdateAsync([FromBody]PostVM post)
+        public async Task<JsonResult> OnPostUpdateAsync([FromBody]PostIM post)
         {
             var blogPost = new BlogPost
             {
@@ -243,7 +202,7 @@ namespace Fan.WebApp.Manage.Admin
         /// <remarks>
         /// This is called by either auto save or user clicking on Save.
         /// </remarks>
-        public async Task<JsonResult> OnPostSaveAsync([FromBody]PostVM post)
+        public async Task<JsonResult> OnPostSaveAsync([FromBody]PostIM post)
         {
             var blogPost = new BlogPost
             {
@@ -268,7 +227,7 @@ namespace Fan.WebApp.Manage.Admin
                 blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
-            var postVM = new PostVM
+            var postVM = new PostIM
             {
                 Id = blogPost.Id,
                 Title = blogPost.Title,
@@ -291,7 +250,7 @@ namespace Fan.WebApp.Manage.Admin
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnPostPreviewAsync([FromBody]PostVM post)
+        public async Task<JsonResult> OnPostPreviewAsync([FromBody]PostIM post)
         {
             // prep blog post
             List<Tag> tags = new List<Tag>();
@@ -320,8 +279,6 @@ namespace Fan.WebApp.Manage.Admin
             // return preview url
             return new JsonResult($"{Request.Scheme}://{Request.Host}{prevRelLink}");
         }
-
-        // -------------------------------------------------------------------- private methods
 
         private string GetPostAbsoluteUrl(BlogPost blogPost)
         {

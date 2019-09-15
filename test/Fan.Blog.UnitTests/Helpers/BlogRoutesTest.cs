@@ -58,7 +58,7 @@ namespace Fan.Blog.UnitTests.Helpers
             var postId = 1;
             var editLink = BlogRoutes.GetPostEditLink(postId);
 
-            Assert.Equal("/admin/compose/1", editLink);
+            Assert.Equal("/admin/compose/post/1", editLink);
         }
 
         /// <summary>

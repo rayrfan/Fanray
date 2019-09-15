@@ -1,4 +1,4 @@
-﻿var app = new Vue({
+﻿let app = new Vue({
     el: '#app',
     store,
     mixins: [composeMixin],
@@ -151,13 +151,13 @@
             this.saveText = 'Saving...';
 
             console.log('payload: ', this.payload);
-            axios.post('/admin/compose?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+            axios.post('/admin/compose/post?handler=save', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
                     this.post.id = resp.data.id;
                     this.post.slug = resp.data.slug;
                     this.post.draftDate = resp.data.draftDate;
                     this.post.isDraft = true;
-                    if (window.location.href.endsWith('/compose'))
+                    if (window.location.href.endsWith('/compose/post'))
                         history.replaceState({}, null, window.location.href + `/${this.post.id}`);
                 })
                 .catch(err => { console.log(err); });
@@ -168,10 +168,10 @@
         preview() {
             this.previewDialogVisible = true;
             this.payload.body = this.editor.getData();
-            axios.post('/admin/compose?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
+            axios.post('/admin/compose/post?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
                     this.previewUrl = resp.data;
-                    this.postUrl = this.previewUrl.replace('preview/', '');
+                    this.postUrl = this.previewUrl.replace('preview/post/', '');
                 })
                 .catch(err => { console.log(err); });
         },
@@ -190,7 +190,7 @@
             this.pubClicked = true;
             this.pubText = this.post.published ? 'Updating...' : 'Publishing...';
 
-            const url = this.post.published ? '/admin/compose?handler=update' : '/admin/compose?handler=publish';
+            const url = this.post.published ? '/admin/compose/post?handler=update' : '/admin/compose/post?handler=publish';
             axios.post(url, this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
                     window.location.replace(resp.data);
