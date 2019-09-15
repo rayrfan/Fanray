@@ -239,17 +239,17 @@ namespace Fan.Helpers
 
             try
             {
+                // decode body
+                body = WebUtility.HtmlDecode(body); 
+
                 HtmlDocument document = new HtmlDocument();
                 document.LoadHtml(body);
                 body = document.DocumentNode.InnerText?.Trim(); // should be clean text by now
                 if (body.IsNullOrEmpty()) return "";
 
-                // html entities https://stackoverflow.com/a/10971380/32240
-                body = WebUtility.HtmlDecode(body);
-
                 return body.Truncate(wordsLimit, Truncator.FixedNumberOfWords);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return body;
             }

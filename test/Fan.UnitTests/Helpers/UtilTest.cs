@@ -43,6 +43,8 @@ namespace Fan.UnitTests.Helpers
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5 words.", 6)]
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5…", 5)]
         [InlineData("<p></p>", "", 55)]
+        [InlineData("<script></script>", "", 55)]
+        [InlineData("&lt;script&gt;&lt;/script&gt;", "", 55)]
         public void GetExcerpt_returns_a_string_excerpt_from_a_given_html(string body, string expected, int wordLimit)
         {
             Assert.Equal(expected, Util.GetExcerpt(body, wordLimit));

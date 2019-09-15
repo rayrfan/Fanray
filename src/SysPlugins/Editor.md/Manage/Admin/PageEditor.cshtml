@@ -30,7 +30,7 @@ else if (plugin.Language == "zh-tw")
                     editorTheme: '@plugin.CodeMirrorTheme',
                     htmlDecode: true,
                     saveHTMLToTextarea: true,
-                    previewCodeHighlight: false, // stop emitting hljs markup
+                    previewCodeHighlight: false, // fix hljs
                     toolbarIcons: function () {
                         return [
                             "undo", "redo", "|",
@@ -53,6 +53,11 @@ else if (plugin.Language == "zh-tw")
                             self.saveText = 'Save';
                             typingTimer = setTimeout(self.saveDraft, self.autosaveInterval);
                         }
+                    },
+                    onload : function() {
+                        let txt = document.createElement("textarea");
+                        txt.innerHTML = self.page.bodyMark; // decode
+                        this.setMarkdown(txt.value);
                     }
                 });
             },

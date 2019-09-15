@@ -380,18 +380,16 @@ namespace Fan.Blog.Services
             post.Title = page.Title;
 
             // Bodys
-            post.BodyMark = page.BodyMark;
-            // post.Body = page.Body;
             string parentSlug = null;
             if (!page.IsParent)
             {
                 var parent = await GetAsync(post.ParentId.Value);
                 parentSlug = parent.Slug;
             }
-            // TODO sanitize <script> from html body
-            post.Body = FormatNavLinks(page.Body, page.IsParent ? slug : parentSlug); 
-            
-            // Excerpt
+            post.Body = FormatNavLinks(page.Body, page.IsParent ? slug : parentSlug);
+            post.BodyMark = WebUtility.HtmlEncode(page.BodyMark); // decoded on the client
+
+            // Excerpt TODO should I extract excerpt from body if user didn't put an excerpt?
             post.Excerpt = page.Excerpt;
 
             // UserId
