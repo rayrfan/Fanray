@@ -6,7 +6,7 @@ namespace Fan.Navigation
 {
     public interface INavigationService
     {
-        Task<IList<Nav>> GetMenu(EMenu menu, bool includeNavUrl = false);
+        Task<IList<Nav>> GetMenuAsync(EMenu menuId, bool includeNavUrl = false);
         Task AddNavToMenuAsync(EMenu menuId, int index, Nav nav);
         Task SortNavInMenuAsync(EMenu menuId, int index, int oldIndex, Nav nav);
         Task RemoveNavFromMenuAsync(EMenu menuId, int index);

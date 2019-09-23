@@ -22,7 +22,7 @@ namespace Fan.WebApp.Manage.Admin.Shared
 
         public async Task OnGetAsync(EMenu menuId, int index)
         {
-            var navList = await navigationService.GetMenu(menuId);
+            var navList = await navigationService.GetMenuAsync(menuId);
             var nav = navList[index];
 
             Index = index;

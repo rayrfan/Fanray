@@ -32,7 +32,7 @@ namespace Fan.Web.TagHelpers
 
             ((IViewContextAware)this.viewComponentHelper).Contextualize(ViewContext);
 
-            var navList = await navigationService.GetMenu(Id, includeNavUrl: true);
+            var navList = await navigationService.GetMenuAsync(Id, includeNavUrl: true);
             var content = await viewComponentHelper.InvokeAsync("Menu", (Id, navList));
             output.Content.AppendHtml(content.GetString());
         }

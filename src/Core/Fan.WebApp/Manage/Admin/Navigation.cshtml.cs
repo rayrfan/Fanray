@@ -80,7 +80,7 @@ namespace Fan.WebApp.Manage.Admin
             var menuVMs = new List<MenuVM>();
             foreach (var menu in menus)
             {
-                var navList = await navigationService.GetMenu(menu.Id);
+                var navList = await navigationService.GetMenuAsync(menu.Id);
                 menuVMs.Add(new MenuVM(menu, navList, pages, cats));
             }
             MenusJson = JsonConvert.SerializeObject(menuVMs);
