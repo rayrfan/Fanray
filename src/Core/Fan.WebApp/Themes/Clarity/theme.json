@@ -8,6 +8,13 @@
   "license": "Apache 2.0",
   "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
   "tags": [ "responsive", "right-sidebar" ],
+  "menus": [
+    {
+      "id": "menu1",
+      "name": "Main Menu",
+      "description": "The top navigation menu"
+    }
+  ],
   "pageLayouts": [
     {
       "id": "layout1",

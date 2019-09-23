@@ -130,6 +130,9 @@ namespace Fan.Web.Tests
                 new Meta { Id = 26, Key = "page-after-content", Value = "{ \"id\":\"page-after-content\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
                 new Meta { Id = 27, Key = "clarity", Value = "", Type = EMetaType.Theme },
                 new Meta { Id = 28, Key = "clarity-my-area", Value = "{\"id\":\"my-area\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaByTheme },
+                new Meta { Id = 29, Key = "menu1", Value = "[]", Type = EMetaType.Menu },
+                new Meta { Id = 30, Key = "menu2", Value = "[]", Type = EMetaType.Menu },
+                new Meta { Id = 31, Key = "coresettings.home", Value = "{\"id\":1,\"type\":1}", Type = EMetaType.Setting },
             };
 
             return metas;

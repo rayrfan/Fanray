@@ -1,12 +1,11 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Models.View;
-using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Helpers;
 using Fan.Settings;
-using Fan.Themes;
 using Fan.Web.Attributes;
+using Fan.Web.Helpers;
 using Fan.Web.Models.Blog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -24,8 +23,8 @@ namespace Fan.Web.Controllers
 {
     public class BlogController : Controller
     {
+        private readonly IHomeHelper homeHelper;
         private readonly IBlogPostService _blogSvc;
-        private readonly IPageService pageService;
         private readonly ICategoryService _catSvc;
         private readonly ITagService _tagSvc;
         private readonly ISettingService settingService;
@@ -33,16 +32,16 @@ namespace Fan.Web.Controllers
         private readonly IDistributedCache _cache;
 
         public BlogController(
+            IHomeHelper homeHelper,
             IBlogPostService blogService,
-            IPageService pageService,
             ICategoryService catService,
             ITagService tagService,
             ISettingService settingService,
             IDistributedCache cache,
             ILogger<BlogController> logger)
         {
+            this.homeHelper = homeHelper;
             _blogSvc = blogService;
-            this.pageService = pageService;
             _catSvc = catService;
             _tagSvc = tagService;
             this.settingService = settingService;
@@ -57,12 +56,8 @@ namespace Fan.Web.Controllers
         [ModelPreRender]
         public async Task<IActionResult> Index(int? page)
         {
-            if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
-            var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-            var posts = await _blogSvc.GetListAsync(page.Value, blogSettings.PostPerPage);
-
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
-            return View(vm);
+            var (_, viewModel) = await homeHelper.GetBlogIndexAsync(page);
+            return View(viewModel);
         }
 
         /// <summary>
@@ -138,11 +133,8 @@ namespace Fan.Web.Controllers
 
         public async Task<IActionResult> Category(string slug)
         {
-            var cat = await _catSvc.GetAsync(slug);
-            var posts = await _blogSvc.GetListForCategoryAsync(slug, 1);
-            var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, cat);
-            return View(vm);
+            var (_, viewModel) = await homeHelper.GetBlogCategoryAsync(slug);
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Tag(string slug)
@@ -211,24 +203,8 @@ namespace Fan.Web.Controllers
         [ModelPreRender]
         public async Task<IActionResult> Page(string parentPage, string childPage)
         {
-            if (parentPage.IsNullOrEmpty()) parentPage = "Home";
-
-            var page = await pageService.GetAsync(parentPage, childPage);
-            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
-
-            var pageVM = new PageVM
-            {
-                Author = page.User.DisplayName,
-                Body = page.Body,
-                Excerpt = page.Excerpt,
-                CreatedOnDisplay = page.CreatedOn.ToDisplayString(coreSettings.TimeZoneId),
-                EditLink = BlogRoutes.GetPageEditLink(page.Id),
-                IsParent = page.IsParent,
-                Title = page.Title,
-                PageLayout = (EPageLayout) page.PageLayout,
-            };
-
-            return View(pageVM);
+            var (_, viewModel) = await homeHelper.GetPageAsync(parentPage, childPage);
+            return View(viewModel);
         }
 
         [ModelPreRender]

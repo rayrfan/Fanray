@@ -1,0 +1,49 @@
+﻿@page
+@model Fan.WebApp.Manage.Admin.Shared.NavSettingsModel
+@{
+    ViewData["Title"] = "Menu Item Settings";
+    Layout = "_SettingsLayout";
+}
+
+<nav-settings inline-template>
+    <v-form v-model="valid">
+        <v-text-field label="Navigation Text" v-model="nav.text" v-on:keydown.enter.prevent="save" :rules="textRules"></v-text-field>
+        <v-text-field label="Title Attribute" v-model="nav.title" v-on:keydown.enter.prevent="save"></v-text-field>
+        <v-btn @@click="save" :disabled="!valid">Save</v-btn>
+    </v-form>
+</nav-settings>
+
+@section Scripts {
+    <script>
+        Vue.component('nav-settings', {
+            data: () => ({
+                nav: @Html.Raw(Model.NavJson),
+                menuId: @Model.MenuId,
+                index: @Model.Index,
+                valid: false,
+                textRules: [
+                    v => !!v.trim() || 'Navigation Text is required',
+                ],
+            }),
+            methods: {
+                async save() {
+                    try {
+                        this.nav.menuId = this.menuId;
+                        this.nav.index = this.index;
+                        let resp = await axios.post('/admin/shared/NavSettings', this.nav, this.$root.headers);
+                        console.log(resp);
+                        this.$root.onExtSettingsUpdated({
+                            menuId: this.menuId,
+                            index: this.nav.index,
+                            text: this.nav.text,
+                            msg: resp.data,
+                        });
+                    } catch (e) {
+                        this.$root.onExtSettingsUpdateErr(e);
+                    }
+                }
+            },
+        });
+    </script>
+}
+

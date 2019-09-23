@@ -27,5 +27,9 @@ namespace Fan.Themes
         /// Page layouts.
         /// </summary>
         public PageLayoutInfo[] PageLayouts { get; set; }
+        /// <summary>
+        /// Site navigation menus.
+        /// </summary>
+        public MenuInfo[] Menus { get; set; }
     }
 }

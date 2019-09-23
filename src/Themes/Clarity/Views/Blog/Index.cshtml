@@ -13,7 +13,7 @@
         <h1>
             <a href="@blogPost.RelativeLink">@blogPost.Title</a>
         </h1>
-        @await Html.PartialAsync("_PostInfo", postVM)
+        @await Html.PartialAsync("_PostInfo.cshtml", postVM)
     </header>
     <div class="post-body">
         @if (postListDisplay == EPostListDisplay.Excerpt)

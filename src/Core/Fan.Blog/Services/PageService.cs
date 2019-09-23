@@ -7,6 +7,7 @@ using Fan.Blog.Services.Interfaces;
 using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Navigation;
 using Markdig;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
-    public class PageService : IPageService
+    public class PageService : IPageService, INavProvider
     {
         private readonly IPostRepository _postRepo;
         private readonly IDistributedCache cache;
@@ -57,7 +58,9 @@ namespace Fan.Blog.Services
         {
             "admin", "account", "api", "app", "apps", "assets",
             "blog", "blogs",
+            "denied",
             "feed", "feeds", "forum", "forums",
+            "image", "images", "img",
             "login", "logout",
             "media",
             "plugin", "plugins", "post", "posts", "preview",
@@ -297,6 +300,14 @@ namespace Fan.Blog.Services
             // invalidate cache
             var key = await GetCacheKey(pageId, post);
             await cache.RemoveAsync(key);
+        }
+
+        public bool CanProvideNav(ENavType type) => type == ENavType.Page;
+
+        public async Task<string> GetNavUrlAsync(int id)
+        {
+            var page = await GetAsync(id);
+            return $"/{page.Slug}";
         }
 
         // -------------------------------------------------------------------- private methods 

@@ -3,5 +3,384 @@
 @{
     ViewData["Title"] = "Navigation";
 }
+@section Styles
+{
+    <style>
+        .tile {
+            border: 1px solid #ddd;
+            margin: 5px;
+        }
+        .menu-tile {
+            border: 1px solid #ddd;
+            background-color: #fafafa;
+            margin: 5px;
+        }
+    </style>
+}
+<navigation inline-template ref="exts">
+    <v-container fluid>
+        <v-layout align-start>
+            @* Nav Items *@
+            <v-flex xs6 md4>
+                <v-expansion-panel v-model="panel" expand class="elevation-1">
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Pages</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="page-navs"
+                                       v-model="pages"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="page in pages">
+                                    <v-list-tile :key="page.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{page.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(page)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Apps</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="app-navs"
+                                       v-model="apps"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="app in apps">
+                                    <v-list-tile :key="app.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{app.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(app)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Blog Categories</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="cat-navs"
+                                       v-model="cats"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="cat in cats">
+                                    <v-list-tile :key="cat.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{cat.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(cat)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Custom Links</h4>
+                        </template>
+                        <v-card>
+                            <v-card-text>coming soon</v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+                <br />
+                @* Home *@
+                <v-card class="lighten-3">
+                    <v-card-title primary-title>
+                        <div>
+                            <div class="headline"><v-icon medium>home</v-icon>Home</div>
+                            <span class="grey--text pt-1">
+                                To set home click on the <v-icon small>more_vert</v-icon> icon
+                                from one of the above navigation items then click on "Set as home".
+                            </span>
+                        </div>
+                    </v-card-title>
+                    <v-card-text>
+                        <div class="subheading">
+                            The root of your site will display the <span class="font-italic font-weight-bold">{{home.text}}</span>
+                            <span v-if="home.type === 0">page!</span>
+                            <span v-else-if="home.type === 1">app!</span>
+                            <span v-else-if="home.type === 2">blog category!</span>
+                        </div>
+                    </v-card-text>
+                </v-card>
+            </v-flex>
+            @* Menus *@
+            <v-flex xs6 md4>
+                <v-list dense class="elevation-1 ml-3" v-for="menu in menus" :key="menu.id">
+                    <v-subheader>
+                        <span class="font-weight-bold black--text">{{ menu.name }}</span>
+                        <span class="grey--text pl-1">(Menu{{menu.id}} - {{menu.description}})</span>
+                    </v-subheader>
+                    <draggable :id="menu.id"
+                               v-model="menu.navs"
+                               v-bind="menuOptions"
+                               @@add="add"
+                               @@sort="sort"
+                               style="min-height: 10px;cursor:move">
+                        <template v-for="(nav, index) in menu.navs">
+                            <v-list-tile :key="index" class="menu-tile">
+                                <v-list-tile-content>
+                                    <div>
+                                        <span class="font-weight-bold">{{nav.text}}</span>
+                                        <div style="display:inline; font-size:smaller">
+                                            <span class="grey--text font-italic" v-if="nav.type === 0"> - {{nav.origNavName}} Page</span>
+                                            <span class="grey--text font-italic" v-else-if="nav.type === 1"> - {{nav.origNavName}} App</span>
+                                            <span class="grey--text font-italic" v-else-if="nav.type === 2"> - {{nav.origNavName}} Blog Category</span>
+                                        </div>
+                                    </div>
+                                </v-list-tile-content>
+                                <v-list-tile-action>
+                                    <v-list-tile-action-text>
+                                        <v-btn flat icon class="mr-1" @@click="viewSettings(nav)">
+                                            <v-icon>edit</v-icon>
+                                        </v-btn>
+                                        <v-btn flat icon @@click="deleteNav(menu.id, index)">
+                                            <v-icon>delete</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action-text>
+                                </v-list-tile-action>
+                            </v-list-tile>
+                        </template>
+                    </draggable>
+                </v-list>
+            </v-flex>
+        </v-layout>
+        <v-dialog lazy
+                  v-model="dialogVisible"
+                  @@keydown.esc="closeDialog"
+                  persistent
+                  content-class="ext-settings-dialog">
+            <v-card>
+                <v-card-title class="pl-4 pt-2 pb-0">
+                    <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn flat small fab @@click="closeDialog">
+                        <v-icon>close</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <iframe ref="settingsIframe"
+                            @@load="$root.initIframeHeight($refs.settingsIframe)"
+                            frameborder="0"
+                            scrolling="no"
+                            class="ext-settings-frame"
+                            v-if="settingsUrl"
+                            :src="settingsUrl"
+                            :title="dialogTitle"></iframe>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </v-container>
+</navigation>
 
-<i>This feature is comming soon... </i>
+@section ComponentScripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.21.0/dist/vuedraggable.umd.min.js"></script>
+    <script>
+        let navigationMixin = {
+            data: function () {
+                return {
+                    panel: [true, false, false, false],
+                    pages: @Html.Raw(Model.PagesJson),
+                    apps: @Html.Raw(Model.AppsJson),
+                    cats: @Html.Raw(Model.CatsJson),
+                    home: @Html.Raw(Model.HomeJson),
+                    menus: @Html.Raw(Model.MenusJson),
+                    infoOptions: {
+                        group: { name:'navs', pull:'clone', put: false },
+                        sort: false
+                    },
+                    menuOptions: {
+                        group: 'navs',
+                        ghostClass: 'sortable-ghost'
+                    }
+                }
+            },
+        }
+    </script>
+    <script>
+        Vue.component('navigation', {
+            mixins: [navigationMixin],
+            data: () => ({
+                dialogVisible: false,
+                dialogTitle: '',
+                settingsUrl: null,
+            }),
+            mounted() {
+                this.initSettingsUpdatedHandler();
+            },
+            methods: {
+                async add(evt) {
+                    let im = {
+                        fromId: evt.from.id,
+                        menuId: evt.to.id,
+                        index: evt.newIndex,
+                        oldIndex: evt.oldIndex,
+                    };
+
+                    if (evt.from.id === 'page-navs') {
+                        let nav = this.pages[evt.oldIndex];
+                        im.id = nav.id;
+                        im.type = nav.type;
+                        im.text = nav.text;
+                    }
+                    else if (evt.from.id === 'app-navs') {
+                        let nav = this.apps[evt.oldIndex];
+                        im.id = nav.id;
+                        im.type = nav.type;
+                        im.text = nav.text;
+                    }
+                    else if (evt.from.id === 'cat-navs') {
+                        let nav = this.cats[evt.oldIndex];
+                        im.id = nav.id;
+                        im.type = nav.type;
+                        im.text = nav.text;
+                    }
+                    else { // from another menu
+                        // since the nav is dragged to the new menu, use to.id
+                        let menu = this.menus.find(m => m.id.toString() === evt.to.id);
+                        let nav = menu.navs[evt.newIndex]; 
+                        im.id = nav.id;
+                        im.type = nav.type;
+                        im.text = nav.text;
+                        im.title = nav.title;
+                        im.url = nav.url;
+                        im.origNavName = nav.origNavName;
+                    }
+
+                    console.log('Nav being added: ', im);
+
+                    try {
+                        let resp = await axios.post('/admin/navigation?handler=add', im, this.$root.headers);
+                        let menu = this.menus.find(m => m.id.toString() === evt.to.id);
+                        let nav = menu.navs[evt.newIndex]; 
+                        nav.settingsUrl = resp.data.settingsUrl;
+                        nav.origNavName = im.origNavName; 
+                    } catch (e) {
+                        console.error(e);
+                        this.$root.toastError('Add menu item failed.');
+                    }
+                },
+                async sort(evt) {
+                    if (evt.from.id !== evt.to.id) return;
+                    let im = {
+                        menuId: evt.to.id,
+                        index: evt.newIndex,
+                        oldIndex: evt.oldIndex,
+                    };
+
+                    let menu = this.menus.find(m => m.id.toString() === evt.from.id);
+                    let nav = menu.navs[evt.newIndex]; // already reordered
+                    im.id = nav.id;
+                    im.type = nav.type;
+                    im.text = nav.text;
+                    im.title = nav.title;
+                    im.url = nav.type === 3 ? null : nav.url;
+
+                    console.log('Nav being sorted: ', im);
+
+                    try {
+                        await axios.post('/admin/navigation?handler=sort', im, this.$root.headers);
+                    } catch (e) {
+                        console.error(e);
+                        this.$root.toastError('Sort menu item failed.');
+                    }
+                },
+                async deleteNav(menuId, index) {
+                    if (confirm(`Are you sure to delete this menu item?`)) {
+                        try {
+                            await axios.delete(`/admin/navigation?menuId=${menuId}&index=${index}`, this.$root.headers);
+                            let menu = this.menus.find(m => m.id === menuId);
+                            menu.navs.splice(index, 1);
+                        } catch (e) {
+                            console.error(e);
+                            this.$root.toastError('Delete menu item failed.');
+                        }
+                    }
+                },
+                async setHome(nav) {
+                    try {
+                        console.log('Set nav as home: ', nav);
+                        await axios.post(`/admin/navigation?handler=home`, nav, this.$root.headers);
+                        this.home = nav;
+                        this.$root.toast('Home updated.');
+                    } catch (e) {
+                        console.error(e);
+                        this.$root.toastError('Set as home failed.');
+                    }
+                },
+                viewSettings(nav) {
+                    console.log(nav);
+                    this.dialogTitle = nav.text;
+                    this.dialogVisible = true;
+                    this.settingsUrl = nav.settingsUrl;
+                },
+                closeDialog() {
+                    this.dialogVisible = false;
+                },
+                initSettingsUpdatedHandler() {
+                    let self = this;
+                    window.document.addEventListener('ExtSettingsUpdated', e => {
+                        console.log('nav settings updated: ', e.detail);
+
+                        // update the menu nav text
+                        let menu = this.menus.find(m => m.id === e.detail.menuId);
+                        let nav = menu.navs[e.detail.index]; 
+                        nav.text = e.detail.text;
+
+                        // show toast and close dialog
+                        self.$root.toast(e.detail.msg);
+                        self.closeDialog();
+                    });
+                },
+            }
+        });
+    </script>
+}

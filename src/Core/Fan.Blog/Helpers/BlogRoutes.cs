@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Fan.Navigation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using System;
 
@@ -154,7 +155,7 @@ namespace Fan.Blog.Helpers
         public static void RegisterRoutes(IRouteBuilder routes)
         {
             // "blog"
-            routes.MapRoute("Blog", "blog", new { controller = "Blog", action = "Index" });
+            routes.MapRoute("Blog", App.BLOG_APP_URL, new { controller = "Blog", action = "Index" });
 
             // "rsd"
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });

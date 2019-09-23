@@ -5,6 +5,7 @@ using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Navigation;
 using Fan.Settings;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -21,6 +22,7 @@ namespace Fan.Blog.Services
     /// The blog category service.
     /// </summary>
     public class CategoryService : ICategoryService,
+                                   INavProvider,
                                    INotificationHandler<BlogPostBeforeCreate>,
                                    INotificationHandler<BlogPostBeforeUpdate>
     {
@@ -236,6 +238,14 @@ namespace Fan.Blog.Services
             await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
         }
 
+        public bool CanProvideNav(ENavType type) => type == ENavType.BlogCategory;
+
+        public async Task<string> GetNavUrlAsync(int id)
+        {
+            var cat = await GetAsync(id);
+            return BlogRoutes.GetCategoryRelativeLink(cat.Slug);
+        }        
+
         // -------------------------------------------------------------------- event handlers
 
         /// <summary>
@@ -296,6 +306,6 @@ namespace Fan.Blog.Services
             title = Util.CleanHtml(title);
             title = title.Length > TITLE_MAXLEN ? title.Substring(0, TITLE_MAXLEN) : title;
             return title;
-        }
+        }      
     }
 }

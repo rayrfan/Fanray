@@ -1,7 +1,7 @@
 ﻿namespace Fan.Themes
 {
     /// <summary>
-    /// Default page layouts.
+    /// Default page layout ids.
     /// </summary>
     public enum EPageLayout : byte
     {
@@ -10,5 +10,6 @@
         Layout3 = 3,
         Layout4 = 4,
         Layout5 = 5,
+        Layout6 = 6,
     }
 }

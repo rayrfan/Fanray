@@ -1,7 +1,10 @@
-﻿using Fan.Blog.Services.Interfaces;
+﻿using Fan.Blog.Services;
+using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
+using Fan.Navigation;
 using Fan.Settings;
+using Fan.Web.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
@@ -13,30 +16,55 @@ namespace Fan.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly ISettingService _settingSvc;
-        private readonly IBlogPostService _blogSvc;
-        private readonly ILogger<HomeController> _logger;
+        private readonly IHomeHelper homeHelper;
+        private readonly SignInManager<User> signInManager;
+        private readonly IPageService pageService;
+        private readonly ICategoryService categoryService;
+        private readonly ISettingService settingService;
+        private readonly ILogger<HomeController> logger;
 
         public HomeController(
-            UserManager<User> userManager,
-            RoleManager<Role> roleManager,
+            IHomeHelper homeHelper,
             SignInManager<User> signInManager,
-            IBlogPostService blogService,
+            IPageService pageService,
+            ICategoryService categoryService,
             ISettingService settingService,
             ILogger<HomeController> logger)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
-            _blogSvc = blogService;
-            _settingSvc = settingService;
-            _logger = logger;
+            this.homeHelper = homeHelper;
+            this.signInManager = signInManager;
+            this.pageService = pageService;
+            this.categoryService = categoryService;
+            this.settingService = settingService;
+            this.logger = logger;
         }
 
-        //public IActionResult Index => RedirectToAction(nameof(BlogController.Index), "Blog");
+        /// <summary>
+        /// Site home.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Index()
+        {
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            var nav = coreSettings.Home;
+
+            if (nav.Type == ENavType.Page)
+            {
+                var page = await pageService.GetAsync(nav.Id);
+                var (pagePath, pageModel) = await homeHelper.GetPageAsync(page.Slug);
+                return View(pagePath, pageModel);
+            }
+            else if (nav.Type == ENavType.BlogCategory)
+            {
+                var cat = await categoryService.GetAsync(nav.Id);
+                var (catPath, catModel) = await homeHelper.GetBlogCategoryAsync(cat.Slug);
+                return View(catPath, catModel);
+            }
+
+            // default to blog app
+            var (indexPath, indexModel) = await homeHelper.GetBlogIndexAsync(BlogPostService.DEFAULT_PAGE_INDEX);
+            return View(indexPath, indexModel);
+        }
 
         /// <summary>
         /// 404 comes here.
@@ -83,8 +111,8 @@ namespace Fan.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
+            await signInManager.SignOutAsync();
+            logger.LogInformation("User logged out.");
             return RedirectToAction(nameof(BlogController.Page), "Blog");
         }
     }

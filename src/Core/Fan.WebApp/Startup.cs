@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
+using Fan.Blog.Services;
 using Fan.Data;
 using Fan.Membership;
+using Fan.Navigation;
 using Fan.Settings;
 using Fan.Web.Controllers;
+using Fan.Web.Helpers;
 using Fan.Web.Middlewares;
 using Fan.Web.Options;
 using Fan.Web.Theming;
@@ -105,11 +108,14 @@ namespace Fan.WebApp
 
             // Scrutor scans Fan, Fan.Blog and Mediatr, see https://bit.ly/2AtPmLn and https://bit.ly/2FIJOhw
             services.Scan(scan => scan
-              .FromAssembliesOf(typeof(ISettingService), typeof(IMediator), typeof(BlogPost))
+              .FromAssembliesOf(typeof(ISettingService), typeof(IMediator), typeof(BlogPost), typeof(IHomeHelper))
               .AddClasses()
               .UsingRegistrationStrategy(RegistrationStrategy.Skip) // prevent added to add again
               .AsImplementedInterfaces()
               .WithScopedLifetime());
+
+            services.AddScoped<INavProvider, PageService>();
+            services.AddScoped<INavProvider, CategoryService>();
 
             // Preferred Domain
             services.AddScoped<IPreferredDomainRewriter, PreferredDomainRewriter>();
@@ -200,7 +206,7 @@ namespace Fan.WebApp
 
         private void RegisterRoutes(IRouteBuilder routes, IApplicationBuilder app)
         {
-            //routes.MapRoute("Home", "", new { controller = "Blog", action = "Index" });
+            routes.MapRoute("Home", "", new { controller = "Home", action = "Index" });
             BlogRoutes.RegisterRoutes(routes);
             routes.MapRoute(name: "Default", template: "{controller=Home}/{action=Index}/{id?}");
         }
