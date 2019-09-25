@@ -1,28 +1,15 @@
 ﻿@page
-@model Fan.WebApp.Manage.Admin.NavigationModel
+@model NavigationModel
 @{
     ViewData["Title"] = "Navigation";
 }
-@section Styles
-{
-    <style>
-        .tile {
-            border: 1px solid #ddd;
-            margin: 5px;
-        }
-        .menu-tile {
-            border: 1px solid #ddd;
-            background-color: #fafafa;
-            margin: 5px;
-        }
-    </style>
-}
+
 <navigation inline-template ref="exts">
     <v-container fluid>
         <v-layout align-start>
             @* Nav Items *@
             <v-flex xs6 md4>
-                <v-expansion-panel v-model="panel" expand class="elevation-1">
+                <v-expansion-panel v-model="infoPanels" expand class="elevation-1">
                     <v-expansion-panel-content class="grey lighten-3">
                         <template v-slot:header>
                             <h4>Pages</h4>
@@ -152,43 +139,49 @@
             </v-flex>
             @* Menus *@
             <v-flex xs6 md4>
-                <v-list dense class="elevation-1 ml-3" v-for="menu in menus" :key="menu.id">
-                    <v-subheader>
-                        <span class="font-weight-bold black--text">{{ menu.name }}</span>
-                        <span class="grey--text pl-1">(Menu{{menu.id}} - {{menu.description}})</span>
-                    </v-subheader>
-                    <draggable :id="menu.id"
-                               v-model="menu.navs"
-                               v-bind="menuOptions"
-                               @@add="add"
-                               @@sort="sort"
-                               style="min-height: 10px;cursor:move">
-                        <template v-for="(nav, index) in menu.navs">
-                            <v-list-tile :key="index" class="menu-tile">
-                                <v-list-tile-content>
-                                    <div>
-                                        <span class="font-weight-bold">{{nav.text}}</span>
-                                        <div style="display:inline; font-size:smaller">
-                                            <span class="grey--text font-italic" v-if="nav.type === 0"> - {{nav.origNavName}} Page</span>
-                                            <span class="grey--text font-italic" v-else-if="nav.type === 1"> - {{nav.origNavName}} App</span>
-                                            <span class="grey--text font-italic" v-else-if="nav.type === 2"> - {{nav.origNavName}} Blog Category</span>
-                                        </div>
-                                    </div>
-                                </v-list-tile-content>
-                                <v-list-tile-action>
-                                    <v-list-tile-action-text>
-                                        <v-btn flat icon class="mr-1" @@click="viewSettings(nav)">
-                                            <v-icon>edit</v-icon>
-                                        </v-btn>
-                                        <v-btn flat icon @@click="deleteNav(menu.id, index)">
-                                            <v-icon>delete</v-icon>
-                                        </v-btn>
-                                    </v-list-tile-action-text>
-                                </v-list-tile-action>
-                            </v-list-tile>
+                <v-expansion-panel v-model="menuPanels" expand class="elevation-1 ml-3">
+                    <v-expansion-panel-content v-for="menu in menus" :key="menu.id" class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>
+                                {{ menu.name }}
+                                <span class="grey--text" style="font-weight:normal">(Menu{{menu.id}} - {{menu.description}})</span>
+                            </h4>
                         </template>
-                    </draggable>
-                </v-list>
+                        <v-list dense>
+                            <draggable :id="menu.id"
+                                       v-model="menu.navs"
+                                       v-bind="menuOptions"
+                                       @@add="add"
+                                       @@sort="sort"
+                                       style="min-height: 10px;cursor:move">
+                                <template v-for="(nav, index) in menu.navs">
+                                    <v-list-tile :key="index" class="tile">
+                                        <v-list-tile-content>
+                                            <div>
+                                                <span class="font-weight-bold">{{nav.text}}</span>
+                                                <div style="display:inline">
+                                                    <span class="grey--text font-italic" v-if="nav.type === 0"> - {{nav.origNavName}} Page</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 1"> - {{nav.origNavName}} App</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 2"> - {{nav.origNavName}} Blog Category</span>
+                                                </div>
+                                            </div>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-list-tile-action-text>
+                                                <v-btn flat icon class="mr-1" @@click="viewSettings(nav)">
+                                                    <v-icon>edit</v-icon>
+                                                </v-btn>
+                                                <v-btn flat icon @@click="deleteNav(menu.id, index)">
+                                                    <v-icon>delete</v-icon>
+                                                </v-btn>
+                                            </v-list-tile-action-text>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
             </v-flex>
         </v-layout>
         <v-dialog lazy
@@ -227,12 +220,13 @@
         let navigationMixin = {
             data: function () {
                 return {
-                    panel: [true, false, false, false],
                     pages: @Html.Raw(Model.PagesJson),
                     apps: @Html.Raw(Model.AppsJson),
                     cats: @Html.Raw(Model.CatsJson),
                     home: @Html.Raw(Model.HomeJson),
                     menus: @Html.Raw(Model.MenusJson),
+                    infoPanels: [true, false, false, false],
+                    menuPanels: @Html.Raw(Model.MenuPanelsJson),
                     infoOptions: {
                         group: { name:'navs', pull:'clone', put: false },
                         sort: false

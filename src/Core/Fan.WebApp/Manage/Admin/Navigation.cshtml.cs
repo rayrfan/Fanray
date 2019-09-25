@@ -42,6 +42,7 @@ namespace Fan.WebApp.Manage.Admin
         public string AppsJson { get; private set; }
         public string HomeJson { get; private set; }
         public string MenusJson { get; private set; }
+        public string MenuPanelsJson { get; private set; }
 
         /// <summary>
         /// Initializes page.
@@ -84,6 +85,14 @@ namespace Fan.WebApp.Manage.Admin
                 menuVMs.Add(new MenuVM(menu, navList, pages, cats));
             }
             MenusJson = JsonConvert.SerializeObject(menuVMs);
+
+            // menu panels
+            var menuPanels = new bool[menus.Length];
+            for (int i = 0; i < menuPanels.Length; i++)
+            {
+                menuPanels[i] = true;
+            }
+            MenuPanelsJson = JsonConvert.SerializeObject(menuPanels);
         }
 
         /// <summary>
