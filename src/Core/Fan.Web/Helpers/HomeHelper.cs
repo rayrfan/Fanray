@@ -5,7 +5,6 @@ using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Settings;
 using Fan.Themes;
-using Fan.Web.Models.Blog;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -44,20 +43,21 @@ namespace Fan.Web.Helpers
             httpContext = httpContextAccessor.HttpContext;
         }
 
-        public async Task<(string viewPath, BlogPostListViewModel viewModel)> GetBlogIndexAsync(int? page)
+        public async Task<(string viewPath, BlogPostListVM viewModel)> GetBlogIndexAsync(int? page)
         {
             if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
             var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
             var posts = await blogPostService.GetListAsync(page.Value, blogSettings.PostPerPage);
-            return ("../Blog/Index", new BlogPostListViewModel(posts, blogSettings, httpContext.Request, page.Value));
+            return ("../Blog/Index", new BlogPostListVM(posts, blogSettings, httpContext.Request, page.Value));
         }
 
-        public async Task<(string viewPath, BlogPostListViewModel viewModel)> GetBlogCategoryAsync(string slug)
+        public async Task<(string viewPath, BlogPostListVM viewModel)> GetBlogCategoryAsync(string slug, int? page)
         {
+            if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
             var cat = await categoryService.GetAsync(slug);
-            var posts = await blogPostService.GetListForCategoryAsync(slug, 1);
+            var posts = await blogPostService.GetListForCategoryAsync(slug, page.Value);
             var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-            return ("../Blog/Categories", new BlogPostListViewModel(posts, blogSettings, httpContext.Request, cat));
+            return ("../Blog/Index", new BlogPostListVM(posts, blogSettings, httpContext.Request, cat, page.Value));
         }
 
         public async Task<(string viewPath, PageVM viewModel)> GetPageAsync(string parentPage, string childPage = null)

@@ -21,8 +21,8 @@ namespace Fan.Blog.Helpers
         private const string POST_PERMA_URL = "blog/post/{0}";
         private const string POST_EDIT_URL = "admin/compose/post/{0}";
 
-        private const string CATEGORY_URL = "posts/categorized/{0}";
-        private const string CATEGORY_RSS_URL = "posts/categorized/{0}/feed";
+        private const string CATEGORY_URL = "blog/{0}";
+        private const string CATEGORY_RSS_URL = "blog/{0}/feed";
         private const string TAG_URL = "posts/tagged/{0}";
         private const string ARCHIVE_URL = "posts/{0}/{1}";
 

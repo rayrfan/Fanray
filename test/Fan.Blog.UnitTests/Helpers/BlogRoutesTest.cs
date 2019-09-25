@@ -70,7 +70,7 @@ namespace Fan.Blog.UnitTests.Helpers
             var slug = "technology";
             var relativeLink = BlogRoutes.GetCategoryRelativeLink(slug);
 
-            Assert.Equal("/posts/categorized/technology", relativeLink);
+            Assert.Equal("/blog/technology", relativeLink);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Fan.Blog.UnitTests.Helpers
             var slug = "technology";
             var rssLink = BlogRoutes.GetCategoryRssRelativeLink(slug);
 
-            Assert.Equal("/posts/categorized/technology/feed", rssLink);
+            Assert.Equal("/blog/technology/feed", rssLink);
         }
 
         /// <summary>

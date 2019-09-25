@@ -6,7 +6,6 @@ using Fan.Helpers;
 using Fan.Settings;
 using Fan.Web.Attributes;
 using Fan.Web.Helpers;
-using Fan.Web.Models.Blog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Distributed;
@@ -86,7 +85,7 @@ namespace Fan.Web.Controllers
         {
             var blogPost = await _blogSvc.GetAsync(slug, year, month, day);
             var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
+            var vm = new BlogPostVM(blogPost, blogSettings, Request);
             return View(vm);
         }
 
@@ -112,7 +111,7 @@ namespace Fan.Web.Controllers
                 blogPost.Body = OembedParser.Parse(blogPost.Body);
                 var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
                 blogSettings.DisqusShortname = ""; // when preview turn off disqus
-                var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
+                var vm = new BlogPostVM(blogPost, blogSettings, Request);
 
                 // Show it
                 return View("Post", vm);
@@ -131,10 +130,10 @@ namespace Fan.Web.Controllers
             return Redirect(BlogRoutes.GetPostRelativeLink(post.CreatedOn, post.Slug));
         }
 
-        public async Task<IActionResult> Category(string slug)
+        public async Task<IActionResult> Category(string slug, int? page)
         {
-            var (_, viewModel) = await homeHelper.GetBlogCategoryAsync(slug);
-            return View(viewModel);
+            var (viewPath, viewModel) = await homeHelper.GetBlogCategoryAsync(slug, page);
+            return View(viewPath, viewModel);
         }
 
         public async Task<IActionResult> Tag(string slug)
@@ -142,7 +141,7 @@ namespace Fan.Web.Controllers
             var tag = await _tagSvc.GetBySlugAsync(slug);
             var posts = await _blogSvc.GetListForTagAsync(slug, 1);
             var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);
+            var vm = new BlogPostListVM(posts, blogSettings, Request, tag);
             return View(vm);
         }
 
@@ -161,7 +160,7 @@ namespace Fan.Web.Controllers
             string monthName = (month.HasValue && month.Value > 0) ?
                 CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Value) : "";
 
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request)
+            var vm = new BlogPostListVM(posts, blogSettings, Request)
             {
                 ArchiveTitle = $"{monthName} {year.Value}"
             };
@@ -244,7 +243,7 @@ namespace Fan.Web.Controllers
                                 await _blogSvc.GetListForCategoryAsync(cat.Slug, 1);
                     var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
                     var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
-                    var vm = new BlogPostListViewModel(postList, blogSettings, Request);
+                    var vm = new BlogPostListVM(postList, blogSettings, Request);
 
                     var settings = await settingService.GetSettingsAsync<CoreSettings>();
                     var channelTitle = cat == null ? settings.Title : $"{cat.Title} - {settings.Title}";

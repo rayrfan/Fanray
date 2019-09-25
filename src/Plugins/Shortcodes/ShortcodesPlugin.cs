@@ -1,7 +1,6 @@
 ﻿using Fan.Blog.Models.View;
 using Fan.Plugins;
 using Fan.Web.Events;
-using Fan.Web.Models.Blog;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Shortcodes.Services;
@@ -13,8 +12,8 @@ namespace Shortcodes
         public override void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<INotificationHandler<ModelPreRender<PageVM>>, ShortcodesHandler>();
-            services.AddScoped<INotificationHandler<ModelPreRender<BlogPostViewModel>>, ShortcodesHandler>();
-            services.AddScoped<INotificationHandler<ModelPreRender<BlogPostListViewModel>>, ShortcodesHandler>();
+            services.AddScoped<INotificationHandler<ModelPreRender<BlogPostVM>>, ShortcodesHandler>();
+            services.AddScoped<INotificationHandler<ModelPreRender<BlogPostListVM>>, ShortcodesHandler>();
 
             var shortcodeService = new ShortcodeService();
             shortcodeService.Add<SourceCodeShortcode>(tag: "code");

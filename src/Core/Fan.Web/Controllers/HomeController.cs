@@ -57,7 +57,7 @@ namespace Fan.Web.Controllers
             else if (nav.Type == ENavType.BlogCategory)
             {
                 var cat = await categoryService.GetAsync(nav.Id);
-                var (catPath, catModel) = await homeHelper.GetBlogCategoryAsync(cat.Slug);
+                var (catPath, catModel) = await homeHelper.GetBlogCategoryAsync(cat.Slug, BlogPostService.DEFAULT_PAGE_INDEX);
                 return View(catPath, catModel);
             }
 

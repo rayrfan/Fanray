@@ -1,7 +1,6 @@
 ﻿using Fan.Blog.Models.View;
 using Fan.Plugins;
 using Fan.Web.Events;
-using Fan.Web.Models.Blog;
 using MediatR;
 using Shortcodes.Services;
 using System.Linq;
@@ -11,8 +10,8 @@ using System.Threading.Tasks;
 namespace Shortcodes
 {
     public class ShortcodesHandler : INotificationHandler<ModelPreRender<PageVM>>, 
-                                     INotificationHandler<ModelPreRender<BlogPostViewModel>>,
-                                     INotificationHandler<ModelPreRender<BlogPostListViewModel>>
+                                     INotificationHandler<ModelPreRender<BlogPostVM>>,
+                                     INotificationHandler<ModelPreRender<BlogPostListVM>>
     {
         private readonly IShortcodeService shortcodeService;
         private readonly IPluginService pluginService;
@@ -31,19 +30,19 @@ namespace Shortcodes
             ((PageVM)notification.Model).Body = shortcodeService.Parse(body);
         }
 
-        public async Task Handle(ModelPreRender<BlogPostViewModel> notification, CancellationToken cancellationToken)
+        public async Task Handle(ModelPreRender<BlogPostVM> notification, CancellationToken cancellationToken)
         {
-            if (!await IsPluginActiveAsync() || !(notification.Model is BlogPostViewModel)) return;
+            if (!await IsPluginActiveAsync() || !(notification.Model is BlogPostVM)) return;
 
-            var body = ((BlogPostViewModel)notification.Model).Body;
-            ((BlogPostViewModel)notification.Model).Body = shortcodeService.Parse(body);
+            var body = ((BlogPostVM)notification.Model).Body;
+            ((BlogPostVM)notification.Model).Body = shortcodeService.Parse(body);
         }
 
-        public async Task Handle(ModelPreRender<BlogPostListViewModel> notification, CancellationToken cancellationToken)
+        public async Task Handle(ModelPreRender<BlogPostListVM> notification, CancellationToken cancellationToken)
         {
-            if (!await IsPluginActiveAsync() || !(notification.Model is BlogPostListViewModel)) return;
+            if (!await IsPluginActiveAsync() || !(notification.Model is BlogPostListVM)) return;
 
-            foreach (var postViewModel in ((BlogPostListViewModel)notification.Model).BlogPostViewModels)
+            foreach (var postViewModel in ((BlogPostListVM)notification.Model).BlogPostViewModels)
             {
                 postViewModel.Body = shortcodeService.Parse(postViewModel.Body);
             }

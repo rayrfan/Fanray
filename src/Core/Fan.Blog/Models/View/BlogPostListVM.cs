@@ -1,50 +1,45 @@
 ﻿using Fan.Blog.Enums;
-using Fan.Blog.Models;
-using Fan.Blog.Services;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace Fan.Web.Models.Blog
+namespace Fan.Blog.Models.View
 {
     /// <summary>
     /// View model for a list of blog posts.
     /// </summary>
-    /// <remarks>
-    /// This is used on Index.cshtml, Category.cshtml and Tag.cshtml.
-    /// </remarks>
-    public class BlogPostListViewModel
+    public class BlogPostListVM
     {
-        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, int currentPage = 1)
+        public BlogPostListVM(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, int currentPage = 1)
         {
-            BlogPostViewModels = new List<BlogPostViewModel>();
+            BlogPostViewModels = new List<BlogPostVM>();
             foreach (var blogPost in blogPostList.Posts)
             {
-                BlogPostViewModels.Add(new BlogPostViewModel(blogPost, blogSettings, request));
+                BlogPostViewModels.Add(new BlogPostVM(blogPost, blogSettings, request));
             }
             PostListDisplay = blogSettings.PostListDisplay;
             PostCount = blogPostList.PostCount;
 
             if (currentPage <= 0) currentPage = 1;
-            if ((currentPage * BlogPostService.DEFAULT_PAGE_SIZE) < PostCount)
+            if ((currentPage * blogSettings.PostPerPage) < PostCount)
             {
                 ShowOlder = true;
-                OlderPageIndex = currentPage + 1;
+                OlderPostsUrl = $"{request.Path}?page={currentPage + 1}";
             }
             if (currentPage > 1)
             {
                 ShowNewer = true;
-                NewerPageIndex = currentPage - 1;
+                NewerPostsUrl = currentPage <= 2 ? $"{request.Path}" : $"{request.Path}?page={currentPage - 1}";
             }
         }
 
-        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Category cat)
-            : this(blogPostList, blogSettings, request)
+        public BlogPostListVM(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Category cat, int currentPage = 1)
+            : this(blogPostList, blogSettings, request, currentPage)
         {
             CategoryTitle = cat.Title;
             Description = cat.Description;
         }
 
-        public BlogPostListViewModel(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Tag tag)
+        public BlogPostListVM(BlogPostList blogPostList, BlogSettings blogSettings, HttpRequest request, Tag tag)
            : this(blogPostList, blogSettings, request)
         {
             TagTitle = tag.Title;
@@ -54,7 +49,7 @@ namespace Fan.Web.Models.Blog
         /// <summary>
         /// The list of <see cref="BlogPostViewModel"/> to show on the page.
         /// </summary>
-        public List<BlogPostViewModel> BlogPostViewModels { get; }
+        public List<BlogPostVM> BlogPostViewModels { get; }
 
         /// <summary>
         /// What type of display for each blog post in a list of posts.
@@ -85,7 +80,7 @@ namespace Fan.Web.Models.Blog
 
         public bool ShowOlder { get; set; }
         public bool ShowNewer { get; set; }
-        public int OlderPageIndex { get; set; }
-        public int NewerPageIndex { get; set; }
+        public string OlderPostsUrl { get; set; }
+        public string NewerPostsUrl { get; set; }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
-using Fan.Blog.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Fan.Web.Models.Blog
+
+namespace Fan.Blog.Models.View
 {
     /// <summary>
     /// View model for a blog post.
@@ -16,9 +16,9 @@ namespace Fan.Web.Models.Blog
     /// This is used on Index.cshtml, Post.cshtml, _PostInfo.cshtml and _Comments.cshtml views,
     /// as well as <see cref="BlogController.Feed"/>.
     /// </remarks>
-    public class BlogPostViewModel
+    public class BlogPostVM
     {
-        public BlogPostViewModel(BlogPost blogPost, BlogSettings blogSettings, HttpRequest request)
+        public BlogPostVM(BlogPost blogPost, BlogSettings blogSettings, HttpRequest request)
         {
             Title = blogPost.Title;
             Body = blogPost.Body;
