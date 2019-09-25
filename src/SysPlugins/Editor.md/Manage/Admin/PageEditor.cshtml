@@ -28,7 +28,7 @@ else if (plugin.Language == "zh-tw")
                     theme: '@theme',
                     previewTheme: '@previewTheme',
                     editorTheme: '@plugin.CodeMirrorTheme',
-                    htmlDecode: true,
+                    htmlDecode: 'script,iframe|on*',
                     saveHTMLToTextarea: true,
                     previewCodeHighlight: false, // fix hljs
                     toolbarIcons: function () {
