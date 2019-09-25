@@ -10,17 +10,24 @@ body {
 // headings
 h1 {
     font-size: $h1-font-size;
+    margin-top: $h1-margin-top;
 }
 
 h2 {
     font-size: $h2-font-size;
+    margin-top: $h2-margin-top;
 }
 
 h3 {
     font-size: $h3-font-size;
+    margin-top: $h3-margin-top;
 }
 
-h4, h5, h6 {
+h4 {
+    font-size: $h4-font-size;
+}
+
+h5, h6 {
     font-size: $font-size-base;
 }
 
