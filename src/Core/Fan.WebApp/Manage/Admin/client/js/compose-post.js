@@ -171,7 +171,7 @@
             axios.post('/admin/compose/post?handler=preview', this.payload, { headers: { 'XSRF-TOKEN': this.tok } })
                 .then(resp => {
                     this.previewUrl = resp.data;
-                    this.postUrl = this.previewUrl.replace('preview/post/', '');
+                    this.postUrl = this.previewUrl.replace('preview/', '');
                 })
                 .catch(err => { console.log(err); });
         },
