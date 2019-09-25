@@ -1,6 +1,6 @@
 ﻿using Fan.Membership;
 using Fan.Settings;
-using Fan.Web.Models.Home;
+using Fan.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace Fan.Web.Components
             var currentUser = await _userManager.GetUserAsync(Request.HttpContext.User);
             var isSignedIn = _signInManager.IsSignedIn(Request.HttpContext.User);
 
-            var vm = new HeaderViewModel
+            var vm = new HeaderVM
             {
                 Title = coreSettings.Title,
                 Tagline = coreSettings.Tagline,

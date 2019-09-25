@@ -1,11 +1,11 @@
 ﻿using Fan.Membership;
-using Fan.Web.Models.Auth;
+using Fan.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Fan.Web.Controllers
+namespace Fan.Web.Api
 {
     /// <summary>
     /// Api for authentication.
@@ -16,12 +16,12 @@ namespace Fan.Web.Controllers
     /// </remarks>
     [Route("api/auth")]
     [ApiController]
-    public class AuthApiController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly IUserService _userSvc;
         private readonly SignInManager<User> _signInManager;
 
-        public AuthApiController(IUserService userService,
+        public AuthController(IUserService userService,
             SignInManager<User> signInManager)
         {
             _userSvc = userService;
@@ -44,7 +44,7 @@ namespace Fan.Web.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel loginUser)
+        public async Task<IActionResult> Login([FromBody] LoginVM loginUser)
         {
             // get user
             var user = await _userSvc.FindByEmailOrUsernameAsync(loginUser.UserName);

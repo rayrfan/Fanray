@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Fan.Web.Models.Auth
+namespace Fan.Web.Models
 {
     /// <summary>
     /// The view model for Pages/Login.cshtml.
     /// </summary>
-    public class LoginViewModel
+    public class LoginVM
     {
         /// <summary>
         /// Either email or username.

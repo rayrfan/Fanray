@@ -1,8 +1,8 @@
 ﻿using Fan.Membership;
 
-namespace Fan.Web.Models.Home
+namespace Fan.Web.Models
 {
-    public class HeaderViewModel
+    public class HeaderVM
     {
         public string Title { get; set; }
         public string Tagline { get; set; }
