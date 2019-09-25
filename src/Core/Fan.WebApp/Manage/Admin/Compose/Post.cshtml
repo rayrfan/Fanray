@@ -129,6 +129,7 @@
                                               v-model="post.slug"
                                               @@input="onFieldsChange"></v-text-field>
                                 <v-textarea label="Excerpt"
+                                            style="font-size:14px"
                                             v-model="post.excerpt"
                                             auto-grow
                                             @@input="onFieldsChange"></v-textarea>
@@ -159,7 +160,7 @@
             </v-toolbar>
             @* Editor *@
             <v-content>
-                <div id="content-area">
+                <div id="content-area" style="padding-bottom:630px">
                     <v-textarea tabindex="1"
                                 id="post-title"
                                 label=""
@@ -255,6 +256,6 @@
         };
     </script>
     <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
-    <script src="~/admin/js/compose-post.js" asp-append-version="true"></script>
+    <script src="~/admin/js/compose-post.js" asp-append-version="true"></script>    
 </body>
 </html>
