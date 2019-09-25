@@ -1,7 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
 using Fan.Extensibility;
-using Fan.Settings;
 using Fan.Widgets;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -33,16 +32,12 @@ namespace Fan.Themes
         private const string CACHE_KEY_INSTALLED_THEMES_MANIFESTS = "installed-theme-manifests";
         private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
 
-        private readonly ISettingService settingService;
-
-        public ThemeService(ISettingService settingService,
-            IHostingEnvironment hostingEnvironment,
+        public ThemeService(IHostingEnvironment hostingEnvironment,
             IDistributedCache distributedCache,
             IMetaRepository metaRepository,
             ILogger<ThemeService> logger)
             : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
-            this.settingService = settingService;
         }
 
         public override string ManifestName { get; } = THEME_MANIFEST;
@@ -137,5 +132,7 @@ namespace Fan.Themes
                 return list;
             });
         }
+
+        public static string GetLayoutName(EPageLayout layout) => $"_Page{layout}";
     }
 }

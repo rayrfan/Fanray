@@ -1,0 +1,17 @@
+﻿@* Layout3 is multi-page layout for pages with child pages, user should put a page nav widget in the sidebar *@
+@{
+    Layout = "_Layout";
+}
+
+@section Canonical {
+    @RenderSection("Canonical", required: false)
+}
+
+<div class="row">
+    <div class="col-md-9 blog-main">
+        @RenderBody()
+    </div>
+    <aside class="col-md-3">
+        <widget-area id="page-sidebar2" />
+    </aside>
+</div>
