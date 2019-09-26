@@ -12,10 +12,6 @@
     <ProjectReference Include="..\..\Core\Fan\Fan.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="widget.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Widgets\SocialIcons</CopyToDir>

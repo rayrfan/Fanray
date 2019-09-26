@@ -19,10 +19,6 @@
     <EmbeddedResource Include="wwwroot\**\*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Plugins\Shortcodes</CopyToDir>
