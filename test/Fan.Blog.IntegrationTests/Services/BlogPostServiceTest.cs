@@ -2,6 +2,7 @@
 using Fan.Blog.IntegrationTests.Base;
 using Fan.Blog.IntegrationTests.Helpers;
 using Fan.Blog.Models;
+using Fan.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -245,8 +246,9 @@ namespace Fan.Blog.IntegrationTests.Services
                 CreatedOn = DateTimeOffset.Now      // user local time
             });
 
+            var coreSettings = new CoreSettings();
             // Then the date displays human friend string
-            Assert.Equal("now", postNow.CreatedOnDisplay);
+            Assert.Equal("now", postNow.CreatedOn.ToDisplayString(coreSettings.TimeZoneId));
         }
 
         /// <summary>

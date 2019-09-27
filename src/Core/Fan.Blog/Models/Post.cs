@@ -6,7 +6,6 @@ using Fan.Membership;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
 namespace Fan.Blog.Models
@@ -75,21 +74,6 @@ namespace Fan.Blog.Models
         ///   or a date time string converted to the <see cref="CoreSettings.TimeZoneId"/>.
         /// </remarks>
         public DateTimeOffset CreatedOn { get; set; }
-
-        /// <summary>
-        /// CreatedOn used for time display, such as "yesterday".
-        /// </summary>
-        [NotMapped]
-        public string CreatedOnDisplay { get; set; }
-
-        /// <summary>
-        /// UpdatedOn used for display.
-        /// </summary>
-        /// <remarks>
-        /// This is used in the admin console to show the last updated date in user's local timezone.
-        /// </remarks>
-        [NotMapped]
-        public string UpdatedOnDisplay { get; set; }
 
         /// <summary>
         /// The post excerpt.

@@ -64,7 +64,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
         }
 
         /// <summary>
-        /// GET to return <see cref="PostIM"/> to initialize the page.
+        /// GET to return <see cref="BlogPostIM"/> to initialize the page.
         /// </summary>
         /// <remarks>
         /// NOTE: the parameter cannot be named "page".
@@ -78,16 +78,18 @@ namespace Fan.WebApp.Manage.Admin.Compose
             Theme = coreSettings.Theme;
 
             // post
-            PostIM postVM;
+            BlogPostIM postIM;
             if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetAsync(postId);
-                postVM = new PostIM
+                var postDate = Util.ConvertTime(post.CreatedOn, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+
+                postIM = new BlogPostIM
                 {
                     Id = post.Id,
                     Title = post.Title,
                     Body = post.Body,
-                    PostDate = post.CreatedOn.ToString(DATE_FORMAT),
+                    PostDate = postDate,
                     Slug = post.Slug,
                     Excerpt = post.Excerpt,
                     CategoryId = post.CategoryId ?? 1,
@@ -99,21 +101,21 @@ namespace Fan.WebApp.Manage.Admin.Compose
             }
             else // new post
             {
-                var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+                var postDate = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
 
-                postVM = new PostIM
+                postIM = new BlogPostIM
                 {
                     Title = "",
                     Body = "",
-                    PostDate = date,
+                    PostDate = postDate,
                     CategoryId = blogSettings.DefaultCategoryId,
                     Tags = new List<string>(),
                     Published = false,
                     IsDraft = false,
                 };
             }
-            PostJson = JsonConvert.SerializeObject(postVM);
+            PostJson = JsonConvert.SerializeObject(postIM);
 
             // cats
             var categories = await _catSvc.GetAllAsync();
@@ -140,28 +142,28 @@ namespace Fan.WebApp.Manage.Admin.Compose
         /// <remarks>
         /// The post could be new or previously published.
         /// </remarks>
-        public async Task<JsonResult> OnPostPublishAsync([FromBody]PostIM post)
+        public async Task<JsonResult> OnPostPublishAsync([FromBody]BlogPostIM postIM)
         {
             var blogPost = new BlogPost
             {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = post.CategoryId,
-                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
-                TagTitles = post.Tags,
-                Slug = post.Slug,
-                Excerpt = post.Excerpt,
-                Title = post.Title,
-                Body = post.Body,
+                CategoryId = postIM.CategoryId,
+                CreatedOn = BlogUtil.GetCreatedOn(postIM.PostDate),
+                TagTitles = postIM.Tags,
+                Slug = postIM.Slug,
+                Excerpt = postIM.Excerpt,
+                Title = postIM.Title,
+                Body = postIM.Body,
                 Status = EPostStatus.Published,
             };
 
-            if (post.Id <= 0)
+            if (postIM.Id <= 0)
             {
                 blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
-                blogPost.Id = post.Id;
+                blogPost.Id = postIM.Id;
                 blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
@@ -174,19 +176,19 @@ namespace Fan.WebApp.Manage.Admin.Compose
         /// <returns>
         /// Absolute URL to the post.
         /// </returns>
-        public async Task<JsonResult> OnPostUpdateAsync([FromBody]PostIM post)
+        public async Task<JsonResult> OnPostUpdateAsync([FromBody]BlogPostIM postIM)
         {
             var blogPost = new BlogPost
             {
-                Id = post.Id,
+                Id = postIM.Id,
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = post.CategoryId,
-                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
-                TagTitles = post.Tags,
-                Slug = post.Slug,
-                Excerpt = post.Excerpt,
-                Title = post.Title,
-                Body = post.Body,
+                CategoryId = postIM.CategoryId,
+                CreatedOn = BlogUtil.GetCreatedOn(postIM.PostDate),
+                TagTitles = postIM.Tags,
+                Slug = postIM.Slug,
+                Excerpt = postIM.Excerpt,
+                Title = postIM.Title,
+                Body = postIM.Body,
                 Status = EPostStatus.Published,
             };
             blogPost = await _blogSvc.UpdateAsync(blogPost);
@@ -202,32 +204,34 @@ namespace Fan.WebApp.Manage.Admin.Compose
         /// <remarks>
         /// This is called by either auto save or user clicking on Save.
         /// </remarks>
-        public async Task<JsonResult> OnPostSaveAsync([FromBody]PostIM post)
+        public async Task<JsonResult> OnPostSaveAsync([FromBody]BlogPostIM postIM)
         {
             var blogPost = new BlogPost
             {
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                CategoryId = post.CategoryId,
-                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
-                TagTitles = post.Tags,
-                Slug = post.Slug,
-                Excerpt = post.Excerpt,
-                Title = post.Title,
-                Body = post.Body,
+                CategoryId = postIM.CategoryId,
+                CreatedOn = BlogUtil.GetCreatedOn(postIM.PostDate),
+                TagTitles = postIM.Tags,
+                Slug = postIM.Slug,
+                Excerpt = postIM.Excerpt,
+                Title = postIM.Title,
+                Body = postIM.Body,
                 Status = EPostStatus.Draft,
             };
 
-            if (post.Id <= 0)
+            if (postIM.Id <= 0)
             {
                 blogPost = await _blogSvc.CreateAsync(blogPost);
             }
             else
             {
-                blogPost.Id = post.Id;
+                blogPost.Id = postIM.Id;
                 blogPost = await _blogSvc.UpdateAsync(blogPost);
             }
 
-            var postVM = new PostIM
+            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+
+            var postVM = new BlogPostIM
             {
                 Id = blogPost.Id,
                 Title = blogPost.Title,
@@ -239,7 +243,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 Tags = blogPost.TagTitles,
                 Published = blogPost.Status == EPostStatus.Published,
                 IsDraft = blogPost.Status == EPostStatus.Draft,
-                DraftDate = blogPost.UpdatedOn.HasValue ? blogPost.UpdatedOnDisplay : "",
+                DraftDate = blogPost.UpdatedOn.HasValue ? blogPost.UpdatedOn.Value.ToDisplayString(coreSettings.TimeZoneId) : "",
             };
 
             return new JsonResult(postVM);
@@ -248,13 +252,13 @@ namespace Fan.WebApp.Manage.Admin.Compose
         /// <summary>
         /// Preview
         /// </summary>
-        /// <param name="post"></param>
+        /// <param name="postIM"></param>
         /// <returns></returns>
-        public async Task<JsonResult> OnPostPreviewAsync([FromBody]PostIM post)
+        public async Task<JsonResult> OnPostPreviewAsync([FromBody]BlogPostIM postIM)
         {
             // prep blog post
             List<Tag> tags = new List<Tag>();
-            foreach (var title in post.Tags) // titles
+            foreach (var title in postIM.Tags) // titles
             {
                 tags.Add(await _tagSvc.GetByTitleAsync(title));
             }
@@ -263,13 +267,13 @@ namespace Fan.WebApp.Manage.Admin.Compose
             {
                 User = await _userManager.GetUserAsync(HttpContext.User),
                 UserId = Convert.ToInt32(_userManager.GetUserId(HttpContext.User)),
-                Category = await _catSvc.GetAsync(post.CategoryId),
-                CreatedOn = BlogUtil.GetCreatedOn(post.PostDate),
+                Category = await _catSvc.GetAsync(postIM.CategoryId),
+                CreatedOn = BlogUtil.GetCreatedOn(postIM.PostDate),
                 Tags = tags,
-                Slug = post.Slug.IsNullOrEmpty() ? "untitled" : post.Slug,
-                Excerpt = post.Excerpt,
-                Title = post.Title.IsNullOrEmpty() ? "Untitled" : post.Title,
-                Body = post.Body,
+                Slug = postIM.Slug.IsNullOrEmpty() ? "untitled" : postIM.Slug,
+                Excerpt = postIM.Excerpt,
+                Title = postIM.Title.IsNullOrEmpty() ? "Untitled" : postIM.Title,
+                Body = postIM.Body,
             };
 
             // prep TempData

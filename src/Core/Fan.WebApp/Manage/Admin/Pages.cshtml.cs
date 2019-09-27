@@ -1,6 +1,8 @@
 using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Services.Interfaces;
+using Fan.Helpers;
+using Fan.Settings;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -11,14 +13,19 @@ namespace Fan.WebApp.Manage.Admin
     public class PagesModel : PageModel
     {
         private readonly IPageService pageService;
+        private readonly ISettingService settingService;
 
-        public PagesModel(IPageService pageService)
+        public PagesModel(IPageService pageService,
+            ISettingService settingService)
         {
             this.pageService = pageService;
+            this.settingService = settingService;
         }
 
         public string PagesJson { get; set; }
         public int ParentId { get; set; }
+
+        public const string POST_DATE_STRING_FORMAT = "yyyy-MM-dd";
 
         /// <summary>
         /// Displays either a list of parents or a parent with its child pages.
@@ -52,6 +59,7 @@ namespace Fan.WebApp.Manage.Admin
             IList<Blog.Models.Page> pages;
             bool isChild = false;
             Fan.Blog.Models.Page parent = null;
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 
             if (parentId <= 0)
             {
@@ -67,13 +75,14 @@ namespace Fan.WebApp.Manage.Admin
                 {
                     Id = parent.Id,
                     Title = parent.Title,
-                    Date = parent.CreatedOn.ToString("yyyy-MM-dd"),
+                    Date = Util.ConvertTime(parent.CreatedOn, coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                     Author = parent.User.DisplayName,
                     EditLink = BlogRoutes.GetPageEditLink(parent.Id),
                     IsDraft = parent.Status == EPostStatus.Draft,
                     PageLink = parent.Status == EPostStatus.Draft ? null :
                             $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPageRelativeLink(parent.Slug),
                     ChildCount = parent.Children.Count,
+                    ViewCount = parent.ViewCount,
                 });
             }
 
@@ -89,7 +98,7 @@ namespace Fan.WebApp.Manage.Admin
                 {
                     Id = page.Id,
                     Title = page.Title,
-                    Date = page.CreatedOn.ToString("yyyy-MM-dd"),
+                    Date = Util.ConvertTime(page.CreatedOn, coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                     Author = page.User.DisplayName,
                     ChildrenLink = !isChild && page.Children.Count > 0 ? $"{Request.Path}/{page.Id}" : "",
                     EditLink = BlogRoutes.GetPageEditLink(page.Id),
@@ -97,6 +106,7 @@ namespace Fan.WebApp.Manage.Admin
                     IsChild = isChild,
                     IsDraft = page.Status == EPostStatus.Draft,
                     ChildCount = isChild ? 0 : page.Children.Count,
+                    ViewCount = page.ViewCount,
                 });
             }
 
@@ -119,5 +129,6 @@ namespace Fan.WebApp.Manage.Admin
         public bool IsDraft { get; set; }
         public bool IsChild { get; set; }
         public int ChildCount { get; set; }
+        public int ViewCount { get; set; }
     }
 }

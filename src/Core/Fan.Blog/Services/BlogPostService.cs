@@ -27,7 +27,7 @@ namespace Fan.Blog.Services
     public partial class BlogPostService : IBlogPostService
     {
         private readonly IPostRepository _postRepo;
-        private readonly ISettingService _settingSvc;
+        private readonly ISettingService settingService;
         private readonly IImageService _imageService;
         private readonly IDistributedCache _cache;
         private readonly ILogger<BlogPostService> _logger;
@@ -43,7 +43,7 @@ namespace Fan.Blog.Services
             IMapper mapper,
             IMediator mediator)
         {
-            _settingSvc = settingService;
+            this.settingService = settingService;
             _imageService = imageService;
             _postRepo = postRepo;
             _cache = cache;
@@ -86,7 +86,7 @@ namespace Fan.Blog.Services
             await blogPost.ValidateTitleAsync();
 
             // prep
-            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
+            var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // before create
             await _mediator.Publish(new BlogPostBeforeCreate
@@ -121,7 +121,7 @@ namespace Fan.Blog.Services
             await blogPost.ValidateTitleAsync();
 
             // prep
-            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
+            var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // before update
             await _mediator.Publish(new BlogPostBeforeUpdate
@@ -167,7 +167,7 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> GetAsync(int id)
         {
             var post = await QueryPostAsync(id);
-            return await GetBlogPostAsync(post);
+            return GetBlogPost(post);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Fan.Blog.Services
             // todo caching
             var post = await _postRepo.GetAsync(slug, year, month, day);
             if (post == null) throw new FanException(EExceptionType.ResourceNotFound);
-            var blogPost = await GetBlogPostAsync(post);
+            var blogPost = GetBlogPost(post);
             blogPost = await PreRenderAsync(blogPost);
             return blogPost;
         }
@@ -235,7 +235,7 @@ namespace Fan.Blog.Services
             {
                 CategorySlug = categorySlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
+                PageSize = (await settingService.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -255,7 +255,7 @@ namespace Fan.Blog.Services
             {
                 TagSlug = tagSlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
+                PageSize = (await settingService.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -339,7 +339,7 @@ namespace Fan.Blog.Services
             };
             foreach (var post in posts)
             {
-                var blogPost = await GetBlogPostAsync(post);
+                var blogPost = GetBlogPost(post);
                 blogPost = await PreRenderAsync(blogPost);
                 blogPostList.Posts.Add(blogPost);
             }
@@ -353,7 +353,7 @@ namespace Fan.Blog.Services
         /// <param name="blogPost">The incoming post with user data.</param>
         /// <param name="createOrUpdate">User is doing either a create or update post.</param>
         /// <returns></returns>
-        private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
+        private async Task<Post> ConvertToPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
             // Get post
             var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id);
@@ -364,7 +364,7 @@ namespace Fan.Blog.Services
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
             }
-            else if (post.CreatedOn != blogPost.CreatedOn) // user changed in post time
+            else if (post.CreatedOn != blogPost.CreatedOn) // user changed in post time 
             {
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
             }
@@ -405,22 +405,9 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
-        private async Task<BlogPost> GetBlogPostAsync(Post post)
+        private BlogPost GetBlogPost(Post post)
         {
             var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-
-            // Friendly post time if the post was published within 2 days
-            // else show the actual date time in setting's timezone
-            blogPost.CreatedOnDisplay = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ?
-                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
-                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).Humanize();
-
-            if (blogPost.UpdatedOn.HasValue)
-            {
-                blogPost.UpdatedOnDisplay =
-                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy");
-            }
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
@@ -437,6 +424,9 @@ namespace Fan.Blog.Services
                 blogPost.Tags.Add(postTag.Tag);
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
+
+            // ViewCount
+            blogPost.ViewCount = post.ViewCount;
 
             _logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;

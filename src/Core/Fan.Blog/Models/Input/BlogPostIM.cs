@@ -6,7 +6,7 @@ namespace Fan.Blog.Models.Input
     /// <summary>
     /// Input model for blog post.
     /// </summary>
-    public class PostIM
+    public class BlogPostIM
     {
         public int Id { get; set; }
         [Required]

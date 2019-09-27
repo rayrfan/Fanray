@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Services;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
@@ -21,6 +22,7 @@ namespace Fan.Web.Controllers
         private readonly IPageService pageService;
         private readonly ICategoryService categoryService;
         private readonly ISettingService settingService;
+        private readonly IStatsService statsService;
         private readonly ILogger<HomeController> logger;
 
         public HomeController(
@@ -29,6 +31,7 @@ namespace Fan.Web.Controllers
             IPageService pageService,
             ICategoryService categoryService,
             ISettingService settingService,
+            IStatsService statsService,
             ILogger<HomeController> logger)
         {
             this.homeHelper = homeHelper;
@@ -36,6 +39,7 @@ namespace Fan.Web.Controllers
             this.pageService = pageService;
             this.categoryService = categoryService;
             this.settingService = settingService;
+            this.statsService = statsService;
             this.logger = logger;
         }
 
@@ -52,6 +56,8 @@ namespace Fan.Web.Controllers
             {
                 var page = await pageService.GetAsync(nav.Id);
                 var (pagePath, pageModel) = await homeHelper.GetPageAsync(page.Slug);
+                await statsService.IncViewCountAsync(EPostType.Page, pageModel.Id);
+                pageModel.ViewCount++;
                 return View(pagePath, pageModel);
             }
             else if (nav.Type == ENavType.BlogCategory)

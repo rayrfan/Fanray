@@ -143,6 +143,19 @@ namespace Fan.Blog.Data
         }
 
         /// <summary>
+        /// Increases post view count.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task IncViewCountAsync(int id, int count)
+        {
+            var post = await _entities.SingleOrDefaultAsync(p => p.Id == id);
+            post.ViewCount += count;
+            await _db.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Returns a <see cref="Post"/> by id. If it is a BlogPost it'll return together with its 
         /// <see cref="Category"/> and <see cref="Tag"/>. Returns null if it's not found.
         /// </summary>

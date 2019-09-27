@@ -114,7 +114,8 @@ namespace Fan.Blog.IntegrationTests.Base
         {
             var metas = new List<Meta>
             {
-                new Meta { Id = 1, Key = "blogsettings.defaultcategoryid", Value = "1" }
+                new Meta { Id = 1, Key = "blogsettings.defaultcategoryid", Value = "1" },
+                new Meta { Id = 2, Key = "coresettings.timezoneid", Value = "UTC" },
             };
 
             return metas;

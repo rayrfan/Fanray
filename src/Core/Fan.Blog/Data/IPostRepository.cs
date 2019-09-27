@@ -35,6 +35,14 @@ namespace Fan.Blog.Data
         Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
 
         /// <summary>
+        /// Increases post view count.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        Task IncViewCountAsync(int id, int count);
+
+        /// <summary>
         /// Returns a <see cref="Post"/> by id. If it is a BlogPost it'll return together with its 
         /// <see cref="Category"/> and <see cref="Tag"/>. Returns null if it's not found.
         /// </summary>

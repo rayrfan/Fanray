@@ -378,9 +378,7 @@ namespace Fan.Blog.Services
             }
 
             // UpdatedOn (DraftSavedOn)
-            // When saving draft this is UtcNow, when publishing it becomes null
-            if (page.Status == EPostStatus.Draft) post.UpdatedOn = DateTimeOffset.UtcNow;
-            else post.UpdatedOn = null;
+            post.UpdatedOn = DateTimeOffset.UtcNow;
 
             // Slug 
             var slug = SlugifyPageTitle(page.Title);

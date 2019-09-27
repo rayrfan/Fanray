@@ -67,4 +67,10 @@ namespace Fan.WebApp.Manage.Admin.Compose
             }
         }
     }
+
+    public class PageNavIM
+    {
+        public int PageId { get; set; }
+        public string NavMd { get; set; }
+    }
 }

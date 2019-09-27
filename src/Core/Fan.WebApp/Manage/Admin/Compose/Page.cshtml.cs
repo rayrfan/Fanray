@@ -71,6 +71,8 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     parent = await pageService.GetAsync(page.ParentId.Value);
                 }
 
+                // convert utc to user local time
+                var postDate = Util.ConvertTime(page.CreatedOn, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 pageIM = new PageIM
                 {
                     Id = page.Id,
@@ -80,7 +82,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     IsDraft = page.Status == EPostStatus.Draft,
                     IsParentDraft = parent != null ? parent.Status == EPostStatus.Draft : false,
                     ParentId = page.ParentId,
-                    PostDate = page.CreatedOn.ToString(DATE_FORMAT),
+                    PostDate = postDate,
                     Published = page.Status == EPostStatus.Published,
                     Title = page.Title,
                     PageLayout = (EPageLayout) page.PageLayout,
@@ -94,6 +96,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                     if (!parent.IsParent) return Redirect("/admin/pages"); // make sure parent is really parent
                 }
 
+                // convert utc to user local time
                 var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 pageIM = new PageIM
                 {

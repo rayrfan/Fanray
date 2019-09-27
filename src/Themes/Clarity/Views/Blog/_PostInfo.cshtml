@@ -3,36 +3,37 @@
 @{
     var post = Model;
 }
-<div class="post-info clearfix">
-    <i class="icon-user" aria-hidden="true"></i><span class="post-info-item">@post.Author</span>
-    <i class="icon-calendar" aria-hidden="true"></i><span class="post-info-item">@post.CreatedOnDisplay</span>
-    <i class="icon-folder" aria-hidden="true"></i><span class="post-info-item"><a href="@post.Category.RelativeLink">@post.Category.Title</a></span>
-    @if (post.ShowDisqus)
-    {
-        <i class="icon-comment" aria-hidden="true"></i><span class="post-info-item"><a href="@post.RelativeLink#disqus_thread" data-disqus-identifier="@post.DisqusPageIdentifier"></a></span>
-    }
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@post.EditLink">Edit</a></span>
-    }
-    <i class="icon-share-alt" aria-hidden="true"></i>
-    <span id="social-list">
-        <a href="@post.TwitterShareLink" title="Share on Twitter" target="_blank" class="twtr-share"><i class="icon-twitter"></i></a>
-        <a href="@post.FacebookShareLink" title="Share on Facebook" target="_blank" class="fb-share"><i class="icon-facebook"></i></a>
-        <a href="@post.LinkedInShareLink" title="Share on LinkedIn" target="_blank" class="lnkd-share"><i class="icon-linkedin"></i></a>
-    </span>
-    @if (post.Tags.Count > 0)
-    {
-        <div>
-            <i class="icon-tag" aria-hidden="true"></i>
-            <span class="post-info-item">
-                @for (int i = 0; i < post.Tags.Count; i++)
-                {
-                    var tag = post.Tags[i];
-                    <a href="@tag.RelativeLink">@tag.Title</a>if (i < post.Tags.Count - 1)
-                    {<text>,</text>}
-            }
-            </span>
-        </div>
-    }
-</div>
+    <div class="post-info clearfix">
+        <i class="icon-user" title="Author" aria-hidden="true"></i><span class="post-info-item">@post.Author</span>
+        <i class="icon-calendar" title="Post date" aria-hidden="true"></i><span class="post-info-item">@post.CreatedOnDisplay</span>
+        <i class="icon-folder" title="Blog category" aria-hidden="true"></i><span class="post-info-item"><a href="@post.Category.RelativeLink">@post.Category.Title</a></span>
+        <i class="icon-eye" title="Views" aria-hidden="true"></i><span class="post-info-item">@post.ViewCount</span>
+        @if (post.ShowDisqus)
+        {
+            <i class="icon-comment" title="Comments" aria-hidden="true"></i><span class="post-info-item"><a href="@post.RelativeLink#disqus_thread" data-disqus-identifier="@post.DisqusPageIdentifier"></a></span>
+        }
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@post.EditLink">Edit</a></span>
+        }
+        <i class="icon-share-alt" title="Share" aria-hidden="true"></i>
+        <span id="social-list">
+            <a href="@post.TwitterShareLink" title="Share on Twitter" target="_blank" class="twtr-share"><i class="icon-twitter"></i></a>
+            <a href="@post.FacebookShareLink" title="Share on Facebook" target="_blank" class="fb-share"><i class="icon-facebook"></i></a>
+            <a href="@post.LinkedInShareLink" title="Share on LinkedIn" target="_blank" class="lnkd-share"><i class="icon-linkedin"></i></a>
+        </span>
+        @if (post.Tags.Count > 0)
+        {
+            <div>
+                <i class="icon-tag" title="Tags" aria-hidden="true"></i>
+                <span class="post-info-item">
+                    @for (int i = 0; i < post.Tags.Count; i++)
+                    {
+                        var tag = post.Tags[i];
+                        <a href="@tag.RelativeLink">@tag.Title</a>if (i < post.Tags.Count - 1)
+                        {<text>,</text>}
+                }
+                </span>
+            </div>
+        }
+    </div>

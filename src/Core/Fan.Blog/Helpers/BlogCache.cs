@@ -15,6 +15,8 @@ namespace Fan.Blog.Helpers
         public const string KEY_POST_COUNT = "BlogPostCount";
         public const string KEY_MAIN_RSSFEED = "BlogRssFeed";
         public const string KEY_CAT_RSSFEED = "BlogRssFeed_{0}";
+        public const string KEY_POST_VIEW_COUNT = "BlogPost_{0}_ViewCount";
+        public const string KEY_PAGE_VIEW_COUNT = "Page_{0}_ViewCount";
 
         /// <summary>
         /// 10 minutes.
@@ -52,5 +54,9 @@ namespace Fan.Blog.Helpers
         /// 10 minutes.
         /// </summary>
         public static readonly TimeSpan Time_CatRSSFeed = new TimeSpan(0, 10, 0);
+        /// <summary>
+        /// 10 min.
+        /// </summary>
+        public static readonly TimeSpan Time_ViewCount = new TimeSpan(0, 10, 0);
     }
 }
