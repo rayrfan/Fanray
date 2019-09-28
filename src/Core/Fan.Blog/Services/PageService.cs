@@ -8,6 +8,7 @@ using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Navigation;
+using Fan.Settings;
 using Markdig;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -26,22 +27,24 @@ namespace Fan.Blog.Services
 {
     public class PageService : IPageService, INavProvider
     {
-        private readonly IPostRepository _postRepo;
+        private readonly ISettingService settingService;
+        private readonly IPostRepository postRepository;
         private readonly IDistributedCache cache;
         private readonly ILogger<PageService> logger;
-        private readonly IMapper _mapper;
+        private readonly IMapper mapper;
 
         public PageService(
-            IPostRepository postRepo,
+            ISettingService settingService,
+            IPostRepository postRepository,
             IDistributedCache cache,
             ILogger<PageService> logger,
-            IMapper mapper
-            )
+            IMapper mapper)
         {
-            _postRepo = postRepo;
+            this.settingService = settingService;
+            this.postRepository = postRepository;
             this.cache = cache;
             this.logger = logger;
-            _mapper = mapper;
+            this.mapper = mapper;
         }
 
         // -------------------------------------------------------------------- consts
@@ -98,7 +101,7 @@ namespace Fan.Blog.Services
             var post = await ConvertToPostAsync(page, ECreateOrUpdate.Create);
 
             // create
-            await _postRepo.CreateAsync(post);
+            await postRepository.CreateAsync(post);
 
             return await GetAsync(post.Id);
         }
@@ -121,7 +124,7 @@ namespace Fan.Blog.Services
             var post = await ConvertToPostAsync(page, ECreateOrUpdate.Update);
 
             // update
-            await _postRepo.UpdateAsync(post);
+            await postRepository.UpdateAsync(post);
 
             // invalidate cache only when published
             if (page.Status == EPostStatus.Published)
@@ -145,7 +148,7 @@ namespace Fan.Blog.Services
             var key = await GetCacheKey(id);
 
             // delete
-            await _postRepo.DeleteAsync(id);
+            await postRepository.DeleteAsync(id);
 
             // invalidate cache
             await cache.RemoveAsync(key);
@@ -166,29 +169,29 @@ namespace Fan.Blog.Services
         public async Task<Page> GetAsync(int id)
         {
             var post = await QueryPostAsync(id);
-            var page = _mapper.Map<Post, Page>(post);
+            var page = mapper.Map<Post, Page>(post);
 
             if (page.IsParent) // fill in children
             {
-                var childPosts = await _postRepo.FindAsync(p => p.Type == EPostType.Page && p.ParentId == page.Id);
+                var childPosts = await postRepository.FindAsync(p => p.Type == EPostType.Page && p.ParentId == page.Id);
                 if (childPosts != null)
                 {
                     foreach (var childPost in childPosts)
                     {
-                        page.Children.Add(_mapper.Map<Post, Page>(childPost));
+                        page.Children.Add(mapper.Map<Post, Page>(childPost));
                     }
                 }
             }
             else // fill in siblings
             {
                 var parentPost = await QueryPostAsync(page.ParentId.Value);
-                var parent = _mapper.Map<Post, Page>(parentPost);
-                var childPosts = await _postRepo.FindAsync(p => p.Type == EPostType.Page && p.ParentId == parent.Id);
+                var parent = mapper.Map<Post, Page>(parentPost);
+                var childPosts = await postRepository.FindAsync(p => p.Type == EPostType.Page && p.ParentId == parent.Id);
                 if (childPosts != null)
                 {
                     foreach (var childPost in childPosts)
                     {
-                        parent.Children.Add(_mapper.Map<Post, Page>(childPost));
+                        parent.Children.Add(mapper.Map<Post, Page>(childPost));
                     }
                 }
 
@@ -264,10 +267,10 @@ namespace Fan.Blog.Services
         public async Task<IList<Page>> GetParentsAsync(bool withChildren = false)
         {
             var query = new PostListQuery(withChildren ? EPostListQueryType.PagesWithChildren : EPostListQueryType.Pages);
-            var (posts, totalCount) = await _postRepo.GetListAsync(query);
+            var (posts, totalCount) = await postRepository.GetListAsync(query);
 
             // either all pages or just parents
-            var pages = _mapper.Map<IList<Post>, IList<Page>>(posts);
+            var pages = mapper.Map<IList<Post>, IList<Page>>(posts);
 
             if (!withChildren) return pages;
 
@@ -295,7 +298,7 @@ namespace Fan.Blog.Services
         {
             var post = await QueryPostAsync(pageId);
             post.Nav = navMd;
-            await _postRepo.UpdateAsync(post);
+            await postRepository.UpdateAsync(post);
 
             // invalidate cache
             var key = await GetCacheKey(pageId, post);
@@ -335,7 +338,7 @@ namespace Fan.Blog.Services
         /// <exception cref="FanException">Thrown if post is not found.</exception>
         private async Task<Post> QueryPostAsync(int id)
         {
-            var post = await _postRepo.GetAsync(id, EPostType.Page);
+            var post = await postRepository.GetAsync(id, EPostType.Page);
 
             if (post == null)
             {
@@ -372,9 +375,15 @@ namespace Fan.Blog.Services
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (page.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : page.CreatedOn.ToUniversalTime();
             }
-            else if (post.CreatedOn != page.CreatedOn) // user changed in post time
+            else 
             {
-                post.CreatedOn = (page.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : page.CreatedOn.ToUniversalTime();
+                // get post.CreatedOn in local time
+                var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+                var postCreatedOnLocal = post.CreatedOn.ToLocalTime(coreSettings.TimeZoneId);
+
+                // user changed the post time 
+                if (!postCreatedOnLocal.YearMonthDayEquals(page.CreatedOn))
+                    post.CreatedOn = (page.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : page.CreatedOn.ToUniversalTime();
             }
 
             // UpdatedOn (DraftSavedOn)

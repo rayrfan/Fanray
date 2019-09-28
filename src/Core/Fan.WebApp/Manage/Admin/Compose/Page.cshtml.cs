@@ -72,7 +72,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 }
 
                 // convert utc to user local time
-                var postDate = Util.ConvertTime(page.CreatedOn, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+                var postDate = page.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 pageIM = new PageIM
                 {
                     Id = page.Id,
@@ -97,7 +97,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 }
 
                 // convert utc to user local time
-                var date = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+                var date = DateTimeOffset.UtcNow.ToLocalTime(coreSettings.TimeZoneId).ToString(DATE_FORMAT);
                 pageIM = new PageIM
                 {
                     Title = "",

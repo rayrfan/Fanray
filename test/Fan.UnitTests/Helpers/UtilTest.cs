@@ -70,7 +70,7 @@ namespace Fan.UnitTests.Helpers
 
             // the user wants to see the actual post time in his own timezone
             // Util.ConvertTime returns him that
-            var displayToUser = Util.ConvertTime(createdOn, coreSettings.TimeZoneId);
+            var displayToUser = createdOn.ToLocalTime(coreSettings.TimeZoneId);
             // https://en.wikipedia.org/wiki/Pacific_Time_Zone
             // Pacific Time Zone observes standard time by subtracting eight hours from Coordinated Universal Time (UTC−8). 
             // During daylight saving time, a time offset of UTC−7 is used.

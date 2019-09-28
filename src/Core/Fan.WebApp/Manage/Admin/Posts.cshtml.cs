@@ -107,7 +107,7 @@ namespace Fan.WebApp.Manage.Admin
                           {
                               Id = p.Id,
                               Title = p.Title,
-                              Date = Util.ConvertTime(p.CreatedOn, coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
+                              Date = p.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                               Author = p.User.DisplayName,
                               EditLink = BlogRoutes.GetPostEditLink(p.Id),
                               PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),

@@ -5,6 +5,7 @@ using Fan.Helpers;
 using Fan.Settings;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -75,7 +76,7 @@ namespace Fan.WebApp.Manage.Admin
                 {
                     Id = parent.Id,
                     Title = parent.Title,
-                    Date = Util.ConvertTime(parent.CreatedOn, coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
+                    Date = parent.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                     Author = parent.User.DisplayName,
                     EditLink = BlogRoutes.GetPageEditLink(parent.Id),
                     IsDraft = parent.Status == EPostStatus.Draft,
@@ -98,7 +99,7 @@ namespace Fan.WebApp.Manage.Admin
                 {
                     Id = page.Id,
                     Title = page.Title,
-                    Date = Util.ConvertTime(page.CreatedOn, coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
+                    Date = page.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                     Author = page.User.DisplayName,
                     ChildrenLink = !isChild && page.Children.Count > 0 ? $"{Request.Path}/{page.Id}" : "",
                     EditLink = BlogRoutes.GetPageEditLink(page.Id),

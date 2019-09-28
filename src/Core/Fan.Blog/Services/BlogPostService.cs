@@ -9,7 +9,6 @@ using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Settings;
-using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -24,32 +23,32 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
-    public partial class BlogPostService : IBlogPostService
+    public class BlogPostService : IBlogPostService
     {
-        private readonly IPostRepository _postRepo;
+        private readonly IPostRepository postRepository;
         private readonly ISettingService settingService;
-        private readonly IImageService _imageService;
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<BlogPostService> _logger;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
+        private readonly IImageService imageService;
+        private readonly IDistributedCache cache;
+        private readonly ILogger<BlogPostService> logger;
+        private readonly IMapper mapper;
+        private readonly IMediator mediator;
 
         public BlogPostService(
             ISettingService settingService,
             IImageService imageService,
-            IPostRepository postRepo,
+            IPostRepository postRepository,
             IDistributedCache cache,
             ILogger<BlogPostService> logger,
             IMapper mapper,
             IMediator mediator)
         {
             this.settingService = settingService;
-            _imageService = imageService;
-            _postRepo = postRepo;
-            _cache = cache;
-            _mapper = mapper;
-            _logger = logger;
-            _mediator = mediator;
+            this.imageService = imageService;
+            this.postRepository = postRepository;
+            this.cache = cache;
+            this.mapper = mapper;
+            this.logger = logger;
+            this.mediator = mediator;
         }
 
         // -------------------------------------------------------------------- consts
@@ -89,14 +88,14 @@ namespace Fan.Blog.Services
             var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // before create
-            await _mediator.Publish(new BlogPostBeforeCreate
+            await mediator.Publish(new BlogPostBeforeCreate
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles
             });
 
             // create
-            await _postRepo.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            await postRepository.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
@@ -105,7 +104,7 @@ namespace Fan.Blog.Services
             }
 
             // after create
-            await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
+            await mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
 
             return await GetAsync(post.Id);
         }
@@ -124,7 +123,7 @@ namespace Fan.Blog.Services
             var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // before update
-            await _mediator.Publish(new BlogPostBeforeUpdate
+            await mediator.Publish(new BlogPostBeforeUpdate
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
@@ -132,13 +131,14 @@ namespace Fan.Blog.Services
             });
 
             // update
-            await _postRepo.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            await postRepository.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache 
             await RemoveAllCacheAsync();
+            await RemoveSinglePostCacheAsync(post);
 
             // after update
-            await _mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
+            await mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
 
             return await GetAsync(post.Id);
         }
@@ -150,8 +150,10 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task DeleteAsync(int id)
         {
-            await _postRepo.DeleteAsync(id);
+            var post = await GetAsync(id);
+            await postRepository.DeleteAsync(id);
             await RemoveAllCacheAsync();
+            await RemoveSinglePostCacheAsync(post);
         }
 
         /// <summary>
@@ -167,7 +169,7 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> GetAsync(int id)
         {
             var post = await QueryPostAsync(id);
-            return GetBlogPost(post);
+            return ConvertToBlogPost(post);
         }
 
         /// <summary>
@@ -185,10 +187,22 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<BlogPost> GetAsync(string slug, int year, int month, int day)
         {
-            // todo caching
-            var post = await _postRepo.GetAsync(slug, year, month, day);
+            Post post = null;
+            if (new DateTime(year, month, day).IsWithinDays(100))
+            {
+                var cacheKey = string.Format(BlogCache.KEY_POST, slug, year, month, day);
+                post = await cache.GetAsync(cacheKey, BlogCache.Time_SingplePost, async () =>
+                {
+                    return await postRepository.GetAsync(slug, year, month, day);
+                });
+            }
+            else
+            {
+                post = await postRepository.GetAsync(slug, year, month, day);
+            }
+
             if (post == null) throw new FanException(EExceptionType.ResourceNotFound);
-            var blogPost = GetBlogPost(post);
+            var blogPost = ConvertToBlogPost(post);
             blogPost = await PreRenderAsync(blogPost);
             return blogPost;
         }
@@ -212,7 +226,7 @@ namespace Fan.Blog.Services
             // cache only first page of the public site, not admin or rss
             if (query.PageIndex == 1 && cacheable)
             {
-                return await _cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_PostsIndex, async () =>
+                return await cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_PostsIndex, async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -314,7 +328,7 @@ namespace Fan.Blog.Services
         /// </remarks>
         private async Task<Post> QueryPostAsync(int id)
         {
-            var post = await _postRepo.GetAsync(id, EPostType.BlogPost);
+            var post = await postRepository.GetAsync(id, EPostType.BlogPost);
 
             if (post == null)
             {
@@ -331,7 +345,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         private async Task<BlogPostList> QueryPostsAsync(PostListQuery query)
         {
-            var (posts, totalCount) = await _postRepo.GetListAsync(query);
+            var (posts, totalCount) = await postRepository.GetListAsync(query);
 
             var blogPostList = new BlogPostList
             {
@@ -339,7 +353,7 @@ namespace Fan.Blog.Services
             };
             foreach (var post in posts)
             {
-                var blogPost = GetBlogPost(post);
+                var blogPost = ConvertToBlogPost(post);
                 blogPost = await PreRenderAsync(blogPost);
                 blogPostList.Posts.Add(blogPost);
             }
@@ -364,9 +378,17 @@ namespace Fan.Blog.Services
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
             }
-            else if (post.CreatedOn != blogPost.CreatedOn) // user changed in post time 
+            else 
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
+                // TODO Add a time picker on the composer
+
+                // get post.CreatedOn in local time
+                var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+                var postCreatedOnLocal = post.CreatedOn.ToLocalTime(coreSettings.TimeZoneId);
+
+                // user changed the post time 
+                if (!postCreatedOnLocal.YearMonthDayEquals(blogPost.CreatedOn))
+                    post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
             }
 
             // UpdatedOn (DraftSavedOn)
@@ -393,7 +415,7 @@ namespace Fan.Blog.Services
             post.Status = blogPost.Status;
             post.CommentStatus = blogPost.CommentStatus;
 
-            _logger.LogDebug(createOrUpdate + " {@Post}", post);
+            logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
 
@@ -405,9 +427,9 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
-        private BlogPost GetBlogPost(Post post)
+        private BlogPost ConvertToBlogPost(Post post)
         {
-            var blogPost = _mapper.Map<Post, BlogPost>(post);
+            var blogPost = mapper.Map<Post, BlogPost>(post);
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
@@ -428,7 +450,7 @@ namespace Fan.Blog.Services
             // ViewCount
             blogPost.ViewCount = post.ViewCount;
 
-            _logger.LogDebug("Show {@BlogPost}", blogPost);
+            logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
         }
 
@@ -456,18 +478,18 @@ namespace Fan.Blog.Services
             int i = 2;
             if (createOrUpdate == ECreateOrUpdate.Create) // create
             {
-                while (await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
+                while (await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
                 {
                     slug = Util.UniquefySlug(slug, ref i);
                 }
             }
             else // update
             {
-                var p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
+                var p = await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 while (p != null && p.Id != blogPostId)
                 {
                     slug = Util.UniquefySlug(slug, ref i);
-                    p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
+                    p = await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 }
             }
 
@@ -479,15 +501,21 @@ namespace Fan.Blog.Services
         /// </summary>
         private async Task RemoveAllCacheAsync()
         {
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
-            await _cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
+            await cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+        }
+
+        private async Task RemoveSinglePostCacheAsync(Post post)
+        {
+            var cacheKey = string.Format(BlogCache.KEY_POST, post.Slug, post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day);
+            await cache.RemoveAsync(cacheKey);
         }
 
         /// <summary>
-        /// Pre render processing of a blog post.
+        /// Pre render processing of a blog post. TODO consider refactor.
         /// </summary>
         /// <param name="blogPost"></param>
         /// <returns></returns>
@@ -496,7 +524,7 @@ namespace Fan.Blog.Services
             if (blogPost == null) return blogPost;
 
             blogPost.Body = OembedParser.Parse(blogPost.Body);
-            blogPost.Body = await _imageService.ProcessResponsiveImageAsync(blogPost.Body);
+            blogPost.Body = await imageService.ProcessResponsiveImageAsync(blogPost.Body);
 
             return blogPost;
         }

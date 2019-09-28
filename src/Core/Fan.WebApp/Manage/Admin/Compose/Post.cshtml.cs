@@ -82,7 +82,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
             if (postId > 0) // existing post
             {
                 var post = await _blogSvc.GetAsync(postId);
-                var postDate = Util.ConvertTime(post.CreatedOn, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+                var postDate = post.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(DATE_FORMAT);
 
                 postIM = new BlogPostIM
                 {
@@ -102,7 +102,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
             else // new post
             {
                 var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                var postDate = Util.ConvertTime(DateTimeOffset.UtcNow, coreSettings.TimeZoneId).ToString(DATE_FORMAT);
+                var postDate = DateTimeOffset.UtcNow.ToLocalTime(coreSettings.TimeZoneId).ToString(DATE_FORMAT);
 
                 postIM = new BlogPostIM
                 {
