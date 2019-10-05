@@ -103,7 +103,7 @@ namespace Fan.Blog.UnitTests.Base
                 _loggerBlogSvc,
                 mapper,
                 mediatorMock.Object);
-            _pageSvc = new PageService(_settingSvcMock.Object, _postRepoMock.Object, _cache, loggerPageSvc, mapper);
+            _pageSvc = new PageService(_settingSvcMock.Object, _postRepoMock.Object, _cache, loggerPageSvc, mapper, mediatorMock.Object);
         }
     }
 }

@@ -10,6 +10,7 @@ using Fan.Helpers;
 using Fan.Navigation;
 using Fan.Settings;
 using Markdig;
+using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System;
@@ -32,19 +33,22 @@ namespace Fan.Blog.Services
         private readonly IDistributedCache cache;
         private readonly ILogger<PageService> logger;
         private readonly IMapper mapper;
+        private readonly IMediator mediator;
 
         public PageService(
             ISettingService settingService,
             IPostRepository postRepository,
             IDistributedCache cache,
             ILogger<PageService> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IMediator mediator)
         {
             this.settingService = settingService;
             this.postRepository = postRepository;
             this.cache = cache;
             this.logger = logger;
             this.mapper = mapper;
+            this.mediator = mediator;
         }
 
         // -------------------------------------------------------------------- consts
@@ -120,19 +124,24 @@ namespace Fan.Blog.Services
             // validate
             await EnsurePageTitleAsync(page);
 
+            // get orig post
+            var origPost = await GetAsync(page.Id);
+
             // convert
             var post = await ConvertToPostAsync(page, ECreateOrUpdate.Update);
 
             // update
             await postRepository.UpdateAsync(post);
 
-            // invalidate cache only when published
+            // invalidate cache for published
             if (page.Status == EPostStatus.Published)
             {
-                // invalidate cache
-                var key = await GetCacheKey(page.Id, post);
+                var key = await GetCacheKeyAsync(page.Id, origPost);
                 await cache.RemoveAsync(key);
             }
+
+            // raise nav updated event
+            await mediator.Publish(new NavUpdated());
 
             return await GetAsync(post.Id);
         }
@@ -145,13 +154,16 @@ namespace Fan.Blog.Services
         public async Task DeleteAsync(int id)
         {
             // get key by id before deletion
-            var key = await GetCacheKey(id);
+            var key = await GetCacheKeyAsync(id);
 
             // delete
             await postRepository.DeleteAsync(id);
 
             // invalidate cache
             await cache.RemoveAsync(key);
+
+            // raise nav deleted event
+            await mediator.Publish(new NavDeleted { Id = id, Type = ENavType.Page });
         }
 
         /// <summary>
@@ -223,12 +235,12 @@ namespace Fan.Blog.Services
             }
 
             // caching
-            var key = string.Format(BlogCache.KEY_PAGE, slugs[0]);
+            var key = GetCacheKey(slugs[0]);
             var time = BlogCache.Time_ParentPage;
 
             if (slugs.Length > 1 && !slugs[1].IsNullOrEmpty()) // child page
             {
-                key = string.Format(BlogCache.KEY_PAGE, slugs[0] + "_" + slugs[1]);
+                key = GetCacheKey(slugs[0], slugs[1]);
                 time = BlogCache.Time_ChildPage;
             }
 
@@ -301,7 +313,7 @@ namespace Fan.Blog.Services
             await postRepository.UpdateAsync(post);
 
             // invalidate cache
-            var key = await GetCacheKey(pageId, post);
+            var key = await GetCacheKeyAsync(pageId, post);
             await cache.RemoveAsync(key);
         }
 
@@ -314,20 +326,6 @@ namespace Fan.Blog.Services
         }
 
         // -------------------------------------------------------------------- private methods 
-
-        private async Task<string> GetCacheKey(int pageId, Post post = null)
-        {
-            post = post ?? await QueryPostAsync(pageId);
-            var key = string.Format(BlogCache.KEY_PAGE, post.Slug);
-
-            if (post.ParentId.HasValue && post.ParentId.Value > 0) // child
-            {
-                var parentPost = await QueryPostAsync(post.ParentId.Value);
-                key = string.Format(BlogCache.KEY_PAGE, post.Slug + "_" + parentPost.Slug);
-            }
-
-            return key;
-        }
 
         /// <summary>
         /// Returns a <see cref="Post"/> by a <see cref="Page"/> <paramref name="id"/> from data 
@@ -342,7 +340,8 @@ namespace Fan.Blog.Services
 
             if (post == null)
             {
-                throw new FanException($"Page with id {id} is not found.");
+                throw new FanException(EExceptionType.ResourceNotFound, 
+                    $"Page with id {id} is not found.");
             }
 
             return post;
@@ -423,6 +422,31 @@ namespace Fan.Blog.Services
             logger.LogDebug(createOrUpdate + " Page: {@Post}", post);
             return post;
         }
+
+        /// <summary>
+        /// Returns cache key for a parent or child page.
+        /// </summary>
+        /// <param name="pageId"></param>
+        /// <param name="parentId"></param>
+        /// <returns></returns>
+        private async Task<string> GetCacheKeyAsync(int pageId, Post post = null)
+        {
+            post = post ?? await QueryPostAsync(pageId);
+            var key = string.Format(BlogCache.KEY_PAGE, post.Slug);
+
+            if (post.ParentId.HasValue && post.ParentId.Value > 0) // child
+            {
+                var parentPost = await QueryPostAsync(post.ParentId.Value);
+                key = string.Format(BlogCache.KEY_PAGE, post.Slug + "_" + parentPost.Slug);
+            }
+
+            return key;
+        }
+
+        private string GetCacheKey(string parentSlug, string childSlug = null) => 
+            childSlug.IsNullOrEmpty() ?
+                string.Format(BlogCache.KEY_PAGE, parentSlug) :
+                string.Format(BlogCache.KEY_PAGE, parentSlug + "_" + childSlug);
 
         /// <summary>
         /// Ensures <see cref="Page"/> title is valid and throws <see cref="FanException"/> if validation fails.

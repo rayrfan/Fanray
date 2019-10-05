@@ -1,8 +1,8 @@
 using Fan.Blog.Enums;
 using Fan.Blog.Helpers;
 using Fan.Blog.Services.Interfaces;
-using Fan.Helpers;
 using Fan.Settings;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System;
@@ -40,9 +40,17 @@ namespace Fan.WebApp.Manage.Admin
             ParentId = parentId;
         }
 
-        public async Task OnDeleteAsync(int pageId)
+        public async Task<IActionResult> OnDeleteAsync(int pageId)
         {
-            await pageService.DeleteAsync(pageId);
+            try
+            {
+                await pageService.DeleteAsync(pageId);
+                return new EmptyResult();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
