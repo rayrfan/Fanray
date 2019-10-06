@@ -109,6 +109,7 @@ namespace Fan.WebApp.Manage.Admin
                               Title = p.Title,
                               Date = p.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                               Author = p.User.DisplayName,
+                              Category = p.CategoryTitle,
                               EditLink = BlogRoutes.GetPostEditLink(p.Id),
                               PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),
                               ViewCount = p.ViewCount,
@@ -120,7 +121,7 @@ namespace Fan.WebApp.Manage.Admin
             return new PostListVM
             {
                 Posts = postVms,
-                TotalPosts = postList.PostCount,
+                TotalPosts = postList.TotalPostCount,
                 PublishedCount = postCount.Published,
                 DraftCount = postCount.Draft,
             };
@@ -142,6 +143,7 @@ namespace Fan.WebApp.Manage.Admin
         public string Title { get; set; }
         public string Date { get; set; }
         public string Author { get; set; }
+        public string Category { get; set; }
         public string EditLink { get; set; }
         public string PostLink { get; set; }
         public int ViewCount { get; set; }

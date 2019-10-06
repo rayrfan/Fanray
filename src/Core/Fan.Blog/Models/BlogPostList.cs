@@ -20,6 +20,6 @@ namespace Fan.Blog.Models
         /// <summary>
         /// Total number of posts returned for a <see cref="PostListQuery"/>
         /// </summary>
-        public int PostCount { get; set; }
+        public int TotalPostCount { get; set; }
     }
 }

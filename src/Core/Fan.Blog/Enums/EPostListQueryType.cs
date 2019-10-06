@@ -27,7 +27,10 @@
         /// This is used by metaweblog.
         /// </summary>
         BlogPostsByNumber,
-
+        /// <summary>
+        /// A sepcific number of published blog posts.
+        /// </summary>
+        BlogPublishedPostsByNumber,
         /// <summary>
         /// All parent pages regardless status.
         /// </summary>

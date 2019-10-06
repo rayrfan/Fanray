@@ -100,7 +100,7 @@ namespace Fan.Blog.Services
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await RemoveAllCacheAsync();
+                await RemoveBlogCacheAsync();
             }
 
             // after create
@@ -134,7 +134,7 @@ namespace Fan.Blog.Services
             await postRepository.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache 
-            await RemoveAllCacheAsync();
+            await RemoveBlogCacheAsync();
             await RemoveSinglePostCacheAsync(post);
 
             // after update
@@ -152,7 +152,7 @@ namespace Fan.Blog.Services
         {
             var post = await GetAsync(id);
             await postRepository.DeleteAsync(id);
-            await RemoveAllCacheAsync();
+            await RemoveBlogCacheAsync();
             await RemoveSinglePostCacheAsync(post);
         }
 
@@ -226,7 +226,7 @@ namespace Fan.Blog.Services
             // cache only first page of the public site, not admin or rss
             if (query.PageIndex == 1 && cacheable)
             {
-                return await cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_PostsIndex, async () =>
+                return await cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_Posts_Index, async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -306,7 +306,7 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Returns specified number of <see cref="BlogPost"/> used by metaweblog.
+        /// Returns specific number of <see cref="BlogPost"/> used by metaweblog.
         /// </summary>
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         public async Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts)
@@ -314,6 +314,37 @@ namespace Fan.Blog.Services
             var query = new PostListQuery(EPostListQueryType.BlogPostsByNumber) { PageSize = numberOfPosts };
 
             return await QueryPostsAsync(query);
+        }
+
+        /// <summary>
+        /// Returns spcific number of published <see cref="BlogPost"/>.
+        /// </summary>
+        /// <param name="numberOfPosts"></param>
+        /// <returns></returns>
+        public async Task<BlogPostList> GetRecentPublishedPostsAsync(int numberOfPosts)
+        {
+            return await cache.GetAsync(BlogCache.KEY_POSTS_RECENT, BlogCache.Time_Posts_Recent, async () =>
+            {
+                var query = new PostListQuery(EPostListQueryType.BlogPublishedPostsByNumber)
+                {
+                    PageSize = numberOfPosts <= 0 ? 1 : numberOfPosts
+                };
+
+                return await QueryPostsAsync(query);
+            });
+        }
+
+        /// <summary>
+        /// Invalidates cache for blog post service.
+        /// </summary>
+        public async Task RemoveBlogCacheAsync()
+        {
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_RECENT);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
+            await cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
         }
 
         // -------------------------------------------------------------------- private methods 
@@ -349,7 +380,7 @@ namespace Fan.Blog.Services
 
             var blogPostList = new BlogPostList
             {
-                PostCount = totalCount
+                TotalPostCount = totalCount
             };
             foreach (var post in posts)
             {
@@ -494,18 +525,6 @@ namespace Fan.Blog.Services
             }
 
             return slug;
-        }
-
-        /// <summary>
-        /// Remove all cached objects for blog.
-        /// </summary>
-        private async Task RemoveAllCacheAsync()
-        {
-            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
-            await cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
         }
 
         private async Task RemoveSinglePostCacheAsync(Post post)

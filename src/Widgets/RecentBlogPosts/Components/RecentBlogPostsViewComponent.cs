@@ -24,16 +24,17 @@ namespace RecentBlogPosts.Components
         public async Task<IViewComponentResult> InvokeAsync(Widget widget)
         {
             var recentBlogPostsWidget = (RecentBlogPostsWidget)widget;
-            var posts = await blogPostService.GetListAsync(1, recentBlogPostsWidget.NumberOfPostsToShow + 1, cacheable: false);
+            // ask for 1 more than number of posts to show
+            var postList = await blogPostService.GetRecentPublishedPostsAsync(recentBlogPostsWidget.NumberOfPostsToShow + 1);
 
             // must have at least 2 posts 
-            if (posts.PostCount < 2)
+            if (postList.TotalPostCount < 2)
                 return await Task.FromResult<IViewComponentResult>(Content(string.Empty));
 
             // get current url
             var relativeUrl = httpContextAccessor.HttpContext.Request.Path;
             var list = new List<RecentPostViewModel>();
-            foreach (var post in posts.Posts)
+            foreach (var post in postList.Posts)
             {
                 // if post url is current url then skip this post
                 var postUrl = BlogRoutes.GetPostRelativeLink(post.CreatedOn, post.Slug);
@@ -47,6 +48,8 @@ namespace RecentBlogPosts.Components
                     Excerpt = recentBlogPostsWidget.ShowPostExcerpt ? post.Excerpt : null,
                     Date = recentBlogPostsWidget.ShowPostDate ? post.CreatedOn.ToString("yyyy-MM-dd") : null,
                 });
+
+                if (list.Count >= recentBlogPostsWidget.NumberOfPostsToShow) break;
             }
 
             return View("~/Components/RecentBlogPosts.cshtml",

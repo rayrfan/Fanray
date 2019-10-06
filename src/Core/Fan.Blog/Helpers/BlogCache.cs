@@ -8,6 +8,7 @@ namespace Fan.Blog.Helpers
     public class BlogCache
     {
         public const string KEY_POSTS_INDEX = "BlogPostsIndex";
+        public const string KEY_POSTS_RECENT = "BlogPostsRecent";
         public const string KEY_POST = "BlogPost_{0}_{1}_{2}_{3}";
         public const string KEY_POST_VIEW_COUNT = "BlogPost_{0}_ViewCount";
         public const string KEY_POST_COUNT = "BlogPostCount";
@@ -32,7 +33,11 @@ namespace Fan.Blog.Helpers
         /// <summary>
         /// 10 minutes.
         /// </summary>
-        public static readonly TimeSpan Time_PostsIndex = new TimeSpan(0, 10, 0);
+        public static readonly TimeSpan Time_Posts_Index = new TimeSpan(0, 10, 0);
+        /// <summary>
+        /// 10 min.
+        /// </summary>
+        public static readonly TimeSpan Time_Posts_Recent = new TimeSpan(0, 10, 0);
         /// <summary>
         /// 10 min.
         /// </summary>

@@ -1,4 +1,5 @@
-﻿using Fan.Widgets;
+﻿using Fan.Blog.Services.Interfaces;
+using Fan.Widgets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -9,9 +10,13 @@ namespace RecentBlogPosts.Manage.Widgets
     public class RecentBlogPostsSettingsModel : PageModel
     {
         protected readonly IWidgetService widgetService;
-        public RecentBlogPostsSettingsModel(IWidgetService widgetService)
+        private readonly IBlogPostService blogPostService;
+
+        public RecentBlogPostsSettingsModel(IWidgetService widgetService, 
+            IBlogPostService blogPostService)
         {
             this.widgetService = widgetService;
+            this.blogPostService = blogPostService;
         }
 
         public string WidgetJson { get; set; }
@@ -27,6 +32,7 @@ namespace RecentBlogPosts.Manage.Widgets
             if (ModelState.IsValid)
             {
                 await widgetService.UpdateWidgetAsync(widget.Id, widget);
+                await blogPostService.RemoveBlogCacheAsync();
                 return new JsonResult("Widget settings updated.");
             }
 

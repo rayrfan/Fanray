@@ -100,10 +100,10 @@ namespace Fan.Web.Helpers
             }
 
             blogPostListVM.PostListDisplay = blogSettings.PostListDisplay;
-            blogPostListVM.PostCount = blogPostList.PostCount;
+            blogPostListVM.TotalPostCount = blogPostList.TotalPostCount;
 
             if (currentPage <= 0) currentPage = 1;
-            if ((currentPage * blogSettings.PostPerPage) < blogPostList.PostCount)
+            if ((currentPage * blogSettings.PostPerPage) < blogPostList.TotalPostCount)
             {
                 blogPostListVM.ShowOlder = true;
                 blogPostListVM.OlderPostsUrl = $"{request.Path}?page={currentPage + 1}";

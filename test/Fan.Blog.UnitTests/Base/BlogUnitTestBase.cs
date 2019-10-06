@@ -89,7 +89,7 @@ namespace Fan.Blog.UnitTests.Base
 
             // tag service
             _loggerTagSvc = loggerFactory.CreateLogger<TagService>();
-            _tagSvc = new TagService(_tagRepoMock.Object, mediatorMock.Object, _cache, _loggerTagSvc);
+            _tagSvc = new TagService(_tagRepoMock.Object, _cache, _loggerTagSvc);
 
             // image service
             _imgSvc = new ImageService(_mediaSvcMock.Object, _storageProMock.Object, appSettingsMock.Object);

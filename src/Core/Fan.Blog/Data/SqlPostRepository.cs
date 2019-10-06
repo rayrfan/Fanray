@@ -230,6 +230,10 @@ namespace Fan.Blog.Data
                 case EPostListQueryType.BlogPostsByNumber:
                     posts = await q.OrderByDescending(p => p.CreatedOn).Take(take).ToListAsync();
                     break;
+                case EPostListQueryType.BlogPublishedPostsByNumber:
+                    q = q.Where(p => p.Status == EPostStatus.Published);
+                    posts = await q.OrderByDescending(p => p.CreatedOn).Take(take).ToListAsync();
+                    break;
                 case EPostListQueryType.Pages:
                     q = q.Where(p => p.ParentId == null || p.ParentId == 0);
                     posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
