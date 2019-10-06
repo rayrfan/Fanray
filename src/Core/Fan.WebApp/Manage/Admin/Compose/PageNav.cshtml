@@ -63,7 +63,7 @@
                                     <li>Use list and surround Page Title with square brackets like <strong>[[Page Title]]</strong>.</li>
                                     <li>When making a sub list make sure to indent it with <strong>two</strong> spaces.</li>
                                     <li>You can also mix in other Markdown elements, such as headings etc.</li>
-                                    <li>Note if a page is still a <strong>draft</strong>, the public won't be able to see it.</li>
+                                    <li>Note if a page is a <strong>draft</strong>, the public won't be able to see it or its children.</li>
                                 </ul>
                             </v-card-text>
                         </v-card>
@@ -76,7 +76,7 @@
                 <v-toolbar-title>{{ parentTitle }}</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-btn @@click="save" :disabled="saveDisabled" color="orange">{{ saveText }}</v-btn>
-                <v-btn href="/admin/pages">Close</v-btn>
+                <v-btn :href="pageUrl">Close</v-btn>
             </v-toolbar>
             @* Editor *@
             <v-content>
@@ -109,6 +109,7 @@
                     pages: @Html.Raw(Model.PagesJson),
                     pageId: @Model.PageId,
                     parentTitle: "@Model.ParentTitle",
+                    pageUrl: "@Model.PageUrl",
                 }
             }
         };

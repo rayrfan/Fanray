@@ -1,4 +1,3 @@
-using Fan.Blog.Models.Input;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +20,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
         public string PagesJson { get; set; }
         public int PageId { get; set; }
         public string ParentTitle { get; set; }
+        public string PageUrl { get; set; }
 
         public async Task<IActionResult> OnGet(int pageId)
         {
@@ -40,6 +40,9 @@ namespace Fan.WebApp.Manage.Admin.Compose
 
             // title
             ParentTitle = page.Title;
+
+            // url
+            PageUrl = $"/{page.Slug}";
 
             // nav
             NavJson = JsonConvert.SerializeObject(page.Nav ?? "");

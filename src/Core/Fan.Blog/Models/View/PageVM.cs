@@ -14,6 +14,7 @@ namespace Fan.Blog.Models.View
         public string CreatedOnDisplay { get; set;  }
         public string UpdatedOnDisplay { get; set;  }
         public string EditLink { get; set; }
+        public string AddChildLink { get; set; }
         public bool IsParent { get; set; }
         public bool ShowDisqus { get; }
         public string Slug { get; set; }

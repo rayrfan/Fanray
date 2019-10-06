@@ -43,6 +43,7 @@
                             <span>
                                 <v-icon small>access_time</v-icon> {{ props.item.date }} &nbsp;
                                 <v-icon small>person</v-icon> {{ props.item.author }} &nbsp;
+                                <v-icon small>folder</v-icon> {{ props.item.category }} &nbsp;
                                 <v-icon small>remove_red_eye</v-icon> {{ props.item.viewCount }} &nbsp;
                             </span>
                         </td>
@@ -70,7 +71,7 @@
                         </td>
                     </template>
                     <template slot="no-data">
-                        <div>You have no posts.</div>
+                        <div style="padding:20px 0;font-style:italic">No posts!</div>
                     </template>
                 </v-data-table>
             </v-flex>

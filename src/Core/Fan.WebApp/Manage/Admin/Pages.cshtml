@@ -28,7 +28,7 @@
                     <v-toolbar-title style="font-size:100%">Pages</v-toolbar-title>
                     <v-btn v-if="parentId > 0" href="/admin/pages" small icon><v-icon small>arrow_upward</v-icon></v-btn>
                     <v-spacer></v-spacer>
-                    <v-btn v-if="parentId > 0" :href="`/admin/compose/page?parentId=${parentId}`"
+                    <v-btn v-if="parentId > 0" href="@Model.AddChildLink"
                            small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Child Page</v-btn>
                     <v-btn v-else href="/admin/compose/page"
                            small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Page</v-btn>
@@ -96,6 +96,9 @@
                         </v-list-tile>
                         <v-divider v-if="index + 1 < pages.length"
                                    :key="index"></v-divider>
+                    </template>
+                    <template v-if="pages.length <= 0">
+                        <div style="padding:20px;font-style:italic">No pages!</div>
                     </template>
                 </v-list>
             </v-flex>

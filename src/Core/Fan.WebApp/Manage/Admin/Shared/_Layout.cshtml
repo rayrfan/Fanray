@@ -1,13 +1,14 @@
 ﻿@* Layout for Admin Panel *@
 @{
     var currentUser = await userManager.GetUserAsync(Context.User);
+    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 }
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Fanray Admin Panel</title>
+    <title>@ViewData["Title"] - @coreSettings.Title</title>
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.css" rel="stylesheet">

@@ -21,6 +21,10 @@
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.EditLink">Edit</a></span>
+                    if (Model.IsParent)
+                    {
+                        <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.AddChildLink">Add Child Page</a></span>
+                    }
                 }
             </div>
         </header>

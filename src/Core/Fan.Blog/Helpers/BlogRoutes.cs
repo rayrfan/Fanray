@@ -7,7 +7,7 @@ namespace Fan.Blog.Helpers
 {
     public static class BlogRoutes
     {
-        // URL templates
+        #region Client URLs
 
         private const string PAGE_PARENT_RELATIVE_URL = "{0}";
         private const string PAGE_PARENT_CHILD_RELATIVE_URL = "{0}/{1}";
@@ -34,7 +34,7 @@ namespace Fan.Blog.Helpers
         public static string GetPageRelativeLink(params string[] slugs)
         {
             return slugs.Length <= 1 || slugs[1].IsNullOrEmpty() ?
-                string.Format("/" + PAGE_PARENT_RELATIVE_URL, slugs[0]):
+                string.Format("/" + PAGE_PARENT_RELATIVE_URL, slugs[0]) :
                 string.Format("/" + PAGE_PARENT_CHILD_RELATIVE_URL, slugs[0], slugs[1]);
         }
 
@@ -147,6 +147,19 @@ namespace Fan.Blog.Helpers
         {
             return string.Format("/" + ARCHIVE_URL, year, month.ToString("00"));
         }
+
+        #endregion
+
+        #region Admin URLs
+
+        private const string ADD_CHILD_PAGE = "/admin/compose/page?parentId={0}";
+
+        public static string GetAddChildPageLink(int parentId)
+        {
+            return string.Format(ADD_CHILD_PAGE, parentId);
+        }
+
+        #endregion
 
         /// <summary>
         /// Registers the blog app's routes.

@@ -23,10 +23,11 @@ namespace Fan.WebApp.Manage.Admin
             this.settingService = settingService;
         }
 
+        public const string POST_DATE_STRING_FORMAT = "yyyy-MM-dd";
+
         public string PagesJson { get; set; }
         public int ParentId { get; set; }
-
-        public const string POST_DATE_STRING_FORMAT = "yyyy-MM-dd";
+        public string AddChildLink { get; set; }
 
         /// <summary>
         /// Displays either a list of parents or a parent with its child pages.
@@ -38,6 +39,7 @@ namespace Fan.WebApp.Manage.Admin
             var pageVMs = await GetPageVMsAsync(parentId);
             PagesJson = JsonConvert.SerializeObject(pageVMs);
             ParentId = parentId;
+            AddChildLink = parentId > 0 ? BlogRoutes.GetAddChildPageLink(parentId) : "";
         }
 
         public async Task<IActionResult> OnDeleteAsync(int pageId)

@@ -81,6 +81,7 @@ namespace Fan.Web.Helpers
                                    page.CreatedOn.ToDisplayString(coreSettings.TimeZoneId),
                 EditLink = BlogRoutes.GetPageEditLink(page.Id),
                 IsParent = page.IsParent,
+                AddChildLink = page.IsParent ? BlogRoutes.GetAddChildPageLink(page.Id) : "",
                 Title = page.Title,
                 PageLayout = (EPageLayout)page.PageLayout,
                 ViewCount = page.ViewCount,
