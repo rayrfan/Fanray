@@ -26,6 +26,7 @@ babel js/compose-pagenav.js --out-dir ../../../wwwroot/admin/js --source-maps --
 babel js/compose-post.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 babel js/blog-posts.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 babel js/blog-pages.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
+babel js/navigation.js --out-dir ../../../wwwroot/admin/js --source-maps --watch
 ```
 
 Develop all files with watch

@@ -7,7 +7,8 @@
 
 <nav-settings inline-template>
     <v-form v-model="valid">
-        <v-text-field label="Navigation Text" v-model="nav.text" v-on:keydown.enter.prevent="save" :rules="textRules"></v-text-field>
+        <v-text-field label="Navigation Text" v-model="nav.text" v-on:keydown.enter.prevent="save" :rules="[rules.required]"></v-text-field>
+        <v-text-field v-if="isCustLink" label="URL" v-model="nav.url" v-on:keydown.enter.prevent="save" :rules="[rules.required]"></v-text-field>
         <v-text-field label="Title Attribute" v-model="nav.title" v-on:keydown.enter.prevent="save"></v-text-field>
         <v-btn @@click="save" :disabled="!valid">Save</v-btn>
     </v-form>
@@ -20,10 +21,11 @@
                 nav: @Html.Raw(Model.NavJson),
                 menuId: @Model.MenuId,
                 index: @Model.Index,
+                isCustLink: @Model.IsCustomLink,
                 valid: false,
-                textRules: [
-                    v => !!v.trim() || 'Navigation Text is required',
-                ],
+                rules: {
+                    required: v => !!v || 'Required.', 
+                },
             }),
             methods: {
                 async save() {

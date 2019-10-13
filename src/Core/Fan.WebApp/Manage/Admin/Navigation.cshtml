@@ -111,7 +111,27 @@
                             <h4>Custom Links</h4>
                         </template>
                         <v-card>
-                            <v-card-text>coming soon</v-card-text>
+                            <v-card-text>
+                                <v-form ref="custLinkForm" v-model="custLinkValid">
+                                    <v-text-field label="URL"
+                                                  v-model="custLinkUrl"
+                                                  :rules="[rules.required, rules.url]"
+                                                  type="text"></v-text-field>
+                                    <v-text-field label="Link Text"
+                                                  v-model="custLinkText"
+                                                  :rules="[rules.required]"
+                                                  type="text"></v-text-field>
+                                    <v-select label="Menu"
+                                              v-model="selectedMenuId"
+                                              :items="menus"
+                                              item-text="name"
+                                              item-value="id"
+                                              dense></v-select>
+                                    <v-btn color="primary"
+                                           :disabled="!custLinkValid"
+                                           @@click="addCustLink">Add to Menu</v-btn>
+                                </v-form>
+                            </v-card-text>
                         </v-card>
                     </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -163,6 +183,7 @@
                                                     <span class="grey--text font-italic" v-if="nav.type === 0"> - {{nav.origNavName}} Page</span>
                                                     <span class="grey--text font-italic" v-else-if="nav.type === 1"> - {{nav.origNavName}} App</span>
                                                     <span class="grey--text font-italic" v-else-if="nav.type === 2"> - {{nav.origNavName}} Blog Category</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 3"> - Custom Link</span>
                                                 </div>
                                             </div>
                                         </v-list-tile-content>
@@ -225,156 +246,11 @@
                     cats: @Html.Raw(Model.CatsJson),
                     home: @Html.Raw(Model.HomeJson),
                     menus: @Html.Raw(Model.MenusJson),
-                    infoPanels: [true, false, false, false],
+                    selectedMenuId: @Model.SelectedMenuId,
                     menuPanels: @Html.Raw(Model.MenuPanelsJson),
-                    infoOptions: {
-                        group: { name:'navs', pull:'clone', put: false },
-                        sort: false
-                    },
-                    menuOptions: {
-                        group: 'navs',
-                        ghostClass: 'sortable-ghost'
-                    }
                 }
             },
         }
     </script>
-    <script>
-        Vue.component('navigation', {
-            mixins: [navigationMixin],
-            data: () => ({
-                dialogVisible: false,
-                dialogTitle: '',
-                settingsUrl: null,
-            }),
-            mounted() {
-                this.initSettingsUpdatedHandler();
-            },
-            methods: {
-                async add(evt) {
-                    let im = {
-                        fromId: evt.from.id,
-                        menuId: evt.to.id,
-                        index: evt.newIndex,
-                        oldIndex: evt.oldIndex,
-                    };
-
-                    if (evt.from.id === 'page-navs') {
-                        let nav = this.pages[evt.oldIndex];
-                        im.id = nav.id;
-                        im.type = nav.type;
-                        im.text = nav.text;
-                    }
-                    else if (evt.from.id === 'app-navs') {
-                        let nav = this.apps[evt.oldIndex];
-                        im.id = nav.id;
-                        im.type = nav.type;
-                        im.text = nav.text;
-                    }
-                    else if (evt.from.id === 'cat-navs') {
-                        let nav = this.cats[evt.oldIndex];
-                        im.id = nav.id;
-                        im.type = nav.type;
-                        im.text = nav.text;
-                    }
-                    else { // from another menu
-                        // since the nav is dragged to the new menu, use to.id
-                        let menu = this.menus.find(m => m.id.toString() === evt.to.id);
-                        let nav = menu.navs[evt.newIndex]; 
-                        im.id = nav.id;
-                        im.type = nav.type;
-                        im.text = nav.text;
-                        im.title = nav.title;
-                        im.url = nav.url;
-                        im.origNavName = nav.origNavName;
-                    }
-
-                    console.log('Nav being added: ', im);
-
-                    try {
-                        let resp = await axios.post('/admin/navigation?handler=add', im, this.$root.headers);
-                        let menu = this.menus.find(m => m.id.toString() === evt.to.id);
-                        let nav = menu.navs[evt.newIndex]; 
-                        nav.settingsUrl = resp.data.settingsUrl;
-                        nav.origNavName = im.origNavName; 
-                    } catch (e) {
-                        console.error(e);
-                        this.$root.toastError('Add menu item failed.');
-                    }
-                },
-                async sort(evt) {
-                    if (evt.from.id !== evt.to.id) return;
-                    let im = {
-                        menuId: evt.to.id,
-                        index: evt.newIndex,
-                        oldIndex: evt.oldIndex,
-                    };
-
-                    let menu = this.menus.find(m => m.id.toString() === evt.from.id);
-                    let nav = menu.navs[evt.newIndex]; // already reordered
-                    im.id = nav.id;
-                    im.type = nav.type;
-                    im.text = nav.text;
-                    im.title = nav.title;
-                    im.url = nav.type === 3 ? null : nav.url;
-
-                    console.log('Nav being sorted: ', im);
-
-                    try {
-                        await axios.post('/admin/navigation?handler=sort', im, this.$root.headers);
-                    } catch (e) {
-                        console.error(e);
-                        this.$root.toastError('Sort menu item failed.');
-                    }
-                },
-                async deleteNav(menuId, index) {
-                    if (confirm(`Are you sure to delete this menu item?`)) {
-                        try {
-                            await axios.delete(`/admin/navigation?menuId=${menuId}&index=${index}`, this.$root.headers);
-                            let menu = this.menus.find(m => m.id === menuId);
-                            menu.navs.splice(index, 1);
-                        } catch (e) {
-                            console.error(e);
-                            this.$root.toastError('Delete menu item failed.');
-                        }
-                    }
-                },
-                async setHome(nav) {
-                    try {
-                        console.log('Set nav as home: ', nav);
-                        await axios.post(`/admin/navigation?handler=home`, nav, this.$root.headers);
-                        this.home = nav;
-                        this.$root.toast('Home updated.');
-                    } catch (e) {
-                        console.error(e);
-                        this.$root.toastError('Set as home failed.');
-                    }
-                },
-                viewSettings(nav) {
-                    console.log(nav);
-                    this.dialogTitle = nav.text;
-                    this.dialogVisible = true;
-                    this.settingsUrl = nav.settingsUrl;
-                },
-                closeDialog() {
-                    this.dialogVisible = false;
-                },
-                initSettingsUpdatedHandler() {
-                    let self = this;
-                    window.document.addEventListener('ExtSettingsUpdated', e => {
-                        console.log('nav settings updated: ', e.detail);
-
-                        // update the menu nav text
-                        let menu = this.menus.find(m => m.id === e.detail.menuId);
-                        let nav = menu.navs[e.detail.index]; 
-                        nav.text = e.detail.text;
-
-                        // show toast and close dialog
-                        self.$root.toast(e.detail.msg);
-                        self.closeDialog();
-                    });
-                },
-            }
-        });
-    </script>
+    <script src="~/admin/js/navigation.js" asp-append-version="true"></script>
 }

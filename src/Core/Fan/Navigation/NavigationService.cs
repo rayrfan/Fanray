@@ -59,9 +59,10 @@ namespace Fan.Navigation
             await UpdateMetaAsync(menuId, navList);
         }
 
-        public async Task SortNavInMenuAsync(EMenu menuId, int index, int oldIndex, Nav nav)
+        public async Task SortNavInMenuAsync(EMenu menuId, int index, int oldIndex)
         {
             var navList = await GetMenuAsync(menuId);
+            var nav = navList[oldIndex];
             navList.RemoveAt(oldIndex);
             navList.Insert(index, nav);
             await UpdateMetaAsync(menuId, navList);

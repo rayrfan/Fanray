@@ -43,6 +43,7 @@ namespace Fan.WebApp.Manage.Admin
         public string HomeJson { get; private set; }
         public string MenusJson { get; private set; }
         public string MenuPanelsJson { get; private set; }
+        public int SelectedMenuId { get; private set; }
 
         /// <summary>
         /// Initializes page.
@@ -86,6 +87,9 @@ namespace Fan.WebApp.Manage.Admin
             }
             MenusJson = JsonConvert.SerializeObject(menuVMs);
 
+            // selected menu
+            SelectedMenuId = menus.Length > 0 ? (int) menus[0].Id : 0;
+
             // menu panels
             var menuPanels = new bool[menus.Length];
             for (int i = 0; i < menuPanels.Length; i++)
@@ -104,6 +108,9 @@ namespace Fan.WebApp.Manage.Admin
         /// </returns>
         public async Task<IActionResult> OnPostAddAsync([FromBody]AddNavIM im)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid form values submitted.");
+
             // from a menu since menu id is an int
             if (int.TryParse(im.FromId, out int fromId))
             {
@@ -114,7 +121,7 @@ namespace Fan.WebApp.Manage.Admin
             var nav = new Nav
             {
                 Id = im.Id,
-                Text = im.Text,
+                Text = im.Text.Trim(),
                 Type = im.Type,
             };
             await navigationService.AddNavToMenuAsync(im.MenuId, im.Index, nav);
@@ -132,14 +139,7 @@ namespace Fan.WebApp.Manage.Admin
         /// <param name="im"></param>
         /// <returns></returns>
         public async Task OnPostSortAsync([FromBody]SortNavIM im) =>
-            await navigationService.SortNavInMenuAsync(im.MenuId, im.Index, im.OldIndex, new Nav
-            {
-                Id = im.Id,
-                Text = im.Text,
-                Type = im.Type,
-                Title = im.Title,
-                Url = im.Url,
-            });
+            await navigationService.SortNavInMenuAsync(im.MenuId, im.Index, im.OldIndex);
 
         /// <summary>
         /// Sets a nav as home.
@@ -162,6 +162,30 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task OnDeleteAsync(EMenu menuId, int index) =>
             await navigationService.RemoveNavFromMenuAsync(menuId, index);
+
+        public async Task<IActionResult> OnPostCustomLinkAsync([FromBody]AddNavIM im)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid form values submitted.");
+
+            var nav = new Nav
+            {
+                Id = 0,
+                Text = im.Text.Trim(),
+                Type = ENavType.CustomLink,
+                Url = im.Url?.Trim(),
+            };
+
+            await navigationService.AddNavToMenuAsync(im.MenuId, im.Index, nav);
+
+            var navVM = new NavVM(nav)
+            {
+                SettingsUrl = string.Format(NAV_SETTINGS_URL, im.MenuId, im.Index),
+                Type = ENavType.CustomLink,
+            };
+
+            return new JsonResult(navVM);
+        }
 
         public static string GetOriginalNavTitle(Nav nav, IList<Blog.Models.Page> pages, IList<Category> cats)
         {

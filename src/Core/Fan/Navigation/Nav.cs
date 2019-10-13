@@ -11,6 +11,9 @@ namespace Fan.Navigation
         /// <summary>
         /// Id of the original item.
         /// </summary>
+        /// <remarks>
+        /// It's 0 when <see cref="Type"/> is <see cref="ENavType.CustomLink"/>.
+        /// </remarks>
         public int Id { get; set; }
 
         /// <summary>
