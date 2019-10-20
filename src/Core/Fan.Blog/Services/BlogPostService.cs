@@ -94,7 +94,7 @@ namespace Fan.Blog.Services
                 TagTitles = blogPost.TagTitles
             });
 
-            // create
+            // create (post will get new id)
             await postRepository.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache only when published

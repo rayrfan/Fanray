@@ -34,10 +34,10 @@ namespace Fan.Data
         }
 
         /// <summary>
-        /// Creates an entity and the returned object is tracked.
+        /// Creates an entity and returns a tracked object with id.
         /// </summary>
         /// <param name="entity"></param>
-        /// <returns></returns>
+        /// <returns>The <paramref name="entity"/> with id.</returns>
         /// <exception cref="FanException">
         /// Throws if insert violates unique key constraint. See <see cref="https://stackoverflow.com/a/47465944/32240"/>
         /// </exception>
