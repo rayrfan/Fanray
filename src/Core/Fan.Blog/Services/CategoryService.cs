@@ -208,7 +208,7 @@ namespace Fan.Blog.Services
             await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
             // raise nav updated event
-            await mediator.Publish(new NavUpdated());
+            await mediator.Publish(new NavUpdated { Id = category.Id, Type = ENavType.BlogCategory });
 
             // return entity
             logger.LogDebug("Updated {@Category}", entity);

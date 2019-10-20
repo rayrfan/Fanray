@@ -1,5 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
+using Fan.Settings;
 using Fan.Themes;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -21,14 +22,17 @@ namespace Fan.Navigation
     {
         private readonly IMetaRepository metaRepository;
         private readonly IEnumerable<INavProvider> navProviders;
+        private readonly ISettingService settingService;
         private readonly IDistributedCache cache;
 
         public NavigationService(IMetaRepository metaRepository,
             IEnumerable<INavProvider> navProviders,
+            ISettingService settingService,
             IDistributedCache cache)
         {
             this.metaRepository = metaRepository;
             this.navProviders = navProviders;
+            this.settingService = settingService;
             this.cache = cache;
         }
 
@@ -82,6 +86,14 @@ namespace Fan.Navigation
             await UpdateMetaAsync(menuId, navList);
         }
 
+        public async Task SetNavAsHome(int navId, ENavType navType)
+        {
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            coreSettings.Home.Id = navId;
+            coreSettings.Home.Type = navType;
+            await settingService.UpsertSettingsAsync(coreSettings);
+        }
+
         // -------------------------------------------------------------------- event handlers
 
         /// <summary>
@@ -93,6 +105,17 @@ namespace Fan.Navigation
         /// <returns></returns>
         public async Task Handle(NavUpdated notification, CancellationToken cancellationToken)
         {
+            // if nav updated was a page and it is now a draft
+            if (notification.Type == ENavType.Page && notification.IsDraft)
+            {
+                // 1. update home
+                await HandleHomeAsync(notification.Id, notification.Type);
+
+                // 2. remove it from any menus that contain it
+                await HandleMenusAsync(notification.Id, notification.Type);
+            }
+
+            // invalidate all menus cache
             var menuMetas = await metaRepository.GetListAsync(EMetaType.Menu);
             foreach (var meta in menuMetas)
             {
@@ -101,13 +124,47 @@ namespace Fan.Navigation
         }
 
         /// <summary>
-        /// Handles <see cref="NavDeleted"/> event raised by an <see cref="INavProvider"/>, it 
-        /// goes through all menus and remove the deleted <see cref="Nav"/>.
+        /// Handles <see cref="NavDeleted"/> event raised by an <see cref="INavProvider"/>.
         /// </summary>
         /// <param name="notification">The <see cref="NavDeleted"/> notification.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// When a nav is delete, this method handles it by going through all menus and remove the 
+        /// deleted <see cref="Nav"/>. If the deleted nav is used for home, then blog app will be 
+        /// used as default for home.
+        /// </remarks>
         public async Task Handle(NavDeleted notification, CancellationToken cancellationToken)
+        {
+            // in case the deleted nav was set home
+            await HandleHomeAsync(notification.Id, notification.Type);
+
+            // remove the deleted nav from all menus that contains it
+            await HandleMenusAsync(notification.Id, notification.Type);
+        }
+
+        /// <summary>
+        /// When a nav is updated / deleted, site home may need to be updated by setting blog app
+        /// as home.
+        /// </summary>
+        /// <returns></returns>
+        private async Task HandleHomeAsync(int navId, ENavType navType)
+        {
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            if (coreSettings.Home.Id == navId && coreSettings.Home.Type == navType)
+            {
+                coreSettings.Home.Id = App.BLOG_APP_ID;
+                coreSettings.Home.Type = ENavType.App;
+                await settingService.UpsertSettingsAsync(coreSettings);
+            }
+        }
+
+        /// <summary>
+        /// When a nav is updated / deleted, menus may need to remove the <see cref="Nav"/>.
+        /// </summary>
+        /// <param name="navId"></param>
+        /// <param name="navType"></param>
+        private async Task HandleMenusAsync(int navId, ENavType navType)
         {
             var menuMetas = await metaRepository.GetListAsync(EMetaType.Menu);
             foreach (var meta in menuMetas) // List<Meta>
@@ -117,7 +174,7 @@ namespace Fan.Navigation
                 foreach (var nav in navList)
                 {
                     // if the menu contains the deleted nav, remove it
-                    if (nav.Id == notification.Id && nav.Type == notification.Type)
+                    if (nav.Id == navId && nav.Type == navType)
                     {
                         navList.Remove(nav);
 

@@ -148,10 +148,7 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task OnPostHomeAsync([FromBody]Nav nav)
         {
-            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
-            coreSettings.Home.Id = nav.Id;
-            coreSettings.Home.Type = nav.Type;
-            await settingService.UpsertSettingsAsync(coreSettings);
+            await navigationService.SetNavAsHome(nav.Id, nav.Type);
         }
 
         /// <summary>

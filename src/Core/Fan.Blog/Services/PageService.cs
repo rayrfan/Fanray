@@ -104,7 +104,7 @@ namespace Fan.Blog.Services
             // convert
             var post = await ConvertToPostAsync(page, ECreateOrUpdate.Create);
 
-            // create
+            // create (post will get new id)
             await postRepository.CreateAsync(post);
 
             return await GetAsync(post.Id);
@@ -141,7 +141,12 @@ namespace Fan.Blog.Services
             }
 
             // raise nav updated event
-            await mediator.Publish(new NavUpdated());
+            await mediator.Publish(new NavUpdated 
+            { 
+                Id = page.Id, 
+                Type = ENavType.Page, 
+                IsDraft = post.Status == EPostStatus.Draft 
+            });
 
             return await GetAsync(post.Id);
         }
@@ -437,7 +442,7 @@ namespace Fan.Blog.Services
             if (post.ParentId.HasValue && post.ParentId.Value > 0) // child
             {
                 var parentPost = await QueryPostAsync(post.ParentId.Value);
-                key = string.Format(BlogCache.KEY_PAGE, post.Slug + "_" + parentPost.Slug);
+                key = string.Format(BlogCache.KEY_PAGE, parentPost.Slug + "_" + post.Slug);
             }
 
             return key;

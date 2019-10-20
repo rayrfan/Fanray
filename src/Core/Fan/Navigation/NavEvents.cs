@@ -7,6 +7,9 @@ namespace Fan.Navigation
     /// </summary>
     public class NavUpdated : INotification
     {
+        public int Id { get; set; }
+        public ENavType Type { get; set; }
+        public bool IsDraft { get; set; }
     }
 
     /// <summary>

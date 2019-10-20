@@ -11,5 +11,6 @@ namespace Fan.Navigation
         Task SortNavInMenuAsync(EMenu menuId, int index, int oldIndex);
         Task RemoveNavFromMenuAsync(EMenu menuId, int index);
         Task UpdateNavInMenuAsync(EMenu menuId, int index, Nav nav);
+        Task SetNavAsHome(int navId, ENavType navType);
     }
 }
