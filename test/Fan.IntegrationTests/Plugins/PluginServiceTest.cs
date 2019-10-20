@@ -106,13 +106,21 @@ namespace Fan.IntegrationTests.Plugins
         }
 
         /// <summary>
-        /// System plugins are part of the system and thus cannot be activated. Activating one
-        /// will throw exception.
+        /// SysPlugins also require activation and are activated at install time.
         /// </summary>
         [Fact]
-        public async void System_plugin_cannot_be_activated()
+        public async void System_plugin_also_need_to_be_activated()
         {
-            await Assert.ThrowsAsync<FanException>(() => pluginService.ActivatePluginAsync(MY_SYSPLUGIN));
+            // Given a plugin and when the system activates it
+            var id = await pluginService.ActivatePluginAsync(MY_SYSPLUGIN);
+
+            // Then there will be a plugin meta
+            var pluginMeta = await metaRepository.GetAsync(id);
+            Assert.NotNull(pluginMeta);
+
+            // And the plugin's Active property is true
+            var plugin = await pluginService.GetExtensionAsync(id);
+            Assert.True(plugin.Active);
         }
     }
 }

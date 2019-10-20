@@ -1,5 +1,4 @@
 ﻿using Fan.Data;
-using Fan.Exceptions;
 using Fan.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -53,7 +52,8 @@ namespace Fan.Plugins
         /// <param name="folder">The key of the plugin.</param>
         /// <returns>Id of the plugin.</returns>
         /// <remarks>
-        /// It upserts a plugin meta and makes sure Active is true.
+        /// It upserts a plugin meta and makes sure Active is true. SysPlugins also require activation 
+        /// when they first install.
         /// </remarks>
         public async Task<int> ActivatePluginAsync(string folder)
         {
@@ -61,8 +61,6 @@ namespace Fan.Plugins
 
             var manifests = await LoadManifestsAsync();
             var manifest = manifests.SingleOrDefault(m => m.Folder.ToUpperInvariant().Equals(folder.ToUpperInvariant()));
-            if (manifest.IsSysPlugin)
-                throw new FanException("A system plugin cannot be activated.");
 
             var meta = await GetPluginMetaAsync(folder);
             if (meta != null)
@@ -103,6 +101,7 @@ namespace Fan.Plugins
         /// <returns></returns>
         /// <remarks>
         /// De-activation removes plugin id from active-plugins but does not delete the plugin meta.
+        /// TODO should I check if plugin is SysPlugin and throw exception if it is
         /// </remarks>
         public async Task DeactivatePluginAsync(int id)
         {
