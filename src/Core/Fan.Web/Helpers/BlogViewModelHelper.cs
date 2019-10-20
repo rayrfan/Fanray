@@ -137,7 +137,7 @@ namespace Fan.Web.Helpers
         public async Task<BlogPostListVM> GetBlogPostListVMForTagAsync(BlogPostList blogPostList, Tag tag)
         {
             var blogPostListVM = await GetBlogPostListVMAsync(blogPostList);
-            blogPostListVM.CategoryTitle = tag.Title;
+            blogPostListVM.TagTitle = tag.Title;
             blogPostListVM.Description = tag.Description;
             return blogPostListVM;
         }
