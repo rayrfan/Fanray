@@ -1,12 +1,12 @@
 ﻿# Working with migrations
 
-Migrations can be done inside VS by opening up Package Manager Console.
+Open Package Manager Console, make sure `Fan` is the default project.
 
 ## Add-Migration
 
-If you make changes to any Entity derived model classes or ModelBuilders, say you added a property to Post class.
+If you've made changes to any Entity derived model classes or ModelBuilders, say a property has been added to the `Post` class.
 
-`Add-Migration UpdatePost` will create a migration named UdpatePost prefixed with today's timestamp.
+`Add-Migration UpdatePost` will create a migration named UpdatePost prefixed with today's timestamp, it has two methods `Up` and `Down`; a `.Designer.cs` will also be created; Snapshot will be updated.
 
 ## Update-Database
 
@@ -22,7 +22,7 @@ Make sure `appsettings.json` is pointing to the right database.
 ## Script-Migration
 
 `Script-Migration` will generate a SQL script from migrations.
-`Script-Migration -Idempotent -From FanSchemaV1` will generate a script since the `FanSchemaV1` which covers only `FanV2_0`
+`Script-Migration -Idempotent -From FanV1_1` will generate a script since the `FanSchemaV1` which covers only `FanV2_0`
 
 
 ## Note

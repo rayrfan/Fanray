@@ -54,6 +54,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{27E759ED-9E68-4AE7-BDE8-16D0222CD1DA}"
 	ProjectSection(SolutionItems) = preProject
 		sql\1.0-1.1.sql = sql\1.0-1.1.sql
+		sql\1.1-prev3 to prev4.sql = sql\1.1-prev3 to prev4.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForkMeRibbon", "src\Plugins\ForkMeRibbon\ForkMeRibbon.csproj", "{22949558-4220-4879-8BB1-D03BCEFDD981}"

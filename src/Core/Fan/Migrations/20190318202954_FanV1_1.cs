@@ -14,6 +14,16 @@ namespace Fan.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 256);
 
+            migrationBuilder.AddColumn<string>(
+                name: "Nav",
+                table: "Blog_Post",
+                nullable: true);
+
+            migrationBuilder.AddColumn<byte?>(
+                name: "PageLayout",
+                table: "Blog_Post",
+                nullable: true);
+
             migrationBuilder.RenameColumn(
                 name: "AppId",
                 table: "Core_Media",
@@ -97,6 +107,14 @@ namespace Fan.Migrations
               oldClrType: typeof(string),
               oldMaxLength: 256,
               oldNullable: true);
+
+            migrationBuilder.DropColumn(
+                name: "Nav",
+                table: "Blog_Post");
+
+            migrationBuilder.DropColumn(
+                name: "PageLayout",
+                table: "Blog_Post");
 
             migrationBuilder.DropColumn(
                 name: "Width",
