@@ -84,7 +84,11 @@ Please refer to [Contributing Guide](CONTRIBUTING.md).
 
 ## Support Me
 
-<a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+If you find this project useful please consider support it, your contribution means a lot! Thank you!
+
+<a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee"></a>
+
+<a href="https://paypal.me/FanrayMedia" target="_blank"><img src="https://user-images.githubusercontent.com/633119/67154590-d1891300-f2b3-11e9-83d2-c7e6232a09df.jpg" alt="PayPal Me" width="135" height="35"></a>
 
 ## License
 
