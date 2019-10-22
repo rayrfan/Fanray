@@ -76,16 +76,16 @@ namespace Fan.IntegrationTests.Themes
             Assert.Single(themes);
         }
 
-        [Fact]
-        public async void A_default_theme_named_clarity_is_always_available()
-        {
-            // When system retrieves installed themes
-            var themes = await _svc.GetManifestsAsync();
+        //[Fact]
+        //public async void A_default_theme_named_clarity_is_always_available()
+        //{
+        //    // When system retrieves installed themes
+        //    var themes = await _svc.GetManifestsAsync();
 
-            // Then the default Clarity theme should be available
-            Assert.Contains(themes, t => t.Name == "Clarity");
-            Assert.Contains(themes, t => t.Folder.Equals("clarity", StringComparison.CurrentCultureIgnoreCase));
-        }
+        //    // Then the default Clarity theme should be available
+        //    Assert.Contains(themes, t => t.Name == "Clarity");
+        //    Assert.Contains(themes, t => t.Folder.Equals("clarity", StringComparison.CurrentCultureIgnoreCase));
+        //}
 
         /// <summary>
         /// A "theme.json" file at the root of each theme's folder will provide

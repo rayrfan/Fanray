@@ -43,11 +43,10 @@ namespace Fan.Blog.UnitTests.Services
         [Fact]
         public async void Create_category_throws_FanException_if_title_already_exists()
         {
-            var title = "web development";
-            await Assert.ThrowsAsync<FanException>(() => _catSvc.CreateAsync(title));
-
             try
             {
+                var title = "web development";
+
                 await _catSvc.CreateAsync(title);
             }
             catch (FanException ex)

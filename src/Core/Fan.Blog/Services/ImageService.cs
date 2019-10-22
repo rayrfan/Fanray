@@ -339,7 +339,7 @@ namespace Fan.Blog.Services
 
                 return changed ? doc.DocumentNode.OuterHtml : body;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return body;
             }
