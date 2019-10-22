@@ -248,8 +248,8 @@ namespace Fan.Navigation
 
         private async Task InvalidateMenuCacheAsync(string metaKey)
         {
-            // convert "menu1" to enum
-            Enum.TryParse(metaKey, ignoreCase: true, out EMenu menuId);
+            // convert "menu1" to enum ignoreCase
+            Enum.TryParse(metaKey, true, out EMenu menuId);
             if (menuId <= 0) return;
 
             await InvalidateMenuCacheAsync(menuId);
