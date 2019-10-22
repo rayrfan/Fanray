@@ -2,7 +2,7 @@ language: csharp
 solution: Fanray.sln
 sudo: required
 dist: xenial
-dotnet: 2.2
+dotnet: 3.0.100
 mono: none
 os:
   - linux
