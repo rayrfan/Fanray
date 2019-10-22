@@ -7,15 +7,25 @@ jobs:
     vmImage: 'ubuntu-latest'  
  
   steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 2.2.402'
+    inputs:
+      version: 2.2.402
+
   - script: |
-      dotnet build --configuration $(buildConfiguration)
-      dotnet test --configuration $(buildConfiguration)
+      dotnet build --configuration $(buildConfiguration) 
+      dotnet test
 
 - job: macOS
   pool:
-    vmImage: 'macOS-latest'
+    vmImage: 'macOS-10.13'
 
   steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 2.2.402'
+    inputs:
+      version: 2.2.402
+
   - script: |
       dotnet build --configuration $(buildConfiguration)
       dotnet test --configuration $(buildConfiguration)
