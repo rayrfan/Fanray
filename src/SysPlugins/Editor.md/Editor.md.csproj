@@ -30,7 +30,7 @@
 
     <RemoveDir Directories="$(CopyToDir)" />
     <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
-    <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(FileName)%(Extension)" />
   </Target>
 
 </Project>
