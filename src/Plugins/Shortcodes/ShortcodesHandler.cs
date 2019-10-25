@@ -1,4 +1,5 @@
 ﻿using Fan.Blog.Models.View;
+using Fan.Blog.Services;
 using Fan.Plugins;
 using Fan.Web.Events;
 using MediatR;
@@ -22,12 +23,23 @@ namespace Shortcodes
             this.pluginService = pluginService;
         }
 
+        /// <summary>
+        /// Handles <see cref="PageVM"/> by parsing shortcodes then nav links.
+        /// </summary>
+        /// <param name="notification"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Nav links are a special code with double brackets [[Page Title]].
+        /// </remarks>
         public async Task Handle(ModelPreRender<PageVM> notification, CancellationToken cancellationToken)
         {
             if (!await IsPluginActiveAsync() || !(notification.Model is PageVM)) return;
 
-            var body = ((PageVM)notification.Model).Body;
-            ((PageVM)notification.Model).Body = shortcodeService.Parse(body);
+            var pageVM = (PageVM) notification.Model;
+            
+            // parse shortcode, then nav link
+            ((PageVM)notification.Model).Body = PageService.ParseNavLinks(shortcodeService.Parse(pageVM.Body), pageVM.Slug);
         }
 
         public async Task Handle(ModelPreRender<BlogPostVM> notification, CancellationToken cancellationToken)

@@ -402,13 +402,7 @@ namespace Fan.Blog.Services
             post.Title = page.Title;
 
             // Bodys
-            string parentSlug = null;
-            if (!page.IsParent)
-            {
-                var parent = await GetAsync(post.ParentId.Value);
-                parentSlug = parent.Slug;
-            }
-            post.Body = FormatNavLinks(page.Body, page.IsParent ? slug : parentSlug);
+            post.Body = page.Body;
             post.BodyMark = WebUtility.HtmlEncode(page.BodyMark); // decoded on the client
 
             // Excerpt TODO should I extract excerpt from body if user didn't put an excerpt?
@@ -600,7 +594,7 @@ namespace Fan.Blog.Services
         /// <param name="body"></param>
         /// <param name="parentSlug"></param>
         /// <returns></returns>
-        public static string FormatNavLinks(string body, string parentSlug)
+        public static string ParseNavLinks(string body, string parentSlug)
         {
             if (body.IsNullOrEmpty()) return body;
 

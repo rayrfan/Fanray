@@ -72,6 +72,8 @@ namespace Fan.Web.Helpers
             return ("../Blog/Page", new PageVM
             {
                 Id = page.Id,
+                ParentId = page.ParentId,
+                Slug = page.IsParent ? parentPage : childPage,
                 Author = page.User.DisplayName,
                 Body = page.Body,
                 Excerpt = page.Excerpt,
