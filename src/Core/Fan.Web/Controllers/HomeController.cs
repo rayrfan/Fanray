@@ -5,6 +5,7 @@ using Fan.Exceptions;
 using Fan.Membership;
 using Fan.Navigation;
 using Fan.Settings;
+using Fan.Web.Attributes;
 using Fan.Web.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
@@ -47,6 +48,7 @@ namespace Fan.Web.Controllers
         /// Site home.
         /// </summary>
         /// <returns></returns>
+        [ModelPreRender]
         public async Task<IActionResult> Index()
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();

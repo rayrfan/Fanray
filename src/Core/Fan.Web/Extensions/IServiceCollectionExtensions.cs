@@ -24,11 +24,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddPlugins(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
         {
-            var pluginsDir = Path.Combine(hostingEnvironment.ContentRootPath, "Plugins");
+            var sysPluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "SysPlugins"));
+            var pluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "Plugins"));
+            var totalDirs = new string[sysPluginsDirs.Length + pluginsDirs.Length];
+            sysPluginsDirs.CopyTo(totalDirs, 0);
+            pluginsDirs.CopyTo(totalDirs, sysPluginsDirs.Length);
             var binDir = Util.IsRunningFromTestHost() ? Environment.CurrentDirectory :
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            foreach (var dir in Directory.GetDirectories(pluginsDir))
+            foreach (var dir in totalDirs)
             {
                 try
                 {

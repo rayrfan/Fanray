@@ -21,7 +21,7 @@
 
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
-      <CopyToDir>..\..\Core\Fan.WebApp\Plugins\Shortcodes</CopyToDir>
+      <CopyToDir>..\..\Core\Fan.WebApp\SysPlugins\Shortcodes</CopyToDir>
     </PropertyGroup>
 
     <ItemGroup>
