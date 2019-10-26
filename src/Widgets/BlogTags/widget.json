@@ -3,7 +3,7 @@
   "description": "A list of blog tags.",
   "type": "BlogTags.BlogTagsWidget, BlogTags",
   "version": "1.0.0",
-  "requiresAtLeast": "1.1.0-preview3",
+  "requiresAtLeast": "1.1.0",
   "widgetUrl": "https://github.com/FanrayMedia/Fanray",
   "author": "Ray Fan",
   "authorUrl": "https://www.fanray.com"

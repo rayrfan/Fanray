@@ -3,7 +3,7 @@
   "description": "A markdown editor based on Editor.md.",
   "type": "Editor.md.EditorMdPlugin, Editor.md",
   "version": "1.0.0",
-  "requiresAtLeast": "1.1.0-preview4",
+  "requiresAtLeast": "1.1.0",
   "pluginUrl": "https://github.com/FanrayMedia/Fanray/wiki/Editor.md-Plugin",
   "author": "Ray Fan",
   "authorUrl": "https://www.fanray.com"

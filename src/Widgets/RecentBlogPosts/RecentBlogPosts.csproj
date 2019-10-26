@@ -12,6 +12,10 @@
     <ProjectReference Include="..\..\Core\Fan.Blog\Fan.Blog.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="widget.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Widgets\RecentBlogPosts</CopyToDir>

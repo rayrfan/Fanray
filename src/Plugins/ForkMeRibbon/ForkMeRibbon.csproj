@@ -19,6 +19,10 @@
     <EmbeddedResource Include="wwwroot\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Plugins\ForkMeRibbon</CopyToDir>
