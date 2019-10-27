@@ -119,6 +119,10 @@ namespace Fan.Plugins
         /// Returns a list of active plugins.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// TODO this implmentation makes the assumption all SysPlugins' Active property is set to 
+        /// true in database if for whatever reason its false, it won't be returned.
+        /// </remarks>
         public async Task<IEnumerable<Plugin>> GetActivePluginsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_ACTIVE_PLUGINS, Cache_Time_Active_Plugins, async () =>
