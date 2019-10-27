@@ -19,10 +19,6 @@
     <EmbeddedResource Include="wwwroot\**\*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="theme.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <Target Name="CopyArtifacts" AfterTargets="Build">
     <PropertyGroup>
       <CopyToDir>..\..\Core\Fan.WebApp\Themes\Clarity</CopyToDir>
