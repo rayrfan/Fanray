@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Fan.IntegrationTests")]
@@ -30,6 +29,12 @@ namespace Fan.Widgets
         public static WidgetAreaInfo BlogAfterPost = new WidgetAreaInfo { Id = "blog-after-post", Name = "Blog - After Post" };
         public static WidgetAreaInfo BlogBeforePostList = new WidgetAreaInfo { Id = "blog-before-post-list", Name = "Blog - Before Post List" };
         public static WidgetAreaInfo BlogAfterPostList = new WidgetAreaInfo { Id = "blog-after-post-list", Name = "Blog - After Post List" };
+
+        public static WidgetAreaInfo PageSidebar1 = new WidgetAreaInfo { Id = "page-sidebar1", Name = "Page - Sidebar1" };
+        public static WidgetAreaInfo PageSidebar2 = new WidgetAreaInfo { Id = "page-sidebar2", Name = "Page - Sidebar2" };
+        public static WidgetAreaInfo PageBeforeContent = new WidgetAreaInfo { Id = "page-before-content", Name = "Page - Before Content" };
+        public static WidgetAreaInfo PageAfterContent = new WidgetAreaInfo { Id = "page-after-content", Name = "Page - After Content" };
+
         public static WidgetAreaInfo Footer1 = new WidgetAreaInfo { Id = "footer1", Name = "Footer 1" };
         public static WidgetAreaInfo Footer2 = new WidgetAreaInfo { Id = "footer2", Name = "Footer 2" };
         public static WidgetAreaInfo Footer3 = new WidgetAreaInfo { Id = "footer3", Name = "Footer 3" };
@@ -42,6 +47,12 @@ namespace Fan.Widgets
             BlogAfterPost,
             BlogBeforePostList,
             BlogAfterPostList,
+
+            PageSidebar1,
+            PageSidebar2,
+            PageBeforeContent,
+            PageAfterContent,
+
             Footer1,
             Footer2,
             Footer3,
@@ -55,13 +66,6 @@ namespace Fan.Widgets
         /// The widgets directory inside the web app.
         /// </summary>
         public const string WIDGETS_DIR = "Widgets";
-        /// <summary>
-        /// A widget's folder must be in PascalCase.
-        /// </summary>
-        /// <remarks>
-        /// https://stackoverflow.com/a/2106423/32240
-        /// </remarks>
-        public const string WIDGET_FOLDER_REGEX = @"^[A-Z][a-z]+(?:[A-Z][a-z]+)*$";
 
         private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
         private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
@@ -329,7 +333,7 @@ namespace Fan.Widgets
                         Type = EMetaType.Widget,
                     });
                 }
-                catch (FanException ex) when (ex.ExceptionType == EExceptionType.MetaDuplicate)
+                catch (FanException ex) when (ex.ExceptionType == EExceptionType.DuplicateRecord)
                 {
                 }
             }
@@ -360,10 +364,6 @@ namespace Fan.Widgets
             await metaRepository.UpdateAsync(meta);
             await InvalidAreaCacheAsync();
         }
-
-        // -------------------------------------------------------------------- validate
-
-        public override bool IsValidExtensionFolder(string folder) => new Regex(WIDGET_FOLDER_REGEX).IsMatch(folder);
 
         // -------------------------------------------------------------------- private methods
 

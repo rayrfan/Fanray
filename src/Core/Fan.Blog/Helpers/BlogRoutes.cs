@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Fan.Navigation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using System;
 
@@ -6,14 +7,63 @@ namespace Fan.Blog.Helpers
 {
     public static class BlogRoutes
     {
-        private const string POST_RELATIVE_URL_TEMPLATE = "post/{0}/{1}/{2}/{3}";
-        private const string PREVIEW_POST_RELATIVE_URL_TEMPLATE = "preview/post/{0}/{1}/{2}/{3}";
-        private const string POST_PERMA_URL_TEMPLATE = "blog/post/{0}";
-        private const string POST_EDIT_URL_TEMPLATE = "admin/compose/{0}";
-        private const string CATEGORY_URL_TEMPLATE = "posts/categorized/{0}";
-        private const string CATEGORY_RSS_URL_TEMPLATE = "posts/categorized/{0}/feed";
-        private const string TAG_URL_TEMPLATE = "posts/tagged/{0}";
-        private const string ARCHIVE_URL_TEMPLATE = "posts/{0}/{1}";
+        #region Client URLs
+
+        private const string PAGE_PARENT_RELATIVE_URL = "{0}";
+        private const string PAGE_PARENT_CHILD_RELATIVE_URL = "{0}/{1}";
+        private const string PAGE_EDIT_URL = "admin/compose/page/{0}";
+        private const string PAGE_EDIT_NAV_URL = "admin/compose/pagenav/{0}";
+        private const string PREVIEW_PARENT_RELATIVE_URL = "preview/page/{0}";
+        private const string PREVIEW_PARENT_CHILD_RELATIVE_URL = "preview/page/{0}/{1}";
+
+        private const string POST_RELATIVE_URL = "post/{0}/{1}/{2}/{3}";
+        private const string PREVIEW_POST_RELATIVE_URL = "preview/post/{0}/{1}/{2}/{3}";
+        private const string POST_PERMA_URL = "blog/post/{0}";
+        private const string POST_EDIT_URL = "admin/compose/post/{0}";
+
+        private const string CATEGORY_URL = "blog/{0}";
+        private const string CATEGORY_RSS_URL = "blog/{0}/feed";
+        private const string TAG_URL = "posts/tagged/{0}";
+        private const string ARCHIVE_URL = "posts/{0}/{1}";
+
+        /// <summary>
+        /// Returns a page's relative link that starts with "/" and contains one or two slugs.
+        /// </summary>
+        /// <param name="slugs"></param>
+        /// <returns></returns>
+        public static string GetPageRelativeLink(params string[] slugs)
+        {
+            return slugs.Length <= 1 || slugs[1].IsNullOrEmpty() ?
+                string.Format("/" + PAGE_PARENT_RELATIVE_URL, slugs[0]) :
+                string.Format("/" + PAGE_PARENT_CHILD_RELATIVE_URL, slugs[0], slugs[1]);
+        }
+
+        /// <summary>
+        /// Returns a page's edit link, the returned string is a relative URL that starts with "/".
+        /// </summary>
+        /// <param name="pageId"></param>
+        /// <returns></returns>
+        public static string GetPageEditLink(int pageId)
+        {
+            return string.Format("/" + PAGE_EDIT_URL, pageId);
+        }
+
+        public static string GetPageNavEditLink(int pageId)
+        {
+            return string.Format("/" + PAGE_EDIT_NAV_URL, pageId);
+        }
+
+        /// <summary>
+        /// Returns a page's preview relative link that starts with "/".
+        /// </summary>
+        /// <param name="slugs"></param>
+        /// <returns></returns>
+        public static string GetPagePreviewRelativeLink(params string[] slugs)
+        {
+            return slugs.Length <= 1 || slugs[1].IsNullOrEmpty() ?
+                string.Format("/" + PREVIEW_PARENT_RELATIVE_URL, slugs[0]) :
+                string.Format("/" + PREVIEW_PARENT_CHILD_RELATIVE_URL, slugs[0], slugs[1]);
+        }
 
         /// <summary>
         /// Returns a blog post's relative link that starts with "/" and contains 2-digit month and day.
@@ -23,7 +73,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetPostRelativeLink(DateTimeOffset dt, string slug)
         {
-            return string.Format("/" + POST_RELATIVE_URL_TEMPLATE, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
+            return string.Format("/" + POST_RELATIVE_URL, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
         }
 
         /// <summary>
@@ -34,7 +84,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetPostPreviewRelativeLink(DateTimeOffset dt, string slug)
         {
-            return string.Format("/" + PREVIEW_POST_RELATIVE_URL_TEMPLATE, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
+            return string.Format("/" + PREVIEW_POST_RELATIVE_URL, dt.Year, dt.Month.ToString("00"), dt.Day.ToString("00"), slug);
         }
 
         /// <summary>
@@ -44,7 +94,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetPostPermalink(int postId)
         {
-            return string.Format("/" + POST_PERMA_URL_TEMPLATE, postId);
+            return string.Format("/" + POST_PERMA_URL, postId);
         }
 
         /// <summary>
@@ -54,7 +104,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetPostEditLink(int postId)
         {
-            return string.Format("/" + POST_EDIT_URL_TEMPLATE, postId);
+            return string.Format("/" + POST_EDIT_URL, postId);
         }
 
         /// <summary>
@@ -64,7 +114,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetCategoryRelativeLink(string slug)
         {
-            return string.Format("/" + CATEGORY_URL_TEMPLATE, slug);
+            return string.Format("/" + CATEGORY_URL, slug);
         }
 
         /// <summary>
@@ -74,7 +124,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetCategoryRssRelativeLink(string slug)
         {
-            return string.Format("/" + CATEGORY_RSS_URL_TEMPLATE, slug);
+            return string.Format("/" + CATEGORY_RSS_URL, slug);
         }
 
         /// <summary>
@@ -84,7 +134,7 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetTagRelativeLink(string slug)
         {
-            return string.Format("/" + TAG_URL_TEMPLATE, slug);
+            return string.Format("/" + TAG_URL, slug);
         }
 
         /// <summary>
@@ -95,8 +145,21 @@ namespace Fan.Blog.Helpers
         /// <returns></returns>
         public static string GetArchiveRelativeLink(int year, int month)
         {
-            return string.Format("/" + ARCHIVE_URL_TEMPLATE, year, month.ToString("00"));
+            return string.Format("/" + ARCHIVE_URL, year, month.ToString("00"));
         }
+
+        #endregion
+
+        #region Admin URLs
+
+        private const string ADD_CHILD_PAGE = "/admin/compose/page?parentId={0}";
+
+        public static string GetAddChildPageLink(int parentId)
+        {
+            return string.Format(ADD_CHILD_PAGE, parentId);
+        }
+
+        #endregion
 
         /// <summary>
         /// Registers the blog app's routes.
@@ -104,40 +167,61 @@ namespace Fan.Blog.Helpers
         /// <param name="routes"></param>
         public static void RegisterRoutes(IRouteBuilder routes)
         {
-            routes.MapRoute("Blog", "blog", new { controller = "Blog", action = "Index" });
+            // "blog"
+            routes.MapRoute("Blog", App.BLOG_APP_URL, new { controller = "Blog", action = "Index" });
 
+            // "rsd"
             routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
-            routes.MapRoute("BlogPostPerma", string.Format(POST_PERMA_URL_TEMPLATE, "{id}"),
+            // "blog/post/1"
+            routes.MapRoute("BlogPostPerma", string.Format(POST_PERMA_URL, "{id}"),
                new { controller = "Blog", action = "PostPerma", id = 0 }, new { id = @"^\d+$" });
 
-            routes.MapRoute("BlogPost", string.Format(POST_RELATIVE_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
+            // "post/2017/01/01/test-post"
+            routes.MapRoute("BlogPost", string.Format(POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
-            routes.MapRoute("BlogPreview", string.Format(PREVIEW_POST_RELATIVE_URL_TEMPLATE, "{year}", "{month}", "{day}", "{slug}"),
-                new { controller = "Blog", action = "Preview", year = 0, month = 0, day = 0, slug = "" },
+            // "preview/post/2017/01/01/test-post"
+            routes.MapRoute("BlogPreview", string.Format(PREVIEW_POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
+                new { controller = "Blog", action = "PreviewPost", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
-            // "posts/categorized/technology" shows posts in technology category
-            routes.MapRoute("BlogCategory", string.Format(CATEGORY_URL_TEMPLATE, "{slug}"),
+            // "posts/categorized/technology"
+            routes.MapRoute("BlogCategory", string.Format(CATEGORY_URL, "{slug}"),
                 new { controller = "Blog", action = "Category", slug = "" });
 
-            // "posts/tagged/cs" shows posts with c# tag
-            routes.MapRoute("BlogTag", string.Format(TAG_URL_TEMPLATE, "{slug}"),
+            // "posts/tagged/cs" 
+            routes.MapRoute("BlogTag", string.Format(TAG_URL, "{slug}"),
                 new { controller = "Blog", action = "Tag", slug = "" });
 
-            // "posts/2017/12" shows posts from Dec 2017
-            routes.MapRoute("BlogArchive", string.Format(ARCHIVE_URL_TEMPLATE, "{year}", "{month}"),
+            // "posts/2017/12" 
+            routes.MapRoute("BlogArchive", string.Format(ARCHIVE_URL, "{year}", "{month}"),
                 new { controller = "Blog", action = "Archive", year = 0, month = 0 },
                 new { year = @"^\d+$", month = @"^\d+$" });
 
-            // "feed" shows main feed of blog
+            // "feed"
             routes.MapRoute("BlogFeed", "feed", new { controller = "Blog", action = "Feed" });
 
             // "posts/categorized/technology/feed"
-            routes.MapRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL_TEMPLATE, "{slug}"),
+            routes.MapRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL, "{slug}"),
                 new { controller = "Blog", action = "CategoryFeed", slug = "" });
+
+            // "preview/page/about"
+            routes.MapRoute("PagePreview", string.Format(PREVIEW_PARENT_RELATIVE_URL, "{parentSlug}"),
+                new { controller = "Blog", action = "PreviewPage", parentSlug = "" });
+
+            // "preview/page/about/ray"
+            routes.MapRoute("ChildPagePreview", string.Format(PREVIEW_PARENT_CHILD_RELATIVE_URL, "{parentSlug}", "{childSlug}"),
+                new { controller = "Blog", action = "PreviewPage", parentSlug = "", childSlug = "" });
+
+            // "about"
+            routes.MapRoute("Page", "{parentPage}",
+                defaults: new { controller = "Blog", action = "Page", parentPage = "" });
+
+            // "about/ray"
+            routes.MapRoute("ChildPage", "{parentPage}/{childPage}",
+                defaults: new { controller = "Blog", action = "Page", parentPage = "", childPage = "" });
         }
     }
 }

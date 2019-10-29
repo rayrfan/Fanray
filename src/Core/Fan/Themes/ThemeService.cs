@@ -1,7 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
 using Fan.Extensibility;
-using Fan.Settings;
 using Fan.Widgets;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -11,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static MoreLinq.Extensions.DistinctByExtension;
 
@@ -30,24 +28,16 @@ namespace Fan.Themes
         /// The directory that contains themes "Themes".
         /// </summary>
         public const string THEME_DIR = "Themes";
-        /// <summary>
-        /// A theme's folder can only contain alphanumeric, dash and underscore.
-        /// </summary>
-        public const string THEME_FOLDER_REGEX = @"^[a-zA-Z0-9-_]+$";
 
         private const string CACHE_KEY_INSTALLED_THEMES_MANIFESTS = "installed-theme-manifests";
         private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
 
-        private readonly ISettingService settingService;
-
-        public ThemeService(ISettingService settingService,
-            IHostingEnvironment hostingEnvironment,
+        public ThemeService(IHostingEnvironment hostingEnvironment,
             IDistributedCache distributedCache,
             IMetaRepository metaRepository,
             ILogger<ThemeService> logger)
             : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
-            this.settingService = settingService;
         }
 
         public override string ManifestName { get; } = THEME_MANIFEST;
@@ -143,6 +133,6 @@ namespace Fan.Themes
             });
         }
 
-        public override bool IsValidExtensionFolder(string folder) => new Regex(THEME_FOLDER_REGEX).IsMatch(folder);
+        public static string GetLayoutName(EPageLayout layout) => $"_Page{layout}";
     }
 }

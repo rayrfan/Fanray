@@ -8,7 +8,7 @@
 
 @section ComponentScripts {
     <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js"></script>
-    <partial name="_BlogMediaTemplate" />
+    <partial name="Shared/MediaTemplate" />
     <script>
         let mediaMixin = {
             data: function () {
@@ -16,7 +16,7 @@
                     images: @Html.Raw(Model.Data.ImagesJson),
                     count: @Model.ImageCount,
                     pageSize: @MediaModel.PAGE_SIZE,
-                    maxImageFileSize: @ImageService.MAX_FILE_SIZE,
+                    maxImageFileSize: @ImageService.Max_File_Size,
                     validFileTypes: @Html.Raw(ImageService.ValidFileTypesJson),
                     errFileType: '@ImageService.ERR_MSG_FILETYPE',
                     errFileSize: '@ImageService.ERR_MSG_FILESIZE',

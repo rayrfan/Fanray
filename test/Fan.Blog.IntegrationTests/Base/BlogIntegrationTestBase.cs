@@ -10,18 +10,8 @@ using System.Collections.Generic;
 namespace Fan.Blog.IntegrationTests.Base
 {
     /// <summary>
-    /// Base class for all blog integration tests.  It helps initialization of a in-memory based 
-    /// BlogDbContext as well as seeding initial blog data that some of the tests depend on.
+    /// Base class for all blog integration tests, it seeds initial blog data.
     /// </summary>
-    /// <remarks>
-    /// When it comes to test with an in-memory database, there are two choices, the 
-    /// EF Core In-Memory Database Provider (Microsoft.EntityFrameworkCore.InMemory)
-    /// or the SQLite Database Provider (Microsoft.EntityFrameworkCore.Sqlite) with the SQLite 
-    /// in-memory mode. However EF Core provider does not enforce any integrity like a relational 
-    /// database, for example, the Meta table cannot have duplicate keys, it doesn't enforce that.
-    /// 
-    /// For more info https://docs.microsoft.com/en-us/ef/core/miscellaneous/testing/index
-    /// </remarks>
     public class BlogIntegrationTestBase : IntegrationTestBase
     {
         // -------------------------------------------------------------------- Seed data
@@ -35,23 +25,25 @@ namespace Fan.Blog.IntegrationTests.Base
         public const string TAG2_SLUG = "cs";
 
         /// <summary>
-        /// Seeds 1 user.
+        /// Seeds 1 user and returns its id.
         /// </summary>
-        protected void SeedUser()
+        protected int Seed_1User()
         {
-            _db.Users.Add(Actor.User);
+            var user = Actor.User;
+            _db.Users.Add(user);
             _db.SaveChanges();
+            return user.Id;
         }
 
         /// <summary>
         /// Seeds 1 blog post associated with 1 category and 2 tags.
         /// </summary>
         /// <param name="db"></param>
-        protected void SeedTestPost()
+        protected void Seed_1BlogPost_with_1Category_2Tags()
         {
             _db.Set<Meta>().AddRange(GetMetas());
             _db.Users.Add(Actor.User);
-            _db.Set<Post>().Add(GetPost());
+            _db.Set<Post>().Add(GetBlogPost());
             _db.SaveChanges();
         }
 
@@ -61,11 +53,31 @@ namespace Fan.Blog.IntegrationTests.Base
         /// </summary>
         /// <param name="db"></param>
         /// <param name="numOfPosts"></param>
-        protected void SeedTestPosts(int numOfPosts)
+        protected void Seed_N_BlogPosts(int numOfPosts)
         {
             _db.Set<Meta>().AddRange(GetMetas());
             _db.Users.Add(Actor.User);
-            _db.Set<Post>().AddRange(GetPosts(numOfPosts));
+            _db.Set<Post>().AddRange(GetBlogPosts(numOfPosts));
+            _db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Seeds a published parent page and returns its id.
+        /// </summary>
+        /// <returns></returns>
+        protected int Seed_1Page()
+        {
+            _db.Users.Add(Actor.User);
+            var page = GetPage();
+            _db.Set<Post>().Add(page);
+            _db.SaveChanges();
+            return page.Id;
+        }
+
+        protected void Seed_2_Parents_With_1_Child_Each()
+        {
+            _db.Users.Add(Actor.User);
+            _db.Set<Post>().AddRange(GetPages());
             _db.SaveChanges();
         }
 
@@ -102,7 +114,8 @@ namespace Fan.Blog.IntegrationTests.Base
         {
             var metas = new List<Meta>
             {
-                new Meta { Id = 1, Key = "blogsettings.defaultcategoryid", Value = "1" }
+                new Meta { Id = 1, Key = "blogsettings.defaultcategoryid", Value = "1" },
+                new Meta { Id = 2, Key = "coresettings.timezoneid", Value = "UTC" },
             };
 
             return metas;
@@ -111,7 +124,7 @@ namespace Fan.Blog.IntegrationTests.Base
         /// <summary>
         /// Returns a post associated with 1 category and 2 tags.
         /// </summary>
-        private Post GetPost()
+        private Post GetBlogPost()
         {
             var cat = new Category { Slug = CAT_SLUG, Title = CAT_TITLE };
             var tag1 = new Tag { Slug = TAG1_SLUG, Title = TAG1_TITLE };
@@ -123,7 +136,6 @@ namespace Fan.Blog.IntegrationTests.Base
                 Category = cat,
                 UserId = Actor.ADMIN_ID,
                 CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
-                RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,
                 Type = EPostType.BlogPost,
@@ -143,7 +155,7 @@ namespace Fan.Blog.IntegrationTests.Base
         /// while odd number posts are published and tagged with tag1.
         /// </summary>
         /// <returns></returns>
-        private List<Post> GetPosts(int numOfPosts)
+        private List<Post> GetBlogPosts(int numOfPosts)
         {
             if (numOfPosts < 1) throw new ArgumentException("Param numOfPosts must be > 1");
 
@@ -160,7 +172,6 @@ namespace Fan.Blog.IntegrationTests.Base
                     Category = cat,
                     UserId = Actor.ADMIN_ID,
                     CreatedOn = new DateTimeOffset(new DateTime(2017, 01, i), new TimeSpan(-7, 0, 0)),
-                    RootId = null,
                     Title = $"Test Post #{i}",
                     Slug = $"{POST_SLUG}-{i}",
                     Type = EPostType.BlogPost,
@@ -185,5 +196,54 @@ namespace Fan.Blog.IntegrationTests.Base
 
             return list;
         }
+
+
+        private List<Post> GetPages()
+        {
+            var list = new List<Post>();
+            var parent1 = GetPage(1);
+            parent1.Id = 1;
+
+            var parent2 = GetPage(2);
+            parent2.Id = 2;
+
+            var child1 = GetPage(3);
+            child1.Id = 3;
+            child1.ParentId = 1;
+
+            var child2 = GetPage(4);
+            child2.Id = 4;
+            child2.ParentId = 2;
+
+            parent1.Nav = "- [[Test Page 1]] \n- [[Test Page 2]]";
+
+            list.Add(parent1);
+            list.Add(parent2);
+            list.Add(child1);
+            list.Add(child2);
+
+            return list;
+        }
+
+        /// <summary>
+        /// Returns a published parent page.
+        /// </summary>
+        /// <returns></returns>
+        private Post GetPage(int num = 1)
+        {
+            return new Post
+            {
+                Title = "Page" + num,
+                Slug = "page" + num,
+                Body = "<h1>Test Page</h1>",
+                BodyMark = "# Test Page",
+                UserId = Actor.ADMIN_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                ParentId = null,
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+            };
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Fan.Blog.Models;
 using Fan.Helpers;
+using System;
 using System.Collections.Generic;
 
 namespace Fan.Blog.Helpers
@@ -22,17 +23,11 @@ namespace Fan.Blog.Helpers
         /// </remarks>
         public static string SlugifyTaxonomy(string title, int maxlen, IEnumerable<string> existingSlugs = null)
         {
-            // if user input exceeds max len, we trim
-            if (title.Length > maxlen)
-            {
-                title = title.Substring(0, maxlen);
-            }
-
             // preserve # as s before format to slug
             title = title.Replace('#', 's');
 
             // make slug
-            var slug = Util.Slugify(title, randomCharCountOnEmpty: 6);
+            var slug = Util.Slugify(title, maxlen: maxlen, randomCharCountOnEmpty: 6);
 
             // make sure slug is unique
             slug = Util.UniquefySlug(slug, existingSlugs);
@@ -58,6 +53,18 @@ namespace Fan.Blog.Helpers
                     cfg.CreateMap<Page, Post>();
                 }).CreateMapper();
             }
+        }
+
+        /// <summary>
+        /// Returns a DateTimeOffset by appending current time to the given date string for example "2018-05-18".
+        /// </summary>
+        /// <param name="date">A date string for example "2018-05-18"</param>
+        /// <returns></returns>
+        public static DateTimeOffset GetCreatedOn(string date)
+        {
+            var dt = DateTimeOffset.Parse(date);
+            return new DateTimeOffset(dt.Year, dt.Month, dt.Day, DateTimeOffset.Now.Hour, DateTimeOffset.Now.Minute, DateTimeOffset.Now.Second,
+                DateTimeOffset.Now.Offset);
         }
     }
 }

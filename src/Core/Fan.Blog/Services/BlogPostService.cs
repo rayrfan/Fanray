@@ -5,10 +5,10 @@ using Fan.Blog.Events;
 using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
+using Fan.Blog.Validators;
 using Fan.Exceptions;
 using Fan.Helpers;
 using Fan.Settings;
-using Humanizer;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -23,32 +23,32 @@ using System.Threading.Tasks;
 
 namespace Fan.Blog.Services
 {
-    public partial class BlogPostService : IBlogPostService
+    public class BlogPostService : IBlogPostService
     {
-        private readonly IPostRepository _postRepo;
-        private readonly ISettingService _settingSvc;
-        private readonly IImageService _imageService;
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<BlogPostService> _logger;
-        private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
+        private readonly IPostRepository postRepository;
+        private readonly ISettingService settingService;
+        private readonly IImageService imageService;
+        private readonly IDistributedCache cache;
+        private readonly ILogger<BlogPostService> logger;
+        private readonly IMapper mapper;
+        private readonly IMediator mediator;
 
         public BlogPostService(
             ISettingService settingService,
             IImageService imageService,
-            IPostRepository postRepo,
+            IPostRepository postRepository,
             IDistributedCache cache,
             ILogger<BlogPostService> logger,
             IMapper mapper,
             IMediator mediator)
         {
-            _settingSvc = settingService;
-            _imageService = imageService;
-            _postRepo = postRepo;
-            _cache = cache;
-            _mapper = mapper;
-            _logger = logger;
-            _mediator = mediator;
+            this.settingService = settingService;
+            this.imageService = imageService;
+            this.postRepository = postRepository;
+            this.cache = cache;
+            this.mapper = mapper;
+            this.logger = logger;
+            this.mediator = mediator;
         }
 
         // -------------------------------------------------------------------- consts
@@ -68,8 +68,6 @@ namespace Fan.Blog.Services
         /// </summary>
         public const int EXCERPT_WORD_LIMIT = 55;
 
-        public const int TITLE_MAXLEN = 256;
-
         // -------------------------------------------------------------------- public methods 
 
         /// <summary>
@@ -83,29 +81,30 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> CreateAsync(BlogPost blogPost)
         {
             // validate
-            ValidatePost(blogPost);
+            if (blogPost == null) throw new ArgumentNullException(nameof(blogPost));
+            await blogPost.ValidateTitleAsync();
 
             // prep
-            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Create);
+            var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Create);
 
             // before create
-            await _mediator.Publish(new BlogPostBeforeCreate
+            await mediator.Publish(new BlogPostBeforeCreate
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles
             });
 
-            // create
-            await _postRepo.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            // create (post will get new id)
+            await postRepository.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
             {
-                await RemoveAllCacheAsync();
+                await RemoveBlogCacheAsync();
             }
 
             // after create
-            await _mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
+            await mediator.Publish(new BlogPostCreated { BlogPost = blogPost });
 
             return await GetAsync(post.Id);
         }
@@ -117,27 +116,29 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
         {
             // validate
-            ValidatePost(blogPost);
+            if (blogPost == null) throw new ArgumentNullException(nameof(blogPost));
+            await blogPost.ValidateTitleAsync();
 
             // prep
-            var post = await PrepPostAsync(blogPost, ECreateOrUpdate.Update);
+            var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // before update
-            await _mediator.Publish(new BlogPostBeforeUpdate
+            await mediator.Publish(new BlogPostBeforeUpdate
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
-                CurrentPost = await QueryPostAsync(blogPost.Id, EPostType.BlogPost),
+                CurrentPost = await QueryPostAsync(blogPost.Id),
             });
 
             // update
-            await _postRepo.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            await postRepository.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache 
-            await RemoveAllCacheAsync();
+            await RemoveBlogCacheAsync();
+            await RemoveSinglePostCacheAsync(post);
 
             // after update
-            await _mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
+            await mediator.Publish(new BlogPostUpdated { BlogPost = blogPost });
 
             return await GetAsync(post.Id);
         }
@@ -149,8 +150,10 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task DeleteAsync(int id)
         {
-            await _postRepo.DeleteAsync(id);
-            await RemoveAllCacheAsync();
+            var post = await GetAsync(id);
+            await postRepository.DeleteAsync(id);
+            await RemoveBlogCacheAsync();
+            await RemoveSinglePostCacheAsync(post);
         }
 
         /// <summary>
@@ -165,13 +168,13 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<BlogPost> GetAsync(int id)
         {
-            var post = await QueryPostAsync(id, EPostType.BlogPost);
-            if (post == null) throw new FanException("Blog post not found.");
-            return await GetBlogPostAsync(post);
+            var post = await QueryPostAsync(id);
+            return ConvertToBlogPost(post);
         }
 
         /// <summary>
         /// Returns a <see cref="BlogPost"/> by slug and date time, throws <see cref="FanException"/> if not found.
+        /// If the post is draft then it's considered not found.
         /// </summary>
         /// <param name="slug"></param>
         /// <param name="year"></param>
@@ -184,10 +187,22 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<BlogPost> GetAsync(string slug, int year, int month, int day)
         {
-            // todo caching
-            var post = await _postRepo.GetAsync(slug, year, month, day);
-            if (post == null) throw new FanException("Blog post not found.");
-            var blogPost = await GetBlogPostAsync(post);
+            Post post = null;
+            if (new DateTime(year, month, day).IsWithinDays(100))
+            {
+                var cacheKey = string.Format(BlogCache.KEY_POST, slug, year, month, day);
+                post = await cache.GetAsync(cacheKey, BlogCache.Time_SingplePost, async () =>
+                {
+                    return await postRepository.GetAsync(slug, year, month, day);
+                });
+            }
+            else
+            {
+                post = await postRepository.GetAsync(slug, year, month, day);
+            }
+
+            if (post == null) throw new FanException(EExceptionType.ResourceNotFound);
+            var blogPost = ConvertToBlogPost(post);
             blogPost = await PreRenderAsync(blogPost);
             return blogPost;
         }
@@ -211,7 +226,7 @@ namespace Fan.Blog.Services
             // cache only first page of the public site, not admin or rss
             if (query.PageIndex == 1 && cacheable)
             {
-                return await _cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_PostsIndex, async () =>
+                return await cache.GetAsync(BlogCache.KEY_POSTS_INDEX, BlogCache.Time_Posts_Index, async () =>
                 {
                     return await QueryPostsAsync(query);
                 });
@@ -234,7 +249,7 @@ namespace Fan.Blog.Services
             {
                 CategorySlug = categorySlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
+                PageSize = (await settingService.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -254,7 +269,7 @@ namespace Fan.Blog.Services
             {
                 TagSlug = tagSlug,
                 PageIndex = (pageIndex <= 0) ? 1 : pageIndex,
-                PageSize = (await _settingSvc.GetSettingsAsync<BlogSettings>()).PostPerPage,
+                PageSize = (await settingService.GetSettingsAsync<BlogSettings>()).PostPerPage,
             };
 
             return await QueryPostsAsync(query);
@@ -291,7 +306,7 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Returns specified number of <see cref="BlogPost"/> used by metaweblog.
+        /// Returns specific number of <see cref="BlogPost"/> used by metaweblog.
         /// </summary>
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         public async Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts)
@@ -301,24 +316,54 @@ namespace Fan.Blog.Services
             return await QueryPostsAsync(query);
         }
 
+        /// <summary>
+        /// Returns spcific number of published <see cref="BlogPost"/>.
+        /// </summary>
+        /// <param name="numberOfPosts"></param>
+        /// <returns></returns>
+        public async Task<BlogPostList> GetRecentPublishedPostsAsync(int numberOfPosts)
+        {
+            return await cache.GetAsync(BlogCache.KEY_POSTS_RECENT, BlogCache.Time_Posts_Recent, async () =>
+            {
+                var query = new PostListQuery(EPostListQueryType.BlogPublishedPostsByNumber)
+                {
+                    PageSize = numberOfPosts <= 0 ? 1 : numberOfPosts
+                };
+
+                return await QueryPostsAsync(query);
+            });
+        }
+
+        /// <summary>
+        /// Invalidates cache for blog post service.
+        /// </summary>
+        public async Task RemoveBlogCacheAsync()
+        {
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_RECENT);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
+            await cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+        }
+
         // -------------------------------------------------------------------- private methods 
 
         /// <summary>
         /// Returns a <see cref="Post"/> from data source, throws <see cref="FanException"/> if not found.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="type"></param>
+        /// <param name="id">A blog post id.</param>
         /// <returns></returns>
         /// <remarks>
-        /// This returns Post not a BlogPost, which would maintain tracking for <see cref="PrepPostAsync(BlogPost, string)"/>.
+        /// Returned post is tracked.
         /// </remarks>
-        private async Task<Post> QueryPostAsync(int id, EPostType type)
+        private async Task<Post> QueryPostAsync(int id)
         {
-            var post = await _postRepo.GetAsync(id, type);
+            var post = await postRepository.GetAsync(id, EPostType.BlogPost);
 
             if (post == null)
             {
-                throw new FanException($"{type} with id {id} is not found.");
+                throw new FanException($"Blog post with id {id} is not found.");
             }
 
             return post;
@@ -331,15 +376,15 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         private async Task<BlogPostList> QueryPostsAsync(PostListQuery query)
         {
-            var (posts, totalCount) = await _postRepo.GetListAsync(query);
+            var (posts, totalCount) = await postRepository.GetListAsync(query);
 
             var blogPostList = new BlogPostList
             {
-                PostCount = totalCount
+                TotalPostCount = totalCount
             };
             foreach (var post in posts)
             {
-                var blogPost = await GetBlogPostAsync(post);
+                var blogPost = ConvertToBlogPost(post);
                 blogPost = await PreRenderAsync(blogPost);
                 blogPostList.Posts.Add(blogPost);
             }
@@ -348,32 +393,15 @@ namespace Fan.Blog.Services
         }
 
         /// <summary>
-        /// Validates a blog post and throws exception if validation fails.
-        /// </summary>
-        /// <param name="blogPost"></param>
-        /// <returns></returns>
-        private void ValidatePost(BlogPost blogPost)
-        {
-            // validate
-            var errMsg = "";
-            if (blogPost == null) errMsg = "Invalid blog post.";
-            else if (blogPost.Status != EPostStatus.Draft && blogPost.Title.IsNullOrEmpty()) errMsg = "Blog post title cannot be empty.";
-            else if (!blogPost.Title.IsNullOrEmpty() && blogPost.Title.Length > TITLE_MAXLEN) errMsg = $"Blog post title cannot exceed {TITLE_MAXLEN} chars.";
-            if (!errMsg.IsNullOrEmpty()) throw new FanException(errMsg);
-        }
-
-        /// <summary>
         /// Prepares a <see cref="BlogPost"/> into Post for create or update.
         /// </summary>
         /// <param name="blogPost">The incoming post with user data.</param>
         /// <param name="createOrUpdate">User is doing either a create or update post.</param>
         /// <returns></returns>
-        private async Task<Post> PrepPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
+        private async Task<Post> ConvertToPostAsync(BlogPost blogPost, ECreateOrUpdate createOrUpdate)
         {
             // Get post
-            // NOTE: can't use this.GetPostAsync(blogPost.Id) as it returns a BlogPost not a Post which would lose tracking
-            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id, EPostType.BlogPost);
-            //var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            var post = (createOrUpdate == ECreateOrUpdate.Create) ? new Post() : await QueryPostAsync(blogPost.Id);
 
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create)
@@ -381,9 +409,17 @@ namespace Fan.Blog.Services
                 // post time will be min value if user didn't set a time
                 post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? DateTimeOffset.UtcNow : blogPost.CreatedOn.ToUniversalTime();
             }
-            else if (post.CreatedOn != blogPost.CreatedOn) // user changed in post time
+            else 
             {
-                post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
+                // TODO Add a time picker on the composer
+
+                // get post.CreatedOn in local time
+                var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+                var postCreatedOnLocal = post.CreatedOn.ToLocalTime(coreSettings.TimeZoneId);
+
+                // user changed the post time 
+                if (!postCreatedOnLocal.YearMonthDayEquals(blogPost.CreatedOn))
+                    post.CreatedOn = (blogPost.CreatedOn <= DateTimeOffset.MinValue) ? post.CreatedOn : blogPost.CreatedOn.ToUniversalTime();
             }
 
             // UpdatedOn (DraftSavedOn)
@@ -410,7 +446,7 @@ namespace Fan.Blog.Services
             post.Status = blogPost.Status;
             post.CommentStatus = blogPost.CommentStatus;
 
-            _logger.LogDebug(createOrUpdate + " {@Post}", post);
+            logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
 
@@ -422,23 +458,9 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// It readies <see cref="Post.CreatedOnDisplay"/>, Title, Excerpt, CategoryTitle, Tags and Body with shortcodes.
         /// </remarks>
-        private async Task<BlogPost> GetBlogPostAsync(Post post)
+        private BlogPost ConvertToBlogPost(Post post)
         {
-            var blogPost = _mapper.Map<Post, BlogPost>(post);
-            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-
-            // Friendly post time if the post was published within 2 days
-            // else show the actual date time in setting's timezone
-            blogPost.CreatedOnDisplay = (DateTimeOffset.UtcNow.Day - blogPost.CreatedOn.Day) > 2 ?
-                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).ToString("dddd, MMMM dd, yyyy") :
-                Util.ConvertTime(blogPost.CreatedOn, coreSettings.TimeZoneId).Humanize();
-
-            if (blogPost.UpdatedOn.HasValue)
-            {
-                blogPost.UpdatedOnDisplay =
-                    Util.ConvertTime(blogPost.UpdatedOn.Value, coreSettings.TimeZoneId).ToString("MM/dd/yyyy");
-            }
+            var blogPost = mapper.Map<Post, BlogPost>(post);
 
             // Title
             blogPost.Title = WebUtility.HtmlDecode(blogPost.Title); // since OLW encodes it, we decode it here
@@ -456,7 +478,10 @@ namespace Fan.Blog.Services
                 blogPost.TagTitles.Add(postTag.Tag.Title);
             }
 
-            _logger.LogDebug("Show {@BlogPost}", blogPost);
+            // ViewCount
+            blogPost.ViewCount = post.ViewCount;
+
+            logger.LogDebug("Show {@BlogPost}", blogPost);
             return blogPost;
         }
 
@@ -477,51 +502,39 @@ namespace Fan.Blog.Services
         /// </remarks>
         internal async Task<string> GetBlogPostSlugAsync(string input, DateTimeOffset createdOn, ECreateOrUpdate createOrUpdate, int blogPostId)
         {
-            // when user manually inputted a slug, it could exceed max len
-            if (input.Length > TITLE_MAXLEN)
-            {
-                input = input.Substring(0, TITLE_MAXLEN);
-            }
-
             // make slug
-            var slug = Util.Slugify(input, randomCharCountOnEmpty: 8);
+            var slug = Util.Slugify(input, maxlen: PostTitleValidator.TITLE_MAXLEN, randomCharCountOnEmpty: 8);
 
             // make sure slug is unique
             int i = 2;
             if (createOrUpdate == ECreateOrUpdate.Create) // create
             {
-                while (await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
+                while (await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day) != null)
                 {
                     slug = Util.UniquefySlug(slug, ref i);
                 }
             }
             else // update
             {
-                var p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
+                var p = await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 while (p != null && p.Id != blogPostId)
                 {
                     slug = Util.UniquefySlug(slug, ref i);
-                    p = await _postRepo.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
+                    p = await postRepository.GetAsync(slug, createdOn.Year, createdOn.Month, createdOn.Day);
                 }
             }
 
             return slug;
         }
 
-        /// <summary>
-        /// Remove all cached objects for blog.
-        /// </summary>
-        private async Task RemoveAllCacheAsync()
+        private async Task RemoveSinglePostCacheAsync(Post post)
         {
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_ARCHIVES);
-            await _cache.RemoveAsync(BlogCache.KEY_POST_COUNT);
+            var cacheKey = string.Format(BlogCache.KEY_POST, post.Slug, post.CreatedOn.Year, post.CreatedOn.Month, post.CreatedOn.Day);
+            await cache.RemoveAsync(cacheKey);
         }
 
         /// <summary>
-        /// Pre render processing of a blog post.
+        /// Pre render processing of a blog post. TODO consider refactor.
         /// </summary>
         /// <param name="blogPost"></param>
         /// <returns></returns>
@@ -530,7 +543,7 @@ namespace Fan.Blog.Services
             if (blogPost == null) return blogPost;
 
             blogPost.Body = OembedParser.Parse(blogPost.Body);
-            blogPost.Body = await _imageService.ProcessResponsiveImageAsync(blogPost.Body);
+            blogPost.Body = await imageService.ProcessResponsiveImageAsync(blogPost.Body);
 
             return blogPost;
         }

@@ -25,6 +25,15 @@ namespace Fan.UnitTests.Helpers
             Assert.Equal(expected, Util.Slugify(title));
         }
 
+        [Theory]
+        [InlineData("h12", 1, "h")]
+        [InlineData("h 2", 3, "h-2")]
+        [InlineData("h 21", 3, "h-2")]
+        public void Slugify_has_maxlen(string title, int maxlen, string expected)
+        {
+            Assert.Equal(expected, Util.Slugify(title, maxlen: maxlen));
+        }
+
         /// <summary>
         /// Test for <see cref="Util.GetExcerpt(string, int)"/> method.
         /// TODO should have a performance test on GetExcerpt.
@@ -34,6 +43,8 @@ namespace Fan.UnitTests.Helpers
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5 words.", 6)]
         [InlineData("<p>A body more than 5 words.</p>", "A body more than 5…", 5)]
         [InlineData("<p></p>", "", 55)]
+        [InlineData("<script></script>", "", 55)]
+        [InlineData("&lt;script&gt;&lt;/script&gt;", "", 55)]
         public void GetExcerpt_returns_a_string_excerpt_from_a_given_html(string body, string expected, int wordLimit)
         {
             Assert.Equal(expected, Util.GetExcerpt(body, wordLimit));
@@ -59,7 +70,7 @@ namespace Fan.UnitTests.Helpers
 
             // the user wants to see the actual post time in his own timezone
             // Util.ConvertTime returns him that
-            var displayToUser = Util.ConvertTime(createdOn, coreSettings.TimeZoneId);
+            var displayToUser = createdOn.ToLocalTime(coreSettings.TimeZoneId);
             // https://en.wikipedia.org/wiki/Pacific_Time_Zone
             // Pacific Time Zone observes standard time by subtracting eight hours from Coordinated Universal Time (UTC−8). 
             // During daylight saving time, a time offset of UTC−7 is used.

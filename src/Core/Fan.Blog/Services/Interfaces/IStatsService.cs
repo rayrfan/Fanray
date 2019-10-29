@@ -1,4 +1,5 @@
-﻿using Fan.Blog.Models;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,5 +19,10 @@ namespace Fan.Blog.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<PostCount> GetPostCountAsync();
+
+        /// <summary>
+        /// Increases post view count.
+        /// </summary>
+        Task IncViewCountAsync(EPostType postType, int postId);
     }
 }

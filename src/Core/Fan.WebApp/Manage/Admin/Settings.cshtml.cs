@@ -14,15 +14,15 @@ namespace Fan.WebApp.Manage.Admin
 {
     public class SettingsModel : PageModel
     {
-        private readonly ISettingService _settingSvc;
-        private readonly IBlogPostService _blogSvc;
+        private readonly ISettingService settingService;
+        private readonly IBlogPostService blogService;
 
         public SettingsModel(
              IBlogPostService blogService,
             ISettingService settingService)
         {
-            _blogSvc = blogService;
-            _settingSvc = settingService;
+            this.blogService = blogService;
+            this.settingService = settingService;
         }
 
         public string TimeZoneId { get; set; }
@@ -39,8 +39,8 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task OnGetAsync()
         {
-            CoreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            BlogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            CoreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            BlogSettings = await settingService.GetSettingsAsync<BlogSettings>();
 
             TimeZones = new List<SelectListItem>();
             foreach (var tz in TimeZoneInfo.GetSystemTimeZones())
@@ -64,14 +64,14 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task<IActionResult> OnPostSiteSettingsAsync([FromBody] CoreSettings model)
         {
-            var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            var settings = await settingService.GetSettingsAsync<CoreSettings>();
 
             settings.Title = model.Title;
             settings.Tagline = model.Tagline;
             settings.TimeZoneId = model.TimeZoneId;
             settings.GoogleAnalyticsTrackingID = model.GoogleAnalyticsTrackingID;
 
-            await _settingSvc.UpsertSettingsAsync(settings);
+            await settingService.UpsertSettingsAsync(settings);
             return new JsonResult(true);
         }
 
@@ -82,14 +82,15 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task<IActionResult> OnPostBlogSettingsAsync([FromBody] BlogSettings model)
         {
-            var settings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            var settings = await settingService.GetSettingsAsync<BlogSettings>();
 
             settings.PostListDisplay = model.PostListDisplay;
             settings.PostPerPage = model.PostPerPage;
             settings.DisqusShortname = model.DisqusShortname;
             settings.AllowComments = model.AllowComments;
 
-            await _settingSvc.UpsertSettingsAsync(settings);
+            await settingService.UpsertSettingsAsync(settings);
+            await blogService.RemoveBlogCacheAsync();
             return new JsonResult(true);
         }
     }

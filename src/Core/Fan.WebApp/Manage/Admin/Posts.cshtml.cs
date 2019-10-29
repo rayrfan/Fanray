@@ -1,5 +1,7 @@
 ﻿using Fan.Blog.Helpers;
 using Fan.Blog.Services.Interfaces;
+using Fan.Helpers;
+using Fan.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -12,23 +14,25 @@ namespace Fan.WebApp.Manage.Admin
 {
     public class PostsModel : PageModel
     {
-        // -------------------------------------------------------------------- Constructor
+        private readonly IBlogPostService blogPostService;
+        private readonly IStatsService statsService;
+        private readonly ISettingService settingService;
 
-        private readonly IBlogPostService _blogSvc;
-        private readonly IStatsService _statsSvc;
-
-        public PostsModel(IBlogPostService blogService, IStatsService statsService)
+        public PostsModel(IBlogPostService blogPostService, 
+            IStatsService statsService,
+            ISettingService settingService)
         {
-            _blogSvc = blogService;
-            _statsSvc = statsService;
+            this.blogPostService = blogPostService;
+            this.statsService = statsService;
+            this.settingService = settingService;
         }
-
-        // -------------------------------------------------------------------- Consts & Properties
 
         /// <summary>
         /// For post data table footer pagination.
         /// </summary>
         public const string DEFAULT_ROW_PER_PAGE_ITEMS = "[25, 50]";
+
+        public const string POST_DATE_STRING_FORMAT = "yyyy-MM-dd";
 
         /// <summary>
         /// The json data to initially bootstrap page.
@@ -45,36 +49,12 @@ namespace Fan.WebApp.Manage.Admin
         /// </remarks>
         public string ActiveStatus { get; set; }
 
-        // -------------------------------------------------------------------- Helper Classes
-
-        public class PostListVM
-        {
-            public IEnumerable<PostVM> Posts {get;set;}
-            public int TotalPosts { get; set; }
-            public int PublishedCount { get; set; }
-            public int DraftCount { get; set; }
-
-            public string JsonPosts => Posts == null ? "" : JsonConvert.SerializeObject(Posts);
-        }
-
-        public class PostVM
-        {
-            public int Id { get; set; }
-            public string Title { get; set; }
-            public string Date { get; set; }
-            public string Author { get; set; }
-            public string EditLink { get; set; }
-            public string PostLink { get; set; }
-        }
-
-        // -------------------------------------------------------------------- Public Methods
-
         /// <summary>
         /// GET initial page.
         /// </summary>
         public async Task OnGetAsync(string status = "published")
         {
-            Data = await GetPostListVmAsync(status, pageNumber: 1, pageSize: 25);
+            Data = await GetPostListVMAsync(status, pageNumber: 1, pageSize: 25);
             ActiveStatus = status;
         }
 
@@ -86,7 +66,7 @@ namespace Fan.WebApp.Manage.Admin
         /// </remarks>
         public async Task<JsonResult> OnGetPostsAsync(string status, int pageNumber, int pageSize)
         {
-            var list = await GetPostListVmAsync(status, pageNumber, pageSize);
+            var list = await GetPostListVMAsync(status, pageNumber, pageSize);
             return new JsonResult(list);
         }
 
@@ -100,12 +80,10 @@ namespace Fan.WebApp.Manage.Admin
         /// <returns></returns>
         public async Task<JsonResult> OnDeleteAsync(int postId, string status, int pageNumber, int pageSize)
         {
-            await _blogSvc.DeleteAsync(postId);
-            var list = await GetPostListVmAsync(status, pageNumber, pageSize);
+            await blogPostService.DeleteAsync(postId);
+            var list = await GetPostListVMAsync(status, pageNumber, pageSize);
             return new JsonResult(list);
         }
-
-        // -------------------------------------------------------------------- Private Methods
 
         /// <summary>
         /// Returns posts, total posts and post statuses.
@@ -117,33 +95,57 @@ namespace Fan.WebApp.Manage.Admin
         /// <remarks>
         /// I did a workaround for tabs, couldn't get "statuses" to work as the tab is not initially selected.
         /// </remarks>
-        private async Task<PostListVM> GetPostListVmAsync(string status, int pageNumber, int pageSize)
+        private async Task<PostListVM> GetPostListVMAsync(string status, int pageNumber, int pageSize)
         {
             var postList = status.Equals("published", StringComparison.InvariantCultureIgnoreCase) ?
-                await _blogSvc.GetListAsync(pageNumber, pageSize, cacheable: false) :
-                await _blogSvc.GetListForDraftsAsync(); // TODO drafts need pagination too
+                await blogPostService.GetListAsync(pageNumber, pageSize, cacheable: false) :
+                await blogPostService.GetListForDraftsAsync(); // TODO drafts need pagination too
 
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
             var postVms = from p in postList.Posts
                           select new PostVM
                           {
                               Id = p.Id,
                               Title = p.Title,
-                              Date = p.CreatedOn.ToString("yyyy-MM-dd"),
+                              Date = p.CreatedOn.ToLocalTime(coreSettings.TimeZoneId).ToString(POST_DATE_STRING_FORMAT),
                               Author = p.User.DisplayName,
+                              Category = p.CategoryTitle,
                               EditLink = BlogRoutes.GetPostEditLink(p.Id),
                               PostLink = $"{Request.Scheme}://{Request.Host}" + BlogRoutes.GetPostRelativeLink(p.CreatedOn, p.Slug),
+                              ViewCount = p.ViewCount,
                           };
 
-            var postCount = await _statsSvc.GetPostCountAsync();
+            var postCount = await statsService.GetPostCountAsync();
 
             // prep vm
             return new PostListVM
             {
                 Posts = postVms,
-                TotalPosts = postList.PostCount,
+                TotalPosts = postList.TotalPostCount,
                 PublishedCount = postCount.Published,
                 DraftCount = postCount.Draft,
             };
         }
+    }
+
+    public class PostListVM
+    {
+        public IEnumerable<PostVM> Posts { get; set; }
+        public int TotalPosts { get; set; }
+        public int PublishedCount { get; set; }
+        public int DraftCount { get; set; }
+        public string JsonPosts => Posts == null ? "" : JsonConvert.SerializeObject(Posts);
+    }
+
+    public class PostVM
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Date { get; set; }
+        public string Author { get; set; }
+        public string Category { get; set; }
+        public string EditLink { get; set; }
+        public string PostLink { get; set; }
+        public int ViewCount { get; set; }
     }
 }

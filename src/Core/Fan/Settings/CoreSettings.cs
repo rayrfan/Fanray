@@ -1,4 +1,6 @@
-﻿namespace Fan.Settings
+﻿using Fan.Navigation;
+
+namespace Fan.Settings
 {
     /// <summary>
     /// Core settings for the site.
@@ -40,5 +42,10 @@
         /// Has the setup happened, true will let system skip setup, false will forward to setup page.
         /// </summary>
         public bool SetupDone { get; set; } = false;
+
+        /// <summary>
+        /// Home page of the site. Default to blog app.
+        /// </summary>
+        public Nav Home { get; set; } = new Nav { Id = App.BLOG_APP_ID, Type = ENavType.App };
     }
 }

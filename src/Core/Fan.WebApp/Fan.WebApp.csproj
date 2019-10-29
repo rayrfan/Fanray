@@ -6,16 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.1.0" />
-    <PackageReference Include="Markdig" Version="0.17.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
-    <PackageReference Include="Scrutor" Version="3.0.2" />
-    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.1" />
-    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.3" />
+    <PackageReference Include="Scrutor" Version="3.1.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.4" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="4.0.0" />
@@ -23,12 +22,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Plugins\ForkMeRibbon\ForkMeRibbon.csproj" />
-    <ProjectReference Include="..\..\Plugins\Shortcodes\Shortcodes.csproj" />
     <ProjectReference Include="..\..\SysPlugins\Editor.md\Editor.md.csproj" />
+    <ProjectReference Include="..\..\SysPlugins\Shortcodes\Shortcodes.csproj" />
     <ProjectReference Include="..\..\Themes\Clarity\Clarity.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogArchives\BlogArchives.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogCategories\BlogCategories.csproj" />
     <ProjectReference Include="..\..\Widgets\BlogTags\BlogTags.csproj" />
+    <ProjectReference Include="..\..\Widgets\PageNavigation\PageNavigation.csproj" />
     <ProjectReference Include="..\..\Widgets\RecentBlogPosts\RecentBlogPosts.csproj" />
     <ProjectReference Include="..\..\Widgets\SocialIcons\SocialIcons.csproj" />
     <ProjectReference Include="..\Fan.Web\Fan.Web.csproj" />

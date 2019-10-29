@@ -5,6 +5,7 @@ using Fan.Helpers;
 using Fan.Medias;
 using Fan.Settings;
 using HtmlAgilityPack;
+using Humanizer;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -58,7 +59,8 @@ namespace Fan.Blog.Services
         /// <summary>
         /// Max image file size is 5MB.
         /// </summary>
-        public const long MAX_FILE_SIZE = 5 * ByteSize.BytesInMegaByte;
+        public static readonly long Max_File_Size = (long)(5).Megabytes().Bytes;
+
 
         /// <summary>
         /// Error message for valid file types.
@@ -285,7 +287,7 @@ namespace Fan.Blog.Services
             }
 
             // check file size
-            if (source.Length > MAX_FILE_SIZE)
+            if (source.Length > Max_File_Size)
             {
                 throw new FanException(ERR_MSG_FILESIZE);
             }
@@ -337,7 +339,7 @@ namespace Fan.Blog.Services
 
                 return changed ? doc.DocumentNode.OuterHtml : body;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return body;
             }

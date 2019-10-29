@@ -14,7 +14,7 @@ namespace Fan.Blog.UnitTests.Services
     /// <summary>
     /// Unit tests for <see cref="TagService"/>.
     /// </summary>
-    public class TagServiceTest : BlogServiceUnitTestBase
+    public class TagServiceTest : BlogUnitTestBase
     {
         /// <summary>
         /// Setting up existing tags.
@@ -58,15 +58,12 @@ namespace Fan.Blog.UnitTests.Services
         [Fact]
         public async void CreateTag_Throws_FanException_If_Title_Already_Exist()
         {
-            // Arrange: a category with a title that exists
-            var tag = new Tag { Title = "Technology" };
-
-            // Act and Assert: when we create it, we get exception
-            await Assert.ThrowsAsync<FanException>(() => _tagSvc.CreateAsync(tag));
-
-            // Act and Assert: error message
             try
             {
+                // Arrange: a category with a title that exists
+                var tag = new Tag { Title = "Technology" };
+
+                // Act and Assert: error message
                 await _tagSvc.CreateAsync(tag);
             }
             catch (FanException ex)

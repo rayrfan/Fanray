@@ -8,7 +8,7 @@
         blogSettings.CommentProvider == ECommentProvider.Disqus && !blogSettings.DisqusShortname.IsNullOrEmpty();
 }
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>@title</title>
     <link rel="shortcut icon" href="/favicon.ico">
@@ -34,14 +34,7 @@
     <vc:header />
     <vc:cookie-consent />
     <main role="main" class="container">
-        <div class="row">
-            <div class="col-md-9 blog-main">
-                @RenderBody()
-            </div>
-            <aside class="col-md-3">
-                <widget-area id="blog-sidebar1" />
-            </aside>
-        </div>
+        @RenderBody()
     </main>
     <vc:footer />
     <plugin-area id="FootContent" />

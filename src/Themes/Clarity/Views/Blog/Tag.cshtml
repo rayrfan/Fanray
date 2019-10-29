@@ -1,6 +1,7 @@
-@model BlogPostListViewModel
+@model BlogPostListVM
 
 @{
+    Layout = "_BlogPostLayout";
     var tagTitle = Model.TagTitle;
     var posts = Model.BlogPostViewModels;
     ViewData["Title"] = $"Latest '{tagTitle}' Posts";
@@ -20,7 +21,10 @@
             @await Html.PartialAsync("_PostInfo", post)
         </header>
         <div class="post-body">
-            @Html.Raw(post.Excerpt) <span style="padding-left:5px"><a href="@post.RelativeLink">Read More</a></span>
+            @Html.Raw(post.Excerpt)
+            <div class="read-more">
+                <a href="@post.RelativeLink">Read More</a>
+            </div>
         </div>
     </article>
 }

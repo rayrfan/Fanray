@@ -1,5 +1,4 @@
 ﻿using Fan.Data;
-using Fan.Exceptions;
 using Fan.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Fan.Plugins
@@ -31,13 +29,6 @@ namespace Fan.Plugins
         /// The system plugin directory, "SysPlugins".
         /// </summary>
         public const string SYS_PLUGIN_DIR = "SysPlugins";
-        /// <summary>
-        /// A plugin's folder allows "a-zA-Z", "_", "-", "." and numbers.
-        /// </summary>
-        /// <remarks>
-        /// https://stackoverflow.com/a/2988351/32240
-        /// </remarks>
-        public const string PLUGIN_FOLDER_REGEX = @"[\w.-]";
 
         private const string CACHE_KEY_PLUGIN_MANIFESTS = "plugin-manifests";
         private TimeSpan Cache_Time_Plugin_Manifests = new TimeSpan(0, 10, 0);
@@ -61,7 +52,8 @@ namespace Fan.Plugins
         /// <param name="folder">The key of the plugin.</param>
         /// <returns>Id of the plugin.</returns>
         /// <remarks>
-        /// It upserts a plugin meta and makes sure Active is true.
+        /// It upserts a plugin meta and makes sure Active is true. SysPlugins also require activation 
+        /// when they first install.
         /// </remarks>
         public async Task<int> ActivatePluginAsync(string folder)
         {
@@ -69,8 +61,6 @@ namespace Fan.Plugins
 
             var manifests = await LoadManifestsAsync();
             var manifest = manifests.SingleOrDefault(m => m.Folder.ToUpperInvariant().Equals(folder.ToUpperInvariant()));
-            if (manifest.IsSysPlugin)
-                throw new FanException("A system plugin cannot be activated.");
 
             var meta = await GetPluginMetaAsync(folder);
             if (meta != null)
@@ -111,6 +101,7 @@ namespace Fan.Plugins
         /// <returns></returns>
         /// <remarks>
         /// De-activation removes plugin id from active-plugins but does not delete the plugin meta.
+        /// TODO should I check if plugin is SysPlugin and throw exception if it is
         /// </remarks>
         public async Task DeactivatePluginAsync(int id)
         {
@@ -128,6 +119,10 @@ namespace Fan.Plugins
         /// Returns a list of active plugins.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// TODO this implmentation makes the assumption all SysPlugins' Active property is set to 
+        /// true in database if for whatever reason its false, it won't be returned.
+        /// </remarks>
         public async Task<IEnumerable<Plugin>> GetActivePluginsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_ACTIVE_PLUGINS, Cache_Time_Active_Plugins, async () =>
@@ -224,13 +219,6 @@ namespace Fan.Plugins
 
             return plugin;
         }
-
-        /// <summary>
-        /// Returns true if plugin folder name is valid.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        public override bool IsValidExtensionFolder(string folder) => new Regex(PLUGIN_FOLDER_REGEX).IsMatch(folder);
 
         /// <summary>
         /// Upserts a plugin settings.

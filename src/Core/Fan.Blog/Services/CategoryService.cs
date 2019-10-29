@@ -5,6 +5,7 @@ using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Helpers;
+using Fan.Navigation;
 using Fan.Settings;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -21,26 +22,27 @@ namespace Fan.Blog.Services
     /// The blog category service.
     /// </summary>
     public class CategoryService : ICategoryService,
+                                   INavProvider,
                                    INotificationHandler<BlogPostBeforeCreate>,
                                    INotificationHandler<BlogPostBeforeUpdate>
     {
-        private readonly ICategoryRepository _catRepo;
-        private readonly ISettingService _settingSvc;
-        private readonly IMediator _mediator;
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<CategoryService> _logger;
+        private readonly ICategoryRepository categoryRepository;
+        private readonly ISettingService settingService;
+        private readonly IMediator mediator;
+        private readonly IDistributedCache cache;
+        private readonly ILogger<CategoryService> logger;
 
-        public CategoryService(ICategoryRepository catRepo,
+        public CategoryService(ICategoryRepository categoryRepository,
                                ISettingService settingService,
                                IMediator mediator,
                                IDistributedCache cache,
                                ILogger<CategoryService> logger)
         {
-            _catRepo = catRepo;
-            _settingSvc = settingService;
-            _mediator = mediator;
-            _cache = cache;
-            _logger = logger;
+            this.categoryRepository = categoryRepository;
+            this.settingService = settingService;
+            this.mediator = mediator;
+            this.cache = cache;
+            this.logger = logger;
         }
 
         // -------------------------------------------------------------------- const
@@ -68,7 +70,8 @@ namespace Fan.Blog.Services
             var cat = cats.SingleOrDefault(c => c.Id == id);
             if (cat == null)
             {
-                throw new FanException($"Category with id {id} is not found.");
+                throw new FanException(EExceptionType.ResourceNotFound, 
+                    $"Category with id {id} is not found.");
             }
 
             return cat;
@@ -81,13 +84,14 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task<Category> GetAsync(string slug)
         {
-            if (slug.IsNullOrEmpty()) throw new FanException("Category does not exist.");
+            if (slug.IsNullOrEmpty()) 
+                throw new FanException(EExceptionType.ResourceNotFound, "Category does not exist.");
 
             var cats = await GetAllAsync();
             var cat = cats.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (cat == null)
             {
-                throw new FanException($"Category '{slug}' does not exist.");
+                throw new FanException(EExceptionType.ResourceNotFound, $"Category '{slug}' does not exist.");
             }
 
             return cat;
@@ -104,8 +108,8 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<List<Category>> GetAllAsync()
         {
-            return await _cache.GetAsync(BlogCache.KEY_ALL_CATS, BlogCache.Time_AllCats, async () => {
-                return await _catRepo.GetListAsync();
+            return await cache.GetAsync(BlogCache.KEY_ALL_CATS, BlogCache.Time_AllCats, async () => {
+                return await categoryRepository.GetListAsync();
             });
         }
 
@@ -116,7 +120,7 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task SetDefaultAsync(int id)
         {
-            await _settingSvc.UpsertSettingsAsync(new BlogSettings
+            await settingService.UpsertSettingsAsync(new BlogSettings
             {
                 DefaultCategoryId = id,
             });
@@ -155,13 +159,13 @@ namespace Fan.Blog.Services
             };
 
             // create
-            category = await _catRepo.CreateAsync(category);
+            category = await categoryRepository.CreateAsync(category);
 
             // remove cache
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
-            _logger.LogDebug("Created {@Category}", category);
+            logger.LogDebug("Created {@Category}", category);
             return category;
         }
 
@@ -190,21 +194,24 @@ namespace Fan.Blog.Services
             }
 
             // prep slug, description and count
-            var entity = await _catRepo.GetAsync(category.Id);
+            var entity = await categoryRepository.GetAsync(category.Id);
             entity.Title = category.Title; // assign new title
             entity.Slug = BlogUtil.SlugifyTaxonomy(category.Title, SLUG_MAXLEN, allCats.Select(c => c.Slug)); // slug is based on title
             entity.Description = Util.CleanHtml(category.Description);
             entity.Count = category.Count;
 
             // update
-            await _catRepo.UpdateAsync(category);
+            await categoryRepository.UpdateAsync(category);
 
             // remove cache
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+
+            // raise nav updated event
+            await mediator.Publish(new NavUpdated { Id = category.Id, Type = ENavType.BlogCategory });
 
             // return entity
-            _logger.LogDebug("Updated {@Category}", entity);
+            logger.LogDebug("Updated {@Category}", entity);
             return entity;
         }
 
@@ -222,7 +229,7 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task DeleteAsync(int id)
         {
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
+            var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
 
             // on the UI there is no delete button on the default cat
             // therefore when there is only one category left, it'll be the default.
@@ -231,10 +238,24 @@ namespace Fan.Blog.Services
                 throw new FanException("Default category cannot be deleted.");
             }
 
-            await _catRepo.DeleteAsync(id, blogSettings.DefaultCategoryId);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            // delete
+            await categoryRepository.DeleteAsync(id, blogSettings.DefaultCategoryId);
+
+            // invalidate cache
+            await cache.RemoveAsync(BlogCache.KEY_ALL_CATS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+
+            // raise nav deleted event
+            await mediator.Publish(new NavDeleted { Id = id, Type = ENavType.BlogCategory });
         }
+
+        public bool CanProvideNav(ENavType type) => type == ENavType.BlogCategory;
+
+        public async Task<string> GetNavUrlAsync(int id)
+        {
+            var cat = await GetAsync(id);
+            return BlogRoutes.GetCategoryRelativeLink(cat.Slug);
+        }        
 
         // -------------------------------------------------------------------- event handlers
 
@@ -296,6 +317,6 @@ namespace Fan.Blog.Services
             title = Util.CleanHtml(title);
             title = title.Length > TITLE_MAXLEN ? title.Substring(0, TITLE_MAXLEN) : title;
             return title;
-        }
+        }      
     }
 }

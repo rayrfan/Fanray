@@ -10,6 +10,19 @@ using System;
 
 namespace Fan.IntegrationTests.Base
 {
+    /// <summary>
+    /// Base class for all integration tests, it provides the <see cref="FanDbContext"/> with 
+    /// in-memory database.
+    /// </summary>
+    /// <remarks>
+    /// When it comes to test with an in-memory database, there are two choices, the 
+    /// EF Core In-Memory Database Provider (Microsoft.EntityFrameworkCore.InMemory)
+    /// or the SQLite Database Provider (Microsoft.EntityFrameworkCore.Sqlite) with the SQLite 
+    /// in-memory mode. However EF Core provider does not enforce any integrity like a relational 
+    /// database, for example, the Meta table cannot have duplicate keys, it doesn't enforce that.
+    /// 
+    /// For more info https://docs.microsoft.com/en-us/ef/core/miscellaneous/testing/index
+    /// </remarks>
     public class IntegrationTestBase : IDisposable
     {
         /// <summary>
@@ -37,7 +50,7 @@ namespace Fan.IntegrationTests.Base
         }
 
         /// <summary>
-        /// Returns <see cref="CoreDbContext"/> with SQLite Database Provider in-memory mode.
+        /// Returns <see cref="FanDbContext"/> with SQLite Database Provider in-memory mode.
         /// </summary>
         private FanDbContext GetContextWithSqlite()
         {

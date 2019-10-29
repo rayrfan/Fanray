@@ -42,7 +42,7 @@ namespace Fan.IntegrationTests.Widgets
             var loggerThemeSvc = _loggerFactory.CreateLogger<ThemeService>();
 
             // theme service
-            themeService = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, loggerThemeSvc);
+            themeService = new ThemeService(env.Object, _cache, _metaRepo, loggerThemeSvc);
 
             _svc = new WidgetService(_metaRepo, themeService, _cache, settingSvcMock.Object, env.Object, loggerWidgetSvc);
         }

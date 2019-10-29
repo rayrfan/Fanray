@@ -29,6 +29,9 @@ namespace Editor.md
         /// </remarks>
         public string CodeMirrorTheme { get; set; } = "default";
 
+        public override string GetFootScriptsViewName() => "EditorMdScripts";
+        public override string GetStylesViewName() => "EditorMdStyles";
+
         /// <summary>
         /// EditorMd plugin's Settings URL.
         /// </summary>

@@ -18,11 +18,12 @@ using System.Threading.Tasks;
 namespace Fan.Blog.IntegrationTests.Base
 {
     /// <summary>
-    /// Blog integration test base.
+    /// Integration test base for blog services.
     /// </summary>
     public class BlogServiceIntegrationTestBase : BlogIntegrationTestBase
     {
-        protected IBlogPostService _blogSvc;
+        protected IBlogPostService _blogPostSvc;
+        protected IPageService _pageService;
         protected ICategoryService _catSvc;
         protected ITagService _tagSvc;
         protected IImageService _imgSvc;
@@ -71,7 +72,8 @@ namespace Fan.Blog.IntegrationTests.Base
             // ---------------------------------------------------------------- LoggerFactory
 
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            var loggerBlogSvc = loggerFactory.CreateLogger<BlogPostService>();
+            var loggerBlogPostSvc = loggerFactory.CreateLogger<BlogPostService>();
+            var loggerPageSvc = loggerFactory.CreateLogger<PageService>();
             var loggerCatSvc = loggerFactory.CreateLogger<CategoryService>();
             var loggerTagSvc = loggerFactory.CreateLogger<TagService>();
 
@@ -92,20 +94,13 @@ namespace Fan.Blog.IntegrationTests.Base
 
             var provider = services.BuildServiceProvider();
             var mediator = provider.GetRequiredService<IMediator>();
+            var mediatorMock = new Mock<IMediator>();
 
-            _catSvc = new CategoryService(catRepo, _settingSvcMock.Object, mediator, cache, loggerCatSvc);
-            _tagSvc = new TagService(tagRepo, mediator, cache, loggerTagSvc);
+            _catSvc = new CategoryService(catRepo, _settingSvcMock.Object, mediatorMock.Object, cache, loggerCatSvc);
+            _tagSvc = new TagService(tagRepo, cache, loggerTagSvc);
             _imgSvc = new ImageService(_mediaSvc, _storageProviderMock.Object, appSettingsMock.Object);
-
-            // the blog service
-            _blogSvc = new BlogPostService(
-                _settingSvcMock.Object, 
-                _imgSvc,
-                postRepo, 
-                cache, 
-                loggerBlogSvc, 
-                mapper, 
-                mediator);
+            _blogPostSvc = new BlogPostService(_settingSvcMock.Object, _imgSvc, postRepo, cache, loggerBlogPostSvc, mapper, mediator);
+            _pageService = new PageService(_settingSvcMock.Object, postRepo, cache, loggerPageSvc, mapper, mediatorMock.Object);
         }
     }
 }

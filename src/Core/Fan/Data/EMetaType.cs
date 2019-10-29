@@ -1,7 +1,7 @@
 ﻿namespace Fan.Data
 {
     /// <summary>
-    /// The different meta type.
+    /// The different meta types.
     /// </summary>
     public enum EMetaType
     {
@@ -22,12 +22,20 @@
         /// </summary>
         WidgetAreaByTheme = 3,
         /// <summary>
+        /// Widget settings and default values.
+        /// </summary>
+        WidgetSettings = 4,
+        /// <summary>
         /// A widget.
         /// </summary>
-        Widget = 4,
+        Widget = 5,
         /// <summary>
         /// A plugin.
         /// </summary>
-        Plugin = 5,
+        Plugin = 6,
+        /// <summary>
+        /// A navigation menu.
+        /// </summary>
+        Menu = 7,
     }
 }

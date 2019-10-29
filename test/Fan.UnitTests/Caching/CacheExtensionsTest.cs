@@ -67,15 +67,17 @@ namespace Fan.UnitTests.Caching
         {
             await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                var list = new StrList();
-                list.Add("test");
+                var list = new StrList
+                {
+                    "test"
+                };
                 list.TotalStrings = 1;
-                return list;
+                return await Task.FromResult(list);
             }, includeTypeName: true);
 
             var result = await _cache.GetAsync("strlist-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return new StrList();
+                return await Task.FromResult(new StrList());
             }, includeTypeName: true);
 
             Assert.Single(result);
@@ -94,12 +96,12 @@ namespace Fan.UnitTests.Caching
                 var list = new StrList2();
                 list.Strings.Add("test");
                 list.TotalStrings = 1;
-                return list;
+                return await Task.FromResult(list);
             });
 
             var result = await _cache.GetAsync("strlist2-cache-key", new TimeSpan(0, 10, 0), async () =>
             {
-                return new StrList2();
+                return await Task.FromResult(new StrList2());
             });
 
             Assert.Single(result.Strings);
@@ -116,7 +118,7 @@ namespace Fan.UnitTests.Caching
             // Given a company with 1 employee cached
             await _cache.GetAsync("company-key", new TimeSpan(0, 1, 0), async () =>
             {
-                return new Company
+                return await Task.FromResult(new Company
                 {
                     FullName = "Some Company",
                     Employees = new List<Person>
@@ -127,13 +129,13 @@ namespace Fan.UnitTests.Caching
                             Stars = 5
                         }
                     }
-                };
+                });
             }, includeTypeName: true);
 
             // When the company is accessed from cache again
             var result = await _cache.GetAsync("company-key", new TimeSpan(0, 1, 0), async () =>
             {
-                return new Company(); // won't be returned since a cached ver is available
+                return await Task.FromResult(new Company()); // won't be returned since a cached ver is available
             }, includeTypeName: true);
 
             // Then the derived type is returned

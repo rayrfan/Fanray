@@ -1,0 +1,121 @@
+﻿@page "{parentId:int?}"
+@model Fan.WebApp.Manage.Admin.PagesModel
+@{
+    ViewData["Title"] = "Pages";
+}
+
+@section Styles {
+    <style>
+        .child {
+            padding-left: 25px;
+        }
+
+        .btn-link {
+            color: #fff;
+            display: block;
+            padding-bottom: 2px;
+            padding-right: 8px;
+            text-decoration: none;
+        }
+    </style>
+}
+
+<pages inline-template>
+    <v-container>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-toolbar dense class="elevation-1 cat-tabs-bar" style="background-color: white">
+                    <v-toolbar-title style="font-size:100%">Pages</v-toolbar-title>
+                    <v-btn v-if="parentId > 0" href="/admin/pages" small icon><v-icon small>arrow_upward</v-icon></v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn v-if="parentId > 0" href="@Model.AddChildLink"
+                           small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Child Page</v-btn>
+                    <v-btn v-else href="/admin/compose/page"
+                           small color="pink" class="text-capitalize white--text"><v-icon small>add</v-icon> New Page</v-btn>
+                </v-toolbar>
+            </v-flex>
+        </v-layout>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-list two-line class="elevation-1">
+                    <template v-for="(page, index) in pages">
+                        <v-list-tile>
+                            <v-list-tile-content v-bind:class="{'child':(page.isChild)}">
+                                <h4 v-if="page.title">
+                                    <a class="post-title-link" :href="page.editLink">{{ page.title }}</a>
+                                </h4>
+                                <h4 v-else style="font-style:italic;color:gray">
+                                    <a class="post-title-link" :href="page.editLink">Untitled</a>
+                                </h4>
+                                <span style="font-size:smaller">
+                                    <v-icon small>access_time</v-icon> {{ page.date }} &nbsp;
+                                    <v-icon small>person</v-icon> {{ page.author }} &nbsp;
+                                    <v-icon small>remove_red_eye</v-icon> {{ page.viewCount }} &nbsp;
+                                </span>
+                            </v-list-tile-content>
+                            <v-spacer></v-spacer>
+                            <v-chip v-if="page.childCount > 0" small label text-color="white" color="blue" class="hidden-sm-and-down">
+                                <a class="btn-link" :href="page.childrenLink" v-if="page.childrenLink">
+                                    <v-icon small>arrow_right</v-icon> Child pages: {{ page.childCount }}
+                                </a>
+                                <span v-else>
+                                    Child pages: {{ page.childCount }}
+                                </span>
+                            </v-chip>
+                            <span v-if="page.isDraft" style="color: red;font-size:small;padding: 0 5px">Draft</span>
+                            <v-list-tile-action>
+                                <v-menu bottom left @@click.native.stop>
+                                    <v-btn slot="activator"
+                                           icon>
+                                        <v-icon>more_vert</v-icon>
+                                    </v-btn>
+                                    <v-list dense>
+                                        <v-list-tile v-if="!page.isChild" :href="`/admin/compose/page?parentId=${page.id}`">
+                                            <v-icon class="menu-action-icon">add</v-icon>
+                                            <v-list-tile-title>New Child Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile :href="page.editLink">
+                                            <v-icon class="menu-action-icon">edit</v-icon>
+                                            <v-list-tile-title>Edit Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="page.childCount > 0" :href="`/admin/compose/pagenav/${page.id}`">
+                                            <v-icon class="menu-action-icon">edit</v-icon>
+                                            <v-list-tile-title>Edit Navigation</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile :href="page.pageLink" v-if="page.pageLink">
+                                            <v-icon class="menu-action-icon">visibility</v-icon>
+                                            <v-list-tile-title>View Page</v-list-tile-title>
+                                        </v-list-tile>
+                                        <v-list-tile @@click="deletePage(page)">
+                                            <v-icon class="menu-action-icon">delete</v-icon>
+                                            <v-list-tile-title>Delete</v-list-tile-title>
+                                        </v-list-tile>
+                                    </v-list>
+                                </v-menu>
+                            </v-list-tile-action>
+                        </v-list-tile>
+                        <v-divider v-if="index + 1 < pages.length"
+                                   :key="index"></v-divider>
+                    </template>
+                    <template v-if="pages.length <= 0">
+                        <div style="padding:20px;font-style:italic">No pages!</div>
+                    </template>
+                </v-list>
+            </v-flex>
+        </v-layout>
+    </v-container>
+</pages>
+
+@section ComponentScripts {
+    <script>
+        let pagesMixin = {
+            data: function () {
+                return {
+                    pages: @Html.Raw(Model.PagesJson),
+                    parentId: @Model.ParentId,
+                }
+            }
+        }
+    </script>
+    <script src="~/admin/js/blog-pages.js" asp-append-version="true"></script>
+}

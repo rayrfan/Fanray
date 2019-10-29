@@ -1,5 +1,5 @@
 ﻿aside .widgets {
-    padding-top: 5rem;
+    padding-top: 3rem;
 }
 
 .blog-afterpost {
@@ -7,7 +7,6 @@
 }
 
 .widget {
-    /*border:1px red solid;*/
     font-size: .875rem;
     padding-bottom: 2rem;
 
@@ -28,10 +27,10 @@
         font-size: 1rem;
         padding: 0 1.5rem;
     }
-
+    /* TODO if widget body is not preceeded by a header, the its top padding should be 0 */
     .widget-body {
         background: rgba(255, 255, 255, 0.1);
-        padding: 1rem 1.5rem;
+        padding: 1rem 1.5rem 0 1.5rem;
         font-size: .875rem;
     }
 
@@ -57,9 +56,9 @@
         }
     }
 
-    @media screen and (max-width: 64rem) {
+    /*@media screen and (max-width: 64rem) {
         margin-bottom: 1rem;
-    }
+    }*/
 }
 
 /**
@@ -125,6 +124,10 @@
  * Recent Blog Posts Widget
  */
 .recent-blog-posts {
+    h2 {
+        margin-top: 0;
+    }
+
     h2 a {
         color: #222325;
     }
@@ -140,21 +143,22 @@
 
     .icon-user:before {
         font-size: small;
-        content: "by ";
+        //content: "by ";
     }
 
     .icon-calendar:before {
         font-size: small;
-        content: "on ";
+        //content: "on ";
     }
 }
 
 aside .recent-blog-posts {
-    padding: 0 6px 0 16px;
+    padding: 0 6px 0 0;
 
     h2 {
         font-weight: normal;
         line-height: 0.9;
+        margin-top: 0;
     }
 
     h2 a {
@@ -163,11 +167,12 @@ aside .recent-blog-posts {
     }
 
     li {
-        list-style: square;
+        list-style: none;
     }
 
     p {
-        font-size: smaller;
+        font-size: small;
+        margin: 0;
     }
 }
 
@@ -180,11 +185,11 @@ aside .recent-blog-posts {
     }
 
     h2 a {
-        font-size: 18px;
+        font-size: 17px;
     }
 
     p {
-        font-size: medium;
+        font-size: 14px;
     }
 }
 
@@ -203,5 +208,73 @@ aside .recent-blog-posts {
     .svg-icon:hover {
         cursor: pointer;
         filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
+    }
+}
+
+/**
+ * Page Navigation Widget
+ */
+
+.page-navigation {
+    ul li a {
+        color: gray;
+        text-decoration: none;
+        font-size: 0.92rem;
+    }
+
+    ul li a:hover {
+        color: $color-primary;
+    }
+
+    ul li {
+        padding: 5px 0 2px 0;
+        line-height: 1.3;
+    }
+
+    ul li ul li {
+        padding: 6px 0 0 20px;
+        line-height: 1.3;
+    }
+
+    ul > li {
+        margin-bottom: .1rem;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        padding: 10px 0 5px 0;
+        margin: 0;
+    }
+
+    h1 {
+        font-size: 1.35em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    h3 {
+        font-size: 1.1em;
+    }
+
+    h4 {
+        font-size: 1.0em;
+    }
+
+    h5 {
+        font-size: 0.9em;
+    }
+
+    h5 {
+        font-size: 0.8em;
+    }
+
+    h1 a, h2 a, h3 a, h4 a, h5 a, h6 a, a.page-nav-edit {
+        color: gray;
+        text-decoration: none;
+    }
+
+    h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover, a.page-nav-edit:hover {
+        color: $color-primary;
     }
 }

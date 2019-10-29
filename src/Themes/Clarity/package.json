@@ -8,6 +8,6 @@
     "scss:watch": "sass --watch client/scss:wwwroot/themes/clarity/css --style compressed"
   },
   "devDependencies": {
-    "sass": "1.22.1"
+    "sass": "1.23.0"
   }
 }

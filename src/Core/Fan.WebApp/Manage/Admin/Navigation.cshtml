@@ -1,0 +1,256 @@
+﻿@page
+@model NavigationModel
+@{
+    ViewData["Title"] = "Navigation";
+}
+
+<navigation inline-template ref="exts">
+    <v-container fluid>
+        <v-layout align-start>
+            @* Nav Items *@
+            <v-flex xs6 md4>
+                <v-expansion-panel v-model="infoPanels" expand class="elevation-1">
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Pages</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="page-navs"
+                                       v-model="pages"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="page in pages">
+                                    <v-list-tile :key="page.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{page.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(page)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Apps</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="app-navs"
+                                       v-model="apps"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="app in apps">
+                                    <v-list-tile :key="app.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{app.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(app)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Blog Categories</h4>
+                        </template>
+                        <v-list dense>
+                            <draggable id="cat-navs"
+                                       v-model="cats"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="cat in cats">
+                                    <v-list-tile :key="cat.id" class="tile">
+                                        <v-list-tile-content>
+                                            <span>{{cat.text}}</span>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-menu bottom left @@click.native.stop>
+                                                <v-btn slot="activator" icon>
+                                                    <v-icon>more_vert</v-icon>
+                                                </v-btn>
+                                                <v-list dense>
+                                                    <v-list-tile @@click="setHome(cat)">
+                                                        <v-icon class="menu-action-icon" small>home</v-icon>
+                                                        <v-list-tile-title>Set as home</v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Custom Links</h4>
+                        </template>
+                        <v-card>
+                            <v-card-text>
+                                <v-form ref="custLinkForm" v-model="custLinkValid">
+                                    <v-text-field label="URL"
+                                                  v-model="custLinkUrl"
+                                                  :rules="[rules.required, rules.url]"
+                                                  type="text"></v-text-field>
+                                    <v-text-field label="Link Text"
+                                                  v-model="custLinkText"
+                                                  :rules="[rules.required]"
+                                                  type="text"></v-text-field>
+                                    <v-select label="Menu"
+                                              v-model="selectedMenuId"
+                                              :items="menus"
+                                              item-text="name"
+                                              item-value="id"
+                                              dense></v-select>
+                                    <v-btn color="primary"
+                                           :disabled="!custLinkValid"
+                                           @@click="addCustLink">Add to Menu</v-btn>
+                                </v-form>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+                <br />
+                @* Home *@
+                <v-card class="lighten-3">
+                    <v-card-title primary-title>
+                        <div>
+                            <div class="headline"><v-icon medium>home</v-icon>Home</div>
+                            <span class="grey--text pt-1">
+                                To set home click on the <v-icon small>more_vert</v-icon> icon
+                                from one of the above navigation items then click on "Set as home".
+                            </span>
+                        </div>
+                    </v-card-title>
+                    <v-card-text>
+                        <div class="subheading">
+                            The root of your site will display the <span class="font-italic font-weight-bold">{{home.text}}</span>
+                            <span v-if="home.type === 0">page!</span>
+                            <span v-else-if="home.type === 1">app!</span>
+                            <span v-else-if="home.type === 2">blog category!</span>
+                        </div>
+                    </v-card-text>
+                </v-card>
+            </v-flex>
+            @* Menus *@
+            <v-flex xs6 md4>
+                <v-expansion-panel v-model="menuPanels" expand class="elevation-1 ml-3">
+                    <v-expansion-panel-content v-for="menu in menus" :key="menu.id" class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>
+                                {{ menu.name }}
+                                <span class="grey--text" style="font-weight:normal">(Menu{{menu.id}} - {{menu.description}})</span>
+                            </h4>
+                        </template>
+                        <v-list dense>
+                            <draggable :id="menu.id"
+                                       v-model="menu.navs"
+                                       v-bind="menuOptions"
+                                       @@add="add"
+                                       @@sort="sort"
+                                       style="min-height: 10px;cursor:move">
+                                <template v-for="(nav, index) in menu.navs">
+                                    <v-list-tile :key="index" class="tile">
+                                        <v-list-tile-content>
+                                            <div>
+                                                <span class="font-weight-bold">{{nav.text}}</span>
+                                                <div style="display:inline">
+                                                    <span class="grey--text font-italic" v-if="nav.type === 0"> - {{nav.origNavName}} Page</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 1"> - {{nav.origNavName}} App</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 2"> - {{nav.origNavName}} Blog Category</span>
+                                                    <span class="grey--text font-italic" v-else-if="nav.type === 3"> - Custom Link</span>
+                                                </div>
+                                            </div>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-list-tile-action-text>
+                                                <v-btn flat icon class="mr-1" @@click="viewSettings(nav)">
+                                                    <v-icon>edit</v-icon>
+                                                </v-btn>
+                                                <v-btn flat icon @@click="deleteNav(menu.id, index)">
+                                                    <v-icon>delete</v-icon>
+                                                </v-btn>
+                                            </v-list-tile-action-text>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+            </v-flex>
+        </v-layout>
+        <v-dialog lazy
+                  v-model="dialogVisible"
+                  @@keydown.esc="closeDialog"
+                  persistent
+                  content-class="ext-settings-dialog">
+            <v-card>
+                <v-card-title class="pl-4 pt-2 pb-0">
+                    <span style="font-size:larger;font-weight:bold">{{ dialogTitle }}</span>
+                    <v-spacer></v-spacer>
+                    <v-btn flat small fab @@click="closeDialog">
+                        <v-icon>close</v-icon>
+                    </v-btn>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-card-text>
+                    <iframe ref="settingsIframe"
+                            @@load="$root.initIframeHeight($refs.settingsIframe)"
+                            frameborder="0"
+                            scrolling="no"
+                            class="ext-settings-frame"
+                            v-if="settingsUrl"
+                            :src="settingsUrl"
+                            :title="dialogTitle"></iframe>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </v-container>
+</navigation>
+
+@section ComponentScripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuedraggable@2.21.0/dist/vuedraggable.umd.min.js"></script>
+    <script>
+        let navigationMixin = {
+            data: function () {
+                return {
+                    pages: @Html.Raw(Model.PagesJson),
+                    apps: @Html.Raw(Model.AppsJson),
+                    cats: @Html.Raw(Model.CatsJson),
+                    home: @Html.Raw(Model.HomeJson),
+                    menus: @Html.Raw(Model.MenusJson),
+                    selectedMenuId: @Model.SelectedMenuId,
+                    menuPanels: @Html.Raw(Model.MenuPanelsJson),
+                }
+            },
+        }
+    </script>
+    <script src="~/admin/js/navigation.js" asp-append-version="true"></script>
+}

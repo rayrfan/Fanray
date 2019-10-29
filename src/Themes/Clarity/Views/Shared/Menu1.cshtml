@@ -1,0 +1,61 @@
+﻿@model IList<Nav>
+@{ 
+    var currentUser = await userManager.GetUserAsync(Context.Request.HttpContext.User);
+    var isSignedIn = signInManager.IsSignedIn(Context.Request.HttpContext.User);
+}
+
+<nav class="navbar my-md-0 mr-md-3 mb-sm-0 p-0">
+    @foreach (var nav in Model)
+    {
+        <a class="p-2 text-dark" href="@nav.Url" title="@nav.Title">@nav.Text</a>
+    }
+    @if (isSignedIn)
+    {
+        <div class="dropdown">
+            <a class="p-2 text-dark nav-link" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                <div class="d-flex justify-content-between">
+                    <a class="dropdown-item" href="/admin/posts">Posts</a>
+                    <a class="dropdown-item text-right pr-3" href="/admin/compose/post"><i class="icon-pencil-square-o" aria-hidden="true"></i></a>
+                </div>
+                <div class="dropdown-divider m-0"></div>
+                <div class="d-flex justify-content-between">
+                    <a class="dropdown-item" href="/admin/pages">Pages</a>
+                    <a class="dropdown-item text-right pr-3" href="/admin/compose/page"><i class="icon-pencil-square-o" aria-hidden="true"></i></a>
+                </div>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/media">Media</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/categories">Categories</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/tags">Tags</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/navigation">Navigation</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/themes">Themes</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/plugins">Plugins</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/Widgets">Widgets</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/users">Users</a>
+                <div class="dropdown-divider m-0"></div>
+                <a class="dropdown-item" href="/admin/settings">Settings</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <a class="nav-link" href="#" id="avatarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" class="avatar" />
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="avatarDropdown">
+                <form asp-area="" asp-controller="Home" asp-action="Logout" method="post" id="logoutForm">
+                    <button type="submit" class="dropdown-item btn btn-link navbar-btn navbar-link"><i class="icon-power-off" aria-hidden="true"></i> Logout</button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <a class="p-2 text-dark" href="/login">Login</a>
+    }
+</nav>

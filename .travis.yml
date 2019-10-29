@@ -2,16 +2,10 @@ language: csharp
 solution: Fanray.sln
 sudo: required
 dist: xenial
-dotnet: 2.2
+dotnet: 3.0.100
 mono: none
 os:
   - linux
-
-branches:  
-  only:
-    - master
-    - dev
-    - v1.1.0-preview3
 
 notifications:
   email:
@@ -24,7 +18,7 @@ before_script:
 script:
   - dotnet build ./Fanray.sln
   - dotnet test ./test/Fan.UnitTests/Fan.UnitTests.csproj
-#  - dotnet test ./test/Fan.IntegrationTests/Fan.IntegrationTests.csproj
+  - dotnet test ./test/Fan.IntegrationTests/Fan.IntegrationTests.csproj
   - dotnet test ./test/Fan.Blog.UnitTests/Fan.Blog.UnitTests.csproj
   - dotnet test ./test/Fan.Blog.IntegrationTests/Fan.Blog.IntegrationTests.csproj
   - dotnet test ./test/Fan.Web.Tests/Fan.Web.Tests.csproj

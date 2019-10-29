@@ -1,7 +1,6 @@
 ﻿using Fan.Data;
 using Fan.Exceptions;
 using Fan.IntegrationTests.Base;
-using Fan.Settings;
 using Fan.Themes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,7 +8,6 @@ using Moq;
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Fan.IntegrationTests.Themes
@@ -24,10 +22,6 @@ namespace Fan.IntegrationTests.Themes
             // meta repo
             _metaRepo = new SqlMetaRepository(_db);
 
-            // default CoreSettings
-            var settingSvcMock = new Mock<ISettingService>();
-            settingSvcMock.Setup(svc => svc.GetSettingsAsync<CoreSettings>()).Returns(Task.FromResult(new CoreSettings()));
-
             // set ContentRootPath to "Fan.IntegrationTests"
             var workingDirectory = Environment.CurrentDirectory;
             var projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
@@ -37,7 +31,7 @@ namespace Fan.IntegrationTests.Themes
             // logger
             var logger = _loggerFactory.CreateLogger<ThemeService>();
 
-            _svc = new ThemeService(settingSvcMock.Object, env.Object, _cache, _metaRepo, logger);
+            _svc = new ThemeService(env.Object, _cache, _metaRepo, logger);
         }
 
         /// <summary>
@@ -58,12 +52,10 @@ namespace Fan.IntegrationTests.Themes
         }
 
         /// <summary>
-        /// A theme's folder name can only be alphanumeric, dash, underscore; it cannot contain
-        /// characters like '/', ' ', '.' etc.
+        /// An extension's folder allows "a-zA-Z", "_", "-", "." and numbers.
         /// </summary>
         /// <param name="folder"></param>
         [Theory]
-        [InlineData("test.")]
         [InlineData("test one")]
         [InlineData("/test")]
         public async void Invalid_theme_folder_name_cannot_be_activated(string folder)
@@ -84,16 +76,16 @@ namespace Fan.IntegrationTests.Themes
             Assert.Single(themes);
         }
 
-        [Fact]
-        public async void A_default_theme_named_clarity_is_always_available()
-        {
-            // When system retrieves installed themes
-            var themes = await _svc.GetManifestsAsync();
+        //[Fact]
+        //public async void A_default_theme_named_clarity_is_always_available()
+        //{
+        //    // When system retrieves installed themes
+        //    var themes = await _svc.GetManifestsAsync();
 
-            // Then the default Clarity theme should be available
-            Assert.Contains(themes, t => t.Name == "Clarity");
-            Assert.Contains(themes, t => t.Folder.Equals("clarity", StringComparison.CurrentCultureIgnoreCase));
-        }
+        //    // Then the default Clarity theme should be available
+        //    Assert.Contains(themes, t => t.Name == "Clarity");
+        //    Assert.Contains(themes, t => t.Folder.Equals("clarity", StringComparison.CurrentCultureIgnoreCase));
+        //}
 
         /// <summary>
         /// A "theme.json" file at the root of each theme's folder will provide

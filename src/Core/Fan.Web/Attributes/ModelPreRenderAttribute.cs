@@ -1,4 +1,4 @@
-﻿using Fan.Web.Models.Blog;
+﻿using Fan.Blog.Models.View;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -32,12 +32,17 @@ namespace Fan.Web.Attributes
         {
             if (context.Controller is Controller controller)
             {
-                if (controller.ViewData.Model is BlogPostViewModel model)
+                if (controller.ViewData.Model is PageVM pageVM)
+                {
+                    mediator.OnModelPreRender(pageVM);
+                }
+
+                if (controller.ViewData.Model is BlogPostVM model)
                 {
                     mediator.OnModelPreRender(model);
                 }
 
-                if (controller.ViewData.Model is BlogPostListViewModel list)
+                if (controller.ViewData.Model is BlogPostListVM list)
                 {
                     mediator.OnModelPreRender(list);
                 }

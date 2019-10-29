@@ -1,5 +1,5 @@
 ﻿using Fan.Settings;
-using Fan.Web.Models.Home;
+using Fan.Web.Models;
 using Microsoft.ApplicationInsights.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +37,7 @@ namespace Fan.Web.Components
         public async Task<IViewComponentResult> InvokeAsync()
         {
             var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-            var vm = new AnalyticsViewModel
+            var vm = new AnalyticsVM
             {
                 GoogleAnalyticsTrackingID = coreSettings.GoogleAnalyticsTrackingID,
                 AppInsightsFullScript = _jsSnippet.FullScript,

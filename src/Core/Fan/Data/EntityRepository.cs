@@ -34,13 +34,12 @@ namespace Fan.Data
         }
 
         /// <summary>
-        /// Creates an entity and the returned object is tracked.
+        /// Creates an entity and returns a tracked object with id.
         /// </summary>
         /// <param name="entity"></param>
-        /// <returns></returns>
-        /// <exception cref="DbUpdateException">
-        /// If table has unique key constrain and the record being added violates it, 
-        /// this exception will throw, such as <see cref="Meta"/> table.
+        /// <returns>The <paramref name="entity"/> with id.</returns>
+        /// <exception cref="FanException">
+        /// Throws if insert violates unique key constraint. See <see cref="https://stackoverflow.com/a/47465944/32240"/>
         /// </exception>
         public virtual async Task<T> CreateAsync(T entity)
         {
@@ -50,9 +49,9 @@ namespace Fan.Data
                 await _db.SaveChangesAsync();
                 return entity;
             }
-            catch (DbUpdateException dbUpdException)
+            catch (DbUpdateException dbUpdEx) 
             {
-                throw new FanException(EExceptionType.MetaDuplicate, dbUpdException);
+                throw GetExceptionForUniqueConstraint(dbUpdEx);
             }
         }
 
@@ -104,10 +103,19 @@ namespace Fan.Data
         /// <param name="entity">
         /// The entity to be updated, the EF implementation does not use this parameter.
         /// </param>
-        /// <returns></returns>
+        /// <exception cref="FanException">
+        /// Throws if update violates unique key constraint.
+        /// </exception>
         public virtual async Task UpdateAsync(T entity)
         {
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbUpdEx)
+            {
+                throw GetExceptionForUniqueConstraint(dbUpdEx);
+            }
         }
 
         /// <summary>
@@ -120,6 +128,27 @@ namespace Fan.Data
         public virtual async Task UpdateAsync(IEnumerable<T> entities)
         {
             await _db.SaveChangesAsync();
+        }
+
+        private Exception GetExceptionForUniqueConstraint(DbUpdateException dbUpdEx)
+        {
+            if (dbUpdEx.InnerException != null)
+            {
+                var message = dbUpdEx.InnerException.Message;
+                if (message.Contains("UniqueConstraint", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("Unique Constraint", StringComparison.OrdinalIgnoreCase))
+                    return new FanException(EExceptionType.DuplicateRecord, dbUpdEx);
+
+                if (dbUpdEx.InnerException.InnerException != null)
+                {
+                    message = dbUpdEx.InnerException.InnerException.Message;
+                    if (message.Contains("UniqueConstraint", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("Unique Constraint", StringComparison.OrdinalIgnoreCase))
+                        return new FanException(EExceptionType.DuplicateRecord, dbUpdEx);
+                }
+            }
+
+            return dbUpdEx;
         }
     }
 }

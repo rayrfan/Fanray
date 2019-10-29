@@ -8,6 +8,8 @@
 }
 
 .blog-main {
+    margin-top: 1rem;
+
     article {
         background: #fff;
         /* controls how wide your article is */
@@ -41,6 +43,20 @@
                 h1 {
                     font-size: 2.25rem;
                 }
+            }
+        }
+
+        .post-body {
+            h1, h2, h3, h4, h5, h6 {
+                margin-bottom: .5rem;
+            }
+
+            ul li p {
+                margin-bottom: 5px;
+            }
+
+            ul {
+                padding-left: 1.5em;
             }
         }
 
@@ -90,6 +106,36 @@
                     color: #0e76a8;
                 }
             }
+        }
+        // table
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            display: block;
+            overflow: auto;
+            width: 100%;
+
+            td, th {
+                border: 1px solid #dfe2e5;
+                padding: 6px 13px;
+            }
+
+            th {
+                font-weight: 600;
+            }
+
+            tr {
+                background-color: #fff;
+                border-top: 1px solid #c6cbd1;
+            }
+
+            tr:nth-child(2n) {
+                background-color: #f6f8fa;
+            }
+        }
+
+        .read-more {
+            padding-top: 5px
         }
     }
 

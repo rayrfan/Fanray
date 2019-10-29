@@ -7,72 +7,77 @@
 
 <blog-posts inline-template>
     <v-container>
-        <v-tabs v-model="active" style="margin-bottom: 18px" class="elevation-1">
-            <v-tab @@click="getPosts('published')" key="1">
-                Published <v-chip v-if="publishedCount > 0" small>{{ publishedCount }}</v-chip>
-            </v-tab>
-            <v-tab @@click="getPosts('draft')" key="0">
-                Draft <v-chip v-if="draftCount > 0" small>{{ draftCount }}</v-chip>
-            </v-tab>
-        </v-tabs>
-        <v-data-table :items="posts"
-                      :pagination.sync="pagination"
-                      :total-items="totalPosts"
-                      :loading="loading"
-                      :rows-per-page-items="rowsPerPageItems"
-                      rows-per-page-text=""
-                      hide-headers
-                      class="elevation-1">
-            <template slot="items" slot-scope="props">
-                <td style="padding: 8px 20px">
-                    <h3 v-if="props.item.title">
-                        <a class="post-title-link" :href="props.item.editLink">{{ props.item.title }}</a>
-                    </h3>
-                    <h3 v-else style="font-style:italic;color:gray">
-                        <a class="post-title-link" :href="props.item.editLink">Untitled</a>
-                    </h3>
-                    <span>{{ props.item.date }} by {{ props.item.author }}</span>
-                </td>
-                <td class="right layout px-0" style="padding: 8px 20px">
-                    <v-menu bottom left @@click.native.stop>
-                        <v-btn slot="activator"
-                               icon>
-                            <v-icon>more_vert</v-icon>
-                        </v-btn>
-                        <v-list dense>
-                            <v-list-tile :href="props.item.editLink">
-                                <v-icon class="menu-action-icon">edit</v-icon>
-                                <v-list-tile-title>Edit</v-list-tile-title>
-                            </v-list-tile>
-                            <v-list-tile :href="props.item.postLink">
-                                <v-icon class="menu-action-icon">visibility</v-icon>
-                                <v-list-tile-title>View Post</v-list-tile-title>
-                            </v-list-tile>
-                            <v-list-tile @@click="deletePost(props.item)">
-                                <v-icon class="menu-action-icon">delete</v-icon>
-                                <v-list-tile-title>Delete</v-list-tile-title>
-                            </v-list-tile>
-                        </v-list>
-                    </v-menu>
-                </td>
-            </template>
-            <template slot="no-data">
-                <div>You have no posts.</div>
-            </template>
-        </v-data-table>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-tabs v-model="active" style="margin-bottom: 18px" class="elevation-1">
+                    <v-tab @@click="getPosts('published')" key="1">
+                        Published <v-chip v-if="publishedCount > 0" small>{{ publishedCount }}</v-chip>
+                    </v-tab>
+                    <v-tab @@click="getPosts('draft')" key="0">
+                        Draft <v-chip v-if="draftCount > 0" small>{{ draftCount }}</v-chip>
+                    </v-tab>
+                    <v-spacer></v-spacer>
+                    <v-btn small href="/admin/compose/post" color="pink" class="text-capitalize white--text"
+                           style="margin:10px 13px 0 0"><v-icon small>add</v-icon> New Post</v-btn>
+                </v-tabs>
+            </v-flex>
+        </v-layout>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-data-table :items="posts"
+                              :pagination.sync="pagination"
+                              :total-items="totalPosts"
+                              :loading="loading"
+                              :rows-per-page-items="rowsPerPageItems"
+                              rows-per-page-text=""
+                              hide-headers
+                              class="elevation-1">
+                    <template slot="items" slot-scope="props">
+                        <td style="padding: 8px 20px">
+                            <h3 v-if="props.item.title">
+                                <a class="post-title-link" :href="props.item.editLink">{{ props.item.title }}</a>
+                            </h3>
+                            <h3 v-else style="font-style:italic;color:gray">
+                                <a class="post-title-link" :href="props.item.editLink">Untitled</a>
+                            </h3>
+                            <span>
+                                <v-icon small>access_time</v-icon> {{ props.item.date }} &nbsp;
+                                <v-icon small>person</v-icon> {{ props.item.author }} &nbsp;
+                                <v-icon small>folder</v-icon> {{ props.item.category }} &nbsp;
+                                <v-icon small>remove_red_eye</v-icon> {{ props.item.viewCount }} &nbsp;
+                            </span>
+                        </td>
+                        <td class="right layout px-0" style="padding: 8px 20px">
+                            <v-menu bottom left @@click.native.stop>
+                                <v-btn slot="activator"
+                                       icon>
+                                    <v-icon>more_vert</v-icon>
+                                </v-btn>
+                                <v-list dense>
+                                    <v-list-tile :href="props.item.editLink">
+                                        <v-icon class="menu-action-icon">edit</v-icon>
+                                        <v-list-tile-title>Edit</v-list-tile-title>
+                                    </v-list-tile>
+                                    <v-list-tile :href="props.item.postLink">
+                                        <v-icon class="menu-action-icon">visibility</v-icon>
+                                        <v-list-tile-title>View Post</v-list-tile-title>
+                                    </v-list-tile>
+                                    <v-list-tile @@click="deletePost(props.item)">
+                                        <v-icon class="menu-action-icon">delete</v-icon>
+                                        <v-list-tile-title>Delete</v-list-tile-title>
+                                    </v-list-tile>
+                                </v-list>
+                            </v-menu>
+                        </td>
+                    </template>
+                    <template slot="no-data">
+                        <div style="padding:20px 0;font-style:italic">No posts!</div>
+                    </template>
+                </v-data-table>
+            </v-flex>
+        </v-layout>        
     </v-container>
 </blog-posts>
-
-<v-btn fab
-       bottom
-       right
-       color="pink"
-       dark
-       fixed
-       v-once
-       href="/admin/compose">
-    <v-icon>add</v-icon>
-</v-btn>
 
 @section ComponentScripts {
     <script>

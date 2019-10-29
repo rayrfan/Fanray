@@ -1,4 +1,6 @@
-﻿IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
+﻿/* Upgrade from v1.0 to v1.1 */
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
     DECLARE @var0 sysname;
     SELECT @var0 = [d].[name]
@@ -138,8 +140,22 @@ GO
 
 IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
 BEGIN
+    ALTER TABLE [Blog_Post] ADD [PageLayout] tinyint NULL;
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
+BEGIN
+    ALTER TABLE [Blog_Post] ADD [Nav] nvarchar(max) NULL;
+END;
+
+GO
+
+IF NOT EXISTS(SELECT * FROM [__EFMigrationsHistory] WHERE [MigrationId] = N'20190318202954_FanV1_1')
+BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20190318202954_FanV1_1', N'2.2.3-servicing-35854');
+    VALUES (N'20190318202954_FanV1_1', N'2.2.4-servicing-10062');
 END;
 
 GO

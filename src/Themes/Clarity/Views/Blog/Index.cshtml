@@ -1,5 +1,7 @@
-﻿@model BlogPostListViewModel
+﻿@model BlogPostListVM
 @{
+    Layout = "_BlogPostLayout";
+    ViewData["Title"] = "Blog";
     var postListDisplay = Model.PostListDisplay;
     var blogPostViewModels = Model.BlogPostViewModels;
 }
@@ -7,38 +9,36 @@
 @foreach (var postVM in blogPostViewModels)
 {
     var blogPost = postVM;
-<article>
-    <header>
-        <h1>
-            <a href="@blogPost.RelativeLink">@blogPost.Title</a>
-        </h1>
-        @await Html.PartialAsync("_PostInfo", postVM)
-    </header>
-    <div class="post-body">
-        @if (postListDisplay == EPostListDisplay.Excerpt)
-        {
-            @Html.Raw(blogPost.Excerpt) <span style="padding-left:5px"><a href="@blogPost.RelativeLink">Read More</a></span>
-        }
-        else if (postListDisplay == EPostListDisplay.FullBody)
-        {
-            @Html.Raw(blogPost.Body)
-        }
-    </div>
-</article>
+    <article>
+        <header>
+            <h1>
+                <a href="@blogPost.RelativeLink">@blogPost.Title</a>
+            </h1>
+            @await Html.PartialAsync("_PostInfo.cshtml", postVM)
+        </header>
+        <div class="post-body">
+            @if (postListDisplay == EPostListDisplay.Excerpt)
+            {
+                @Html.Raw(blogPost.Excerpt) 
+                <div class="read-more">
+                    <a href="@blogPost.RelativeLink">Read More</a>
+                </div>
+            }
+            else if (postListDisplay == EPostListDisplay.FullBody)
+            {
+                @Html.Raw(blogPost.Body)
+            }
+        </div>
+    </article>
 }
 
-@if (Model.ShowNewer)
-{
-    if (Model.NewerPageIndex <= 1)
+<div class="mt-5 mb-5 text-center">
+    @if (Model.ShowNewer)
     {
-        <a class="btn btn-default" href="/" role="button">Newer posts</a>
+        <a class="mr-3" href="@Model.NewerPostsUrl" role="button">&larr; Newer posts</a>
     }
-    else
+    @if (Model.ShowOlder)
     {
-        <a class="btn btn-default" href="?page=@Model.NewerPageIndex" role="button">Newer posts</a>
+        <a class="ml-3" href="@Model.OlderPostsUrl" role="button">Older posts &rarr;</a>
     }
-}
-@if (Model.ShowOlder)
-{
-    <a class="btn btn-default" href="?page=@Model.OlderPageIndex" role="button">Older posts</a>
-}
+</div>

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Fan.Extensibility
@@ -24,6 +25,11 @@ namespace Fan.Extensibility
         protected readonly IDistributedCache distributedCache;
         protected readonly IHostingEnvironment hostingEnvironment;
         protected readonly ILogger<IExtensibleService<TManifest, TExtension>> logger;
+
+        /// <summary>
+        /// An extension folder allows "a-zA-Z", "_", "-", "." and numbers.
+        /// </summary>
+        public const string FOLDER_REGEX = @"^[a-zA-Z0-9_.-]+$";
 
         public ExtensibleService(IMetaRepository metaRepository,
             IDistributedCache distributedCache,
@@ -85,7 +91,7 @@ namespace Fan.Extensibility
         /// </summary>
         /// <param name="folder">The folder name.</param>
         /// <returns></returns>
-        public abstract bool IsValidExtensionFolder(string folder);
+        public virtual bool IsValidExtensionFolder(string folder) => new Regex(FOLDER_REGEX).IsMatch(folder);
 
         /// <summary>
         /// Returns extension manifest by folder.

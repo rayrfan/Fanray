@@ -103,7 +103,6 @@ namespace Shortcodes.Tests
             Assert.Equal("<pre class=\"brush: csharp\">[Theory][InlineData(\"[code language=‘cs’]\")]public void Test() {}</pre>", result);
         }
 
-
         /// <summary>
         /// User can use either lang or language.
         /// </summary>
@@ -116,5 +115,17 @@ namespace Shortcodes.Tests
 			Assert.Equal("<pre class=\"brush: csharp\">var i = 1;</pre>", languageResult);
 			Assert.Equal("<pre class=\"brush: csharp\">var i = 1;</pre>", langResult);
 		}
-	}
+
+        /// <summary>
+        /// When you want to display shortcodes as content, you need to escape the code with an 
+        /// outer set of square brackets.
+        /// </summary>
+        [Fact]
+        public void Escape_shortcode_by_surrounding_content_with_extra_square_bracket()
+        {
+            var content = "[[code gutter=false]var i = 1;[/code]]";
+            var result = _svc.Parse(content);
+            Assert.Equal("[code gutter=false]var i = 1;[/code]", result);
+        }
+    }
 }
