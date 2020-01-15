@@ -19,20 +19,20 @@ namespace Fan.Blog.Data
         /// Creates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to create.</param>
-        /// <param name="categoryId">The category id is available when called from browser.</param>
         /// <param name="categoryTitle">The category title is available when called from metaweblog.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
         /// <returns>
         /// The inserted post with id.
         /// </returns>
-        Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
+        Task<Post> CreateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles);
 
         /// <summary>
         /// Updates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to update.</param>
+        /// <param name="categoryTitle">The category title of the blog post input.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
-        Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles);
+        Task UpdateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles);
 
         /// <summary>
         /// Increases post view count.

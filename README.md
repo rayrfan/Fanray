@@ -55,7 +55,7 @@ Fanray has an _extensible design_ that allows you to create _plugins_, _themes_ 
  
 ## Quick Start
 
-Fanray v1.1 runs on [.NET Core 2.2](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
+Fanray v1.1 runs on [.NET Core 3.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
 
 Clone the repo then run from either [VS2019](https://www.visualstudio.com/vs/community/) or command line.
 

@@ -42,7 +42,7 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public static void UsePlugins(this IApplicationBuilder app, IHostingEnvironment env)
+        public static void UsePlugins(this IApplicationBuilder app, IWebHostEnvironment env)
         {
             foreach (var plugin in app.ApplicationServices.GetServices<Plugin>())
             {

@@ -68,9 +68,9 @@ namespace Fan.Widgets
         public const string WIDGETS_DIR = "Widgets";
 
         private const string CACHE_KEY_CURRENT_THEME_AREAS = "{0}-theme-widget-areas";
-        private TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
+        private readonly TimeSpan Cache_Time_Current_Theme_Areas = new TimeSpan(0, 10, 0);
         private const string CACHE_KEY_WIDGETS_MANIFESTS = "installed-widgets-manifests";
-        private TimeSpan Cache_Time_Widgets_Manifests = new TimeSpan(0, 10, 0);
+        private readonly TimeSpan Cache_Time_Widgets_Manifests = new TimeSpan(0, 10, 0);
 
         private readonly IThemeService themeService;
         private readonly ISettingService settingService;
@@ -79,7 +79,7 @@ namespace Fan.Widgets
             IThemeService themeService,
             IDistributedCache distributedCache,
             ISettingService settingService,
-            IHostingEnvironment hostingEnvironment,
+            IWebHostEnvironment hostingEnvironment,
             ILogger<WidgetService> logger)
             : base(metaRepository, distributedCache, hostingEnvironment, logger)
         {
@@ -145,7 +145,7 @@ namespace Fan.Widgets
                 var widgetAreaInstancelist = new List<WidgetAreaInstance>();
 
                 var currentTheme = (await themeService.GetManifestsAsync())
-                                   .Single(t => t.Name.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
+                                   .Single(t => t.Folder.Equals(coreSettings.Theme, StringComparison.OrdinalIgnoreCase));
                 foreach (var areaInfo in currentTheme.WidgetAreas)
                 {
                     var metaArea = await GetAreaMetaAsync(areaInfo.Id);
@@ -210,7 +210,7 @@ namespace Fan.Widgets
         public async Task<WidgetInstance> AddWidgetToAreaAsync(int widgetId, string areaId, int index)
         {
             // get area
-            var metaArea = await GetAreaMetaAsync(areaId); // metaRepository.GetAsync(areaId, type);
+            var metaArea = await GetAreaMetaAsync(areaId);
             var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
             // insert new id to area
@@ -224,7 +224,7 @@ namespace Fan.Widgets
             widget.AreaId = areaId;
             await UpdateWidgetAsync(widgetId, widget);
 
-            // update meta
+            // update widget area
             metaArea.Value = JsonConvert.SerializeObject(area);
             await metaRepository.UpdateAsync(metaArea);
 
@@ -267,14 +267,14 @@ namespace Fan.Widgets
         /// <summary>
         /// Moves a widget in an area to a new position.
         /// </summary>
-        /// <param name="widgetId"></param>
-        /// <param name="areaId"></param>
-        /// <param name="index"></param>
+        /// <param name="widgetId">the widget to be ordered</param>
+        /// <param name="areaId">the widget area that contains the widget</param>
+        /// <param name="index">new index</param>
         /// <returns></returns>
         public async Task OrderWidgetInAreaAsync(int widgetId, string areaId, int index)
         {
             // get area
-            var metaArea = await GetAreaMetaAsync(areaId); // await metaRepository.GetAsync(areaId);
+            var metaArea = await GetAreaMetaAsync(areaId);
             var area = JsonConvert.DeserializeObject<WidgetArea>(metaArea.Value);
 
             // reorder the widget in area
@@ -354,7 +354,7 @@ namespace Fan.Widgets
         /// <summary>
         /// Updates a widget instance.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">widget meta id</param>
         /// <param name="widget"></param>
         /// <returns></returns>
         public async Task UpdateWidgetAsync(int id, Widget widget)

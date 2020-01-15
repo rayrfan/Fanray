@@ -45,7 +45,7 @@ namespace Fan.Plugins
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
         }
 

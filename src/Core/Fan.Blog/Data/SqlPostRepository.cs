@@ -24,26 +24,23 @@ namespace Fan.Blog.Data
         /// Creates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to create.</param>
-        /// <param name="categoryId">The category id is available when called from browser.</param>
         /// <param name="categoryTitle">The category title is available when called from metaweblog.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
         /// <returns>
         /// The inserted post with id.
         /// </returns>
-        public async Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        public async Task<Post> CreateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles)
         {
             // Category
             if (!categoryTitle.IsNullOrEmpty())
             {
-                // from metaweblog with a cat inputted
-                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+                // cat title present, olw and setup
+                post.Category = _db.Set<Category>().First(c => c.Title.ToUpper() == categoryTitle.ToUpper());
             }
-            else
+            else if (!post.CategoryId.HasValue) // from browser CategoryId will have value
             {
-                post.CategoryId = categoryId.HasValue ?
-                    // from browser
-                    categoryId : 
-                    // from metaweblog with no cat inputted
+                // from metaweblog with no cat inputted, give it the default cat id
+                post.CategoryId =                     
                     Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
             }
 
@@ -57,7 +54,7 @@ namespace Fan.Blog.Data
                 foreach (var title in tagTitles)
                 {
                     // lookup the tag (any new tag is already created prior)
-                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    var tag = tags.First(t => t.Title.ToUpper() == title.ToUpper());
                     post.PostTags.Add(new PostTag { Post = post, Tag = tag });
                 }
             }
@@ -71,24 +68,16 @@ namespace Fan.Blog.Data
         /// Updates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to update.</param>
+        /// <param name="categoryTitle">The category title of the blog post input.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
-        public async Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        public async Task UpdateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles)
         {
             // Category
-            if (!categoryTitle.IsNullOrEmpty())
+            if (!categoryTitle.IsNullOrEmpty()) // if cat title has value
             {
                 // from metaweblog with a cat inputted
-                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
-            }
-            else if (categoryId.HasValue)
-            {
-                // from browser
-                if (categoryId != post.CategoryId) post.CategoryId = categoryId;
-            }
-            else
-            {
-                // from metaweblog with no cat inputted
-                post.CategoryId = Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+                post.Category = _db.Set<Category>().First(c => c.Title.ToUpper() == categoryTitle.ToUpper());
+                post.CategoryId = post.Category.Id;
             }
 
             // PostTags
@@ -108,7 +97,7 @@ namespace Fan.Blog.Data
                 var titlesToAdd = tagTitles.Except(currentTitles);
                 foreach (var title in titlesToAdd)
                 {
-                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    var tag = tags.First(t => t.Title.ToUpper() == title.ToUpper());
                     post.PostTags.Add(new PostTag { PostId = post.Id, TagId = tag.Id });
                 }
             }
@@ -171,17 +160,24 @@ namespace Fan.Blog.Data
         /// <summary>
         /// Returns a <see cref="EPostStatus.Published"/> <see cref="Post"/>, returns null if it's not found.
         /// </summary>
-        public async Task<Post> GetAsync(string slug, int year, int month, int day)
-        {
-            return await _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
-                                  .SingleOrDefaultAsync(p =>
-                                    p.Type == EPostType.BlogPost &&
-                                    p.Status == EPostStatus.Published &&
-                                    p.Slug.ToLower() == slug.ToLower() &&
-                                    p.CreatedOn.Year == year &&
-                                    p.CreatedOn.Month == month &&
-                                    p.CreatedOn.Day == day);
-        }
+        public async Task<Post> GetAsync(string slug, int year, int month, int day) =>
+            isSqlite ?
+                 _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag).ToList()
+                                   .SingleOrDefault(p =>
+                                     p.Type == EPostType.BlogPost &&
+                                     p.Status == EPostStatus.Published &&
+                                     p.Slug.ToUpper() == slug.ToUpper() &&
+                                     p.CreatedOn.Year == year &&
+                                     p.CreatedOn.Month == month &&
+                                     p.CreatedOn.Day == day) :
+                 await _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
+                               .SingleOrDefaultAsync(p =>
+                                 p.Type == EPostType.BlogPost &&
+                                 p.Status == EPostStatus.Published &&
+                                 p.Slug.ToUpper() == slug.ToUpper() &&
+                                 p.CreatedOn.Year == year &&
+                                 p.CreatedOn.Month == month &&
+                                 p.CreatedOn.Day == day);
 
         /// <summary>
         /// Returns a list of posts and total post count by query or empty list if no posts found.

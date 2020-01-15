@@ -39,7 +39,7 @@ namespace Fan.WebApp.Manage.Admin
                 var vm = new ThemeViewModel
                 {
                     Name = manifest.Name,
-                    Screenshot = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/themes/{manifest.Name}/theme.png",
+                    Screenshot = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/_content/{manifest.Name}/theme.png",
                     IsActive = manifest.Folder.Equals(currentTheme, StringComparison.OrdinalIgnoreCase),
                 };
 

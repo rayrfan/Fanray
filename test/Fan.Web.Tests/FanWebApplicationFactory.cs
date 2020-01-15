@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fan.Web.Tests
 {
@@ -24,43 +25,45 @@ namespace Fan.Web.Tests
         : WebApplicationFactory<TStartup> where TStartup : class
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
+        {            
             builder.ConfigureServices(services =>
             {
-                // create a new service provider
-                var serviceProvider = new ServiceCollection()
-                    .AddEntityFrameworkInMemoryDatabase()
-                    .BuildServiceProvider();
+                // Remove the app's DbContext registration.
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<FanDbContext>));
 
-                // add FanDbContext using an in-memory database
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                // Add DbContext using an in-memory database for testing.
                 services.AddDbContext<FanDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
-                    options.UseInternalServiceProvider(serviceProvider);
                 });
 
-                // build the service provider
+                // Build the service provider.
                 var sp = services.BuildServiceProvider();
 
-                // create a scope to obtain a reference to FanDbContext
-                using (var scope = sp.CreateScope())
+                // Create a scope to obtain a reference to the dbcontext
+                using var scope = sp.CreateScope();
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<FanDbContext>();
+                var logger = scopedServices
+                    .GetRequiredService<ILogger<FanWebApplicationFactory<TStartup>>>();
+
+                // Ensure the database is created.
+                db.Database.EnsureCreated();
+
+                try
                 {
-                    var scopedServices = scope.ServiceProvider;
-                    var dbCtx = scopedServices.GetRequiredService<FanDbContext>();
-                    var logger = scopedServices.GetRequiredService<ILogger<FanWebApplicationFactory<TStartup>>>();
-
-                    // ensure database is created
-                    dbCtx.Database.EnsureCreated();
-
-                    try
-                    {
-                        // seed the database with test data
-                        Seed(dbCtx);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"An error occurred seeding the database: {ex.Message}");
-                    }
+                    // Seed the database with test data.
+                    Seed(db);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"An error occurred seeding the database: {ex.Message}");
                 }
             });
         }

@@ -20,6 +20,9 @@ namespace Fan.Settings
         /// <summary>
         /// Default theme "Clarity".
         /// </summary>
+        /// <remarks>
+        /// This is the theme's folder name.
+        /// </remarks>
         public string Theme { get; set; } = "Clarity";
 
         /// <summary>

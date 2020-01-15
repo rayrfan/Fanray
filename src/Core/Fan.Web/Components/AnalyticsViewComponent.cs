@@ -15,12 +15,12 @@ namespace Fan.Web.Components
     {
         private readonly ISettingService _settingSvc;
         private readonly JavaScriptSnippet _jsSnippet;
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
 
         public AnalyticsViewComponent(
             ISettingService settingService,
             JavaScriptSnippet jsSnippet,
-            IHostingEnvironment env)
+            IWebHostEnvironment env)
         {
             _settingSvc = settingService;
             _jsSnippet = jsSnippet;

@@ -13,6 +13,10 @@ namespace Fan.Exceptions
     /// </remarks>
     public class FanException : Exception
     {
+        public FanException()
+        {
+        }
+
         /// <summary>
         /// Thrown with a message.
         /// </summary>
