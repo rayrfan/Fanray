@@ -37,7 +37,7 @@ namespace Fan.Tests.Data
             connection.Open();
 
             var options = new DbContextOptionsBuilder<FanDbContext>()
-                .UseLoggerFactory(loggerFactory)
+                //.UseLoggerFactory(loggerFactory) // turn on logging to see generated SQL
                 .UseSqlite(connection).Options;
 
             _db = new FanDbContext(options, loggerFactory);

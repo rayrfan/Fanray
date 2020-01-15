@@ -5,56 +5,42 @@ jobs:
 - job: Linux
   pool:
     vmImage: 'ubuntu-latest'  
- 
+  
   steps:
-  - task: UseDotNet@2
-    displayName: ".NET Core 3.1.x"
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
     inputs:
-      version: '3.1.x'
-      packageType: sdk
-  - script: dotnet build --configuration $(buildConfiguration)
+      version: 3.1.101
 
-  - task: DotNetCoreCLI@2
-      displayName: "Test"
-      inputs:
-        command: test
-        projects: '**/*tests/*.csproj'
-        arguments: '--configuration $(buildConfiguration)'
+  - script: |
+      dotnet build --configuration $(buildConfiguration)
+      dotnet test --configuration $(buildConfiguration)
 
 - job: macOS
   pool:
     vmImage: 'macOS-latest'
 
   steps:
-  - task: UseDotNet@2
-    displayName: ".NET Core 3.1.x"
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
     inputs:
-      version: '3.1.x'
-      packageType: sdk
-  - script: dotnet build --configuration $(buildConfiguration)
+      version: 3.1.101
 
-  - task: DotNetCoreCLI@2
-      displayName: "Test"
-      inputs:
-        command: test
-        projects: '**/*tests/*.csproj'
-        arguments: '--configuration $(buildConfiguration)'
+  - script: |
+      dotnet build --configuration $(buildConfiguration)
+      dotnet test --configuration $(buildConfiguration)
 
 - job: Windows
   pool:
     vmImage: 'windows-latest'
   
   steps:
-  - task: UseDotNet@2
-    displayName: ".NET Core 3.1.x"
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
     inputs:
-      version: '3.1.x'
-      packageType: sdk
-  - script: dotnet build --configuration $(buildConfiguration)
+      version: 3.1.101
 
-  - task: DotNetCoreCLI@2
-      displayName: "Test"
-      inputs:
-        command: test
-        projects: '**/*tests/*.csproj'
-        arguments: '--configuration $(buildConfiguration)'
+  - script: |
+      dotnet build --configuration $(buildConfiguration)
+      dotnet test --configuration $(buildConfiguration)
+

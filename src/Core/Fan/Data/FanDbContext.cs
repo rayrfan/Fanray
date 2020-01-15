@@ -41,7 +41,7 @@ namespace Fan.Data
             foreach (var type in entityTypes)
             {
                 modelBuilder.Entity(type);
-                logger.LogInformation($"Entity: '{type.Name}' added to model");
+                logger.LogDebug($"Entity: '{type.Name}' added to model");
             }
 
             // call base
@@ -75,7 +75,7 @@ namespace Fan.Data
             {
                 if (builderType != null && builderType != typeof(IEntityModelBuilder))
                 {
-                    logger.LogInformation($"ModelBuilder '{builderType.Name}' added to model");
+                    logger.LogDebug($"ModelBuilder '{builderType.Name}' added to model");
                     var builder = (IEntityModelBuilder) Activator.CreateInstance(builderType);
                     builder.CreateModel(modelBuilder);
                 }
