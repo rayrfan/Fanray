@@ -23,15 +23,15 @@ namespace Fan.Blog.Data
             builder.Entity<Category>(entity =>
             {
                 entity.ToTable("Blog_Category");
-                entity.HasKey(e => e.Id).ForSqlServerIsClustered(clustered: false);
-                entity.HasIndex(e => e.Slug).IsUnique().ForSqlServerIsClustered();
+                entity.HasKey(e => e.Id).IsClustered(clustered: false);
+                entity.HasIndex(e => e.Slug).IsUnique().IsClustered();
             });
 
             builder.Entity<Tag>(entity =>
             {
                 entity.ToTable("Blog_Tag");
-                entity.HasKey(e => e.Id).ForSqlServerIsClustered(clustered: false);
-                entity.HasIndex(e => e.Slug).IsUnique().ForSqlServerIsClustered();
+                entity.HasKey(e => e.Id).IsClustered(clustered: false);
+                entity.HasIndex(e => e.Slug).IsUnique().IsClustered();
             });
 
             builder.Entity<PostTag>(entity =>
