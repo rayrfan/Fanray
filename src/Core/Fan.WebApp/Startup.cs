@@ -180,7 +180,9 @@ namespace Fan.WebApp
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+#if DEBUG
                 app.UseBrowserLink();
+#endif
                 app.UseDatabaseErrorPage();
             }
             else
