@@ -17,4 +17,7 @@ before_script:
 
 script:
   - dotnet build ./Fanray.sln
-  - dotnet test --verbosity d ./test/Fan.Tests/Fan.Tests.csproj
+  - dotnet test ./test/Fan.Tests/Fan.Tests.csproj
+  - dotnet test ./test/Fan.Blog.Tests/Fan.Blog.Tests.csproj
+  - dotnet test ./test/Fan.Web.Tests/Fan.Web.Tests.csproj
+  - dotnet test ./test/Shortcodes.Tests/Shortcodes.Tests.csproj
