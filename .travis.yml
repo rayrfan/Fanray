@@ -16,8 +16,8 @@ before_script:
   - dotnet restore
 
 script:
-  - dotnet build ./Fanray.sln
-  - dotnet test ./test/Fan.Tests/Fan.Tests.csproj
-  - dotnet test ./test/Fan.Blog.Tests/Fan.Blog.Tests.csproj
-  - dotnet test ./test/Fan.Web.Tests/Fan.Web.Tests.csproj
-  - dotnet test ./test/Shortcodes.Tests/Shortcodes.Tests.csproj
+  - dotnet build -c Release ./Fanray.sln
+  - dotnet test -c Release ./test/Fan.Tests/Fan.Tests.csproj
+  - dotnet test -c Release ./test/Fan.Blog.Tests/Fan.Blog.Tests.csproj
+  - dotnet test -c Release ./test/Fan.Web.Tests/Fan.Web.Tests.csproj
+  - dotnet test -c Release ./test/Shortcodes.Tests/Shortcodes.Tests.csproj
