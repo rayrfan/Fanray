@@ -8,9 +8,9 @@ jobs:
   
   steps:
   - task: DotNetCoreInstaller@0
-    displayName: 'Use .NET Core sdk 3.1.101'
+    displayName: 'Use .NET Core sdk 3.1.100'
     inputs:
-      version: 3.1.101
+      version: 3.1.100
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
@@ -22,9 +22,9 @@ jobs:
 
   steps:
   - task: DotNetCoreInstaller@0
-    displayName: 'Use .NET Core sdk 3.1.101'
+    displayName: 'Use .NET Core sdk 3.1.100'
     inputs:
-      version: 3.1.101
+      version: 3.1.100
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
@@ -36,9 +36,9 @@ jobs:
   
   steps:
   - task: DotNetCoreInstaller@0
-    displayName: 'Use .NET Core sdk 3.1.101'
+    displayName: 'Use .NET Core sdk 3.1.100'
     inputs:
-      version: 3.1.101
+      version: 3.1.100
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
