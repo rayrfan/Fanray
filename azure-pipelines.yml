@@ -14,7 +14,7 @@ jobs:
 
   - script: |
       dotnet build --configuration $(buildConfiguration)
-      dotnet test --no-build --configuration $(buildConfiguration)
+      dotnet test --no-build --verbosity d
 
 - job: macOS
   pool:
