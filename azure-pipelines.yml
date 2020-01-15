@@ -7,25 +7,57 @@ jobs:
     vmImage: 'ubuntu-latest'  
  
   steps:
-  - script: |
-      dotnet build --configuration $(buildConfiguration) 
-      dotnet test --configuration $(buildConfiguration)
+  - task: UseDotNet@2
+    displayName: ".NET Core 3.1.x"
+    inputs:
+      version: '3.1.x'
+      packageType: sdk
+  - script: dotnet build --configuration $(buildConfiguration)
+      displayName: 'dotnet build $(buildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+      displayName: "Test"
+      inputs:
+        command: test
+        projects: '**/*tests/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
 
 - job: macOS
   pool:
     vmImage: 'macOS-latest'
 
   steps:
-  - script: |
-      dotnet build --configuration $(buildConfiguration)
-      dotnet test --configuration $(buildConfiguration)
+  - task: UseDotNet@2
+    displayName: ".NET Core 3.1.x"
+    inputs:
+      version: '3.1.x'
+      packageType: sdk
+  - script: dotnet build --configuration $(buildConfiguration)
+      displayName: 'dotnet build $(buildConfiguration)'
+
+  - task: DotNetCoreCLI@2
+      displayName: "Test"
+      inputs:
+        command: test
+        projects: '**/*tests/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
 
 - job: Windows
   pool:
     vmImage: 'windows-latest'
   
   steps:
-  - script: |
-      dotnet build --configuration $(buildConfiguration)
-      dotnet test --configuration $(buildConfiguration)
+  - task: UseDotNet@2
+    displayName: ".NET Core 3.1.x"
+    inputs:
+      version: '3.1.x'
+      packageType: sdk
+  - script: dotnet build --configuration $(buildConfiguration)
+      displayName: 'dotnet build $(buildConfiguration)'
 
+  - task: DotNetCoreCLI@2
+      displayName: "Test"
+      inputs:
+        command: test
+        projects: '**/*tests/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
