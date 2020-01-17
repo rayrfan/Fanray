@@ -28,7 +28,7 @@ $content-font-size: 1.13rem;
 */
 #content-area {
     margin: auto;
-    width: 818px;
+    width: 866px;
     padding: 18px 0;
 
     #post-title {
@@ -103,7 +103,7 @@ $content-font-size: 1.13rem;
             color: inherit;
             font-weight: normal;
             box-shadow: none;
-            display:inline; // shrink top bottom padding
+            display: inline; // shrink top bottom padding
         }
     }
 
@@ -151,6 +151,16 @@ $content-font-size: 1.13rem;
         border-radius: 0;
         padding: 5px;
         color: black;
+
+        code {
+            background-color: transparent;
+            padding: 0;
+            font-family: "SF Mono",menlo,monaco,"Roboto Mono",Consolas,"Lucida Console",monospace;
+            font-size: .866666em;
+            font-weight: normal;
+            color: #353535;
+            box-shadow:none;
+        }
     }
 
     blockquote {

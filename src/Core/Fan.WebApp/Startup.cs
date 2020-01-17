@@ -151,7 +151,6 @@ namespace Fan.WebApp
             // AppInsights
             services.AddApplicationInsightsTelemetry(Configuration);
 
-#if DEBUG
             // RCLs to monitor
             if (Env.IsDevelopment())
             {
@@ -172,7 +171,6 @@ namespace Fan.WebApp
                     }
                 });
             }
-#endif
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -180,9 +178,7 @@ namespace Fan.WebApp
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-#if DEBUG
                 app.UseBrowserLink();
-#endif
                 app.UseDatabaseErrorPage();
             }
             else
