@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <param name="hostingEnvironment"></param>
         /// <returns></returns>
-        public static IServiceCollection AddPlugins(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
+        public static IServiceCollection AddPlugins(this IServiceCollection services, IWebHostEnvironment hostingEnvironment)
         {
             var sysPluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "SysPlugins"));
             var pluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "Plugins"));
@@ -83,7 +83,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddStorageProvider(this IServiceCollection services, IConfiguration configuration)
         {
             var appSettingsConfigSection = configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsConfigSection);
+            services.Configure<AppSettings>(options => appSettingsConfigSection.Bind(options));
             var appSettings = appSettingsConfigSection.Get<AppSettings>();
             if (appSettings.MediaStorageType == EMediaStorageType.AzureBlob)
                 services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();

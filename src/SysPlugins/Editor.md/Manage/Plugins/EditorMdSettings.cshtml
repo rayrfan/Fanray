@@ -5,7 +5,7 @@
     Layout = "_SettingsLayout";
 }
 @section Styles {
-    <link rel="stylesheet" href="~/plugins/editor.md/css/editormd.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/_content/editor.md/css/editormd.min.css" asp-append-version="true" />
 }
 
 <ext-settings inline-template>
@@ -46,8 +46,8 @@ let i = { test: "Hi!" };
 </ext-settings>
 
 @section Scripts {
-    <script src="~/plugins/editor.md/lib/jquery.min.js" asp-append-version="true"></script>
-    <script src="~/plugins/editor.md/js/editormd.min.js" asp-append-version="true"></script>
+    <script src="~/_content/editor.md/lib/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/_content/editor.md/js/editormd.min.js" asp-append-version="true"></script>
     <script>
         Vue.component('ext-settings', {
             data: () => ({
@@ -62,7 +62,7 @@ let i = { test: "Hi!" };
             }),
             mounted() {
                 this.editor = editormd("editor-md", {
-                    path: '/plugins/editor.md/lib/',
+                    path: '/_content/editor.md/lib/',
                     height: 200,
                     theme: this.ext.darkTheme ? 'dark' : 'default',
                     previewTheme: this.ext.darkTheme ? 'dark' : 'default',

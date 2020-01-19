@@ -5,10 +5,15 @@ jobs:
 - job: Linux
   pool:
     vmImage: 'ubuntu-latest'  
- 
+  
   steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
+    inputs:
+      version: 3.1.101
+
   - script: |
-      dotnet build --configuration $(buildConfiguration) 
+      dotnet build --configuration $(buildConfiguration)
       dotnet test --configuration $(buildConfiguration)
 
 - job: macOS
@@ -16,6 +21,11 @@ jobs:
     vmImage: 'macOS-latest'
 
   steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
+    inputs:
+      version: 3.1.101
+
   - script: |
       dotnet build --configuration $(buildConfiguration)
       dotnet test --configuration $(buildConfiguration)
@@ -25,7 +35,12 @@ jobs:
     vmImage: 'windows-latest'
   
   steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'Use .NET Core sdk 3.1.101'
+    inputs:
+      version: 3.1.101
+
   - script: |
       dotnet build --configuration $(buildConfiguration)
-      dotnet test --configuration $(buildConfiguration)
+      dotnet test --no-build --configuration $(buildConfiguration)
 

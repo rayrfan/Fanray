@@ -257,10 +257,10 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task Handle(BlogPostBeforeUpdate notification, CancellationToken cancellationToken)
         {
-            if (notification.TagTitles == null || notification.TagTitles.Count <= 0 || notification.CurrentPost == null) return;
+            if (notification.TagTitles == null || notification.TagTitles.Count <= 0 || notification.PostTags == null) return;
 
             // get tags that are not among current tags
-            var currentTitles = notification.CurrentPost.PostTags.Select(pt => pt.Tag.Title);
+            var currentTitles = notification.PostTags.Select(pt => pt.Tag.Title);
             var distinctTitles = notification.TagTitles.Except(currentTitles);
             var allTags = await GetAllAsync();
 

@@ -21,8 +21,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Fan.Blog.IntegrationTests")]
-[assembly: InternalsVisibleTo("Fan.Blog.UnitTests")]
+[assembly: InternalsVisibleTo("Fan.Blog.Tests")]
 
 namespace Fan.Blog.Services
 {

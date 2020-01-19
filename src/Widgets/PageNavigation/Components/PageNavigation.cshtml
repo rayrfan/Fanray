@@ -1,5 +1,7 @@
 ﻿@using PageNavigation
-@inject SignInManager<User> SignInManager
+@using Microsoft.AspNetCore.Identity
+@using Fan.Membership
+@inject SignInManager<User> signInManager
 @model Tuple<string, string, PageNavigationWidget>
 @{
     var nav = Model.Item1;
@@ -13,7 +15,7 @@
         <h1 class="widget-header">@widget.Title</h1>
     }
     <div class="widget-body page-navigation">
-        @if (SignInManager.IsSignedIn(User))
+        @if (signInManager.IsSignedIn(User))
         {
             <a href="@navEditLink" class="page-nav-edit"><i class="icon-pencil" aria-hidden="true"></i></a>
         }

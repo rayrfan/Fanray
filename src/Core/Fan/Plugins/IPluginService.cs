@@ -11,7 +11,7 @@ namespace Fan.Plugins
         /// </summary>
         /// <param name="folder"></param>
         /// <returns>Id of the plugin.</returns>
-        Task<int> ActivatePluginAsync(string folder);
+        Task<Plugin> ActivatePluginAsync(string folder);
 
         /// <summary>
         /// De-activates a plugin.

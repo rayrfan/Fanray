@@ -18,8 +18,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("Fan.Blog.IntegrationTests")]
-[assembly: InternalsVisibleTo("Fan.Blog.UnitTests")]
+[assembly: InternalsVisibleTo("Fan.Blog.Tests")]
 
 namespace Fan.Blog.Services
 {
@@ -95,7 +94,7 @@ namespace Fan.Blog.Services
             });
 
             // create (post will get new id)
-            await postRepository.CreateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            await postRepository.CreateAsync(post, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache only when published
             if (blogPost.Status == EPostStatus.Published)
@@ -116,10 +115,10 @@ namespace Fan.Blog.Services
         public async Task<BlogPost> UpdateAsync(BlogPost blogPost)
         {
             // validate
-            if (blogPost == null) throw new ArgumentNullException(nameof(blogPost));
+            if (blogPost == null || blogPost.Id <= 0) throw new ArgumentException(null, nameof(blogPost));
             await blogPost.ValidateTitleAsync();
 
-            // prep
+            // prep current post with blog post
             var post = await ConvertToPostAsync(blogPost, ECreateOrUpdate.Update);
 
             // before update
@@ -127,11 +126,11 @@ namespace Fan.Blog.Services
             {
                 CategoryTitle = blogPost.CategoryTitle,
                 TagTitles = blogPost.TagTitles,
-                CurrentPost = await QueryPostAsync(blogPost.Id),
+                PostTags = post.PostTags,
             });
 
             // update
-            await postRepository.UpdateAsync(post, blogPost.CategoryId, blogPost.CategoryTitle, blogPost.TagTitles);
+            await postRepository.UpdateAsync(post, blogPost.CategoryTitle, blogPost.TagTitles);
 
             // invalidate cache 
             await RemoveBlogCacheAsync();
@@ -446,6 +445,9 @@ namespace Fan.Blog.Services
             post.Status = blogPost.Status;
             post.CommentStatus = blogPost.CommentStatus;
 
+            // CategoryId
+            post.CategoryId = blogPost.CategoryId;
+
             logger.LogDebug(createOrUpdate + " {@Post}", post);
             return post;
         }
@@ -469,7 +471,7 @@ namespace Fan.Blog.Services
             blogPost.Excerpt = post.Excerpt.IsNullOrEmpty() ? Util.GetExcerpt(post.Body, EXCERPT_WORD_LIMIT) : post.Excerpt;
 
             // CategoryTitle
-            blogPost.CategoryTitle = post.Category.Title;
+            blogPost.CategoryTitle = post.Category?.Title;
 
             // Tags and TagTitles
             foreach (var postTag in post.PostTags)

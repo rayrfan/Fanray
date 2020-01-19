@@ -32,7 +32,7 @@ namespace Fan.Themes
         private const string CACHE_KEY_INSTALLED_THEMES_MANIFESTS = "installed-theme-manifests";
         private TimeSpan Cache_Time_Installed_Theme_Manifests = new TimeSpan(0, 10, 0);
 
-        public ThemeService(IHostingEnvironment hostingEnvironment,
+        public ThemeService(IWebHostEnvironment hostingEnvironment,
             IDistributedCache distributedCache,
             IMetaRepository metaRepository,
             ILogger<ThemeService> logger)
@@ -71,13 +71,14 @@ namespace Fan.Themes
 
             // register theme-defined widget areas
             var installedThemes = await GetManifestsAsync();
-            var themeToActivate = installedThemes.Single(t => t.Name.Equals(folderName, StringComparison.OrdinalIgnoreCase));
+            var themeToActivate = installedThemes.Single(t => t.Folder.Equals(folderName, StringComparison.OrdinalIgnoreCase));
 
             // check if there is any empty area ids
             if (themeToActivate.WidgetAreas.Any(a => a.Id.IsNullOrEmpty()))
                 throw new FanException("Widget area id cannot be empty.");
 
-            var themeDefinedAreas = themeToActivate.WidgetAreas.Where(ta => !WidgetService.SystemDefinedWidgetAreaInfos.Any(sa => sa.Id == ta.Id));
+            var themeDefinedAreas = themeToActivate.WidgetAreas.Where(ta => 
+                                    !WidgetService.SystemDefinedWidgetAreaInfos.Any(sa => sa.Id == ta.Id));
             foreach (var area in themeDefinedAreas)
             {
                 var key = string.Format($"{folderName}-{area.Id}").ToLower();

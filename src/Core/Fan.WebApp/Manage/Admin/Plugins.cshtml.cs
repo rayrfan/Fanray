@@ -27,8 +27,8 @@ namespace Fan.WebApp.Manage.Admin
 
         public async Task<IActionResult> OnPostActivateAsync([FromBody]PluginDto dto)
         {
-            var id = await pluginService.ActivatePluginAsync(dto.Folder);
-            return new JsonResult(id);
+            var plugin = await pluginService.ActivatePluginAsync(dto.Folder);
+            return new JsonResult(plugin.Id);
         }
 
         public async Task<IActionResult> OnPostDeactivateAsync([FromBody]PluginDto dto)

@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "build": "npm run scss",
-    "scss": "sass --update client/scss:wwwroot/plugins/shortcodes/css --style compressed",
-    "scss:watch": "sass --watch client/scss:wwwroot/plugins/shortcodes/css --style compressed"
+    "scss": "sass --update client/scss:wwwroot/css --style compressed",
+    "scss:watch": "sass --watch client/scss:wwwroot/css --style compressed"
   },
   "devDependencies": {
-    "sass": "1.22.1"
+    "sass": "1.24.4"
   }
 }

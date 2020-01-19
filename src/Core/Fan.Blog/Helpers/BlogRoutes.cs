@@ -165,62 +165,62 @@ namespace Fan.Blog.Helpers
         /// Registers the blog app's routes.
         /// </summary>
         /// <param name="routes"></param>
-        public static void RegisterRoutes(IRouteBuilder routes)
+        public static void RegisterRoutes(IEndpointRouteBuilder routes)
         {
             // "blog"
-            routes.MapRoute("Blog", App.BLOG_APP_URL, new { controller = "Blog", action = "Index" });
+            routes.MapControllerRoute("Blog", App.BLOG_APP_URL, new { controller = "Blog", action = "Index" });
 
             // "rsd"
-            routes.MapRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
+            routes.MapControllerRoute("RSD", "rsd", new { controller = "Blog", action = "Rsd" });
 
             // "blog/post/1"
-            routes.MapRoute("BlogPostPerma", string.Format(POST_PERMA_URL, "{id}"),
+            routes.MapControllerRoute("BlogPostPerma", string.Format(POST_PERMA_URL, "{id}"),
                new { controller = "Blog", action = "PostPerma", id = 0 }, new { id = @"^\d+$" });
 
             // "post/2017/01/01/test-post"
-            routes.MapRoute("BlogPost", string.Format(POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
+            routes.MapControllerRoute("BlogPost", string.Format(POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "Post", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
             // "preview/post/2017/01/01/test-post"
-            routes.MapRoute("BlogPreview", string.Format(PREVIEW_POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
+            routes.MapControllerRoute("BlogPreview", string.Format(PREVIEW_POST_RELATIVE_URL, "{year}", "{month}", "{day}", "{slug}"),
                 new { controller = "Blog", action = "PreviewPost", year = 0, month = 0, day = 0, slug = "" },
                 new { year = @"^\d+$", month = @"^\d+$", day = @"^\d+$" });
 
             // "posts/categorized/technology"
-            routes.MapRoute("BlogCategory", string.Format(CATEGORY_URL, "{slug}"),
+            routes.MapControllerRoute("BlogCategory", string.Format(CATEGORY_URL, "{slug}"),
                 new { controller = "Blog", action = "Category", slug = "" });
 
             // "posts/tagged/cs" 
-            routes.MapRoute("BlogTag", string.Format(TAG_URL, "{slug}"),
+            routes.MapControllerRoute("BlogTag", string.Format(TAG_URL, "{slug}"),
                 new { controller = "Blog", action = "Tag", slug = "" });
 
             // "posts/2017/12" 
-            routes.MapRoute("BlogArchive", string.Format(ARCHIVE_URL, "{year}", "{month}"),
+            routes.MapControllerRoute("BlogArchive", string.Format(ARCHIVE_URL, "{year}", "{month}"),
                 new { controller = "Blog", action = "Archive", year = 0, month = 0 },
                 new { year = @"^\d+$", month = @"^\d+$" });
 
             // "feed"
-            routes.MapRoute("BlogFeed", "feed", new { controller = "Blog", action = "Feed" });
+            routes.MapControllerRoute("BlogFeed", "feed", new { controller = "Blog", action = "Feed" });
 
             // "posts/categorized/technology/feed"
-            routes.MapRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL, "{slug}"),
+            routes.MapControllerRoute("BlogCategoryFeed", string.Format(CATEGORY_RSS_URL, "{slug}"),
                 new { controller = "Blog", action = "CategoryFeed", slug = "" });
 
             // "preview/page/about"
-            routes.MapRoute("PagePreview", string.Format(PREVIEW_PARENT_RELATIVE_URL, "{parentSlug}"),
+            routes.MapControllerRoute("PagePreview", string.Format(PREVIEW_PARENT_RELATIVE_URL, "{parentSlug}"),
                 new { controller = "Blog", action = "PreviewPage", parentSlug = "" });
 
             // "preview/page/about/ray"
-            routes.MapRoute("ChildPagePreview", string.Format(PREVIEW_PARENT_CHILD_RELATIVE_URL, "{parentSlug}", "{childSlug}"),
+            routes.MapControllerRoute("ChildPagePreview", string.Format(PREVIEW_PARENT_CHILD_RELATIVE_URL, "{parentSlug}", "{childSlug}"),
                 new { controller = "Blog", action = "PreviewPage", parentSlug = "", childSlug = "" });
 
             // "about"
-            routes.MapRoute("Page", "{parentPage}",
+            routes.MapControllerRoute("Page", "{parentPage}",
                 defaults: new { controller = "Blog", action = "Page", parentPage = "" });
 
             // "about/ray"
-            routes.MapRoute("ChildPage", "{parentPage}/{childPage}",
+            routes.MapControllerRoute("ChildPage", "{parentPage}/{childPage}",
                 defaults: new { controller = "Blog", action = "Page", parentPage = "", childPage = "" });
         }
     }

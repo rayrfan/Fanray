@@ -18,12 +18,11 @@
 	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
 	</a>
 	<a href="https://fanray.visualstudio.com/Fanray/_build?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=master" alt="Azure Pipelines">
+	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=dev" alt="Azure Pipelines">
 	</a>
 	<a href="https://travis-ci.org/FanrayMedia/Fanray">
 	  <img src="https://travis-ci.org/FanrayMedia/Fanray.svg?branch=master" alt="Travis CI">
 	</a>
-    <a href="https://github.com/996icu/996.ICU"><img src="https://img.shields.io/badge/link-996.icu-blue.svg" alt="996.icu" /></a>
   </p>
 </p>
 
@@ -55,7 +54,7 @@ Fanray has an _extensible design_ that allows you to create _plugins_, _themes_ 
  
 ## Quick Start
 
-Fanray v1.1 runs on [.NET Core 2.2](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
+Fanray v1.1 runs on [.NET Core 3.1](https://www.microsoft.com/net/download) and [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads). Any of the free SQL Server editions, LocalDB, Express, Developer will be sufficient.
 
 Clone the repo then run from either [VS2019](https://www.visualstudio.com/vs/community/) or command line.
 

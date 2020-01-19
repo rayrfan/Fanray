@@ -22,8 +22,8 @@ namespace Fan.Navigation
 
         public async Task<string> GetNavUrlAsync(int id)
         {
-            var appNav = await AppNavs.ToAsyncEnumerable().Single(a => a.Id == id);
-            return appNav.Url;
+            var appNav = AppNavs.Single(a => a.Id == id);
+            return await Task.FromResult(appNav.Url);
         }
     }
 }

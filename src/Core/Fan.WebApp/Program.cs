@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.IO;
@@ -39,7 +39,7 @@ namespace Fan.WebApp
             {
                 Log.Information("Starting web host");
 
-                CreateWebHostBuilder(args).Build().Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
@@ -67,10 +67,13 @@ namespace Fan.WebApp
         /// <see href="https://github.com/serilog/serilog-aspnetcore/issues/3">but I'm using Serilog in place of those</see>,
         /// the configuration of Serilog is at the beginning of the Main method.
         /// </remarks>
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseApplicationInsights()
-                .UseSerilog()
-                .UseStartup<Startup>();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStaticWebAssets(); // https://bit.ly/36vNWgY
+                    webBuilder.UseStartup<Startup>();
+                })
+                .UseSerilog();
     }
 }

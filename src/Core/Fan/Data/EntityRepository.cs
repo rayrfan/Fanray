@@ -22,6 +22,8 @@ namespace Fan.Data
         /// The set initialized by sub class.
         /// </summary>
         protected readonly DbSet<T> _entities;
+        protected readonly bool isSqlite;
+
         /// <summary>
         /// The specific context initialized by sub class.
         /// </summary>
@@ -31,6 +33,7 @@ namespace Fan.Data
         {
             _entities = context.Set<T>();
             _db = context;
+            isSqlite = _db.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
         }
 
         /// <summary>
@@ -87,8 +90,10 @@ namespace Fan.Data
         /// Suitable when predicate is very simple and short.  If you take a look at 
         /// SqlTagRepository GetListAsync() that is not suitable for this.
         /// </remarks>
-        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) 
-            => await _entities.Where(predicate).ToListAsync();
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) =>
+            isSqlite ? 
+                _entities.ToList().Where(predicate.Compile()).ToList() :
+                await _entities.Where(predicate).ToListAsync();
 
         /// <summary>
         /// Returns an object by id, returns null if not found.

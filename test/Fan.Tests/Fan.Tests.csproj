@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Plugins\MyPlugin\plugin.json" />
+    <None Remove="SysPlugins\MySysPlugin\plugin.json" />
+    <None Remove="Themes\MyTheme\theme.json" />
+    <None Remove="Widgets\MyWidget\widget.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Plugins\MyPlugin\plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SysPlugins\MySysPlugin\plugin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Themes\MyTheme\theme.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Widgets\MyWidget\widget.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+    <PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\Fan\Fan.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -23,7 +23,7 @@ namespace Fan.Extensibility
     {
         protected readonly IMetaRepository metaRepository;
         protected readonly IDistributedCache distributedCache;
-        protected readonly IHostingEnvironment hostingEnvironment;
+        protected readonly IWebHostEnvironment hostingEnvironment;
         protected readonly ILogger<IExtensibleService<TManifest, TExtension>> logger;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Fan.Extensibility
 
         public ExtensibleService(IMetaRepository metaRepository,
             IDistributedCache distributedCache,
-            IHostingEnvironment hostingEnvironment, 
+            IWebHostEnvironment hostingEnvironment, 
             ILogger<IExtensibleService<TManifest, TExtension>> logger)
         {
             this.metaRepository = metaRepository;
