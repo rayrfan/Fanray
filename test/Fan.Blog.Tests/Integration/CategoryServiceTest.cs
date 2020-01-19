@@ -55,18 +55,9 @@ namespace Fan.Blog.Tests.Integration
             // When create another category with the same title
             Task action() => _catSvc.CreateAsync(CAT_TITLE);
 
-            // Then you got exception
-            await Assert.ThrowsAsync<FanException>(action);
-
-            // and you got msgs
-            try
-            {
-                await action();
-            }
-            catch (FanException ex)
-            {
-                Assert.Equal($"'{CAT_TITLE}' already exists.", ex.Message);
-            }
+            // Then you got exception with msg
+            var ex = await Assert.ThrowsAsync<FanException>(action);
+            Assert.Equal($"'{CAT_TITLE}' already exists.", ex.Message);
         }
 
         /// <summary>
@@ -84,18 +75,9 @@ namespace Fan.Blog.Tests.Integration
             cat.Title = "Tech";
             Task action() => _catSvc.UpdateAsync(cat);
 
-            // Then you got exception
-            await Assert.ThrowsAsync<FanException>(action);
-
-            // and error message
-            try
-            {
-                await _catSvc.UpdateAsync(cat);
-            }
-            catch (FanException ex)
-            {
-                Assert.Equal("'Tech' already exists.", ex.Message);
-            }
+            // Then you got exception with msg
+            var ex = await Assert.ThrowsAsync<FanException>(action);
+            Assert.Equal("'Tech' already exists.", ex.Message);
         }
 
         /// <summary>

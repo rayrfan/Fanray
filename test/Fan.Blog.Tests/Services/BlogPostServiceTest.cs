@@ -378,18 +378,9 @@ namespace Fan.Blog.Tests.Services
             var blogPost = new BlogPost { Title = title, Status = status };
 
             // When validate it throws FanException
-            await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
-
-            // And with these number of errors and messages
-            try
-            {
-                await blogPost.ValidateTitleAsync();
-            }
-            catch (FanException ex)
-            {
-                Assert.Equal(numberOfErrors, ex.ValidationErrors.Count);
-                Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
-            }
+            var ex = await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
+            Assert.Equal(numberOfErrors, ex.ValidationErrors.Count);
+            Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
         }
 
         /// <summary>
@@ -405,17 +396,10 @@ namespace Fan.Blog.Tests.Services
             var blogPost = new BlogPost { Title = title, Status = status };
 
             // Act: validate
-            await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
-            try
-            {
-                await blogPost.ValidateTitleAsync();
-            }
-            catch (FanException ex)
-            {
-                // Assert: 1 error
-                Assert.Equal(1, ex.ValidationErrors.Count);
-                Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
-            }
+            var ex = await Assert.ThrowsAsync<FanException>(() => blogPost.ValidateTitleAsync());
+            // Assert: 1 error
+            Assert.Equal(1, ex.ValidationErrors.Count);
+            Assert.Equal(expectedMessages[0], ex.ValidationErrors[0].ErrorMessage);
         }
 
         /// <summary>

@@ -78,18 +78,12 @@ namespace Fan.Blog.Tests.Services
         [Fact]
         public async void CreateTag_Throws_FanException_If_Title_Already_Exist()
         {
-            try
-            {
-                // Arrange: a category with a title that exists
-                var tag = new Tag { Title = "Technology" };
+            // Arrange: a category with a title that exists
+            var tag = new Tag { Title = "Technology" };
 
-                // Act and Assert: error message
-                await tagService.CreateAsync(tag);
-            }
-            catch (FanException ex)
-            {
-                Assert.Equal("'Technology' already exists.", ex.Message);
-            }
+            // Act and Assert: error message
+            var ex = await Assert.ThrowsAsync<FanException>(() => tagService.CreateAsync(tag));
+            Assert.Equal("'Technology' already exists.", ex.Message);
         }
 
         /// <summary>
