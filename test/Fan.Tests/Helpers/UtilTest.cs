@@ -140,29 +140,34 @@ namespace Fan.Tests.Helpers
         /// Test cases for <see cref="RegexUtilities.IsValidEmail(string)"/> method.
         /// </summary>
         /// <param name="email"></param>
-        /// <param name="expected"></param>
         /// <remarks>
         /// Test data provided by https://docs.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format#compiling-the-code
         /// </remarks>
         [Theory]
-        [InlineData("david.jones@proseware.com", true)]
-        [InlineData("d.j@server1.proseware.com", true)]
-        [InlineData("jones@ms1.proseware.com", true)]
-        [InlineData("j.@server1.proseware.com", false)]
-        [InlineData("j@proseware.com9", true)]
-        [InlineData("js#internal@proseware.com", true)]
-        [InlineData("j_9@[129.126.118.1]", true)]
-        [InlineData("j..s@proseware.com", false)]
-        [InlineData("js*@proseware.com", false)]
-        [InlineData("js@proseware..com", false)]
-        [InlineData("js@proseware.com9", true)]
-        [InlineData("j.s@server1.proseware.com", true)]
-        [InlineData(@"""j\""s\""""@proseware.com", true)]
-        [InlineData("js@contoso.中国", true)]
-        [InlineData("a@a", false)]
-        public void IsValidEmail_Test(string email, bool expected)
+        [InlineData("david.jones@proseware.com")]
+        [InlineData("d.j@server1.proseware.com")]
+        [InlineData("jones@ms1.proseware.com")]
+        [InlineData("j@proseware.com9")]
+        [InlineData("js#internal@proseware.com")]
+        [InlineData("j_9@[129.126.118.1]")]
+        [InlineData("js@proseware.com9")]
+        [InlineData("j.s@server1.proseware.com")]
+        [InlineData(@"""j\""s\""""@proseware.com")]
+        [InlineData("js@contoso.中国")]
+        public void IsValidEmail_returns_true_on_valid_emails(string email)
         {
-            Assert.Equal(expected, Util.IsValidEmail(email));
+            Assert.True(Util.IsValidEmail(email));
+        }
+
+        [Theory]
+        [InlineData("j.@server1.proseware.com")]
+        [InlineData("j..s@proseware.com")]
+        [InlineData("js*@proseware.com")]
+        [InlineData("js@proseware..com")]
+        [InlineData("a@a")]
+        public void IsValidEmail_returns_false_on_invalid_emails(string email)
+        {
+            Assert.False(Util.IsValidEmail(email));
         }
 
         [Fact]
