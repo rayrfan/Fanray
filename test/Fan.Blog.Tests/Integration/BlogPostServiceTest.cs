@@ -242,12 +242,12 @@ namespace Fan.Blog.Tests.Integration
                 TagTitles = null,                   // user didn't input
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
-                CreatedOn = DateTimeOffset.Now      // user local time
+                CreatedOn = DateTimeOffset.Now.AddDays(-1.01)      // user local time
             });
 
             var coreSettings = new CoreSettings();
             // Then the date displays human friend string
-            Assert.Equal("now", postNow.CreatedOn.ToDisplayString(coreSettings.TimeZoneId));
+            Assert.Equal("yesterday", postNow.CreatedOn.ToDisplayString(coreSettings.TimeZoneId));
         }
 
         /// <summary>
