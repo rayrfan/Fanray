@@ -120,7 +120,8 @@
                 autosave: {
                     save(editor) {
                         clearTimeout(typingTimer);
-                        if (!self.post.published) {
+                        let body = self.editor.getData();
+                        if (!self.post.published && body && body.trim().length !== 0) { // save only when there is content
                             self.saveVisible = true;
                             self.saveDisabled = false;
                             self.saveText = 'Save';
