@@ -66,7 +66,7 @@ namespace Fan.Web.Helpers
         {
             if (parentPage.IsNullOrEmpty()) parentPage = "Home";
 
-            var page = await pageService.GetAsync(parentPage, childPage);
+            var page = await pageService.GetAsync(isPreview: false, parentPage, childPage);
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
 
             return ("../Blog/Page", new PageVM

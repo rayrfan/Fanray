@@ -43,7 +43,7 @@ namespace PageNavigation.Components
             }
 
             // visible only parent has children
-            var page = await pageService.GetAsync(slugs);
+            var page = await pageService.GetAsync(Request.Path.ToString().StartsWith("/preview"), slugs);
             if (page.IsParent && !page.HasChildren)
             {
                 return await Task.FromResult<IViewComponentResult>(Content(string.Empty));

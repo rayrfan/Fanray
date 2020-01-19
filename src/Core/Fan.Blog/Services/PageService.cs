@@ -222,6 +222,7 @@ namespace Fan.Blog.Services
         /// children will also be returned if any, if the page is a child its siblings will also be 
         /// returned if any.
         /// </summary>
+        /// <param name="isPreview">True if page is being retrieved for previewing.</param>
         /// <param name="slugs">The slugs that lead to the page.</param>
         /// <exception cref="FanException">
         /// Thrown if page by <paramref name="slugs"/> is not found or the page is a <see cref="EPostStatus.Draft"/>
@@ -231,11 +232,32 @@ namespace Fan.Blog.Services
         /// <remarks>
         /// Caches individual page instead of on <see cref="GetParentsAsync"/> as a bulk.
         /// </remarks>
-        public async Task<Page> GetAsync(params string[] slugs)
+        public async Task<Page> GetAsync(bool isPreview, params string[] slugs)
         {
             if (slugs == null || slugs.Length <= 0)
             {
                 throw new ArgumentNullException(nameof(slugs));
+            }
+
+            if (isPreview) // don't cache when preivew
+            {
+                var parents = await GetParentsAsync(withChildren: true);
+
+                // find slugs[0], throw if not found or draft, url encode takes care of url with foreign chars
+                var page = parents.SingleOrDefault(p => p.Slug.Equals(WebUtility.UrlEncode(slugs[0]), StringComparison.CurrentCultureIgnoreCase));
+                if (page == null)
+                {
+                    throw new FanException(EExceptionType.ResourceNotFound);
+                }
+
+                // page requested is a child, throw if not found or draft
+                if (page.IsParent && slugs.Length > 1 && !slugs[1].IsNullOrEmpty())
+                {
+                    var child = page.Children.SingleOrDefault(p => p.Slug.Equals(slugs[1], StringComparison.CurrentCultureIgnoreCase));
+                    page = child ?? throw new FanException(EExceptionType.ResourceNotFound);
+                }
+
+                return page;
             }
 
             // caching

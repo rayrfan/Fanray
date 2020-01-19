@@ -91,20 +91,15 @@ namespace Fan.Blog.Tests.Integration
             var userId = Seed_1User();
 
             // When he publishes a page with a title "Login" which conflicts with Reserved Slug
-            try
+            var ex = await Assert.ThrowsAsync<FanException>(() => _pageService.CreateAsync(new Page
             {
-                await _pageService.CreateAsync(new Page
-                {
-                    UserId = userId,
-                    Title = "Login",
-                    Status = EPostStatus.Published,
-                });
-            }
-            catch (FanException ex)
-            {
-                // Then FanException is thrown with the following msg
-                Assert.Equal(string.Format(PageService.RESERVED_SLUG_MSG, "login"), ex.Message);
-            }
+                UserId = userId,
+                Title = "Login",
+                Status = EPostStatus.Published,
+            }));
+
+            // Then FanException is thrown with the following msg
+            Assert.Equal(string.Format(PageService.RESERVED_SLUG_MSG, "login"), ex.Message);
         }
 
         /// <summary>
@@ -137,22 +132,20 @@ namespace Fan.Blog.Tests.Integration
             Seed_2_Parents_With_1_Child_Each();
 
             // When he publishes a page with a title "Page1" which is a duplicate of a seeded page
-            try
+            // Then FanException is thrown with the following msg
+            var ex = await Assert.ThrowsAsync<FanException>(() => _pageService.CreateAsync(new Page
             {
-                await _pageService.CreateAsync(new Page
-                {
-                    UserId = Actor.ADMIN_ID,
-                    Title = "Page1",
-                    Status = EPostStatus.Published,
-                });
-            }
-            catch (FanException ex)
-            {
-                // Then FanException is thrown with the following msg
-                Assert.Equal(PageService.DUPLICATE_TITLE_MSG, ex.Message);
-            }
+                UserId = Actor.ADMIN_ID,
+                Title = "Page1",
+                Status = EPostStatus.Published,
+            }));
+
+            Assert.Equal(PageService.DUPLICATE_TITLE_MSG, ex.Message);
         }
 
+        /// <summary>
+        /// Drafts are not visible to public.
+        /// </summary>
         [Fact]
         public async void Get_draft_page_from_public_throws_FanException()
         {
@@ -165,7 +158,25 @@ namespace Fan.Blog.Tests.Integration
             await _pageService.UpdateAsync(page);
 
             // Then you get exception
-            await Assert.ThrowsAsync<FanException>(() => _pageService.GetAsync(page.Slug));
+            await Assert.ThrowsAsync<FanException>(() => _pageService.GetAsync(isPreview: false, page.Slug));
+        }
+
+        /// <summary>
+        /// Drafts are not visible to public but they are visible for previewing.
+        /// </summary>
+        [Fact]
+        public async void Get_draft_page_from_preview_does_not_throw_FanException()
+        {
+            // Given a published parent page
+            var pageId = Seed_1Page();
+
+            // When update it to draft
+            var page = await _pageService.GetAsync(pageId);
+            page.Status = EPostStatus.Draft;
+            await _pageService.UpdateAsync(page);
+
+            // Then you get no exception
+            await _pageService.GetAsync(isPreview: true, page.Slug);
         }
 
         [Fact]
