@@ -64,21 +64,4 @@ babel js --out-dir ../../../wwwroot/admin/js --source-maps --plugins transform-r
 
 ## Scss
 
-### Prerequisite
-
-1. download [RubyInstaller](https://rubyinstaller.org/)
-2. run `gem install sass`
-
-### Develop
-
-```bash
-sass --watch scss/admin.scss:../../../wwwroot/admin/css/admin.css
-sass --watch scss/compose.scss:../../../wwwroot/admin/css/compose.css
-```
-
-### Release
-
-```bash
-sass scss/admin.scss ../../../wwwroot/admin/css/admin.css --style compressed
-sass scss/compose.scss ../../../wwwroot/admin/css/compose.css --style compressed
-```
+See package.json

@@ -4,13 +4,16 @@
   "description": "Fanray Admin Panel",
   "author": "Ray Fan",
   "license": "Apache-2.0",
-  "scripts": {},
-  "dependencies": {},
+  "scripts": {
+    "scss": "sass --update scss:../../../wwwroot/admin/css --style compressed",
+    "scss:w": "sass --watch scss:../../../wwwroot/admin/css --style compressed"
+  },
   "devDependencies": {
-    "@babel/cli": "7.6.2",
-    "@babel/core": "7.6.2",
-    "@babel/plugin-proposal-object-rest-spread": "7.6.2",
+    "@babel/cli": "7.8.3",
+    "@babel/core": "7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "7.8.3",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "babel-preset-minify": "^0.5.1"
+    "babel-preset-minify": "^0.5.1",
+    "sass": "1.25.0"
   }
 }
