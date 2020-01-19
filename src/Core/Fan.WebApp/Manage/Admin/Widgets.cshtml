@@ -7,61 +7,71 @@
 <widgets inline-template ref="exts">
     <v-container fluid>
         <v-layout align-start>
-            <v-flex xs6 md4 elevation-1 ma-2>
-                <v-list dense>
-                    <v-subheader>
-                        Available Widgets
-                    </v-subheader>
-                    <draggable id="widget-infos"
-                               v-model="widgetInfos"
-                               v-bind="infoOptions"
-                               style="cursor:pointer">
-                        <template v-for="info in widgetInfos">
-                            <v-list-tile :key="info.id" avatar style="border:1px solid #eee;margin:5px">
-                                <v-list-tile-content>
-                                    <div>
-                                        <span style="font-weight:bold;color:#333">{{info.name}}</span>
-                                        <span style="color:#999">- {{info.description}}</span>
-                                    </div>
-                                </v-list-tile-content>
-                            </v-list-tile>
+            @* Available Widgets *@
+            <v-flex xs6 md4 elevation-1>
+                <v-expansion-panel v-model="infoPanel" expand disabled class="elevation-1">
+                    <v-expansion-panel-content class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>Available Widgets</h4>
                         </template>
-                    </draggable>
-                </v-list>
+                        <v-list dense>
+                            <draggable id="widget-infos"
+                                       v-model="widgetInfos"
+                                       v-bind="infoOptions"
+                                       style="cursor:pointer">
+                                <template v-for="info in widgetInfos">
+                                    <v-list-tile :key="info.id" avatar style="border:1px solid #eee;margin:5px">
+                                        <v-list-tile-content>
+                                            <div>
+                                                <span style="font-weight:bold;color:#333">{{info.name}}</span>
+                                                <span style="color:#999">- {{info.description}}</span>
+                                            </div>
+                                        </v-list-tile-content>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
             </v-flex>
+            @* Widget Areas *@
             <v-flex xs6 md4>
-                <v-list dense class="elevation-1 ma-2" v-for="area in widgetAreas" :key="area.id">
-                    <v-subheader>
-                        {{ area.title }}
-                    </v-subheader>
-                    <draggable :id="area.id"
-                               v-model="area.widgets"
-                               v-bind="areaOptions"
-                               @@add="add"
-                               @@sort="sort"
-                               style="min-height: 10px;cursor:move">
-                        <template v-for="widget in area.widgetInstances">
-                            <v-list-tile :key="widget.id" avatar style="border:1px solid #eee;margin:5px">
-                                <v-list-tile-content>
-                                    <div>
-                                        <span style="font-weight:bold;color:#333">{{widget.name}}</span>
-                                        <span style="color:#999">: {{widget.title}}</span>
-                                    </div>
-                                </v-list-tile-content>
-                                <v-list-tile-action>
-                                    <v-list-tile-action-text>
-                                        <v-btn flat icon class="mr-1" @@click="viewSettings(widget)">
-                                            <v-icon>edit</v-icon>
-                                        </v-btn>
-                                        <v-btn flat icon @@click="deleteWidget(widget, area.id)">
-                                            <v-icon>delete</v-icon>
-                                        </v-btn>
-                                    </v-list-tile-action-text>
-                                </v-list-tile-action>
-                            </v-list-tile>
+                <v-expansion-panel v-model="areaPanels" expand class="elevation-1 ml-3">
+                    <v-expansion-panel-content v-for="area in widgetAreas" :key="area.id" class="grey lighten-3">
+                        <template v-slot:header>
+                            <h4>{{ area.title }}</h4>
                         </template>
-                    </draggable>
-                </v-list>
+                        <v-list dense>
+                            <draggable :id="area.id"
+                                       v-model="area.widgets"
+                                       v-bind="areaOptions"
+                                       @@add="add"
+                                       @@sort="sort"
+                                       style="min-height: 10px;cursor:move">
+                                <template v-for="widget in area.widgetInstances">
+                                    <v-list-tile :key="widget.id" avatar style="border:1px solid #eee;margin:5px">
+                                        <v-list-tile-content>
+                                            <div>
+                                                <span style="font-weight:bold;color:#333">{{widget.name}}</span>
+                                                <span style="color:#999">: {{widget.title}}</span>
+                                            </div>
+                                        </v-list-tile-content>
+                                        <v-list-tile-action>
+                                            <v-list-tile-action-text>
+                                                <v-btn flat icon class="mr-1" @@click="viewSettings(widget)">
+                                                    <v-icon>edit</v-icon>
+                                                </v-btn>
+                                                <v-btn flat icon @@click="deleteWidget(widget, area.id)">
+                                                    <v-icon>delete</v-icon>
+                                                </v-btn>
+                                            </v-list-tile-action-text>
+                                        </v-list-tile-action>
+                                    </v-list-tile>
+                                </template>
+                            </draggable>
+                        </v-list>                    
+                    </v-expansion-panel-content>
+                </v-expansion-panel>            
             </v-flex>
         </v-layout>
         <v-dialog lazy
@@ -102,6 +112,8 @@
                 return {
                     widgetInfos: @Html.Raw(Model.WidgetManifestsJson),
                     widgetAreas: @Html.Raw(Model.WidgetAreasJson),
+                    areaPanels: @Html.Raw(Model.WidgetAreaPanelsJson),
+                    infoPanel: [true],
                     infoOptions: {
                         group: { name:'widgets', pull:'clone', put: false },
                         sort: false

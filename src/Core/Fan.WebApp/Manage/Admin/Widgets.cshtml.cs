@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.WebApp.Manage.Admin
@@ -19,8 +20,9 @@ namespace Fan.WebApp.Manage.Admin
 
         public string WidgetManifestsJson { get; private set; }
         public string WidgetAreasJson { get; private set; }
+        public string WidgetAreaPanelsJson { get; private set; }
 
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
             // manifests
             var widgetManifests = await widgetService.GetManifestsAsync();
@@ -29,6 +31,14 @@ namespace Fan.WebApp.Manage.Admin
             // areas
             var widgetAreas = await widgetService.GetCurrentThemeAreasAsync();
             WidgetAreasJson = JsonConvert.SerializeObject(widgetAreas);
+
+            // areas panels
+            var panels = new bool[widgetAreas.ToArray().Length];
+            for (int i = 0; i < panels.Length; i++)
+            {
+                panels[i] = true;
+            }
+            WidgetAreaPanelsJson = JsonConvert.SerializeObject(panels);
         }
 
         /// <summary>
