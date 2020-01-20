@@ -49,15 +49,15 @@ namespace Fan.Web.Controllers
         /// </summary>
         /// <returns></returns>
         [ModelPreRender]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
             var nav = coreSettings.Home;
 
             if (nav.Type == ENavType.Page)
             {
-                var page = await pageService.GetAsync(nav.Id);
-                var (pagePath, pageModel) = await homeHelper.GetPageAsync(page.Slug);
+                var page2 = await pageService.GetAsync(nav.Id);
+                var (pagePath, pageModel) = await homeHelper.GetPageAsync(page2.Slug);
                 await statsService.IncViewCountAsync(EPostType.Page, pageModel.Id);
                 pageModel.ViewCount++;
                 return View(pagePath, pageModel);
@@ -70,7 +70,7 @@ namespace Fan.Web.Controllers
             }
 
             // default to blog app
-            var (indexPath, indexModel) = await homeHelper.GetBlogIndexAsync(BlogPostService.DEFAULT_PAGE_INDEX);
+            var (indexPath, indexModel) = await homeHelper.GetBlogIndexAsync(page);
             return View(indexPath, indexModel);
         }
 
