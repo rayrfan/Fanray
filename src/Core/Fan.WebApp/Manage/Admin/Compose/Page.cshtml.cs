@@ -6,7 +6,6 @@ using Fan.Blog.Models.View;
 using Fan.Blog.Services;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
-using Fan.Helpers;
 using Fan.Membership;
 using Fan.Settings;
 using Fan.Themes;
@@ -269,6 +268,20 @@ namespace Fan.WebApp.Manage.Admin.Compose
             // title
             var title = pageIM.Title.IsNullOrEmpty() ? "Untitled" : pageIM.Title;
 
+            // body 
+            var body = pageIM.Body;
+
+            // author
+            var user = await userManager.GetUserAsync(HttpContext.User);
+            var author = user.DisplayName;
+
+            // date
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            var date = DateTimeOffset.Parse(pageIM.PostDate).ToDisplayString(coreSettings.TimeZoneId);
+
+            // layout
+            var pageLayout = pageIM.PageLayout;
+
             // slug
             var slug = PageService.SlugifyPageTitle(pageIM.Title);
             if (slug.IsNullOrEmpty()) slug = "untitled";
@@ -281,25 +294,11 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 parentSlug = parent.Slug;
             }
 
-            // body 
-            var body = pageIM.Body;
-                //Markdown.ToHtml(pageIM.BodyMark);
-
-            // author
-            var user = await userManager.GetUserAsync(HttpContext.User);
-            var author = user.DisplayName;
-
-            // date
-            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
-            var date = DateTimeOffset.Parse(pageIM.PostDate).ToDisplayString(coreSettings.TimeZoneId);
-
-            // TempData
+            // preview relative link (the slugs are url encoded)
             var prevRelLink = parentSlug.IsNullOrEmpty() ? BlogRoutes.GetPagePreviewRelativeLink(slug) :
                               BlogRoutes.GetPagePreviewRelativeLink(parentSlug, slug);
 
-            // hide
-            var pageLayout = pageIM.PageLayout;
-
+            // put vm in tempdata with preview link as key
             var pageVM = new PageVM
             {
                 Author = author,

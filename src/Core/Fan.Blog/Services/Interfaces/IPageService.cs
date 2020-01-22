@@ -45,7 +45,6 @@ namespace Fan.Blog.Services.Interfaces
         /// <summary>
         /// Returns a page by <paramref name="slugs"/>. If the page is a parent its children will be returned with it.
         /// </summary>
-        /// <param name="isPreview">True if page is being retrieved for previewing.</param>
         /// <param name="slugs">The slugs that lead to the page.</param>
         /// <returns>
         /// A <see cref="Page"/> for public viewing.
@@ -54,7 +53,7 @@ namespace Fan.Blog.Services.Interfaces
         /// Thrown if page by <paramref name="slugs"/> is not found or the page is a <see cref="EPostStatus.Draft"/>
         /// or its parent is a <see cref="EPostStatus.Draft"/>.
         /// </exception>
-        Task<Page> GetAsync(bool isPreview, params string[] slugs);
+        Task<Page> GetAsync(params string[] slugs);
 
         /// <summary>
         /// Returns all parent pages, when <paramref name="withChildren"/> is true their children are also returned.

@@ -158,25 +158,7 @@ namespace Fan.Blog.Tests.Integration
             await _pageService.UpdateAsync(page);
 
             // Then you get exception
-            await Assert.ThrowsAsync<FanException>(() => _pageService.GetAsync(isPreview: false, page.Slug));
-        }
-
-        /// <summary>
-        /// Drafts are not visible to public but they are visible for previewing.
-        /// </summary>
-        [Fact]
-        public async void Get_draft_page_from_preview_does_not_throw_FanException()
-        {
-            // Given a published parent page
-            var pageId = Seed_1Page();
-
-            // When update it to draft
-            var page = await _pageService.GetAsync(pageId);
-            page.Status = EPostStatus.Draft;
-            await _pageService.UpdateAsync(page);
-
-            // Then you get no exception
-            await _pageService.GetAsync(isPreview: true, page.Slug);
+            await Assert.ThrowsAsync<FanException>(() => _pageService.GetAsync(page.Slug));
         }
 
         [Fact]

@@ -13,6 +13,7 @@ using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -74,7 +75,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Returns viewing of a single post.
+        /// A blog post.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -91,7 +92,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Returns previewing of a single post.  
+        /// Preview a post.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -122,18 +123,34 @@ namespace Fan.Web.Controllers
             }
         }
 
+        /// <summary>
+        /// Blog post perma link.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> PostPerma(int id)
         {
             var post = await blogPostService.GetAsync(id);
             return Redirect(BlogRoutes.GetPostRelativeLink(post.CreatedOn, post.Slug));
         }
 
+        /// <summary>
+        /// Blog category.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Category(string slug, int? page)
         {
             var (viewPath, viewModel) = await homeHelper.GetBlogCategoryAsync(slug, page);
             return View(viewPath, viewModel);
         }
 
+        /// <summary>
+        /// Blog tag.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Tag(string slug)
         {
             var tag = await tagService.GetBySlugAsync(slug);
@@ -143,7 +160,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Archive page.
+        /// Blog archive.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -188,6 +205,12 @@ namespace Fan.Web.Controllers
             };
         }
 
+        /// <summary>
+        /// A page.
+        /// </summary>
+        /// <param name="parentPage"></param>
+        /// <param name="childPage"></param>
+        /// <returns></returns>
         [ModelPreRender]
         public async Task<IActionResult> Page(string parentPage, string childPage)
         {
@@ -197,14 +220,25 @@ namespace Fan.Web.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Preview a page.
+        /// </summary>
+        /// <param name="parentSlug"></param>
+        /// <param name="childSlug"></param>
+        /// <returns></returns>
         [ModelPreRender]
         public IActionResult PreviewPage(string parentSlug, string childSlug)
         {
             try
             {
-                var link = BlogRoutes.GetPagePreviewRelativeLink(parentSlug, childSlug);
-                var pageVM = TempData.Get<PageVM>(link);
-                return View("Page", pageVM);
+                // slugs coming in are not url encoded, encode them for the key to tempdata
+                if (!parentSlug.IsNullOrEmpty()) parentSlug = WebUtility.UrlEncode(parentSlug);
+                if (!childSlug.IsNullOrEmpty()) childSlug = WebUtility.UrlEncode(childSlug);
+
+                var key = BlogRoutes.GetPagePreviewRelativeLink(parentSlug, childSlug);
+                var pageVM = TempData.Get<PageVM>(key);
+
+                return pageVM == null ? View("404") : View("Page", pageVM);
             }
             catch (Exception)
             {

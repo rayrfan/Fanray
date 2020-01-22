@@ -132,12 +132,9 @@ namespace Fan.Blog.Services
             // update
             await postRepository.UpdateAsync(post);
 
-            // invalidate cache for published
-            if (page.Status == EPostStatus.Published)
-            {
-                var key = await GetCacheKeyAsync(page.Id, origPost);
-                await cache.RemoveAsync(key);
-            }
+            // invalidate cache regardless status
+            var key = await GetCacheKeyAsync(page.Id, origPost);
+            await cache.RemoveAsync(key);
 
             // raise nav updated event
             await mediator.Publish(new NavUpdated 
@@ -230,38 +227,23 @@ namespace Fan.Blog.Services
         /// </exception>
         /// <returns>A <see cref="Page"/> for public viewing.</returns>
         /// <remarks>
-        /// Caches individual page instead of on <see cref="GetParentsAsync"/> as a bulk.
+        /// - Caches individual page instead of on <see cref="GetParentsAsync"/> as a bulk.
+        /// - This method does not handle preview which should not happen.
         /// </remarks>
-        public async Task<Page> GetAsync(bool isPreview, params string[] slugs)
+        public async Task<Page> GetAsync(params string[] slugs)
         {
             if (slugs == null || slugs.Length <= 0)
             {
                 throw new ArgumentNullException(nameof(slugs));
             }
 
-            if (isPreview) // don't cache when preivew
+            if (slugs[0] == "preview")
             {
-                var parents = await GetParentsAsync(withChildren: true);
-
-                // find slugs[0], throw if not found or draft, url encode takes care of url with foreign chars
-                var page = parents.SingleOrDefault(p => p.Slug.Equals(WebUtility.UrlEncode(slugs[0]), StringComparison.CurrentCultureIgnoreCase));
-                if (page == null)
-                {
-                    throw new FanException(EExceptionType.ResourceNotFound);
-                }
-
-                // page requested is a child, throw if not found or draft
-                if (page.IsParent && slugs.Length > 1 && !slugs[1].IsNullOrEmpty())
-                {
-                    var child = page.Children.SingleOrDefault(p => p.Slug.Equals(slugs[1], StringComparison.CurrentCultureIgnoreCase));
-                    page = child ?? throw new FanException(EExceptionType.ResourceNotFound);
-                }
-
-                return page;
+                throw new FanException(EExceptionType.ResourceNotFound);
             }
 
             // caching
-            var key = GetCacheKey(slugs[0]);
+            var key = GetCacheKey(WebUtility.UrlEncode(slugs[0]));
             var time = BlogCache.Time_ParentPage;
 
             if (slugs.Length > 1 && !slugs[1].IsNullOrEmpty()) // child page
@@ -284,7 +266,7 @@ namespace Fan.Blog.Services
                 // page requested is a child, throw if not found or draft
                 if (page.IsParent && slugs.Length > 1 && !slugs[1].IsNullOrEmpty())
                 {
-                    var child = page.Children.SingleOrDefault(p => p.Slug.Equals(slugs[1], StringComparison.CurrentCultureIgnoreCase));
+                    var child = page.Children.SingleOrDefault(p => p.Slug.Equals(WebUtility.UrlEncode(slugs[1]), StringComparison.CurrentCultureIgnoreCase));
                     if (child == null || child.Status == EPostStatus.Draft)
                     {
                         throw new FanException(EExceptionType.ResourceNotFound);
