@@ -216,12 +216,12 @@
             this.$store.dispatch('emptyErrMsg');
         },
         /**
-         * Inserts images to editor.
+         * Inserts images to editor. Note: page uses original img.
          */
         insertImagesToEditor(images) {
             let imgsHtml = '';
             images.forEach(img => {
-                imgsHtml += `![${img.alt}](${img.urlMedium} "${img.title}")\n`;
+                imgsHtml += `![${img.alt}](${img.urlOriginal} "${img.title}")\n`;
                 img.selected = false; // remove the checkmark
             });
             this.editor.insertValue(imgsHtml);

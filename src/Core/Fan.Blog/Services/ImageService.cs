@@ -82,27 +82,27 @@ namespace Fan.Blog.Services
         public const char IMAGE_PATH_SEPARATOR = '/';
 
         /// <summary>
-        /// Large image (lg) size 1600 pixel (2x).
+        /// Large image (lg) size 2400 pixel (2x).
         /// </summary>
-        public const int LARGE_IMG_SIZE = 1600;
+        public const int LARGE_IMG_SIZE = 2400;
 
         /// <summary>
-        /// Medium large image (ml) size 1200 pixel (1.5x).
+        /// Medium large image (ml) size 1800 pixel (1.5x).
         /// </summary>
-        public const int MEDIUM_LARGE_IMG_SIZE = 1200;
+        public const int MEDIUM_LARGE_IMG_SIZE = 1800;
 
         /// <summary>
-        /// Medium image (md) size 800 pixel (1x default).
+        /// Medium image (md) size 1200 pixel (1x default).
         /// </summary>
-        public const int MEDIUM_IMG_SIZE = 800;
+        public const int MEDIUM_IMG_SIZE = 1200;
 
         /// <summary>
-        /// Small image (sm) size 400 pixel.
+        /// Small image (sm) size 600 pixel.
         /// </summary>
         /// <remarks>
         /// Good for media gallery, small low res phones.
         /// </remarks>
-        public const int SMALL_IMG_SIZE = 400;
+        public const int SMALL_IMG_SIZE = 600;
 
         /// <summary>
         /// The different image resizes per image upload.
