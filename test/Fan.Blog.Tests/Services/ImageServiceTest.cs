@@ -74,11 +74,11 @@ namespace Fan.Blog.Tests.Services
 
             var input = "<img src=\"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg\" alt=\"painting 2200x1650\">";
             var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg\" alt=\"painting 2200x1650\" " +
-                           "srcset=\"https://localhost:44381/media/blog/2019/04/sm/painting-2200x1650.jpg 400w, " +
-                           "https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg 800w, " + 
+                           $"srcset=\"https://localhost:44381/media/blog/2019/04/sm/painting-2200x1650.jpg {ImageService.SMALL_IMG_SIZE}w, " +
+                           $"https://localhost:44381/media/blog/2019/04/md/painting-2200x1650.jpg {ImageService.MEDIUM_IMG_SIZE}w, " + 
                            "https://localhost:44381/media/blog/2019/04/ml/painting-2200x1650.jpg 2x, " +
                            "https://localhost:44381/media/blog/2019/04/lg/painting-2200x1650.jpg 3x\" " +
-                           "sizes=\"(max-width: 1200px) 100vw, 1200px\">";
+                           $"sizes=\"(max-width: {ImageService.MEDIUM_LARGE_IMG_SIZE}px) 100vw, {ImageService.MEDIUM_LARGE_IMG_SIZE}px\">";
             var output = await _imgSvc.ProcessResponsiveImageAsync(input);
 
             Assert.Equal(expected, output);
@@ -100,8 +100,8 @@ namespace Fan.Blog.Tests.Services
 
             var input = "<img src=\"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg\" alt=\"nightsky 960x1440\">";
             var expected = "<img src=\"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg\" alt=\"nightsky 960x1440\" "+
-                           "srcset=\"https://localhost:44381/media/blog/2019/04/sm/nightsky-960x1440.jpg 400w, "+
-                           "https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg 800w, "+
+                           $"srcset=\"https://localhost:44381/media/blog/2019/04/sm/nightsky-960x1440.jpg {ImageService.SMALL_IMG_SIZE}w, "+
+                           $"https://localhost:44381/media/blog/2019/04/md/nightsky-960x1440.jpg {ImageService.MEDIUM_IMG_SIZE}w, "+
                            "https://localhost:44381/media/blog/2019/04/ml/nightsky-960x1440.jpg 2x, "+
                            "https://localhost:44381/media/blog/2019/04/nightsky-960x1440.jpg 3x\" "+
                            "sizes=\"(max-width: 960px) 100vw, 960px\">";
