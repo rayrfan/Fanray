@@ -47,7 +47,10 @@ namespace Fan.Web.Controllers
         /// <summary>
         /// Site home.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="page">Page number when home is set to the blog app.</param>
+        /// <returns>
+        /// View name and its view model.
+        /// </returns>
         [ModelPreRender]
         public async Task<IActionResult> Index(int? page)
         {

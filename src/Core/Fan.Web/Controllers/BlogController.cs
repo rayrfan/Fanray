@@ -3,6 +3,7 @@ using Fan.Blog.Helpers;
 using Fan.Blog.Models;
 using Fan.Blog.Models.View;
 using Fan.Blog.Services.Interfaces;
+using Fan.Navigation;
 using Fan.Settings;
 using Fan.Web.Attributes;
 using Fan.Web.Helpers;
@@ -50,23 +51,30 @@ namespace Fan.Web.Controllers
             this.distributedCache = distributedCache;
         }
 
+        [ViewData]
+        public string Title { get; set; }
+
+        [ViewData]
+        public string Description { get; set; }
+
         /// <summary>
-        /// Blog index page, redirect to home setup on initial launch.
+        /// Blog index page.
         /// </summary>
         /// <returns></returns>
         [ModelPreRender]
         public async Task<IActionResult> Index(int? page)
         {
             var (_, viewModel) = await homeHelper.GetBlogIndexAsync(page);
+            Title = App.BLOG_APP_NAME;
             return View(viewModel);
         }
 
         /// <summary>
-        /// Returns content of the RSD file which will tell where the MetaWeblog API endpoint is.
+        /// Blog RSD file. 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The content of the RSD file.</returns>
         /// <remarks>
-        /// https://en.wikipedia.org/wiki/Really_Simple_Discovery
+        /// RSD tells where the MetaWeblog API endpoint is <see cref="https://en.wikipedia.org/wiki/Really_Simple_Discovery"/>.
         /// </remarks>
         public IActionResult Rsd()
         {
@@ -88,6 +96,8 @@ namespace Fan.Web.Controllers
             var blogPost = await blogPostService.GetAsync(slug, year, month, day);
             var blogPostVM = await blogViewModelHelper.GetBlogPostVMAsync(blogPost);
             await statsService.IncViewCountAsync(EPostType.BlogPost, blogPost.Id);
+            Title = blogPostVM.Title;
+            Description = blogPostVM.Excerpt;
             return View(blogPostVM);
         }
 
@@ -143,6 +153,7 @@ namespace Fan.Web.Controllers
         public async Task<IActionResult> Category(string slug, int? page)
         {
             var (viewPath, viewModel) = await homeHelper.GetBlogCategoryAsync(slug, page);
+            Title = viewModel.CategoryTitle;
             return View(viewPath, viewModel);
         }
 
@@ -156,6 +167,7 @@ namespace Fan.Web.Controllers
             var tag = await tagService.GetBySlugAsync(slug);
             var posts = await blogPostService.GetListForTagAsync(slug, 1);
             var blogPostListVM = await blogViewModelHelper.GetBlogPostListVMForTagAsync(posts, tag);
+            Title = $"Latest '{blogPostListVM.TagTitle}' Posts";
             return View(blogPostListVM);
         }
 
@@ -170,6 +182,7 @@ namespace Fan.Web.Controllers
             if (!year.HasValue) return RedirectToAction("Index");
             var posts = await blogPostService.GetListForArchive(year, month);
             var blogPostListVM = await blogViewModelHelper.GetBlogPostListVMForArchiveAsync(posts, year, month);
+            Title = blogPostListVM.ArchiveTitle;
             return View(blogPostListVM);
         }
 
@@ -217,6 +230,8 @@ namespace Fan.Web.Controllers
             var (_, viewModel) = await homeHelper.GetPageAsync(parentPage, childPage);
             await statsService.IncViewCountAsync(EPostType.Page, viewModel.Id);
             viewModel.ViewCount++;
+            Title = viewModel.Title;
+            Description = viewModel.Excerpt;
             return View(viewModel);
         }
 

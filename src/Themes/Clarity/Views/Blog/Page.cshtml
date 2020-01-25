@@ -1,8 +1,6 @@
 ﻿@model PageVM
 @inject SignInManager<User> SignInManager
 @{ 
-    ViewData["Title"] = Model.Title;
-    ViewData["Description"] = Model.Excerpt;
     Layout = ThemeService.GetLayoutName(Model.PageLayout);
     var fullLayout = ThemeService.GetLayoutName(EPageLayout.Layout2);
 }
