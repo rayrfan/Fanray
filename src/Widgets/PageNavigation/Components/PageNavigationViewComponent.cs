@@ -30,17 +30,16 @@ namespace PageNavigation.Components
             // slugs
             var slugs = Request.Path.Value.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-            // if no slugs or slug is reserved, return empty
+            // if no slugs or first slug is reserved when it's not preview, return empty
             if (slugs.Length <= 0 || 
-                Array.IndexOf(PageService.Reserved_Slugs, slugs[0].ToLower()) != -1 ||
-                Array.IndexOf(PageService.Reserved_Slugs, slugs[^1].ToLower()) != -1)
+                (slugs[0].ToLower() != "preview" && Array.IndexOf(PageService.Reserved_Slugs, slugs[0].ToLower()) != -1))
             {
                 return await Task.FromResult<IViewComponentResult>(Content(string.Empty));
             }
 
             // page
             Page page;
-            if (slugs[0] == "preview")
+            if (slugs[0].ToLower() == "preview")
             {
                 var composePageId = GetComposeUrlPageId();
                 if (composePageId == 0) 
