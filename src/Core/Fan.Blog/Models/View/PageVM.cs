@@ -18,7 +18,6 @@ namespace Fan.Blog.Models.View
         public string AddChildLink { get; set; }
         public bool IsParent { get; set; }
         public bool ShowDisqus { get; }
-        public string Slug { get; set; }
         public string Title { get; set; }
         public int ViewCount { get; set; }
         public EPageLayout PageLayout { get; set; }

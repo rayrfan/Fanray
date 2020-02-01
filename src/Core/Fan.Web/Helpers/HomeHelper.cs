@@ -73,7 +73,6 @@ namespace Fan.Web.Helpers
             {
                 Id = page.Id,
                 ParentId = page.ParentId,
-                Slug = page.IsParent ? parentPage : childPage,
                 Author = page.User.DisplayName,
                 Body = page.Body,
                 Excerpt = page.Excerpt,

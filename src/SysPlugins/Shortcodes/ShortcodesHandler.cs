@@ -1,5 +1,4 @@
 ﻿using Fan.Blog.Models.View;
-using Fan.Blog.Services;
 using Fan.Plugins;
 using Fan.Web.Events;
 using MediatR;
@@ -31,16 +30,12 @@ namespace Shortcodes
         /// <param name="notification"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <remarks>
-        /// NavLinks are a special code with double brackets [[Page Title]].
-        /// TODO the logic of parsing NavLinks should not be here, it should be in its own INotificationHandler.
-        /// </remarks>
         public Task Handle(ModelPreRender<PageVM> notification, CancellationToken cancellationToken)
         {
             if (!(notification.Model is PageVM)) return Task.CompletedTask;
 
             var pageVM = (PageVM)notification.Model;
-            ((PageVM)notification.Model).Body = PageService.ParseNavLinks(shortcodeService.Parse(pageVM.Body), pageVM.Slug);
+            ((PageVM)notification.Model).Body = shortcodeService.Parse(pageVM.Body);
 
             return Task.CompletedTask;
         }

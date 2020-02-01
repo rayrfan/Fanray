@@ -34,6 +34,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
         public const int AUTOSAVE_INTERVAL = 10;
         public string PageJson { get; set; }
         public string LayoutsJson { get; set; }
+        public string Theme { get; set; }
 
         public PageModel(UserManager<User> userManager,
                          IPageService pageService,
@@ -59,6 +60,7 @@ namespace Fan.WebApp.Manage.Admin.Compose
         public async Task<IActionResult> OnGetAsync(int pageId, int? parentId)
         {
             var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+            Theme = coreSettings.Theme;
             Blog.Models.Page parent = null;
             PageIM pageIM;
 
@@ -268,8 +270,20 @@ namespace Fan.WebApp.Manage.Admin.Compose
             // title
             var title = pageIM.Title.IsNullOrEmpty() ? "Untitled" : pageIM.Title;
 
+            // slug
+            var slug = PageService.SlugifyPageTitle(title);
+
+            // parent slug
+            var parentSlug = "";
+            if (pageIM.ParentId.HasValue && pageIM.ParentId > 0)
+            {
+                var parent = await pageService.GetAsync(pageIM.ParentId.Value);
+                parentSlug = parent.Slug;
+            }
+
             // body 
-            var body = pageIM.Body;
+            var body = PageService.ParseNavLinks(pageIM.Body,
+                parentSlug.IsNullOrEmpty() ? slug : parentSlug);
 
             // author
             var user = await userManager.GetUserAsync(HttpContext.User);
@@ -282,21 +296,10 @@ namespace Fan.WebApp.Manage.Admin.Compose
             // layout
             var pageLayout = pageIM.PageLayout;
 
-            // slug
-            var slug = PageService.SlugifyPageTitle(pageIM.Title);
-            if (slug.IsNullOrEmpty()) slug = "untitled";
-
-            // parent slug
-            var parentSlug = "";
-            if (pageIM.ParentId.HasValue && pageIM.ParentId > 0)
-            {
-                var parent = await pageService.GetAsync(pageIM.ParentId.Value);
-                parentSlug = parent.Slug;
-            }
-
             // preview relative link (the slugs are url encoded)
-            var prevRelLink = parentSlug.IsNullOrEmpty() ? BlogRoutes.GetPagePreviewRelativeLink(slug) :
-                              BlogRoutes.GetPagePreviewRelativeLink(parentSlug, slug);
+            var prevRelLink = parentSlug.IsNullOrEmpty() ? 
+                                BlogRoutes.GetPagePreviewRelativeLink(slug) :
+                                BlogRoutes.GetPagePreviewRelativeLink(parentSlug, slug);
 
             // put vm in tempdata with preview link as key
             var pageVM = new PageVM
@@ -304,7 +307,6 @@ namespace Fan.WebApp.Manage.Admin.Compose
                 Author = author,
                 Body = body,                
                 CreatedOnDisplay = date,
-                Slug = $"{parentSlug}/{slug}",
                 Title = title,
                 PageLayout = pageLayout,
             };

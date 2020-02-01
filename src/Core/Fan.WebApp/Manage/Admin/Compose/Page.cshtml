@@ -15,6 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.22/dist/vuetify.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/_content/editor.md/css/editormd.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/_content/@Model.Theme/css/content.css" asp-append-version="true" />
     <style>
         #content-area {
             margin: auto;
@@ -160,7 +161,7 @@
             </v-toolbar>
             @* Editor *@
             <v-content>
-                <div id="content-area">
+                <div id="content-area" class="ck-content">
                     <v-textarea tabindex="1"
                                 id="post-title"
                                 label=""

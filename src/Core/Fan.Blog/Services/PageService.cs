@@ -376,6 +376,14 @@ namespace Fan.Blog.Services
             // Parent id
             post.ParentId = page.ParentId;
 
+            // Parent slug
+            var parentSlug = "";
+            if (page.ParentId.HasValue && page.ParentId > 0)
+            {
+                var parent = await GetAsync(page.ParentId.Value);
+                parentSlug = parent.Slug;
+            }
+
             // CreatedOn
             if (createOrUpdate == ECreateOrUpdate.Create)
             {
@@ -405,7 +413,7 @@ namespace Fan.Blog.Services
             post.Title = page.Title;
 
             // Bodys
-            post.Body = page.Body;
+            post.Body = ParseNavLinks(page.Body, parentSlug.IsNullOrEmpty() ? slug : parentSlug);
             post.BodyMark = WebUtility.HtmlEncode(page.BodyMark); // decoded on the client
 
             // Excerpt TODO should I extract excerpt from body if user didn't put an excerpt?
@@ -605,7 +613,7 @@ namespace Fan.Blog.Services
             foreach (var match in matches)
             {
                 var token = match.ToString();
-                var text = token.Substring(2, token.Length - 4);
+                var text = token[2..^2];
 
                 var slug = Util.Slugify(text);
                 if (!parentSlug.IsNullOrEmpty() && parentSlug != slug)

@@ -92,16 +92,6 @@ $content-font-size: 1.13rem;
         font-size: $content-font-size;
         margin-top: 0;
         margin-bottom: $paragraph-margin-bottom;
-        /* inline code */
-        code {
-            background: rgba(202,205,207,0.3);
-            padding: .1em 0;
-            border-radius: 3px;
-            color: inherit;
-            font-weight: normal;
-            box-shadow: none;
-            display: inline; // shrink top bottom padding
-        }
     }
 
     hr {
@@ -147,17 +137,22 @@ $content-font-size: 1.13rem;
         border: 1px dashed #e0e0e0;
         border-radius: 0;
         padding: 5px;
-        color: black;
+    }
 
-        code {
-            background-color: transparent;
-            padding: 0;
-            font-family: "SF Mono",menlo,monaco,"Roboto Mono",Consolas,"Lucida Console",monospace;
-            font-size: .866666em;
-            font-weight: normal;
-            color: #353535;
-            box-shadow: none;
-        }
+    p code, ul li code, pre code {
+        padding: .1em 0;
+        color: inherit;
+        font-weight: normal;
+        box-shadow: none;
+        display: inline; // shrink top bottom padding
+    }
+
+    pre code {
+        margin-left: -5px; // remove leading space
+    }
+
+    p code, ul li code {
+        font-size: 85%;
     }
 
     blockquote {
@@ -177,10 +172,8 @@ $content-font-size: 1.13rem;
     }
 
     ol, ul {
-        padding-left: 1em;
         font-size: $content-font-size;
         margin-top: 0;
-        margin-bottom: 1rem;
     }
 
     ul li {
@@ -197,4 +190,9 @@ $content-font-size: 1.13rem;
         border: 1px solid #ccc;
         padding: 3px;
     }
+}
+
+// make list closer to left
+.markdown-body ol, .markdown-body ul {
+    padding-left: 1.5em;
 }
