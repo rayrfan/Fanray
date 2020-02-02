@@ -222,35 +222,6 @@ namespace Fan.Blog.Tests.Integration
         }
 
         /// <summary>
-        /// A blog post datetime is in humanized string, such as "now", "an hour ago".
-        /// </summary>
-        [Fact]
-        public async void Visitor_sees_BlogPost_date_in_humanized_string()
-        {
-            // Given 1 blog post with 1 cat and 2 tags exist in db
-            Seed_1BlogPost_with_1Category_2Tags();
-
-            // When user creates a new blog post
-            var postNow = await _blogPostSvc.CreateAsync(new BlogPost // A user posts this from browser
-            {
-                UserId = Actor.ADMIN_ID,
-                Title = "Hello World!",
-                Slug = null,                        // user didn't input
-                Body = "This is my first post",
-                Excerpt = null,                     // user didn't input
-                CategoryId = 1,
-                TagTitles = null,                   // user didn't input
-                Status = EPostStatus.Published,
-                CommentStatus = ECommentStatus.AllowComments,
-                CreatedOn = DateTimeOffset.Now.AddDays(-1.01)      // user local time
-            });
-
-            var coreSettings = new CoreSettings();
-            // Then the date displays human friend string
-            Assert.Equal("yesterday", postNow.CreatedOn.ToDisplayString(coreSettings.TimeZoneId));
-        }
-
-        /// <summary>
         /// When author saves a draft with empty title, it's OK.
         /// </summary>
         [Fact]
