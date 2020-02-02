@@ -2,6 +2,8 @@
 @{
     var currentUser = await userManager.GetUserAsync(Context.User);
     var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+    var navs = await navigationService.GetMenuAsync(EMenu.Menu1, includeNavUrl: true);
+    var menu1NavsJson = JsonConvert.SerializeObject(navs);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -47,37 +49,49 @@
                 </v-list>
             </v-navigation-drawer>
             @* Topbar *@
-        <v-toolbar :clipped-left="$vuetify.breakpoint.lgAndUp"
-                   color="blue darken-3"
-                   dark
-                   app
-                   dense
-                   fixed>
-            <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
-            <img style="margin-left:12px;background-color: white" src="~/admin/img/logo.png" />
-            <span class="title ml-2 mr-5 font-weight-light">FANRAY</span>
-            <v-spacer></v-spacer>
-            <v-menu light offset-y left transition="scale-transition">
-                <v-btn icon slot="activator">
-                    <v-avatar size="32px">
-                        <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" />
-                    </v-avatar>
+            <v-toolbar :clipped-left="$vuetify.breakpoint.lgAndUp"
+                       color="blue darken-3"
+                       dark
+                       app
+                       dense
+                       fixed>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <img style="margin-left:12px;background-color: white" src="~/admin/img/logo.png" />
+                <span class="title ml-2 mr-5 font-weight-light">FANRAY</span>
+                <v-spacer></v-spacer>
+                <v-menu light offset-y left transition="scale-transition">
+                    <v-btn icon slot="activator">
+                        <v-avatar size="32px">
+                            <img gravatar-email="@currentUser.Email" title="@currentUser.DisplayName" />
+                        </v-avatar>
+                    </v-btn>
+                    <v-list dense>
+                        <v-list-tile @@click="">
+                            <v-icon class="menu-action-icon">account_circle</v-icon>
+                            <v-list-tile-title>Profile</v-list-tile-title>
+                        </v-list-tile>
+                        <v-list-tile @@click="logout">
+                            <v-icon class="menu-action-icon">power_settings_new</v-icon>
+                            <v-list-tile-title>Logout</v-list-tile-title>
+                        </v-list-tile>
+                    </v-list>
+                </v-menu>
+                <v-menu offset-y v-if="menu1Navs.length > 0">
+                    <v-btn icon title="View blog" slot="activator">
+                        <v-icon>public</v-icon>
+                    </v-btn>
+                    <v-list>
+                        <v-list-tile v-for="(nav, index) in menu1Navs" :key="index">
+                            <v-list-tile-title>
+                                <a :href="nav.url" :title="nav.title" style="text-decoration:none">{{ nav.text }}</a>
+                            </v-list-tile-title>
+                        </v-list-tile>
+                    </v-list>
+                </v-menu>
+                <v-btn icon href="/" title="View blog" v-else>
+                    <v-icon>public</v-icon>
                 </v-btn>
-                <v-list dense>
-                    <v-list-tile @@click="">
-                        <v-icon class="menu-action-icon">account_circle</v-icon>
-                        <v-list-tile-title>Profile</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @@click="logout">
-                        <v-icon class="menu-action-icon">power_settings_new</v-icon>
-                        <v-list-tile-title>Logout</v-list-tile-title>
-                    </v-list-tile>
-                </v-list>
-            </v-menu>
-            <v-btn icon href="/" title="View blog">
-                <v-icon>public</v-icon>
-            </v-btn>
-        </v-toolbar>
+            </v-toolbar>
             @* Content *@
             <v-content>
                 @RenderBody()
@@ -104,7 +118,7 @@
     </environment>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.19.1/dist/axios.min.js"></script>
     @RenderSection("ComponentScripts", required: false)
-    <script>
+<script>
         let adminMixin = {
             data: function () {
                 return {
@@ -121,10 +135,11 @@
                         { icon: 'supervisor_account', text: 'Users', url: '/admin/users', active: false },
                         { icon: 'settings', text: 'Settings', url: '/admin/settings', active: false },
                     ],
+                    menu1Navs: @Html.Raw(menu1NavsJson)
                 };
             }
         };
-    </script>
+</script>
     <script src="~/admin/js/admin.js" asp-append-version="true"></script>
 </body>
 </html>
