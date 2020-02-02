@@ -36,18 +36,12 @@ h5, h6 {
     font-size: $font-size-base;
 }
 
-p, li {
-    /* default is too small, interestingly 1.1 here looks identical to 1.13 shown in editor 
-    */
-    font-size: 1rem;
-    /* inline code */
-    code {
-        background: rgba(202,205,207,0.3);
-        padding: .2em .4em;
-        border-radius: 3px;
-        color: inherit;
-        font-size: 85%;
-    }
+p code, li code, td code {
+    background: rgba(202,205,207,0.3);
+    padding: .2em .4em;
+    border-radius: 3px;
+    color: inherit;
+    font-size: 85%;
 }
 
 img {
