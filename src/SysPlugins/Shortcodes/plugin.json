@@ -4,7 +4,7 @@
   "type": "Shortcodes.ShortcodesPlugin, Shortcodes",
   "version": "1.0.0",
   "requiresAtLeast": "1.1.0",
-  "pluginUrl": "https://github.com/FanrayMedia/Fanray/wiki/Shortcodes-Plugin",
+  "pluginUrl": "https://www.fanray.com/docs/shortcodes",
   "author": "Ray Fan",
   "authorUrl": "https://www.fanray.com"
 }

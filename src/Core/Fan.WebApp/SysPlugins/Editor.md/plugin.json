@@ -4,7 +4,7 @@
   "type": "Editor.md.EditorMdPlugin, Editor.md",
   "version": "1.0.0",
   "requiresAtLeast": "1.1.0",
-  "pluginUrl": "https://github.com/FanrayMedia/Fanray/wiki/Editor.md-Plugin",
+  "pluginUrl": "https://www.fanray.com",
   "author": "Ray Fan",
   "authorUrl": "https://www.fanray.com"
 }
