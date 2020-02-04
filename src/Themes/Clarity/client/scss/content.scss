@@ -139,7 +139,7 @@ $content-font-size: 1.13rem;
         padding: 5px;
     }
 
-    p code, ul li code, pre code, td code {
+    p code, li code, pre code, td code {
         padding: .1em 0;
         color: inherit;
         font-weight: normal;
@@ -151,7 +151,7 @@ $content-font-size: 1.13rem;
         margin-left: -5px; // remove leading space
     }
 
-    p code, ul li code {
+    p code, li code {
         font-size: 85%;
     }
 
