@@ -29,28 +29,27 @@
 ## Screenshots
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/633119/58754242-b5a9df80-8480-11e9-8fac-6808b1895163.png" title="Composer" />
-  <img src="https://user-images.githubusercontent.com/633119/58754174-8fd00b00-847f-11e9-9655-9edc8f9bc2ba.png" title="Clarity theme" />
+  <img src="https://raw.githubusercontent.com/wiki/FanrayMedia/fanraymedia.github.io/img/readme/post-composer2.png" title="Post Composer" />
+  <img src="https://raw.githubusercontent.com/wiki/FanrayMedia/fanraymedia.github.io/img/readme/clarity-theme2.png" title="Clarity Theme" />
 </p>
 
 ## Features
 
-Fanray has an _extensible design_ that allows you to create _plugins_, _themes_ and _widgets_. It provides basic infrastructure for building your own web apps on .NET Core. See [wiki](https://github.com/FanrayMedia/Fanray/wiki) for more details.
-
-![Fanray-Extensible-Architecture](https://user-images.githubusercontent.com/633119/57195103-89dc1e00-6f03-11e9-96b8-678b90cc6004.png)
+Please see [**Docs**](https://fanray.com/docs) for more details.
 
 | Blog | | Infrastructure |
 | --- | --- |  --- | 
-| Autosave Draft    | Preferred Domain	| Caching                                   
-| Categories		| Responsive Images	| Error Handling
-| Comments (Disqus) | RSS				| Events									
-| Google Analytics  | SEO-Friendly URLs	| Image Resizing                            
-| Media Gallery     | Shortcodes		| Logging (File, Seq, ApplicationInsights)  
-| Navigation		| Site Installation	| Middlewares                           
-| Open Live Writer  | Tags				| Mini SPAs 
-| Pages				| Themes			| Settings                                  
-| Plugins			| Users				| Storage (File System, Azure Blob Storage) 
-| Posts				| Widgets			| Testing (Unit, Integration)              								
+| Autosave Draft    | Preview           	| Caching
+| Categories		| Rich Text / Markdown  | Error Handling
+| Comments (Disqus) | RSS				    | Events
+| Google Analytics  | SEO	                | Extensibility (Plugin, Widget, Theme)	 
+| Media Gallery     | Shortcodes		    | Image Resizing                            
+| Navigation		| Site Installation	    | Logging (File, Seq, Application Insights) 
+| Open Live Writer  | Tags				    | Responsive Images
+| Pages				| Theme 			    | Settings                                  
+| Plugins			| Users				    | Storage (File System, Azure Blob Storage) 
+| Posts				| Widgets			    | Testing (Unit, Integration)
+| Preferred Domain  | 
  
 ## Quick Start
 
@@ -60,7 +59,8 @@ Clone the repo then run from either [VS2019](https://www.visualstudio.com/vs/com
 
 - VS2019: open `Fanray.sln`, make sure `Fan.WebApp` is the startup project, Ctrl + F5
 - Command line: do the following, then go to https://localhost:5001
- ```
+
+```
 cd <sln folder>
 dotnet restore
 cd src/Core/Fan.WebApp
@@ -75,7 +75,7 @@ Database is created for you on app initial launch. Below is the default connecti
 },
 ```
 
-The blog setup page will show up on initial launch, simply fill the form out and create your blog.
+Note the 404 page is only displayed in Production when an invalid URL is accessed, in Development the developer exception page is shown.
 
 ## Contribute
 
@@ -83,7 +83,7 @@ Please refer to [Contributing Guide](CONTRIBUTING.md).
 
 ## Support Me
 
-If you find this project useful please consider support it, your contribution means a lot! Thank you!
+If you find this project useful please consider support it, your contribution will help a lot! Thank you!
 
 <a href="https://www.buymeacoffee.com/Fanray" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee"></a>
 
