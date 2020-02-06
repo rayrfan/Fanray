@@ -1,0 +1,42 @@
+﻿<p>This exercise walks you through 3 simple steps to create a front page for your site.</p>
+<div class="markdown-toc editormd-markdown-toc"><ul class="markdown-toc-list"><li><a class="toc-level-1" href="#Create a New Page" level="1">Create a New Page</a></li><li><a class="toc-level-1" href="#Set “Home Page” as Home" level="1">Set “Home Page” as Home</a></li><li><a class="toc-level-1" href="#Add Link to Site Navigation" level="1">Add Link to Site Navigation</a><ul></ul></li></ul></div>
+<h1 id="h1-create-a-new-page"><a name="Create a New Page" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Create a New Page</h1><p>Go to <a href="/admin/pages">Pages</a> and add a new page.</p>
+<ul>
+    <li><strong>Title</strong>: type in <code>Home</code></li>
+    <li><strong>Body</strong>: copy and paste in the following code</li>
+</ul>
+<pre><code class="language-html hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+<span class="hljs-selector-class">.hero</span> { <span class="hljs-attribute">text-align</span>: center; <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">50px</span>; }
+<span class="hljs-selector-class">.hero</span> <span class="hljs-selector-tag">h1</span> { <span class="hljs-attribute">font-size</span>: <span class="hljs-number">3rem</span> }
+<span class="hljs-selector-class">.hero</span> <span class="hljs-selector-tag">p</span> { <span class="hljs-attribute">font-size</span>: <span class="hljs-number">1.6rem</span>; <span class="hljs-attribute">line-height</span>: <span class="hljs-number">1.3</span>; <span class="hljs-attribute">color</span>: <span class="hljs-number">#6a8bad</span>; }
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"hero"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Fanray<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>A simple and elegant blog.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+<span class="hljs-selector-class">.action</span> { <span class="hljs-attribute">margin</span>: <span class="hljs-number">3rem</span> <span class="hljs-number">0</span> <span class="hljs-number">1rem</span> <span class="hljs-number">0</span>; <span class="hljs-attribute">text-align</span>: center }
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"action"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/blog"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-primary btn-lg active"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">aria-pressed</span>=<span class="hljs-string">"true"</span>&gt;</span>Get Started →<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></code></pre>
+<ul>
+    <li><strong>Description</strong>: type in <code>Welcome to Fanray</code></li>
+    <li><strong>Layout</strong>: choose <code>Full</code> which gives you that full page design</li>
+</ul>
+<p>Click on <strong>Publish</strong> to make it public.</p>
+<h1 id="h1-set-home-page-as-home"><a name="Set “Home Page” as Home" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Set “Home Page” as Home</h1><p>Go to <a href="/admin/navigation">Navigation</a>, you should see the new <strong>Home</strong> page listed under the <strong>Pages</strong> panel, click on the 3 vertical dots and you will see a <strong>Set as Home</strong> button, click on it. This will set the <strong>Home</strong> page as the root of your site.</p>
+<h1 id="h1-add-link-to-site-navigation"><a name="Add Link to Site Navigation" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Add Link to Site Navigation</h1><p>Finally, you want to add a Home link on to the navigation. In the <a href="/admin/navigation">Navigation</a>, add a <strong>Custom Link</strong>.</p>
+<ul>
+    <li><strong>URL</strong>: type in <code>/</code></li>
+    <li><strong>Text</strong>: type in <code>Home</code></li>
+</ul>
+<p>Click on <strong>Add To Menu</strong> to add it to the Main Menu. Then drag the <strong>Home</strong> item to the top as the first item on the navigation.</p>
+<p>
+    <span class="prev">
+        <a href="/docs/pages" title="Pages">Pages</a>
+    </span><br><span class="next">
+        <a href="/docs" title="Docs">Docs</a>
+    </span>
+</p>

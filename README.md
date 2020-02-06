@@ -60,7 +60,7 @@ Clone the repo then run from either [VS2019](https://www.visualstudio.com/vs/com
 - VS2019: open `Fanray.sln`, make sure `Fan.WebApp` is the startup project, Ctrl + F5
 - Command line: do the following, then go to https://localhost:5001
 
-```
+```bash
 cd <sln folder>
 dotnet restore
 cd src/Core/Fan.WebApp
@@ -69,7 +69,7 @@ dotnet run
 
 Database is created for you on app initial launch. Below is the default connection string, to adjust it go to `appsettings.json`
 
-```
+```javascript
 "ConnectionStrings": {
   "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=Fanray;Trusted_Connection=True;MultipleActiveResultSets=true"
 },
