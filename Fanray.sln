@@ -69,6 +69,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fan.Blog.Tests", "test\Fan.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor.md", "src\SysPlugins\Editor.md\Editor.md.csproj", "{5FED1279-4C23-4E5C-A89D-0255FE2B5E80}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{3F248C48-DADD-4659-8D32-9326706303EC}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\BUG_REPORT.md = .github\ISSUE_TEMPLATE\BUG_REPORT.md
+		.github\ISSUE_TEMPLATE\FEATURE_REQUEST.md = .github\ISSUE_TEMPLATE\FEATURE_REQUEST.md
+		.github\FUNDING.yml = .github\FUNDING.yml
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +183,7 @@ Global
 		{FD18CC7B-1138-4170-8903-7086DF834E4F} = {81A32817-2BDD-4F54-A41E-E8B2015D0184}
 		{526E9DCF-C0F3-45E7-AB6E-F90DFE5F06E3} = {81A32817-2BDD-4F54-A41E-E8B2015D0184}
 		{5FED1279-4C23-4E5C-A89D-0255FE2B5E80} = {4BFCF62E-6739-4EB4-84B3-FFF528D3F4E2}
+		{3F248C48-DADD-4659-8D32-9326706303EC} = {596A1022-8E0A-4705-BAAA-4217759203D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1FC29A1-2BF1-46BD-9169-3C33C1C4494F}
