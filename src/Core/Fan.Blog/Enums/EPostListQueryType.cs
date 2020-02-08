@@ -27,23 +27,17 @@
         /// This is used by metaweblog.
         /// </summary>
         BlogPostsByNumber,
-
         /// <summary>
-        /// All root pages.
+        /// A sepcific number of published blog posts.
         /// </summary>
-        RootPages,
+        BlogPublishedPostsByNumber,
         /// <summary>
-        /// All child pages for a root page.
+        /// All parent pages regardless status.
         /// </summary>
-        ChildPagesForRoot,
-        ChildPagesForParent,
+        Pages,
         /// <summary>
-        /// All draft pages.
+        /// All pages (parents and their children).
         /// </summary>
-        PageDrafts,
-        /// <summary>
-        /// Pages, used by metaweblog.
-        /// </summary>
-        PagesByNumber,
+        PagesWithChildren,
     }
 }

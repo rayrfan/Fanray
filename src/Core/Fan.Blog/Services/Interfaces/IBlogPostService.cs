@@ -66,10 +66,21 @@ namespace Fan.Blog.Services.Interfaces
         /// <returns></returns>
         Task<BlogPostList> GetListForDraftsAsync();
         /// <summary>
-        /// Returns specified number of <see cref="BlogPost"/> used by metaweblog.
+        /// Returns specific number of <see cref="BlogPost"/> used by metaweblog.
         /// </summary>
         /// <param name="numberOfPosts">"All" is int.MaxValue</param>
         /// <returns></returns>
         Task<BlogPostList> GetRecentPostsAsync(int numberOfPosts);
+        /// <summary>
+        /// Returns spcific number of published <see cref="BlogPost"/>.
+        /// </summary>
+        /// <param name="numberOfPosts"></param>
+        /// <returns></returns>
+        Task<BlogPostList> GetRecentPublishedPostsAsync(int numberOfPosts);
+        /// <summary>
+        /// Invalidates blog cache.
+        /// </summary>
+        /// <returns></returns>
+        Task RemoveBlogCacheAsync();
     }
 }

@@ -1,0 +1,140 @@
+﻿html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+}
+// headings
+h1, h2, h3, h4, h5, h6 {
+    margin-top: $headings-margin-top;
+    margin-bottom: $headings-margin-bottom;
+    line-height: $headings-line-height;
+    letter-spacing: -.3px;
+    word-spacing: -1.5px;
+}
+
+h1 {
+    font-size: $h1-font-size;
+}
+
+h2 {
+    font-size: $h2-font-size;
+}
+
+h3 {
+    font-size: $h3-font-size;
+}
+
+h4 {
+    font-size: $h4-font-size;
+}
+
+h5, h6 {
+    font-size: $font-size-base;
+}
+
+p code, li code, td code {
+    background: rgba(202,205,207,0.3);
+    padding: .2em .4em;
+    border-radius: 3px;
+    color: inherit;
+    font-size: 85%;
+}
+
+img {
+    /* scale image to fit page https://www.w3schools.com/css/css_rwd_images.asp */
+    max-width: 100%;
+    height: auto;
+}
+
+ul {
+    list-style-type: square;
+    padding-left: 1em; /* default indents list */
+}
+
+ol {
+    padding-left: 1em;
+}
+
+pre {
+    border: 1px dashed #e0e0e0;
+    border-radius: 0;
+    padding: 5px;
+}
+
+blockquote {
+    margin: 0 0 1rem;
+    border-left: 5px solid #ccc;
+    padding: 13px;
+    background: #eee;
+    font-style: italic;
+
+    p {
+        margin-bottom: 0;
+    }
+}
+/* image caption */
+figcaption {
+    font-size: smaller;
+    text-align: center;
+}
+
+/* the shadow under the topbar */
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+/* the brand link */
+a.brand {
+    text-decoration: none;
+}
+/* sticky footer, needs html position and min-height */
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    line-height: 60px; /* Vertically center the text there */
+    background-color: #f5f5f5;
+    text-align: center;
+    /*> .container {
+        padding-right: 15px;
+        padding-left: 15px;
+    }*/
+}
+
+.footer span:last-child {
+    margin-left: 10px;
+
+    @media (max-width: 767px) {
+        display: none;
+    }
+}
+
+/* avatar on navbar */
+.avatar {
+    vertical-align: middle;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+// video embeds from ck
+.media {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+
+    iframe, object, embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}

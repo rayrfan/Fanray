@@ -24,7 +24,12 @@ namespace Fan.Medias
         /// <returns></returns>
         public async Task<Media> GetAsync(string fileName, int year, int month)
         {
-            return await _entities.SingleOrDefaultAsync(m =>
+            return isSqlite ?
+                _entities.ToList().SingleOrDefault(m =>
+                        m.FileName == fileName &&
+                        m.UploadedOn.Year == year &&
+                        m.UploadedOn.Month == month) :
+                await _entities.SingleOrDefaultAsync(m =>
                         m.FileName == fileName &&
                         m.UploadedOn.Year == year &&
                         m.UploadedOn.Month == month);

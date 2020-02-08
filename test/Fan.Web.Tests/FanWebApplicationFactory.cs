@@ -2,6 +2,7 @@
 using Fan.Blog.Models;
 using Fan.Data;
 using Fan.Membership;
+using Fan.Themes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fan.Web.Tests
 {
@@ -23,43 +25,45 @@ namespace Fan.Web.Tests
         : WebApplicationFactory<TStartup> where TStartup : class
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
+        {            
             builder.ConfigureServices(services =>
             {
-                // create a new service provider
-                var serviceProvider = new ServiceCollection()
-                    .AddEntityFrameworkInMemoryDatabase()
-                    .BuildServiceProvider();
+                // Remove the app's DbContext registration.
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<FanDbContext>));
 
-                // add FanDbContext using an in-memory database
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                // Add DbContext using an in-memory database for testing.
                 services.AddDbContext<FanDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
-                    options.UseInternalServiceProvider(serviceProvider);
                 });
 
-                // build the service provider
+                // Build the service provider.
                 var sp = services.BuildServiceProvider();
 
-                // create a scope to obtain a reference to FanDbContext
-                using (var scope = sp.CreateScope())
+                // Create a scope to obtain a reference to the dbcontext
+                using var scope = sp.CreateScope();
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<FanDbContext>();
+                var logger = scopedServices
+                    .GetRequiredService<ILogger<FanWebApplicationFactory<TStartup>>>();
+
+                // Ensure the database is created.
+                db.Database.EnsureCreated();
+
+                try
                 {
-                    var scopedServices = scope.ServiceProvider;
-                    var dbCtx = scopedServices.GetRequiredService<FanDbContext>();
-                    var logger = scopedServices.GetRequiredService<ILogger<FanWebApplicationFactory<TStartup>>>();
-
-                    // ensure database is created
-                    dbCtx.Database.EnsureCreated();
-
-                    try
-                    {
-                        // seed the database with test data
-                        Seed(dbCtx);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, $"An error occurred seeding the database: {ex.Message}");
-                    }
+                    // Seed the database with test data.
+                    Seed(db);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"An error occurred seeding the database: {ex.Message}");
                 }
             });
         }
@@ -86,13 +90,17 @@ namespace Fan.Web.Tests
             db.Set<Meta>().AddRange(GetSettings()); // settings
             db.Users.Add(GetUser()); // user
             db.Set<Post>().Add(GetPostWith1Category2Tags()); // post with category and tags
+            db.Set<Post>().AddRange(GetPages());
             db.SaveChanges();
         }
 
         /// <summary>
         /// Returns some settings.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// If you added new widget area in <see cref="Fan.Widgets.WidgetService"/> and used it in 
+        /// a view, you have to add them here or the razor view will fail and give you 500.
+        /// </remarks>
         private List<Meta> GetSettings()
         {
             var metas = new List<Meta>
@@ -119,8 +127,15 @@ namespace Fan.Web.Tests
                 new Meta { Id = 20, Key = "footer1", Value = "{ \"id\":\"footer1\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
                 new Meta { Id = 21, Key = "footer2", Value = "{ \"id\":\"footer2\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
                 new Meta { Id = 22, Key = "footer3", Value = "{ \"id\":\"footer3\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
-                new Meta { Id = 23, Key = "clarity", Value = "", Type = EMetaType.Theme },
-                new Meta { Id = 24, Key = "clarity-my-area", Value = "{\"id\":\"my-area\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaByTheme },
+                new Meta { Id = 23, Key = "page-sidebar1", Value = "{ \"id\":\"page-sidebar1\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 24, Key = "page-sidebar2", Value = "{ \"id\":\"page-sidebar2\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 25, Key = "page-before-content", Value = "{ \"id\":\"page-before-content\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 26, Key = "page-after-content", Value = "{ \"id\":\"page-after-content\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaBySystem },
+                new Meta { Id = 27, Key = "clarity", Value = "", Type = EMetaType.Theme },
+                new Meta { Id = 28, Key = "clarity-my-area", Value = "{\"id\":\"my-area\",\"widgetIds\":[]}", Type = EMetaType.WidgetAreaByTheme },
+                new Meta { Id = 29, Key = "menu1", Value = "[]", Type = EMetaType.Menu },
+                new Meta { Id = 30, Key = "menu2", Value = "[]", Type = EMetaType.Menu },
+                new Meta { Id = 31, Key = "coresettings.home", Value = "{\"id\":1,\"type\":1}", Type = EMetaType.Setting },
             };
 
             return metas;
@@ -146,11 +161,11 @@ namespace Fan.Web.Tests
 
             var post = new Post
             {
+                Id = 1,
                 Body = "A post body.",
                 Category = cat,
                 UserId = USER_ID,
                 CreatedOn = new DateTimeOffset(POST_DATE), 
-                RootId = null,
                 Title = "A published post",
                 Slug = POST_SLUG,
                 Type = EPostType.BlogPost,
@@ -163,6 +178,66 @@ namespace Fan.Web.Tests
                 };
 
             return post;
+        }
+
+        /// <summary>
+        /// Returns 2 parent pages "Home" and "About" and 1 child page hanging off of About.
+        /// </summary>
+        /// <returns></returns>
+        private List<Post> GetPages()
+        {
+            var list = new List<Post>();
+
+            var homePage = new Post
+            {
+                Id = 2,
+                ParentId = 0,
+                Title = "Home",
+                Slug = "home",
+                Body = "<h1>Home Page</h1>",
+                BodyMark = "# Home",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout2,
+            };
+
+            var parent = new Post
+            {
+                Id = 3,
+                ParentId = 0,
+                Title = "About",
+                Slug = "about",
+                Body = "<h1>About Page</h1>",
+                BodyMark = "# About",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout3,
+            };
+
+            var child = new Post
+            {
+                Id = 4,
+                ParentId = 3,
+                Title = "Ray",
+                Slug = "ray",
+                Body = "<h1>About Ray</h1>",
+                BodyMark = "# About Ray",
+                UserId = USER_ID,
+                CreatedOn = new DateTimeOffset(new DateTime(2017, 01, 01), new TimeSpan(-7, 0, 0)),
+                Type = EPostType.Page,
+                Status = EPostStatus.Published,
+                PageLayout = (byte) EPageLayout.Layout3,
+            };
+
+            list.Add(homePage);
+            list.Add(parent);
+            list.Add(child);
+
+            return list;
         }
     }
 }

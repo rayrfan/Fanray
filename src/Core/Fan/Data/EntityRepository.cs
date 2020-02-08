@@ -22,6 +22,8 @@ namespace Fan.Data
         /// The set initialized by sub class.
         /// </summary>
         protected readonly DbSet<T> _entities;
+        protected readonly bool isSqlite;
+
         /// <summary>
         /// The specific context initialized by sub class.
         /// </summary>
@@ -31,16 +33,16 @@ namespace Fan.Data
         {
             _entities = context.Set<T>();
             _db = context;
+            isSqlite = _db.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
         }
 
         /// <summary>
-        /// Creates an entity and the returned object is tracked.
+        /// Creates an entity and returns a tracked object with id.
         /// </summary>
         /// <param name="entity"></param>
-        /// <returns></returns>
-        /// <exception cref="DbUpdateException">
-        /// If table has unique key constrain and the record being added violates it, 
-        /// this exception will throw, such as <see cref="Meta"/> table.
+        /// <returns>The <paramref name="entity"/> with id.</returns>
+        /// <exception cref="FanException">
+        /// Throws if insert violates unique key constraint. See <see cref="https://stackoverflow.com/a/47465944/32240"/>
         /// </exception>
         public virtual async Task<T> CreateAsync(T entity)
         {
@@ -50,9 +52,9 @@ namespace Fan.Data
                 await _db.SaveChangesAsync();
                 return entity;
             }
-            catch (DbUpdateException dbUpdException)
+            catch (DbUpdateException dbUpdEx) 
             {
-                throw new FanException(EExceptionType.MetaDuplicate, dbUpdException);
+                throw GetExceptionForUniqueConstraint(dbUpdEx);
             }
         }
 
@@ -88,8 +90,10 @@ namespace Fan.Data
         /// Suitable when predicate is very simple and short.  If you take a look at 
         /// SqlTagRepository GetListAsync() that is not suitable for this.
         /// </remarks>
-        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) 
-            => await _entities.Where(predicate).ToListAsync();
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) =>
+            isSqlite ? 
+                _entities.ToList().Where(predicate.Compile()).ToList() :
+                await _entities.Where(predicate).ToListAsync();
 
         /// <summary>
         /// Returns an object by id, returns null if not found.
@@ -104,10 +108,19 @@ namespace Fan.Data
         /// <param name="entity">
         /// The entity to be updated, the EF implementation does not use this parameter.
         /// </param>
-        /// <returns></returns>
+        /// <exception cref="FanException">
+        /// Throws if update violates unique key constraint.
+        /// </exception>
         public virtual async Task UpdateAsync(T entity)
         {
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbUpdEx)
+            {
+                throw GetExceptionForUniqueConstraint(dbUpdEx);
+            }
         }
 
         /// <summary>
@@ -120,6 +133,27 @@ namespace Fan.Data
         public virtual async Task UpdateAsync(IEnumerable<T> entities)
         {
             await _db.SaveChangesAsync();
+        }
+
+        private Exception GetExceptionForUniqueConstraint(DbUpdateException dbUpdEx)
+        {
+            if (dbUpdEx.InnerException != null)
+            {
+                var message = dbUpdEx.InnerException.Message;
+                if (message.Contains("UniqueConstraint", StringComparison.OrdinalIgnoreCase)
+                    || message.Contains("Unique Constraint", StringComparison.OrdinalIgnoreCase))
+                    return new FanException(EExceptionType.DuplicateRecord, dbUpdEx);
+
+                if (dbUpdEx.InnerException.InnerException != null)
+                {
+                    message = dbUpdEx.InnerException.InnerException.Message;
+                    if (message.Contains("UniqueConstraint", StringComparison.OrdinalIgnoreCase)
+                        || message.Contains("Unique Constraint", StringComparison.OrdinalIgnoreCase))
+                        return new FanException(EExceptionType.DuplicateRecord, dbUpdEx);
+                }
+            }
+
+            return dbUpdEx;
         }
     }
 }

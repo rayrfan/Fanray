@@ -3,11 +3,13 @@ using Fan.Blog.Models;
 using Fan.Blog.Services.Interfaces;
 using Fan.Exceptions;
 using Fan.Membership;
+using Fan.Navigation;
 using Fan.Plugins;
 using Fan.Settings;
 using Fan.Themes;
 using Fan.Widgets;
 using FluentValidation;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,6 +19,7 @@ using Newtonsoft.Json;
 using SocialIcons;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,41 +27,49 @@ namespace Fan.WebApp.Manage
 {
     public class SetupModel : PageModel
     {
+        private readonly IWebHostEnvironment hostingEnvironment;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly ISettingService _settingSvc;
+        private readonly ISettingService settingService;
         private readonly IThemeService _themeService;
-        private readonly IBlogPostService _blogSvc;
-        private readonly ICategoryService _catSvc;
-        private readonly ITagService _tagSvc;
-        private readonly IWidgetService _widgetSvc;
         private readonly IPluginService pluginService;
+        private readonly IBlogPostService _blogSvc;
+        private readonly IPageService pageService;
+        private readonly ICategoryService _catSvc;
+        private readonly INavigationService navigationService;
+        private readonly IWidgetService _widgetSvc;
         private readonly ILogger<SetupModel> _logger;
 
+        public const string SETUP_DATA_DIR = "Setup";
+
         public SetupModel(
+            IWebHostEnvironment hostingEnvironment,
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             SignInManager<User> signInManager,
             IBlogPostService blogService,
+            IPageService pageService,
             ICategoryService catService,
-            ITagService tagService,
+            INavigationService navigationService,
             ISettingService settingService,
             IThemeService themeService,
-            IWidgetService widgetService,
             IPluginService pluginService,
+            IWidgetService widgetService,
             ILogger<SetupModel> logger)
         {
+            this.hostingEnvironment = hostingEnvironment;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _blogSvc = blogService;
+            this.pageService = pageService;
             _catSvc = catService;
-            _tagSvc = tagService;
-            _settingSvc = settingService;
+            this.navigationService = navigationService;
+            this.settingService = settingService;
             _themeService = themeService;
-            _widgetSvc = widgetService;
             this.pluginService = pluginService;
+            _widgetSvc = widgetService;
             _logger = logger;
         }
 
@@ -76,7 +87,7 @@ namespace Fan.WebApp.Manage
         /// </summary>
         public async Task<IActionResult> OnGetAsync()
         {
-            var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+            var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
             if (coreSettings.SetupDone)
             {
                 return RedirectToAction("Index", "Blog");
@@ -105,7 +116,7 @@ namespace Fan.WebApp.Manage
         {
             try
             {
-                _logger.LogInformation("Fanray Setup Begins");
+                _logger.LogInformation("Fanray setup begins");
 
                 var validator = new SetupValidator();
                 var valResult = await validator.ValidateAsync(model);
@@ -159,37 +170,34 @@ namespace Fan.WebApp.Manage
                     _logger.LogInformation($"{Role.ADMINISTRATOR_ROLE} role has been assigned to user {@User}.", user);
 
                     // update or create core settings
-                    var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+                    var settings = await settingService.GetSettingsAsync<CoreSettings>();
                     if (settings != null)
                     {
                         settings.Title = model.Title;
                         settings.TimeZoneId = model.TimeZoneId;
                         settings.SetupDone = true;
-                        await _settingSvc.UpsertSettingsAsync(settings);
+                        await settingService.UpsertSettingsAsync(settings);
                     }
                     else
                     {
-                        await _settingSvc.UpsertSettingsAsync(new CoreSettings
+                        await settingService.UpsertSettingsAsync(new CoreSettings
                         {
                             Title = model.Title,
                             TimeZoneId = model.TimeZoneId,
                             SetupDone = true,
                         });
                     }
-                    _logger.LogInformation("Setup is done, CoreSettings created!");
+                    _logger.LogInformation("CoreSettings created");
 
                     // sign-in user
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User has been signed in.");
+                    _logger.LogInformation("User has been signed in");
 
                     // setup blog
-                    await SetupBlogAsync();
-
-                    // setup widgets
-                    await SetupThemeAndWidgetsAsync();
-
-                    // setup plugins
-                    await SetupPluginsAsync();
+                    await SetupBlogSettingsAndPostsAsync();
+                    await SetupPagesAndNavigationAsync();
+                    await SetupThemePluginsAndWidgetsAsync();
+                    _logger.LogInformation("Blog setup completes");
 
                     return new JsonResult(true);
                 }
@@ -198,7 +206,7 @@ namespace Fan.WebApp.Manage
             }
             catch (FanException ex)
             {
-                return BadRequest(ex.ValidationFailures[0].ErrorMessage);
+                return BadRequest(ex.ValidationErrors[0].ErrorMessage);
             }
         }
 
@@ -241,19 +249,22 @@ namespace Fan.WebApp.Manage
         /// Creates the welcome blog post, settings, tags and the default category.
         /// </summary>
         /// <returns></returns>
-        private async Task SetupBlogAsync()
+        private async Task SetupBlogSettingsAndPostsAsync()
         {
-            const string DEFAULT_CATEGORY = "Uncategorized";
-            const string WELCOME_POST_TITLE = "Welcome to Fanray Blog";
-            const string WELCOME_POST_BODY = @"<p>A few tips to get you started.&nbsp;</p><ul><li>Go to <a href=""/admin/settings"">Settings</a> and enter your Disqus and Google Analytics information.</li><li>Go to <a href=""/admin/widgets"">Widgets</a> and update Social Icons to your own media links.</li><li>Spend a few minutes to get familiar with the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer"">Composer</a>, knowing how to effectively input different contents in the <a href=""https://github.com/FanrayMedia/Fanray/wiki/Admin---Composer#editor"">Editor</a> will help you become more productive blogging.</li><li>Check out <code>appsettings.json</code> to update database, storage, preferred domain, logging and diagnostic settings for local and production.</li><li>When you are ready to run this app on Azure, refer to <a href=""https://github.com/FanrayMedia/Fanray/wiki/Deploying-to-Azure"">Deploying to Azure</a>.</li><li>Feel like contributing? See the <a href=""https://github.com/FanrayMedia/Fanray/blob/master/CONTRIBUTING.md"">Contributing Guide</a>.</li></ul><p>Thank you and happy coding :)</p>";
-            const string WELCOME_POST_EXCERPT = "Welcome to Fanray Blog. Here are a few tips to get you started using the blog.";
+            // -------------------------------------------- blog settings
 
-            // create blog setting
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>(); // could be initial or an existing blogsettings
-            await _settingSvc.UpsertSettingsAsync(blogSettings);
+            var blogSettings = await settingService.GetSettingsAsync<BlogSettings>(); // could be initial or an existing blogsettings
+            await settingService.UpsertSettingsAsync(blogSettings);
+
+            _logger.LogInformation("Blog settings created");
+
+            // -------------------------------------------- categories
+
+            const string DEFAULT_CATEGORY = "Software Development";
+            const string SECOND_CATEGORY = "Life Musings";
 
             // get default cat
-            Category defaultCat = null;
+            Category defaultCat;
             try
             {
                 defaultCat = await _catSvc.GetAsync(blogSettings.DefaultCategoryId);
@@ -263,32 +274,174 @@ namespace Fan.WebApp.Manage
                 defaultCat = await _catSvc.CreateAsync(DEFAULT_CATEGORY);
             }
 
-            // TODO should I make create welcome post a option on setup
-            // create welcome post and default category
+            Category secondCat;
+            try
+            {
+                secondCat = await _catSvc.GetAsync(blogSettings.DefaultCategoryId + 1);
+            }
+            catch (FanException)
+            {
+                secondCat = await _catSvc.CreateAsync(SECOND_CATEGORY);
+            }
+
+            _logger.LogInformation("Blog categories created");
+
+            // -------------------------------------------- posts
+
+            // Hello World (life musing)
             await _blogSvc.CreateAsync(new BlogPost
             {
-                CategoryTitle = defaultCat.Title,
-                TagTitles = new List<string> { "announcement", "blogging" },
-                Title = WELCOME_POST_TITLE,
-                Body = WELCOME_POST_BODY,
-                Excerpt = WELCOME_POST_EXCERPT,
                 UserId = 1,
                 Status = EPostStatus.Published,
                 CommentStatus = ECommentStatus.AllowComments,
                 CreatedOn = DateTimeOffset.Now,
+                Title = "Hello World",
+                Body = await GetSetupFileContent("post-hello.html"),
+                Excerpt = "A blogging joke to break ice :)",
+                CategoryTitle = secondCat.Title, 
+                TagTitles = new List<string> { "blogging", "jokes" },
             });
-            _logger.LogInformation("Welcome post and default category created.");
-            _logger.LogInformation("Blog Setup completes.");
+
+            // Welcome to Fanray (software dev)
+            await _blogSvc.CreateAsync(new BlogPost
+            {
+                UserId = 1,
+                Status = EPostStatus.Published,
+                CommentStatus = ECommentStatus.AllowComments,
+                CreatedOn = DateTimeOffset.Now,
+                Title = "Welcome to Fanray",
+                Body = await GetSetupFileContent("post-welcome.html"),
+                Excerpt = "Some tips to get you started blogging!",
+                CategoryTitle = defaultCat.Title, 
+                TagTitles = new List<string> { "blogging", "tips" },
+            });
+
+            _logger.LogInformation("Default posts created");
         }
 
         /// <summary>
-        /// Activiates the default Clarity theme, registers system-defined widget areas, 
+        /// Creates default pages and setup navigation.
+        /// </summary>
+        /// <returns></returns>
+        private async Task SetupPagesAndNavigationAsync()
+        {
+            // -------------------------------------------- pages
+
+            // "docs" parent page
+            var docsPage = await pageService.CreateAsync(new Blog.Models.Page
+            {
+                UserId = 1,
+                Title = "Docs",
+                Status = EPostStatus.Published,
+                CreatedOn = DateTimeOffset.Now,
+                PageLayout = (byte)EPageLayout.Layout3, // multi-page
+                Body = await GetSetupFileContent("page-docs.html"),
+                BodyMark = await GetSetupFileContent("page-docs.md"),
+            });
+
+            // "posts" child page
+            await pageService.CreateAsync(new Blog.Models.Page
+            {
+                UserId = 1,
+                ParentId = docsPage.Id,
+                Title = "Posts",
+                Status = EPostStatus.Published,
+                CreatedOn = DateTimeOffset.Now,
+                PageLayout = (byte)EPageLayout.Layout3, 
+                Excerpt = "How to create posts using Fanray.",
+                Body = await GetSetupFileContent("page-posts.html"),
+                BodyMark = await GetSetupFileContent("page-posts.md"),
+            });
+
+            // "pages" child page
+            await pageService.CreateAsync(new Blog.Models.Page
+            {
+                UserId = 1,
+                ParentId = docsPage.Id,
+                Title = "Pages",
+                Status = EPostStatus.Published,
+                CreatedOn = DateTimeOffset.Now,
+                PageLayout = (byte)EPageLayout.Layout3,
+                Excerpt = "How to create pages using Fanray.",
+                Body = await GetSetupFileContent("page-pages.html"),
+                BodyMark = await GetSetupFileContent("page-pages.md"),
+            });
+
+            // "add a home page" child page
+            await pageService.CreateAsync(new Blog.Models.Page
+            {
+                UserId = 1,
+                ParentId = docsPage.Id,
+                Title = "Add a Home Page",
+                Status = EPostStatus.Published,
+                CreatedOn = DateTimeOffset.Now,
+                PageLayout = (byte)EPageLayout.Layout3,
+                Excerpt = "This exercise shows you how to add a Home page.",
+                Body = await GetSetupFileContent("page-exercise.html"),
+                BodyMark = await GetSetupFileContent("page-exercise.md"),
+            });
+
+            // page navigation
+            await pageService.SaveNavAsync(docsPage.Id, await GetSetupFileContent("pagenav.md"));
+
+            // "about"
+            var aboutPage = await pageService.CreateAsync(new Blog.Models.Page
+            {
+                UserId = 1,
+                Title = "About",
+                Status = EPostStatus.Published,
+                CreatedOn = DateTimeOffset.Now,
+                PageLayout = (byte)EPageLayout.Layout1, // default
+                Excerpt = "About the Fanray project.",
+                Body = await GetSetupFileContent("page-about.html"),
+                BodyMark = await GetSetupFileContent("page-about.md"),
+            });
+
+            _logger.LogInformation("Default pages created");
+
+            // -------------------------------------------- site navigation
+
+            // Blog (App)
+            await navigationService.AddNavToMenuAsync(EMenu.Menu1, 0, new Nav
+            {
+                Id = App.BLOG_APP_ID,
+                Text = App.BLOG_APP_NAME,
+                Type = ENavType.App
+            });
+
+            // Docs (Page)
+            await navigationService.AddNavToMenuAsync(EMenu.Menu1, 1, new Nav
+            {
+                Id = docsPage.Id,
+                Text = docsPage.Title,
+                Type = ENavType.Page
+            });
+
+            // About (Page)
+            await navigationService.AddNavToMenuAsync(EMenu.Menu1, 2, new Nav
+            {
+                Id = aboutPage.Id,
+                Text = aboutPage.Title,
+                Type = ENavType.Page
+            });
+
+            _logger.LogInformation("Site navigation created");
+        }
+
+        /// <summary>
+        /// Activiates the default Clarity theme and plugins and registers system-defined widget areas, 
         /// then load some widgets.
         /// </summary>
-        private async Task SetupThemeAndWidgetsAsync()
+        private async Task SetupThemePluginsAndWidgetsAsync()
         {
             // Clarity theme
             await _themeService.ActivateThemeAsync("Clarity");
+
+            // Activate plugins
+
+            await pluginService.ActivatePluginAsync("Editor.md");
+            await pluginService.ActivatePluginAsync("ForkMeRibbon");
+            await pluginService.ActivatePluginAsync("Shortcodes");
 
             // System-defined Areas
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogSidebar1.Id);
@@ -297,6 +450,12 @@ namespace Fan.WebApp.Manage
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPost.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogBeforePostList.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.BlogAfterPostList.Id);
+
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageSidebar1.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageSidebar2.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageBeforeContent.Id);
+            await _widgetSvc.RegisterAreaAsync(WidgetService.PageAfterContent.Id);
+
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer1.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer2.Id);
             await _widgetSvc.RegisterAreaAsync(WidgetService.Footer3.Id);
@@ -305,40 +464,56 @@ namespace Fan.WebApp.Manage
 
             // Social Icons
             var socialIconsWidget = new SocialIconsWidget { Links = SocialIconsWidget.SocialLinkSeeds };
-            var widgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, "SocialIcons");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 0);
+            var socialIconsWidgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, "SocialIcons");
+            await _widgetSvc.AddWidgetToAreaAsync(socialIconsWidgetInstId, WidgetService.BlogSidebar1.Id, 0);
 
             // Blog Tags
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogTags");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 1);
+            var blogTagsWidgetInstId = await _widgetSvc.CreateWidgetAsync("BlogTags");
+            await _widgetSvc.AddWidgetToAreaAsync(blogTagsWidgetInstId, WidgetService.BlogSidebar1.Id, 1);
 
             // Blog Categories
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogCategories");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 2);
+            var blogCatsWidgetInstId = await _widgetSvc.CreateWidgetAsync("BlogCategories");
+            await _widgetSvc.AddWidgetToAreaAsync(blogCatsWidgetInstId, WidgetService.BlogSidebar1.Id, 2);
 
             // Blog Archives
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("BlogArchives");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogSidebar1.Id, 3);
+            var blogArchivesWidgetInstId = await _widgetSvc.CreateWidgetAsync("BlogArchives");
+            await _widgetSvc.AddWidgetToAreaAsync(blogArchivesWidgetInstId, WidgetService.BlogSidebar1.Id, 3);
 
             // Area: BlogAfterPost
 
             // Recent Blog Posts
-            widgetInstId = await _widgetSvc.CreateWidgetAsync("RecentBlogPosts");
-            await _widgetSvc.AddWidgetToAreaAsync(widgetInstId, WidgetService.BlogAfterPost.Id, 0);
+            var recentBlogPostsWidgetInstId = await _widgetSvc.CreateWidgetAsync("RecentBlogPosts");
+            await _widgetSvc.AddWidgetToAreaAsync(recentBlogPostsWidgetInstId, WidgetService.BlogAfterPost.Id, 0);
+
+            // Area: PageSidebar1
+
+            // Social Icons
+            socialIconsWidgetInstId = await _widgetSvc.CreateWidgetAsync(socialIconsWidget, "SocialIcons");
+            await _widgetSvc.AddWidgetToAreaAsync(socialIconsWidgetInstId, WidgetService.PageSidebar1.Id, 0);
+
+            // Recent Blog Posts
+            recentBlogPostsWidgetInstId = await _widgetSvc.CreateWidgetAsync("RecentBlogPosts");
+            await _widgetSvc.AddWidgetToAreaAsync(recentBlogPostsWidgetInstId, WidgetService.PageSidebar1.Id, 1);
+
+            // Area: PageSidebar2
+
+            // Page Navigation
+            var pageNavWidgetInstId = await _widgetSvc.CreateWidgetAsync("PageNavigation");
+            await _widgetSvc.AddWidgetToAreaAsync(pageNavWidgetInstId, WidgetService.PageSidebar2.Id, 0);
+
+            _logger.LogInformation("Theme and widgets created");
         }
 
         /// <summary>
-        /// Activates plugins.
+        /// Returns the setup file content.
         /// </summary>
-        /// <remarks>
-        /// Currently since I don't have the installation step for plugins yet, unactivated plugins
-        /// that have a settings page when you activate it for the first time, the settings icon is 
-        /// not shown immediately.
-        /// </remarks>
-        private async Task SetupPluginsAsync()
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        private async Task<string> GetSetupFileContent(string fileName)
         {
-            await pluginService.ActivatePluginAsync("ForkMeRibbon");
-            await pluginService.ActivatePluginAsync("Shortcodes");
+            var setupPath = Path.Combine(hostingEnvironment.ContentRootPath, SETUP_DATA_DIR);
+            var filePath = Path.Combine(setupPath, fileName);
+            return await System.IO.File.ReadAllTextAsync(filePath);
         }
     }
 

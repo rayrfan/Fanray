@@ -1,0 +1,39 @@
+﻿@model PageVM
+@inject SignInManager<User> SignInManager
+@{ 
+    Layout = ThemeService.GetLayoutName(Model.PageLayout);
+    var fullLayout = ThemeService.GetLayoutName(EPageLayout.Layout2);
+}
+
+<article class="page">
+    @if (Layout != fullLayout)
+    {
+        <header>
+            <h1>
+                @Model.Title
+            </h1>
+            <div class="post-info clearfix">
+                <i class="icon-user" title="Author" aria-hidden="true"></i><span class="post-info-item">@Model.Author</span>
+                <i class="icon-calendar" title="Last updated" aria-hidden="true"></i><span class="post-info-item">@Model.UpdatedOnDisplay</span>
+                <i class="icon-eye" title="Views" aria-hidden="true"></i><span class="post-info-item">@Model.ViewCount</span>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.EditLink">Edit</a></span>
+                    if (Model.IsParent)
+                    {
+                        <i class="icon-pencil" aria-hidden="true"></i><span class="post-info-item"><a href="@Model.AddChildLink">Add Child Page</a></span>
+                    }
+                }
+            </div>
+        </header>
+    }
+    <div class="post-body">
+        @Html.Raw(Model.Body)
+    </div>
+    @if (SignInManager.IsSignedIn(User) && Layout == fullLayout)
+    {
+        <div class="text-center pt-4">
+            <a href="@Model.EditLink"><i class="icon-pencil" aria-hidden="true"></i></a>
+        </div>
+    }
+</article>

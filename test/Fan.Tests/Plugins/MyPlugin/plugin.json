@@ -1,0 +1,10 @@
+{
+  "name": "My Plugin",
+  "description": "My testing plugin.",
+  "type": "Fan.Tests.Plugins.MyPlugin, Fan.Tests",
+  "version": "1.0.0",
+  "requiresAtLeast": "1.1.0",
+  "pluginUrl": "https://github.com/FanrayMedia/Fanray",
+  "author": "Ray Fan",
+  "authorUrl": "https://www.fanray.com"
+}

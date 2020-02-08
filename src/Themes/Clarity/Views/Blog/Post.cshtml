@@ -1,8 +1,6 @@
-@model BlogPostViewModel
+@model BlogPostVM
 @{
-    var post = Model;
-    ViewData["Title"] = post.Title;
-    ViewData["Description"] = post.Excerpt;
+    Layout = "_BlogPostLayout";
 }
 
 @section Canonical {
@@ -13,12 +11,12 @@
 <article>
     <header>
         <h1>
-            @post.Title
+            @Model.Title
         </h1>
         @await Html.PartialAsync("_PostInfo", Model)
     </header>
     <div class="post-body">
-        @Html.Raw(post.Body)
+        @Html.Raw(Model.Body)
     </div>
 </article>
 
@@ -26,7 +24,7 @@
     <widget-area id="blog-after-post" />
 </div>
 
-@if (post.ShowDisqus)
+@if (Model.ShowDisqus)
 {
     <div id="disqus_thread" style="padding:0 50px"></div>
     <script>
@@ -34,12 +32,12 @@
         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
         var disqus_config = function () {
-        this.page.url = '@post.Permalink';  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = '@post.DisqusPageIdentifier'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = '@Model.Permalink';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = '@Model.DisqusPageIdentifier'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
         };
         (function() { // DON'T EDIT BELOW THIS LINE
         var d = document, s = d.createElement('script');
-        s.src = '@string.Format("https://{0}.disqus.com/embed.js", post.DisqusShortname)';
+        s.src = '@string.Format("https://{0}.disqus.com/embed.js", Model.DisqusShortname)';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
         })();

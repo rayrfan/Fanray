@@ -1,0 +1,19 @@
+﻿@using Fan.Membership
+@using Microsoft.AspNetCore.Identity
+@using PageNavigation.Components
+@inject SignInManager<User> signInManager
+@model PageNavigationVM
+
+<div class="widget">
+    @if (!Model.WidgetTitle.IsNullOrEmpty())
+    {
+        <h1 class="widget-header">@Model.WidgetTitle</h1>
+    }
+    <div class="widget-body page-navigation">
+        @if (signInManager.IsSignedIn(User))
+        {
+            <a href="@Model.NavEditLink" class="page-nav-edit"><i class="icon-pencil" aria-hidden="true"></i></a>
+        }
+        @Html.Raw(Model.NavBody)
+    </div>
+</div>

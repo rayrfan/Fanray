@@ -1,0 +1,13 @@
+{
+  "name": "shortcodes",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run scss",
+    "scss": "sass --update client/scss:wwwroot/css --style compressed",
+    "scss:watch": "sass --watch client/scss:wwwroot/css --style compressed"
+  },
+  "devDependencies": {
+    "sass": "1.24.4"
+  }
+}

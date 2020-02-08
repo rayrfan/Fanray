@@ -1,0 +1,14 @@
+﻿@* Layout2 is full layout with no sidebars, no page title and info *@
+@{
+    Layout = "_Layout";
+}
+
+@section Canonical {
+    @RenderSection("Canonical", required: false)
+}
+
+<div class="row">
+    <div class="blog-main col-md-12">
+        @RenderBody()
+    </div>
+</div>

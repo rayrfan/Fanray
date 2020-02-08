@@ -1,8 +1,12 @@
-﻿<link rel="stylesheet" 
+﻿@* 
+    I used https://www.srihash.org/ to generate the integrity value. 
+    This SO answer https://stackoverflow.com/a/51366490/32240 can help you understand `asp-fallback-*` tag helper.
+*@
+<link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css"
-      asp-fallback-href="~/plugins/forkmeribbon/dist/css/gh-fork-ribbon.min.css"
-      asp-fallback-test-class="github-fork-ribbon" 
-      asp-fallback-test-property="position" 
+      asp-fallback-href="~/_content/forkmeribbon/css/gh-fork-ribbon.min.css"
+      asp-fallback-test-class="github-fork-ribbon"
+      asp-fallback-test-property="position"
       asp-fallback-test-value="absolute"
-      integrity="sha384-jUHnRx457Q15HVKSx5g+6jqsItdcFcR0BBu729dDIMmTM4HT1sbXZuxxOpuiaM/p" 
+      integrity="sha384-jUHnRx457Q15HVKSx5g+6jqsItdcFcR0BBu729dDIMmTM4HT1sbXZuxxOpuiaM/p"
       crossorigin="anonymous" />

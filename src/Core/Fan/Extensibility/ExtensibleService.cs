@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Fan.Extensibility
@@ -22,12 +23,17 @@ namespace Fan.Extensibility
     {
         protected readonly IMetaRepository metaRepository;
         protected readonly IDistributedCache distributedCache;
-        protected readonly IHostingEnvironment hostingEnvironment;
+        protected readonly IWebHostEnvironment hostingEnvironment;
         protected readonly ILogger<IExtensibleService<TManifest, TExtension>> logger;
+
+        /// <summary>
+        /// An extension folder allows "a-zA-Z", "_", "-", "." and numbers.
+        /// </summary>
+        public const string FOLDER_REGEX = @"^[a-zA-Z0-9_.-]+$";
 
         public ExtensibleService(IMetaRepository metaRepository,
             IDistributedCache distributedCache,
-            IHostingEnvironment hostingEnvironment, 
+            IWebHostEnvironment hostingEnvironment, 
             ILogger<IExtensibleService<TManifest, TExtension>> logger)
         {
             this.metaRepository = metaRepository;
@@ -66,7 +72,7 @@ namespace Fan.Extensibility
             var baseType = JsonConvert.DeserializeObject<TExtension>(meta.Value);
             var actualType = await GetManifestTypeByFolderAsync(baseType.Folder);
             var extension = (TExtension)JsonConvert.DeserializeObject(meta.Value, actualType);
-            
+
             return extension;
         }
 
@@ -85,7 +91,7 @@ namespace Fan.Extensibility
         /// </summary>
         /// <param name="folder">The folder name.</param>
         /// <returns></returns>
-        public abstract bool IsValidExtensionFolder(string folder);
+        public virtual bool IsValidExtensionFolder(string folder) => new Regex(FOLDER_REGEX).IsMatch(folder);
 
         /// <summary>
         /// Returns extension manifest by folder.
@@ -117,7 +123,7 @@ namespace Fan.Extensibility
         /// This method serves as a default implementation to support GetManifestsAsync method.
         /// It scans a particular extension folder and reads all the manifest json files for each extension.
         /// </remarks>
-        protected async Task<IEnumerable<TManifest>> LoadManifestsAsync()
+        protected virtual async Task<IEnumerable<TManifest>> LoadManifestsAsync()
         {
             var list = new List<TManifest>();
             var extPath = Path.Combine(hostingEnvironment.ContentRootPath, ManifestDirectory);

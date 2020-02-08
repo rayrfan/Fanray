@@ -16,13 +16,23 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddPlugins(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
+        /// <summary>
+        /// Adds services plugins depend on.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="hostingEnvironment"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddPlugins(this IServiceCollection services, IWebHostEnvironment hostingEnvironment)
         {
-            var pluginsDir = Path.Combine(hostingEnvironment.ContentRootPath, "Plugins");
+            var sysPluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "SysPlugins"));
+            var pluginsDirs = Directory.GetDirectories(Path.Combine(hostingEnvironment.ContentRootPath, "Plugins"));
+            var totalDirs = new string[sysPluginsDirs.Length + pluginsDirs.Length];
+            sysPluginsDirs.CopyTo(totalDirs, 0);
+            pluginsDirs.CopyTo(totalDirs, sysPluginsDirs.Length);
             var binDir = Util.IsRunningFromTestHost() ? Environment.CurrentDirectory :
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            foreach (var dir in Directory.GetDirectories(pluginsDir))
+            foreach (var dir in totalDirs)
             {
                 try
                 {
@@ -51,6 +61,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             }
 
+            // configure services
+            foreach (var plugin in services.BuildServiceProvider().GetServices<Plugin>())
+            {
+                plugin.ConfigureServices(services);
+            }
+
             return services;
         }
 
@@ -67,7 +83,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddStorageProvider(this IServiceCollection services, IConfiguration configuration)
         {
             var appSettingsConfigSection = configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsConfigSection);
+            services.Configure<AppSettings>(options => appSettingsConfigSection.Bind(options));
             var appSettings = appSettingsConfigSection.Get<AppSettings>();
             if (appSettings.MediaStorageType == EMediaStorageType.AzureBlob)
                 services.AddScoped<IStorageProvider, AzureBlobStorageProvider>();

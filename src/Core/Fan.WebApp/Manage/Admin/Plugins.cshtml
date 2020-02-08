@@ -6,39 +6,45 @@
 
 <plugins inline-template ref="exts">
     <v-container>
-        <v-data-table :headers="headers"
-                      :items="pluginInfos"
-                      item-key="folder"
-                      :total-items="totalPlugins"
-                      :rows-per-page-items="rowsPerPageItems"
-                      rows-per-page-text=""
-                      class="elevation-1">
-            <template slot="items" slot-scope="props">
-                <td>
-                    <h3>{{ props.item.name }}</h3>
-                </td>
-                <td>
-                    <div>{{ props.item.description }}</div>
-                    <div>
-                        <span>Version {{ props.item.version }}</span> |
-                        <span>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span> |
-                        <span><a :href="props.item.pluginUrl" target="_blank">View details</a></span>
-                    </div>
-                </td>
-                <td>
-                    <div v-if="props.item.active">
-                        <v-btn fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
-                        <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
-                    </div>
-                    <div v-else>
-                        <v-btn fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
-                    </div>
-                </td>
-            </template>
-            <template slot="no-data">
-                <div>You have no plugins.</div>
-            </template>
-        </v-data-table>
+        <v-layout row>
+            <v-flex xs12 sm12 md10 lg8 xl6 offset-md1 offset-lg2 offset-xl3>
+                <v-data-table :headers="headers"
+                              :items="pluginInfos"
+                              item-key="folder"
+                              :total-items="totalPlugins"
+                              :rows-per-page-items="rowsPerPageItems"
+                              rows-per-page-text=""
+                              class="elevation-1">
+                    <template slot="items" slot-scope="props">
+                        <td>
+                            <h3>{{ props.item.name }}</h3>
+                        </td>
+                        <td>
+                            <div>{{ props.item.description }}</div>
+                            <div>
+                                <span>Version {{ props.item.version }}  |</span>
+                                <span v-if="props.item.pluginUrl"><a :href="props.item.pluginUrl" target="_blank">View details</a>  |</span>
+                                <span v-if="props.item.isSysPlugin" title="System plugin"><v-chip small label color="grey darken-1" class="white--text">System</v-chip></span>
+                                <span v-else>By <a :href="props.item.authorUrl" target="_blank">{{ props.item.author }}</a></span>
+                            </div>
+                        </td>
+                        <td>
+                            <div v-if="props.item.isSysPlugin">
+                                <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
+                            </div>
+                            <div v-else>
+                                <v-btn v-if="props.item.active" fab small color="success" @@click="deactivate(props.item)"><v-icon>power</v-icon></v-btn>
+                                <v-btn v-else fab small dark @@click="activate(props.item)"><v-icon>power_off</v-icon></v-btn>
+                                <v-btn fab small color="primary" v-if="props.item.settingsUrl !== null" @@click="viewSettings(props.item)"><v-icon>build</v-icon></v-btn>
+                            </div>
+                        </td>
+                    </template>
+                    <template slot="no-data">
+                        <div>You have no plugins.</div>
+                    </template>
+                </v-data-table>
+            </v-flex>
+        </v-layout>
         <v-dialog lazy
                   v-model="dialogVisible"
                   @@keydown.esc="closeDialog"

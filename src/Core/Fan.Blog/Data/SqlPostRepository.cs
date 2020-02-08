@@ -24,24 +24,23 @@ namespace Fan.Blog.Data
         /// Creates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to create.</param>
+        /// <param name="categoryTitle">The category title is available when called from metaweblog.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
         /// <returns>
         /// The inserted post with id.
         /// </returns>
-        public async Task<Post> CreateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        public async Task<Post> CreateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles)
         {
             // Category
             if (!categoryTitle.IsNullOrEmpty())
             {
-                // from metaweblog with a cat inputted
-                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
+                // cat title present, olw and setup
+                post.Category = _db.Set<Category>().First(c => c.Title.ToUpper() == categoryTitle.ToUpper());
             }
-            else
+            else if (!post.CategoryId.HasValue) // from browser CategoryId will have value
             {
-                post.CategoryId = categoryId.HasValue ?
-                    // from browser
-                    categoryId : 
-                    // from metaweblog with no cat inputted
+                // from metaweblog with no cat inputted, give it the default cat id
+                post.CategoryId =                     
                     Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
             }
 
@@ -55,7 +54,7 @@ namespace Fan.Blog.Data
                 foreach (var title in tagTitles)
                 {
                     // lookup the tag (any new tag is already created prior)
-                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    var tag = tags.First(t => t.Title.ToUpper() == title.ToUpper());
                     post.PostTags.Add(new PostTag { Post = post, Tag = tag });
                 }
             }
@@ -69,24 +68,16 @@ namespace Fan.Blog.Data
         /// Updates a <see cref="Post"/>.
         /// </summary>
         /// <param name="post">The post to update.</param>
+        /// <param name="categoryTitle">The category title of the blog post input.</param>
         /// <param name="tagTitles">A list of tag titles associated with the post.</param>
-        public async Task UpdateAsync(Post post, int? categoryId, string categoryTitle, IEnumerable<string> tagTitles)
+        public async Task UpdateAsync(Post post, string categoryTitle, IEnumerable<string> tagTitles)
         {
             // Category
-            if (!categoryTitle.IsNullOrEmpty())
+            if (!categoryTitle.IsNullOrEmpty()) // if cat title has value
             {
                 // from metaweblog with a cat inputted
-                post.Category = _db.Set<Category>().First(c => c.Title.Equals(categoryTitle, StringComparison.CurrentCultureIgnoreCase));
-            }
-            else if (categoryId.HasValue)
-            {
-                // from browser
-                if (categoryId != post.CategoryId) post.CategoryId = categoryId;
-            }
-            else
-            {
-                // from metaweblog with no cat inputted
-                post.CategoryId = Convert.ToInt32(_db.Set<Meta>().First(m => m.Key.Equals("blogsettings.defaultcategoryid")).Value);
+                post.Category = _db.Set<Category>().First(c => c.Title.ToUpper() == categoryTitle.ToUpper());
+                post.CategoryId = post.Category.Id;
             }
 
             // PostTags
@@ -106,7 +97,7 @@ namespace Fan.Blog.Data
                 var titlesToAdd = tagTitles.Except(currentTitles);
                 foreach (var title in titlesToAdd)
                 {
-                    var tag = tags.First(t => t.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
+                    var tag = tags.First(t => t.Title.ToUpper() == title.ToUpper());
                     post.PostTags.Add(new PostTag { PostId = post.Id, TagId = tag.Id });
                 }
             }
@@ -115,25 +106,41 @@ namespace Fan.Blog.Data
         }
 
         /// <summary>
-        /// Deletes a <see cref="Post"/> by Id, if the post is a root page, 
+        /// Deletes a <see cref="Post"/> by Id, if the post is a parent page, 
         /// it will also delete all child pages.
         /// </summary>
         public new async Task DeleteAsync(int id)
         {
-            // SingleAsync will throw if id is not found or not unique
+            // throws if id not found or not unique
             var post = await _entities.SingleAsync(c => c.Id == id);
 
-            // root page
-            if (post.Type == EPostType.Page && post.RootId == 0)
-            {
-                var posts = _entities.Where(po => po.RootId == id);
-                _db.RemoveRange(posts);
-            }
-            else
+            // if blog post or child page
+            if (post.Type == EPostType.BlogPost || (post.ParentId.HasValue && post.ParentId > 0))
             {
                 _db.Remove(post);
             }
+            else // parent page which may have children
+            {
+                var posts = _entities.Where(p => p.ParentId == id).ToArray();
+                Array.Resize(ref posts, posts.Length + 1); // put the parent itself in
+                posts[posts.Length - 1] = post;
+                
+                _db.RemoveRange(posts);
+            }
 
+            await _db.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Increases post view count.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public async Task IncViewCountAsync(int id, int count)
+        {
+            var post = await _entities.SingleOrDefaultAsync(p => p.Id == id);
+            post.ViewCount += count;
             await _db.SaveChangesAsync();
         }
 
@@ -153,43 +160,52 @@ namespace Fan.Blog.Data
         /// <summary>
         /// Returns a <see cref="EPostStatus.Published"/> <see cref="Post"/>, returns null if it's not found.
         /// </summary>
-        public async Task<Post> GetAsync(string slug, int year, int month, int day)
-        {
-            return await _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
-                                  .SingleOrDefaultAsync(p =>
-                                    p.Type == EPostType.BlogPost &&
-                                    p.Status == EPostStatus.Published &&
-                                    p.Slug.ToLower() == slug.ToLower() &&
-                                    p.CreatedOn.Year == year &&
-                                    p.CreatedOn.Month == month &&
-                                    p.CreatedOn.Day == day);
-        }
+        public async Task<Post> GetAsync(string slug, int year, int month, int day) =>
+            isSqlite ?
+                 _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag).ToList()
+                                   .SingleOrDefault(p =>
+                                     p.Type == EPostType.BlogPost &&
+                                     p.Status == EPostStatus.Published &&
+                                     p.Slug.ToUpper() == slug.ToUpper() &&
+                                     p.CreatedOn.Year == year &&
+                                     p.CreatedOn.Month == month &&
+                                     p.CreatedOn.Day == day) :
+                 await _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag)
+                               .SingleOrDefaultAsync(p =>
+                                 p.Type == EPostType.BlogPost &&
+                                 p.Status == EPostStatus.Published &&
+                                 p.Slug.ToUpper() == slug.ToUpper() &&
+                                 p.CreatedOn.Year == year &&
+                                 p.CreatedOn.Month == month &&
+                                 p.CreatedOn.Day == day);
 
         /// <summary>
         /// Returns a list of posts and total post count by query or empty list if no posts found.
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public async Task<(List<Post> posts, int totalCount)> GetListAsync(PostListQuery query)
+        public async Task<(IList<Post> posts, int totalCount)> GetListAsync(PostListQuery query)
         {
-            List<Post> posts = null;
+            IList<Post> posts = null;
             int skip = (query.PageIndex - 1) * query.PageSize;
             int take = query.PageSize;
-            IQueryable<Post> q = _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag);
+            IQueryable<Post> q = (query.QueryType == EPostListQueryType.Pages || query.QueryType == EPostListQueryType.PagesWithChildren) ?
+                _entities.Include(p => p.User).Where(p => p.Type == EPostType.Page) :
+                _entities.Include(p => p.User).Include(p => p.Category).Include(p => p.PostTags).ThenInclude(p => p.Tag).Where(p => p.Type == EPostType.BlogPost);
 
             switch (query.QueryType)
             {
                 case EPostListQueryType.BlogPosts:
-                    q = q.Where(p => p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost);
+                    q = q.Where(p => p.Status == EPostStatus.Published);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Skip(skip).Take(take).ToListAsync();
                     break;
                 case EPostListQueryType.BlogDrafts:
-                    q = q.Where(p => p.Status == EPostStatus.Draft && p.Type == EPostType.BlogPost);
+                    q = q.Where(p => p.Status == EPostStatus.Draft);
                     posts = await q.OrderByDescending(p => p.UpdatedOn).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsByCategory:
                     var cat = await _db.Set<Category>().FirstAsync(t => t.Slug == query.CategorySlug);
-                    q = q.Where(p => p.CategoryId == cat.Id && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost);
+                    q = q.Where(p => p.CategoryId == cat.Id && p.Status == EPostStatus.Published);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Skip(skip).Take(take).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsByTag:
@@ -197,41 +213,35 @@ namespace Fan.Blog.Data
                     q = from p in q
                         from pt in p.PostTags
                         where p.Id == pt.PostId &&
-                        pt.TagId == tag.Id && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost
+                        pt.TagId == tag.Id && p.Status == EPostStatus.Published 
                         select p;
                     posts = await q.OrderByDescending(p => p.CreatedOn).Skip(skip).Take(take).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsArchive:
                     q = (query.Month.HasValue && query.Month > 0) ?
-                        q.Where(p => p.CreatedOn.Year == query.Year && p.CreatedOn.Month == query.Month && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost) :
-                        q.Where(p => p.CreatedOn.Year == query.Year && p.Status == EPostStatus.Published && p.Type == EPostType.BlogPost);
+                        q.Where(p => p.CreatedOn.Year == query.Year && p.CreatedOn.Month == query.Month && p.Status == EPostStatus.Published) :
+                        q.Where(p => p.CreatedOn.Year == query.Year && p.Status == EPostStatus.Published);
                     posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
                     break;
                 case EPostListQueryType.BlogPostsByNumber:
-                    q = q.Where(p => p.Type == EPostType.BlogPost);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Take(take).ToListAsync();
                     break;
-                case EPostListQueryType.RootPages:
-                    q = _entities.Where(p => p.RootId == 0 && p.Status == EPostStatus.Published && p.Type == EPostType.Page);
-                    posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
-                    break;
-                case EPostListQueryType.ChildPagesForRoot:
-                    q = _entities.Where(p => p.RootId == query.RootId && p.Status == EPostStatus.Published && p.Type == EPostType.Page);
-                    posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
-                    break;
-                case EPostListQueryType.PageDrafts:
-                    q = _entities.Where(p => p.Status == EPostStatus.Draft && p.Type == EPostType.Page);
-                    posts = await q.OrderByDescending(p => p.UpdatedOn).ToListAsync();
-                    break;
-                case EPostListQueryType.PagesByNumber:
-                    q = _entities.Where(p => p.Type == EPostType.Page);
+                case EPostListQueryType.BlogPublishedPostsByNumber:
+                    q = q.Where(p => p.Status == EPostStatus.Published);
                     posts = await q.OrderByDescending(p => p.CreatedOn).Take(take).ToListAsync();
+                    break;
+                case EPostListQueryType.Pages:
+                    q = q.Where(p => p.ParentId == null || p.ParentId == 0);
+                    posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
+                    break;
+                case EPostListQueryType.PagesWithChildren:
+                    posts = await q.OrderByDescending(p => p.CreatedOn).ToListAsync();
                     break;
             }
 
             int postCount = await q.CountAsync();
 
-            return (posts: posts, totalCount: postCount);
+            return (posts, totalCount: postCount);
         }
 
         /// <summary>

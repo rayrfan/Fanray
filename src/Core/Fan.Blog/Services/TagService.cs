@@ -23,20 +23,17 @@ namespace Fan.Blog.Services
                               INotificationHandler<BlogPostBeforeCreate>,
                               INotificationHandler<BlogPostBeforeUpdate>
     {
-        private readonly ITagRepository _tagRepo;
-        private readonly IMediator _mediator;
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<TagService> _logger;
+        private readonly ITagRepository tagRepository;
+        private readonly IDistributedCache cache;
+        private readonly ILogger<TagService> logger;
 
-        public TagService(ITagRepository tagRepo,
-            IMediator mediator,
+        public TagService(ITagRepository tagRepository,
             IDistributedCache cache,
             ILogger<TagService> logger)
         {
-            _tagRepo = tagRepo;
-            _mediator = mediator;
-            _cache = cache;
-            _logger = logger;
+            this.tagRepository = tagRepository;
+            this.cache = cache;
+            this.logger = logger;
         }
 
         // -------------------------------------------------------------------- const
@@ -64,7 +61,8 @@ namespace Fan.Blog.Services
             var tag = tags.SingleOrDefault(c => c.Id == id);
             if (tag == null)
             {
-                throw new FanException($"Tag with id {id} is not found.");
+                throw new FanException(EExceptionType.ResourceNotFound, 
+                    $"Tag with id {id} is not found.");
             }
 
             return tag;
@@ -77,13 +75,14 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task<Tag> GetBySlugAsync(string slug)
         {
-            if (slug.IsNullOrEmpty()) throw new FanException("Tag does not exist.");
+            if (slug.IsNullOrEmpty()) 
+                throw new FanException(EExceptionType.ResourceNotFound, "Tag does not exist.");
 
             var tags = await GetAllAsync();
             var tag = tags.SingleOrDefault(c => c.Slug.Equals(slug, StringComparison.CurrentCultureIgnoreCase));
             if (tag == null)
             {
-                throw new FanException($"Tag with slug '{slug}' does not exist.");
+                throw new FanException(EExceptionType.ResourceNotFound, $"Tag '{slug}' does not exist.");
             }
 
             return tag;
@@ -123,8 +122,8 @@ namespace Fan.Blog.Services
         /// </remarks>
         public async Task<List<Tag>> GetAllAsync()
         {
-            return await _cache.GetAsync(BlogCache.KEY_ALL_TAGS, BlogCache.Time_AllTags, async () => {
-                return await _tagRepo.GetListAsync();
+            return await cache.GetAsync(BlogCache.KEY_ALL_TAGS, BlogCache.Time_AllTags, async () => {
+                return await tagRepository.GetListAsync();
             });
         }
 
@@ -157,13 +156,13 @@ namespace Fan.Blog.Services
             tag.Count = tag.Count;
 
             // create
-            tag = await _tagRepo.CreateAsync(tag);
+            tag = await tagRepository.CreateAsync(tag);
 
             // remove cache
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
-            _logger.LogDebug("Created {@Tag}", tag);
+            logger.LogDebug("Created {@Tag}", tag);
             return tag;
         }
 
@@ -192,21 +191,21 @@ namespace Fan.Blog.Services
             }
 
             // prep slug, description and count
-            var entity = await _tagRepo.GetAsync(tag.Id);
+            var entity = await tagRepository.GetAsync(tag.Id);
             entity.Title = tag.Title; // assign new title
             entity.Slug = BlogUtil.SlugifyTaxonomy(tag.Title, SLUG_MAXLEN, allTags.Select(c => c.Slug)); // slug is based on title
             entity.Description = Util.CleanHtml(tag.Description);
             entity.Count = tag.Count;
 
             // update 
-            await _tagRepo.UpdateAsync(entity);
+            await tagRepository.UpdateAsync(entity);
 
             // remove cache
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
 
             // return entity
-            _logger.LogDebug("Updated {@Tag}", entity);
+            logger.LogDebug("Updated {@Tag}", entity);
             return entity;
         }
 
@@ -217,9 +216,9 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task DeleteAsync(int id)
         {
-            await _tagRepo.DeleteAsync(id);
-            await _cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
-            await _cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
+            await tagRepository.DeleteAsync(id);
+            await cache.RemoveAsync(BlogCache.KEY_ALL_TAGS);
+            await cache.RemoveAsync(BlogCache.KEY_POSTS_INDEX);
         }
 
         // -------------------------------------------------------------------- event handlers
@@ -258,10 +257,10 @@ namespace Fan.Blog.Services
         /// <returns></returns>
         public async Task Handle(BlogPostBeforeUpdate notification, CancellationToken cancellationToken)
         {
-            if (notification.TagTitles == null || notification.TagTitles.Count <= 0 || notification.CurrentPost == null) return;
+            if (notification.TagTitles == null || notification.TagTitles.Count <= 0 || notification.PostTags == null) return;
 
             // get tags that are not among current tags
-            var currentTitles = notification.CurrentPost.PostTags.Select(pt => pt.Tag.Title);
+            var currentTitles = notification.PostTags.Select(pt => pt.Tag.Title);
             var distinctTitles = notification.TagTitles.Except(currentTitles);
             var allTags = await GetAllAsync();
 

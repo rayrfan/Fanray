@@ -33,9 +33,9 @@ namespace Fan.Blog.Events
         /// </summary>
         public List<string> TagTitles { get; set; }
         /// <summary>
-        /// The current post.
+        /// The current post's PostTags.
         /// </summary>
-        public Post CurrentPost { get; set; }
+        public ICollection<PostTag> PostTags { get; set; }
     }
 
     /// <summary>

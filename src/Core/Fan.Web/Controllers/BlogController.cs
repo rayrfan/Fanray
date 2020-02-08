@@ -1,20 +1,20 @@
-﻿using Fan.Blog.Helpers;
+﻿using Fan.Blog.Enums;
+using Fan.Blog.Helpers;
 using Fan.Blog.Models;
-using Fan.Blog.Services;
+using Fan.Blog.Models.View;
 using Fan.Blog.Services.Interfaces;
-using Fan.Helpers;
+using Fan.Navigation;
 using Fan.Settings;
 using Fan.Web.Attributes;
-using Fan.Web.Models.Blog;
+using Fan.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
 using System;
-using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -22,50 +22,59 @@ namespace Fan.Web.Controllers
 {
     public class BlogController : Controller
     {
-        private readonly IBlogPostService _blogSvc;
-        private readonly ICategoryService _catSvc;
-        private readonly ITagService _tagSvc;
-        private readonly ISettingService _settingSvc;
-        private readonly ILogger<BlogController> _logger;
-        private readonly IDistributedCache _cache;
+        private readonly IBlogPostService blogPostService;
+        private readonly ICategoryService categoryService;
+        private readonly ITagService tagService;
+        private readonly IStatsService statsService;
+        private readonly ISettingService settingService;
+        private readonly IHomeHelper homeHelper;
+        private readonly IBlogViewModelHelper blogViewModelHelper;
+        private readonly IDistributedCache distributedCache;
 
         public BlogController(
-            IBlogPostService blogService,
-            ICategoryService catService,
+            IBlogPostService blogPostService,
+            ICategoryService categoryService,
             ITagService tagService,
+            IStatsService statsService,
             ISettingService settingService,
-            IDistributedCache cache,
-            ILogger<BlogController> logger)
+            IHomeHelper homeHelper,
+            IBlogViewModelHelper blogViewModelHelper,
+            IDistributedCache distributedCache)
         {
-            _blogSvc = blogService;
-            _catSvc = catService;
-            _tagSvc = tagService;
-            _settingSvc = settingService;
-            _cache = cache;
-            _logger = logger;
+            this.blogPostService = blogPostService;
+            this.categoryService = categoryService;
+            this.tagService = tagService;
+            this.statsService = statsService;
+            this.settingService = settingService;
+            this.homeHelper = homeHelper;
+            this.blogViewModelHelper = blogViewModelHelper;
+            this.distributedCache = distributedCache;
         }
 
+        [ViewData]
+        public string Title { get; set; }
+
+        [ViewData]
+        public string Description { get; set; }
+
         /// <summary>
-        /// Blog index page, redirect to home setup on initial launch.
+        /// Blog index page.
         /// </summary>
         /// <returns></returns>
         [ModelPreRender]
         public async Task<IActionResult> Index(int? page)
         {
-            if (!page.HasValue || page <= 0) page = BlogPostService.DEFAULT_PAGE_INDEX;
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var posts = await _blogSvc.GetListAsync(page.Value, blogSettings.PostPerPage);
-
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, page.Value);
-            return View(vm);
+            var (_, viewModel) = await homeHelper.GetBlogIndexAsync(page);
+            Title = App.BLOG_APP_NAME;
+            return View(viewModel);
         }
 
         /// <summary>
-        /// Returns content of the RSD file which will tell where the MetaWeblog API endpoint is.
+        /// Blog RSD file. 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The content of the RSD file.</returns>
         /// <remarks>
-        /// https://en.wikipedia.org/wiki/Really_Simple_Discovery
+        /// RSD tells where the MetaWeblog API endpoint is <see cref="https://en.wikipedia.org/wiki/Really_Simple_Discovery"/>.
         /// </remarks>
         public IActionResult Rsd()
         {
@@ -74,7 +83,7 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
-        /// Returns viewing of a single post.
+        /// A blog post.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -84,14 +93,16 @@ namespace Fan.Web.Controllers
         [ModelPreRender]
         public async Task<IActionResult> Post(int year, int month, int day, string slug)
         {
-            var blogPost = await _blogSvc.GetAsync(slug, year, month, day);
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
-            return View(vm);
+            var blogPost = await blogPostService.GetAsync(slug, year, month, day);
+            var blogPostVM = await blogViewModelHelper.GetBlogPostVMAsync(blogPost);
+            await statsService.IncViewCountAsync(EPostType.BlogPost, blogPost.Id);
+            Title = blogPostVM.Title;
+            Description = blogPostVM.Excerpt;
+            return View(blogPostVM);
         }
 
         /// <summary>
-        /// Returns previewing of a single post.  
+        /// Preview a post.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -99,7 +110,7 @@ namespace Fan.Web.Controllers
         /// <param name="slug"></param>
         /// <returns></returns>
         [ModelPreRender]
-        public async Task<IActionResult> Preview(int year, int month, int day, string slug)
+        public async Task<IActionResult> PreviewPost(int year, int month, int day, string slug)
         {
             try
             {
@@ -108,14 +119,11 @@ namespace Fan.Web.Controllers
                 var link = BlogRoutes.GetPostPreviewRelativeLink(dt, slug);
                 var blogPost = TempData.Get<BlogPost>(link);
 
-                // Prep it
-                blogPost.Body = OembedParser.Parse(blogPost.Body);
-                var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                blogSettings.DisqusShortname = ""; // when preview turn off disqus
-                var vm = new BlogPostViewModel(blogPost, blogSettings, Request);
+                // Prep vm
+                var blogPostVM = await blogViewModelHelper.GetBlogPostVMPreviewAsync(blogPost);
 
                 // Show it
-                return View("Post", vm);
+                return View("Post", blogPostVM);
             }
             catch (Exception)
             {
@@ -125,32 +133,46 @@ namespace Fan.Web.Controllers
             }
         }
 
+        /// <summary>
+        /// Blog post perma link.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> PostPerma(int id)
         {
-            var post = await _blogSvc.GetAsync(id);
+            var post = await blogPostService.GetAsync(id);
             return Redirect(BlogRoutes.GetPostRelativeLink(post.CreatedOn, post.Slug));
         }
 
-        public async Task<IActionResult> Category(string slug)
+        /// <summary>
+        /// Blog category.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Category(string slug, int? page)
         {
-            var cat = await _catSvc.GetAsync(slug);
-            var posts = await _blogSvc.GetListForCategoryAsync(slug, 1);
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, cat);
-            return View(vm);
-        }
-
-        public async Task<IActionResult> Tag(string slug)
-        {
-            var tag = await _tagSvc.GetBySlugAsync(slug);
-            var posts = await _blogSvc.GetListForTagAsync(slug, 1);
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request, tag);
-            return View(vm);
+            var (viewPath, viewModel) = await homeHelper.GetBlogCategoryAsync(slug, page);
+            Title = viewModel.CategoryTitle;
+            return View(viewPath, viewModel);
         }
 
         /// <summary>
-        /// Archive page.
+        /// Blog tag.
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> Tag(string slug)
+        {
+            var tag = await tagService.GetBySlugAsync(slug);
+            var posts = await blogPostService.GetListForTagAsync(slug, 1);
+            var blogPostListVM = await blogViewModelHelper.GetBlogPostListVMForTagAsync(posts, tag);
+            Title = $"Latest '{blogPostListVM.TagTitle}' Posts";
+            return View(blogPostListVM);
+        }
+
+        /// <summary>
+        /// Blog archive.
         /// </summary>
         /// <param name="year"></param>
         /// <param name="month"></param>
@@ -158,17 +180,10 @@ namespace Fan.Web.Controllers
         public async Task<IActionResult> Archive(int? year, int? month)
         {
             if (!year.HasValue) return RedirectToAction("Index");
-
-            var posts = await _blogSvc.GetListForArchive(year, month);
-            var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-            string monthName = (month.HasValue && month.Value > 0) ?
-                CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Value) : "";
-
-            var vm = new BlogPostListViewModel(posts, blogSettings, Request)
-            {
-                ArchiveTitle = $"{monthName} {year.Value}"
-            };
-            return View(vm);
+            var posts = await blogPostService.GetListForArchive(year, month);
+            var blogPostListVM = await blogViewModelHelper.GetBlogPostListVMForArchiveAsync(posts, year, month);
+            Title = blogPostListVM.ArchiveTitle;
+            return View(blogPostListVM);
         }
 
         /// <summary>
@@ -178,7 +193,7 @@ namespace Fan.Web.Controllers
         /// <returns></returns>
         public async Task<ContentResult> CategoryFeed(string slug)
         {
-            var cat = await _catSvc.GetAsync(slug);
+            var cat = await categoryService.GetAsync(slug);
             var rss = await GetFeed(cat);
             return new ContentResult
             {
@@ -204,6 +219,51 @@ namespace Fan.Web.Controllers
         }
 
         /// <summary>
+        /// A page.
+        /// </summary>
+        /// <param name="parentPage"></param>
+        /// <param name="childPage"></param>
+        /// <returns></returns>
+        [ModelPreRender]
+        public async Task<IActionResult> Page(string parentPage, string childPage)
+        {
+            var (_, viewModel) = await homeHelper.GetPageAsync(parentPage, childPage);
+            await statsService.IncViewCountAsync(EPostType.Page, viewModel.Id);
+            viewModel.ViewCount++;
+            Title = viewModel.Title;
+            Description = viewModel.Excerpt;
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Preview a page.
+        /// </summary>
+        /// <param name="parentSlug"></param>
+        /// <param name="childSlug"></param>
+        /// <returns></returns>
+        [ModelPreRender]
+        public IActionResult PreviewPage(string parentSlug, string childSlug)
+        {
+            try
+            {
+                // slugs coming in are not url encoded, encode them for the key to tempdata
+                if (!parentSlug.IsNullOrEmpty()) parentSlug = WebUtility.UrlEncode(parentSlug);
+                if (!childSlug.IsNullOrEmpty()) childSlug = WebUtility.UrlEncode(childSlug);
+
+                var key = BlogRoutes.GetPagePreviewRelativeLink(parentSlug, childSlug);
+                var pageVM = TempData.Get<PageVM>(key);
+
+                return pageVM == null ? View("404") : View("Page", pageVM);
+            }
+            catch (Exception)
+            {
+                // when user access the preview link directly or when user clicks on other links 
+                // and navigates away during the preview, hacky need to find a better way.
+                return RedirectToAction("ErrorCode", "Home", new { statusCode = 404 });
+            }
+        }
+
+        /// <summary>
         /// Returns the rss xml string for the blog or a blog category.
         /// The rss feed always returns first page with 10 results.
         /// </summary>
@@ -213,19 +273,19 @@ namespace Fan.Web.Controllers
         {
             var key = cat == null ? BlogCache.KEY_MAIN_RSSFEED : string.Format(BlogCache.KEY_CAT_RSSFEED, cat.Slug);
             var time = cat == null ? BlogCache.Time_MainRSSFeed : BlogCache.Time_CatRSSFeed;
-            return await _cache.GetAsync(key, time, async () =>
+            return await distributedCache.GetAsync(key, time, async () =>
             {
                 var sw = new StringWriter();
                 using (XmlWriter xmlWriter = XmlWriter.Create(sw, new XmlWriterSettings() { Async = true, Indent = true }))
                 {
                     var postList = cat == null ?
-                                await _blogSvc.GetListAsync(1, 10, cacheable: false) :
-                                await _blogSvc.GetListForCategoryAsync(cat.Slug, 1);
-                    var coreSettings = await _settingSvc.GetSettingsAsync<CoreSettings>();
-                    var blogSettings = await _settingSvc.GetSettingsAsync<BlogSettings>();
-                    var vm = new BlogPostListViewModel(postList, blogSettings, Request);
+                                await blogPostService.GetListAsync(1, 10, cacheable: false) :
+                                await blogPostService.GetListForCategoryAsync(cat.Slug, 1);
+                    var coreSettings = await settingService.GetSettingsAsync<CoreSettings>();
+                    var blogSettings = await settingService.GetSettingsAsync<BlogSettings>();
+                    var vm = await blogViewModelHelper.GetBlogPostListVMAsync(postList);
 
-                    var settings = await _settingSvc.GetSettingsAsync<CoreSettings>();
+                    var settings = await settingService.GetSettingsAsync<CoreSettings>();
                     var channelTitle = cat == null ? settings.Title : $"{cat.Title} - {settings.Title}";
                     var channelDescription = coreSettings.Tagline;
                     var channelLink = $"{Request.Scheme}://{Request.Host}";

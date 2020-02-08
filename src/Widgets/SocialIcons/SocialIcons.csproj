@@ -1,19 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Fan\Fan.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="widget.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyArtifacts" AfterTargets="Build">
@@ -27,7 +24,7 @@
 
     <RemoveDir Directories="$(CopyToDir)" />
     <MakeDir Directories="$(CopyToDir)" Condition="!Exists('$(CopyToDir)')" />
-    <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="@(ManifestToCopy)" DestinationFiles="$(CopyToDir)\%(FileName)%(Extension)" />
   </Target>
 
 </Project>

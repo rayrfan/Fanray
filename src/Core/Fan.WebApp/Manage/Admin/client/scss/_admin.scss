@@ -23,6 +23,7 @@
 }
 
 .cat-dialog {
+    width: 500px;
     max-width: 40vw;
     background-color: white;
 }
@@ -59,4 +60,18 @@
 .sortable-ghost {
     opacity: .5;
     background: #C8EBFB;
+}
+// panel tiles
+.tile {
+    border: 1px solid #ddd;
+    margin: 5px;
+}
+// the hint under a form field
+.form-field-hint {
+    display: block;
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 400;
+    color: #537994;
+    margin-top: -15px;
 }

@@ -11,11 +11,6 @@ namespace Fan.Blog.Data
     public interface ITagRepository : IRepository<Tag>
     {
         /// <summary>
-        /// Deletes a tag and its associated posts.
-        /// </summary>
-        Task DeleteAsync(int id);
-
-        /// <summary>
         /// Returns all tags or empty list if no tags found. The returned list is ordered by 
         /// <see cref="Tag.Count"/> desc.
         /// </summary>

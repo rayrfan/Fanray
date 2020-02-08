@@ -1,0 +1,257 @@
+﻿@page "{pageId:int?}"
+@model Fan.WebApp.Manage.Admin.Compose.PageModel
+@{
+    ViewData["Title"] = "Compose Page";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>@ViewData["Title"] - Fanray</title>
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@1.5.22/dist/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/admin/css/compose.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/_content/editor.md/css/editormd.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/_content/@Model.Theme/css/content.css" asp-append-version="true" />
+    <style>
+        #content-area {
+            margin: auto;
+            width: 90%;
+        }
+
+        #post-title {
+            resize: none;
+            word-wrap: break-word;
+            font-family: "Noto Serif",Georgia,"Times New Roman",Times,serif;
+            font-size: 28px;
+            color: #2e4453;
+            font-weight: 600;
+            line-height: normal;
+        }
+
+        @@media (max-width: 767px) {
+            #content-area {
+                width: 98%;
+            }
+
+            #post-title {
+                font-size: 24px;
+            }
+        }
+
+        p.form-field-hint {
+            display: block;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: 400;
+            color: #537994;
+            margin-top: -15px;
+        }
+    </style>
+</head>
+<body>
+    @Html.AntiForgeryToken()
+
+    <div id="app" v-cloak>
+        @* Dnd *@
+        <div style="visibility:hidden; opacity:0" id="dropzone" v-once>
+            <span class="droptext">Drop files to upload</span>
+        </div>
+        <v-dialog v-model="composerUploadProgress" persistent width="300">
+            <v-card color="primary" dark>
+                <v-card-text>
+                    Uploading ...
+                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-app style="background-color:white">
+            @* Drawer *@
+            <v-navigation-drawer fixed :clipped="$vuetify.breakpoint.mdAndUp" app v-model="drawer">
+                <v-expansion-panel v-model="panel" expand>
+                    <v-expansion-panel-content>
+                        <div slot="header">Options</div>
+                        <v-card>
+                            <div v-if="page.published">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:#29B6F6;padding-right: 5px;font-weight:bold">Published</span><span>
+                                                    on
+                                                    {{ page.postDate }}
+                                                </span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                                <v-card-actions>
+                                    <v-btn small style="width:100%;color:#29B6F6" color="gray" @@click="revert">
+                                        <v-icon left dark>undo</v-icon>
+                                        Revert to draft
+                                    </v-btn>
+                                </v-card-actions>
+                            </div>
+                            <div v-if="page.isDraft">
+                                <v-container fill-height fluid pa-0>
+                                    <v-layout fill-height>
+                                        <v-flex xs12 align-end flexbox>
+                                            <div style="text-align:center;font-size:inherit">
+                                                <span style="color:teal;padding-right: 5px;font-weight:bold">Draft</span>
+                                                <span>saved on {{ page.draftDate }}</span>
+                                            </div>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                            </div>
+                            <v-card-text>
+                                <v-menu ref="menuDate" :close-on-content-click="false" v-model="menuDate"
+                                        :return-value.sync="page.postDate" lazy transition="scale-transition" offset-y
+                                        full-width @@input="onFieldsChange">
+                                    <v-text-field label="Post Date" slot="activator" v-model="page.postDate" readonly>
+                                    </v-text-field>
+                                    <v-date-picker v-model="page.postDate" no-title scrollable
+                                                   @@input="$refs.menuDate.save(page.postDate)"></v-date-picker>
+                                </v-menu>
+                                <v-textarea label="Description"
+                                            style="font-size:14px"
+                                            v-model="page.excerpt"
+                                            auto-grow
+                                            @@input="onFieldsChange"></v-textarea>
+                                <p class="form-field-hint">
+                                    Page's meta description.
+                                </p>
+
+                                <v-radio-group v-model="page.pageLayout" @@change="onFieldsChange">
+                                    <template v-slot:label>
+                                        Layout
+                                    </template>
+                                    <v-radio v-for="(layout, index) in layouts"
+                                             :key="index"
+                                             :value="layout.id">
+                                        <template v-slot:label>
+                                            <div>
+                                                {{ layout.name }}
+                                                <span style="font-size:small;font-style: italic;color: #537994;">
+                                                    {{ layout.description }}
+                                                </span>
+                                            </div>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
+                            </v-card-text>
+                        </v-card>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+            </v-navigation-drawer>
+            @* Topbar *@
+            <v-toolbar color="blue darken-3" dark app :clipped-left="$vuetify.breakpoint.mdAndUp" fixed>
+                <v-toolbar-side-icon @@click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-btn @@click="pub" :disabled="disablePubButton" color="orange">{{ pubText }}</v-btn>
+                <v-btn @@click="saveDraft" flat small v-if="saveVisible" :disabled="saveDisabled" color="orange">
+                    {{ saveText }}
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn @@click="preview">Preview</v-btn>
+                <v-btn @@click="close">Close</v-btn>
+            </v-toolbar>
+            @* Editor *@
+            <v-content>
+                <div id="content-area" class="ck-content">
+                    <v-textarea tabindex="1"
+                                id="post-title"
+                                label=""
+                                auto-grow
+                                placeholder="Title"
+                                aria-label="Edit title"
+                                rows="1"
+                                @@input="onFieldsChange"
+                                @@keyup.enter="titleEnter"
+                                v-model="page.title"></v-textarea>
+
+                    <div id="editor-md" style="z-index:0">
+                        <textarea name="content" id="editor" style="display:none;"></textarea>
+                    </div>
+                </div>
+            </v-content>
+            @* Image Dialog *@
+            <v-dialog v-model="mediaDialogVisible" lazy
+                      @@keydown.esc="closeMediaDialog"
+                      content-class="media-dialog">
+                <blog-media mode="editor"></blog-media>
+            </v-dialog>
+            @* Preview Dialog *@
+            <v-dialog lazy
+                      fullscreen
+                      scrollable
+                      v-model="previewDialogVisible"
+                      @@keydown.esc="closePreview"
+                      content-class="preview-dialog">
+                <v-card height="100%">
+                    <v-card-title>
+                        <span class="preview-title">Preview</span>
+                        <v-spacer></v-spacer>
+                        <span class="preview-title-url">{{ postUrl }}</span>
+                        <v-spacer></v-spacer>
+                        <v-btn @@click="closePreview">Close</v-btn>
+                    </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-text class="preview-body">
+                        <iframe class="preview-frame"
+                                v-if="previewUrl"
+                                :src="previewUrl"
+                                title="Preview"></iframe>
+                    </v-card-text>
+                </v-card>
+            </v-dialog>
+            @* Snackbar *@
+            <v-snackbar bottom right
+                        :timeout="snackbar.timeout"
+                        :color="snackbar.color"
+                        :multi-line="snackbar.mode === 'multi-line'"
+                        v-model="snackbar.show">
+                <span style="font-size:larger">{{ snackbar.text }}</span>
+                <v-btn dark flat @@click.native="snackbar.show = false" icon>
+                    <v-icon>close</v-icon>
+                </v-btn>
+            </v-snackbar>
+        </v-app>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@1.5.22/dist/vuetify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.2/dist/vuex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.1/dist/axios.min.js"></script>
+    <partial name="Shared/MediaTemplate" />
+    <partial name="PageEditor" />
+    <script>
+        let mediaMixin = {
+            data: function () {
+                return {
+                    images: [],
+                    count: 0,
+                    pageSize: @MediaModel.PAGE_SIZE,
+                    maxImageFileSize: @ImageService.Max_File_Size,
+                    validFileTypes: @Html.Raw(ImageService.ValidFileTypesJson),
+                    errFileType: '@ImageService.ERR_MSG_FILETYPE',
+                    errFileSize: '@ImageService.ERR_MSG_FILESIZE',
+                };
+            }
+        };
+        let composeMixin = {
+            data: function () {
+                return {
+                    layouts: @Html.Raw(Model.LayoutsJson),
+                    page: @Html.Raw(Model.PageJson),
+                    autosaveInterval: @(PageModel.AUTOSAVE_INTERVAL * 1000),
+                }
+            }
+        };
+    </script>
+    <script src="~/admin/js/blog-media.js" asp-append-version="true"></script>
+    <script src="~/admin/js/compose-page.js" asp-append-version="true"></script>
+</body>
+</html>

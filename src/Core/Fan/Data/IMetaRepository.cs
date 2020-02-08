@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fan.Data
 {
@@ -17,5 +18,12 @@ namespace Fan.Data
         /// A meta record is unique by combination of key and type.
         /// </remarks>
         Task<Meta> GetAsync(string key, EMetaType type);
+
+        /// <summary>
+        /// Returns a list of <see cref="Meta"/> for a specific <see cref="EMetaType"/>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        Task<List<Meta>> GetListAsync(EMetaType type);
     }
 }

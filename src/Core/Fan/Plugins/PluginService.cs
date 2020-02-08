@@ -1,5 +1,4 @@
 ﻿using Fan.Data;
-using Fan.Exceptions;
 using Fan.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Distributed;
@@ -8,7 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fan.Plugins
@@ -18,25 +17,16 @@ namespace Fan.Plugins
     /// </summary>
     public class PluginService : ExtensibleService<PluginManifest, Plugin>, IPluginService
     {
-        /// <summary>
-        /// The manifest file name for plugins "plugin.json".
-        /// </summary>
         public const string PLUGIN_MANIFEST = "plugin.json";
-        /// <summary>
-        /// The directory that contains plugins "Plugins".
-        /// </summary>
         public const string PLUGIN_DIR = "Plugins";
-        /// <summary>
-        /// A plugin's folder must be in PascalCase.
-        /// </summary>
-        public const string PLUGIN_FOLDER_REGEX = @"^[A-Z][a-z]+(?:[A-Z][a-z]+)*$";
+        public const string SYS_PLUGIN_DIR = "SysPlugins";
 
         private const string CACHE_KEY_PLUGIN_MANIFESTS = "plugin-manifests";
-        private TimeSpan Cache_Time_Plugin_Manifests = new TimeSpan(0, 10, 0);
+        private readonly TimeSpan Cache_Time_Plugin_Manifests = new TimeSpan(0, 20, 0);
         private const string CACHE_KEY_ACTIVE_PLUGINS = "active-plugins";
-        private TimeSpan Cache_Time_Active_Plugins = new TimeSpan(0, 10, 0);
+        private readonly TimeSpan Cache_Time_Active_Plugins = new TimeSpan(0, 20, 0);
 
-        public PluginService(IHostingEnvironment hostingEnvironment,
+        public PluginService(IWebHostEnvironment hostingEnvironment,
                         IDistributedCache distributedCache,
                         IMetaRepository metaRepository,
                         ILogger<PluginService> logger) 
@@ -47,46 +37,44 @@ namespace Fan.Plugins
         public override string ManifestName { get; } = PLUGIN_MANIFEST;
         public override string ManifestDirectory { get; } = PLUGIN_DIR;
 
-        // -------------------------------------------------------------------- public methods
-
         /// <summary>
         /// Activates a plugin.
         /// </summary>
         /// <param name="folder">The key of the plugin.</param>
-        /// <returns>Id of the plugin.</returns>
+        /// <returns>The activated plugin.</returns>
         /// <remarks>
-        /// It upserts a plugin meta and makes sure Active is true.
+        /// It upserts a plugin meta and makes sure Active is true. SysPlugins also require activation 
+        /// when they first install.
         /// </remarks>
-        public async Task<int> ActivatePluginAsync(string folder)
+        public async Task<Plugin> ActivatePluginAsync(string folder)
         {
+            if (folder.IsNullOrEmpty()) throw new ArgumentNullException("Cannot activate a plugin with an empty name.");
+
+            Plugin plugin = null;
+
             var meta = await GetPluginMetaAsync(folder);
             if (meta != null)
             {
-                var plugin = await GetExtensionAsync(meta.Id);
-                plugin.Active = true;
-                await UpdatePluginAsync(plugin);
-            }
-            else
-            {
-                // insert plugin meta
-                var manifest = await GetManifestByFolderAsync(folder);
-                var type = Type.GetType(manifest.Type);
-                var plugin = (Plugin)Activator.CreateInstance(type);
-                plugin.Folder = folder;
-                plugin.Active = true;
-
-                meta = await metaRepository.CreateAsync(new Meta
+                plugin = await GetExtensionAsync(meta.Id);
+                if (!plugin.Active)
                 {
-                    Key = folder.ToLower(),  // plugin key is lower
-                    Value = JsonConvert.SerializeObject(plugin),
-                    Type = EMetaType.Plugin,
-                });
+                    plugin.Active = true;
+                    meta.Value = JsonConvert.SerializeObject(plugin);
+                    await metaRepository.UpdateAsync(meta);
+                }
+            }
+            else // meta not found the plugin was never activated before
+            {
+                var manifests = await LoadManifestsAsync();
+                var manifest = manifests.SingleOrDefault(m => m.Folder.ToUpperInvariant().Equals(folder.ToUpperInvariant()));
+                var pluginId = await CreatePluginMetaByTypeAsync(manifest, active: true);
+                plugin = await GetExtensionAsync(pluginId);
             }
 
             await distributedCache.RemoveAsync(CACHE_KEY_ACTIVE_PLUGINS);
             await distributedCache.RemoveAsync(CACHE_KEY_PLUGIN_MANIFESTS);
 
-            return meta.Id;
+            return plugin;
         }
 
         /// <summary>
@@ -96,12 +84,15 @@ namespace Fan.Plugins
         /// <returns></returns>
         /// <remarks>
         /// De-activation removes plugin id from active-plugins but does not delete the plugin meta.
+        /// TODO should I check if plugin is SysPlugin and throw exception if it is
         /// </remarks>
         public async Task DeactivatePluginAsync(int id)
         {
             var plugin = await GetExtensionAsync(id);
+            var meta = await GetPluginMetaAsync(plugin.Folder);
             plugin.Active = false;
-            await UpdatePluginAsync(plugin);
+            meta.Value = JsonConvert.SerializeObject(plugin);
+            await metaRepository.UpdateAsync(meta);
 
             await distributedCache.RemoveAsync(CACHE_KEY_ACTIVE_PLUGINS);
             await distributedCache.RemoveAsync(CACHE_KEY_PLUGIN_MANIFESTS);
@@ -110,20 +101,40 @@ namespace Fan.Plugins
         /// <summary>
         /// Returns a list of active plugins.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// If a plugin is just installed by copying over a folder, this method will activate that plugin.
+        /// </remarks>
+        /// <returns>
+        /// Specific plugin types.
+        /// </returns>
         public async Task<IEnumerable<Plugin>> GetActivePluginsAsync()
         {
             return await distributedCache.GetAsync(CACHE_KEY_ACTIVE_PLUGINS, Cache_Time_Active_Plugins, async () =>
             {
                 var activePlugins = new List<Plugin>();
-                var pluginMetas = await metaRepository.FindAsync(m => m.Type == EMetaType.Plugin);
+                var manifestsAll = await LoadManifestsAsync(); // all manifests plugins + sysplugins
+                var pluginMetas = await metaRepository.FindAsync(m => m.Type == EMetaType.Plugin); // all plugin meta records
 
-                foreach (var meta in pluginMetas)
+                // register new plugins if any
+                if (manifestsAll.Count() > pluginMetas.Count())
                 {
-                    var plugin = await GetExtensionAsync(meta.Id);
+                    // any manifests with no meta records are new plugins
+                    var manifestsNew = manifestsAll.Where(manifest =>
+                        !pluginMetas.Any(meta => meta.Key.Equals(manifest.Folder, StringComparison.OrdinalIgnoreCase)));
+
+                    foreach (var manifest in manifestsNew)
+                    {
+                        var pluginId = await CreatePluginMetaByTypeAsync(manifest, active: manifest.IsSysPlugin);
+                        var plugin = await GetExtensionAsync(pluginId);
+                        activePlugins.Add(plugin);
+                    }
+                }
+
+                foreach (var pluginMeta in pluginMetas)
+                {
+                    var plugin = await GetExtensionAsync(pluginMeta.Id);
                     if (plugin.Active)
                     {
-                        plugin.Id = meta.Id; // TODO
                         activePlugins.Add(plugin);
                     }
                 }
@@ -133,7 +144,7 @@ namespace Fan.Plugins
         }
 
         /// <summary>
-        /// Returns a list of plugin manifests.
+        /// Returns a list of manifests both plugins and system plugins. 
         /// </summary>
         /// <returns></returns>
         public override async Task<IEnumerable<PluginManifest>> GetManifestsAsync()
@@ -141,6 +152,7 @@ namespace Fan.Plugins
             return await distributedCache.GetAsync(CACHE_KEY_PLUGIN_MANIFESTS, Cache_Time_Plugin_Manifests, async () =>
             {
                 var list = new List<PluginManifest>();
+
                 var manifests = await LoadManifestsAsync();
                 foreach (var manifest in manifests)
                 {
@@ -150,6 +162,12 @@ namespace Fan.Plugins
                         var plugin = await GetExtensionAsync(meta.Id);
                         manifest.Id = meta.Id;
                         manifest.Active = plugin.Active;
+                        manifest.SettingsUrl = plugin.SettingsUrl;
+                    }
+                    else
+                    {
+                        var type = Type.GetType(manifest.Type);
+                        var plugin = (Plugin)Activator.CreateInstance(type);
                         manifest.SettingsUrl = plugin.SettingsUrl;
                     }
 
@@ -173,33 +191,94 @@ namespace Fan.Plugins
         }
 
         /// <summary>
-        /// Returns true if plugin folder name is valid.
+        /// Returns plugin by name.
         /// </summary>
-        /// <param name="folder"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        public override bool IsValidExtensionFolder(string folder) => new Regex(PLUGIN_FOLDER_REGEX).IsMatch(folder);
+        public async Task<Plugin> GetPluginAsync(string name)
+        {
+            Plugin plugin = null;
+            var meta = await GetPluginMetaAsync(name);
+
+            if (meta == null)
+            {
+                var manifests = await LoadManifestsAsync();
+                var manifest = manifests.SingleOrDefault(m => m.Folder.ToUpperInvariant().Equals(name.ToUpperInvariant()));
+                var actualType = Type.GetType(manifest.Type);
+                plugin = (Plugin)Activator.CreateInstance(actualType);
+                plugin.Active = manifest.Active;
+                plugin.Folder = manifest.Folder;
+            }
+            else
+            {
+                var baseType = JsonConvert.DeserializeObject<Plugin>(meta.Value);
+                var actualType = await GetManifestTypeByFolderAsync(baseType.Folder);
+                plugin = (Plugin)JsonConvert.DeserializeObject(meta.Value, actualType);
+            }
+
+            return plugin;
+        }
 
         /// <summary>
-        /// Updates a plugin settings.
+        /// Upserts a plugin settings.
         /// </summary>
-        /// <param name="plugin">The plugin data/settings.</param>
-        /// <remarks>
-        /// This method takes pre-caution if plugin meta does not exist for some reason
-        /// it creates it.
-        /// </remarks>
-        public async Task UpdatePluginAsync(Plugin plugin)
+        /// <param name="plugin"></param>
+        public async Task<int> UpsertPluginAsync(Plugin plugin)
         {
             var meta = await GetPluginMetaAsync(plugin.Folder);
             if (meta == null)
-                throw new FanException($"Plugin {plugin.Folder} is not found.");
-
-            meta.Value = JsonConvert.SerializeObject(plugin);
-            await metaRepository.UpdateAsync(meta);
+            {
+                meta = await metaRepository.CreateAsync(new Meta
+                {
+                    Key = plugin.Folder.ToLower(),  // plugin key is lower
+                    Value = JsonConvert.SerializeObject(plugin),
+                    Type = EMetaType.Plugin,
+                });
+            }
+            else
+            {
+                meta.Value = JsonConvert.SerializeObject(plugin);
+                await metaRepository.UpdateAsync(meta);
+            }
 
             await distributedCache.RemoveAsync(CACHE_KEY_ACTIVE_PLUGINS);
+
+            return meta.Id;
         }
 
-        // -------------------------------------------------------------------- private helpers
+        /// <summary>
+        /// Returns all manifests of plugins and system plugins.
+        /// </summary>
+        /// <returns></returns>
+        protected override async Task<IEnumerable<PluginManifest>> LoadManifestsAsync()
+        {
+            // plugin manifests
+            var manifestsPlugins = await base.LoadManifestsAsync();
+
+            // system plugin manifests
+            var list = new List<PluginManifest>();
+            var extPath = Path.Combine(hostingEnvironment.ContentRootPath, SYS_PLUGIN_DIR);
+            foreach (var dir in Directory.GetDirectories(extPath))
+            {
+                var file = Path.Combine(dir, ManifestName);
+                var manifest = JsonConvert.DeserializeObject<PluginManifest>(await File.ReadAllTextAsync(file));
+                manifest.Folder = new DirectoryInfo(dir).Name;
+                if (!IsValidExtensionFolder(manifest.Folder)) continue;
+
+                if (manifest.Type.IsNullOrEmpty())
+                {
+                    logger.LogError($"Invalid System Plugin {ManifestName} in {manifest.Folder}, missing \"type\" information.");
+                }
+                else
+                {
+                    manifest.Active = true;
+                    manifest.IsSysPlugin = true;
+                    list.Add(manifest);
+                }
+            }
+
+            return manifestsPlugins.Concat(list);
+        }
 
         /// <summary>
         /// Returns plugin meta record.
@@ -210,6 +289,29 @@ namespace Fan.Plugins
         {
             var key = folder.ToLower(); // plugin key is lower
             return await metaRepository.GetAsync(key, EMetaType.Plugin);
+        }
+
+        /// <summary>
+        /// Instantiates a plugin object by type, creates its meta record and returns the plugin
+        /// with id.
+        /// </summary>
+        /// <param name="manifest"></param>
+        /// <returns></returns>
+        private async Task<int> CreatePluginMetaByTypeAsync(PluginManifest manifest, bool active)
+        {
+            var type = Type.GetType(manifest.Type);
+            var plugin = (Plugin)Activator.CreateInstance(type);
+            plugin.Folder = manifest.Folder;
+            plugin.Active = active;
+
+            var meta = await metaRepository.CreateAsync(new Meta
+            {
+                Key = manifest.Folder.ToLower(),  // plugin key is lower
+                Value = JsonConvert.SerializeObject(plugin),
+                Type = EMetaType.Plugin,
+            });
+
+            return meta.Id;
         }
     }
 }

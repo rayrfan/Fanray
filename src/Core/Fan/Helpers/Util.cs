@@ -30,12 +30,11 @@ namespace Fan.Helpers
         /// hand-tuned for speed, reflects performance refactoring contributed by John Gietzen (user otac0n) 
         /// http://stackoverflow.com/questions/25259/how-does-stackoverflow-generate-its-seo-friendly-urls
         /// </remarks>
-        public static string Slugify(string title, int randomCharCountOnEmpty = 0)
+        public static string Slugify(string title, int maxlen = 250, int randomCharCountOnEmpty = 0)
         {
             if (title == null)
                 return randomCharCountOnEmpty <= 0 ? "" : Util.RandomString(randomCharCountOnEmpty);
 
-            const int maxlen = 80;
             int len = title.Length;
             bool prevdash = false;
             var sb = new StringBuilder(len);
@@ -66,7 +65,7 @@ namespace Fan.Helpers
                     sb.Append(RemapInternationalCharToAscii(c));
                     if (prevlen != sb.Length) prevdash = false;
                 }
-                if (i == maxlen) break;
+                if (i == maxlen - 1) break;
             }
 
             var slug = prevdash ? sb.ToString().Substring(0, sb.Length - 1) : sb.ToString();
@@ -240,17 +239,17 @@ namespace Fan.Helpers
 
             try
             {
+                // decode body
+                body = WebUtility.HtmlDecode(body); 
+
                 HtmlDocument document = new HtmlDocument();
                 document.LoadHtml(body);
                 body = document.DocumentNode.InnerText?.Trim(); // should be clean text by now
                 if (body.IsNullOrEmpty()) return "";
 
-                // html entities https://stackoverflow.com/a/10971380/32240
-                body = WebUtility.HtmlDecode(body);
-
                 return body.Truncate(wordsLimit, Truncator.FixedNumberOfWords);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return body;
             }
@@ -267,23 +266,6 @@ namespace Fan.Helpers
             HtmlDocument document = new HtmlDocument();
             document.LoadHtml(content);
             return document.DocumentNode.InnerText;
-        }
-
-        /// <summary>
-        /// Converts a time from the server to a user's local time with his specified timezone.
-        /// </summary>
-        /// <param name="serverTime"></param>
-        /// <param name="timeZoneId">The timezone to convert server time to.</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Server saves all posts with DateTimeOffset.UtcNow, when a post is shown in browser it's 
-        /// shows either a humanized string if the post was published within 2 days, or an actual
-        /// date time string converted in <see cref="CoreSettings.TimeZoneId"/> timezone.
-        /// </remarks>
-        public static DateTimeOffset ConvertTime(DateTimeOffset serverTime, string timeZoneId)
-        {
-            var userTimeZone = TZConvert.GetTimeZoneInfo(timeZoneId);
-            return TimeZoneInfo.ConvertTime(serverTime, userTimeZone);
         }
 
         /// <summary>

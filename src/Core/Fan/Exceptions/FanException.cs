@@ -13,6 +13,10 @@ namespace Fan.Exceptions
     /// </remarks>
     public class FanException : Exception
     {
+        public FanException()
+        {
+        }
+
         /// <summary>
         /// Thrown with a message.
         /// </summary>
@@ -40,7 +44,18 @@ namespace Fan.Exceptions
         public FanException(string message, IList<ValidationFailure> validationFailures)
             : base(message)
         {
-            ValidationFailures = validationFailures;
+            ValidationErrors = validationFailures;
+            ExceptionType = EExceptionType.ValidationError;
+        }
+
+        /// <summary>
+        /// Thrown with a <see cref="EExceptionType"/>.
+        /// </summary>
+        /// <param name="exceptionType"></param>
+        public FanException(EExceptionType exceptionType, string message = "")
+            : base(message)
+        {
+            ExceptionType = exceptionType;
         }
 
         /// <summary>
@@ -58,7 +73,7 @@ namespace Fan.Exceptions
         /// A list of <see cref="ValidationFailure"/>. Null if the exception thrown is not
         /// as a result of <see cref="ValidationResult.IsValid"/> being false.
         /// </summary>
-        public IList<ValidationFailure> ValidationFailures { get; }
+        public IList<ValidationFailure> ValidationErrors { get; }
 
         public EExceptionType ExceptionType { get; }
     }

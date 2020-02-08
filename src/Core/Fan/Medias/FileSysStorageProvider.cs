@@ -17,11 +17,11 @@ namespace Fan.Medias
     /// also olw each time sends two copies of the file, orig and thumb
     public class FileSysStorageProvider : IStorageProvider
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly AppSettings _appSettings;
         private readonly HttpRequest _request;
 
-        public FileSysStorageProvider(IHostingEnvironment env, IServiceProvider serviceProvider, 
+        public FileSysStorageProvider(IWebHostEnvironment env, IServiceProvider serviceProvider, 
             IHttpContextAccessor httpContextAccessor)
         {
             _hostingEnvironment = env;
