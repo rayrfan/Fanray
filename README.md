@@ -14,14 +14,8 @@
 	<a href="#license">License</a>
   </p>
   <p align="center">
-	<a href="https://ci.appveyor.com/project/FanrayMedia/fanray">
-	  <img src="https://ci.appveyor.com/api/projects/status/github/fanraymedia/fanray?svg=true" alt="AppVeyor">
-	</a>
-	<a href="https://fanray.visualstudio.com/Fanray/_build?definitionId=2">
-	  <img src="https://fanray.visualstudio.com/Fanray/_apis/build/status/Fanray-CI?branchName=dev" alt="Azure Pipelines">
-	</a>
-	<a href="https://travis-ci.org/FanrayMedia/Fanray">
-	  <img src="https://travis-ci.org/FanrayMedia/Fanray.svg?branch=master" alt="Travis CI">
+	<a href="https://github.com/rayrfan/Fanray/actions/workflows/ci.yml">
+	  <img src="https://github.com/rayrfan/Fanray/actions/workflows/ci.yml/badge.svg" alt="GitHub Actions">
 	</a>
   </p>
 </p>
